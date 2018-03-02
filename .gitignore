@@ -2,3 +2,4 @@ debug
 *.test
 *.out
 gitignore
+examples/minimal/index.html

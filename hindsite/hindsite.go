@@ -6,15 +6,43 @@ import (
 	"html/template"
 	"io/ioutil"
 	"os"
+	"path"
 
 	blackfriday "gopkg.in/russross/blackfriday.v2"
 )
 
 func main() {
-	markup := readFile(os.Args[1] + "/index.md")
-	tmpl, _ := template.ParseFiles(os.Args[1] + "/layout.html")
+	if len(os.Args) == 1 {
+		helpCommand()
+		os.Exit(0)
+	}
+	cmd := os.Args[1]
+	switch cmd {
+	case "help":
+		helpCommand()
+	case "build":
+		Config.InitDirs(os.Args[3], "", "", "")
+		buildCommand()
+	case "run":
+		runCommand()
+	default:
+		die("illegal command:" + cmd)
+	}
+}
+
+func helpCommand() {
+	println("Usage: hindsite build -project PROJECT_DIR")
+}
+
+func buildCommand() {
+	markup := readFile(path.Join(Config.contentDir, "index.md"))
+	tmpl, _ := template.ParseFiles(path.Join(Config.templateDir, "layout.html"))
 	output := renderWebpage(markup, tmpl)
-	writeFile(os.Args[1]+"/index.html", output)
+	writeFile(Config.buildDir+"/index.html", output)
+}
+
+func runCommand() {
+	// TODO
 }
 
 func renderWebpage(markup string, tmpl *template.Template) (result string) {

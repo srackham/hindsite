@@ -22,6 +22,7 @@ Github name `hindsite`.
 
 ## Inspiration and resources
 - [Writing a Static Blog Generator in Go](https://zupzup.org/static-blog-generator-go/).
+- [How to code a markdown blogging system in Go](http://www.will3942.com/creating-blog-go).
 - [Hugo](https://gohugo.io/).
 - [Introduction to Hugo templating](https://gohugo.io/templates/introduction/)
 - [Disqus comments](https://gohugo.io/content-management/comments/).
@@ -83,7 +84,7 @@ The overarching goals are simplicity and ease of use.
 - Just tags: no taxonomies, no categories see [WordPress Categories vs Tags: How
   Do I Use Them on My
   Blog?](https://www.wpsitecare.com/wordpress-categories-vs-tags/).
-- No explicit slugs.
+- No explicit slugs or permalinks.
 - Minimal explicit meta-data.
 - No _previous/next_ paging, just a _recent_, _all_, _tag_ and _tags_ indexes.
   Paging is just unnecessary complexity -- you can page indexes up and down and search them it in the browser.
@@ -144,13 +145,13 @@ alias html-validator-all='for f in $(find . -name "*.html"); do echo $f; html-va
 
 ## Vocabulary
 project:: A hindsite project consists of a _content directory_, a _template
-directory_ and a _build directory_. Hindsite combines and transforms the
-contents of the content and template directories and generates a website which
-it writes to the build directory.
+directory_ and a _build directory_. Hindsite uses the contents of the template
+and content directories to generate a website which it writes to the build
+directory.
 
-content directory:: A directory (default name `content`) containing content documents,
-optional document meta-data and related static resources (e.g. images).
-The content directory structure matches the template directory.
+content directory:: A directory (default name `content`) containing content
+documents, optional document meta-data and related static resources (e.g.
+images). The content directory structure matches the template directory.
 
 template directory:: A directory (default name `template`) containing webpage
 templates along with optional configuration files and static resources to build
@@ -394,9 +395,11 @@ draft = "true"
 Key aliases to allow Hugo front matter consumption: description = synopsis; categories = tags.
 
 - Implicit values (if neither of the above are present):
-  * `title` defaults to first `h1` title or, failing that, the document file name.
-  * `date` defaults to file name `YYYY-MM-DD` date prefix e.g. `2018-02-14-newsletter.md`.
-  * `author` defaults to value in `config.toml`.
+  * `title` defaults to first `h1` title or, failing that, the document file
+    name (sans drafts and date prefixes with hyphens replaced by spaces).
+  * `date` defaults to file name `YYYY-MM-DD` date prefix e.g.
+    `2018-02-14-newsletter.md`.
+  * `author` defaults to value in `config.toml` or, failing that, blank.
   * `synopsis` defaults to the first paragraph.
   * `addendum` defaults to blank.
   * `draft` is true if the first letter of the content file name is a tilda.
@@ -405,9 +408,9 @@ If you don't use tags then you don't need explicit external or embedded meta-dat
 
 ## CLI
 ```
-hindsite init [-template TEMPLATE_DIR] [CONTENT_DIR]
-hindsite build [-drafts] [-slugify] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [BUILD_DIR]
-hindsite run [BUILD_DIR]
+hindsite init [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
+hindsite build [-drafts] [-slugify] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR]
+hindsite run [-project PROJECT_DIR] [-build BUILD_DIR]
 hindsite -h | --help | help
 
 /*
@@ -416,16 +419,24 @@ hindsite validate [BUILD_DIR]
 hindsite slugify [-exclude FILE] [CONTENT_DIR]
 */
 ```
-All commands support the `-v`,`-verbose` option.
+- Content, template and build directories must be mutually exclusive (not
+  contained within one another) with one exception: content and template
+  directories can be identical (this allows template examples to be tested).
+- If content, template or build directory paths are relative they are relative
+  to the project directory.
+- `PROJECT_DIR` defaults to `.`
+- `CONTENT_DIR` defaults to `content`
+- `BUILD_DIR` defaults to `build`
+- `TEMPLATE_DIR` defaults to `template`
+- All commands support the `-v`,`-verbose` option.
 
 ### Init command
 Creates new project content directory from an existing template directory.
 
-- `CONTENT_DIR` defaults to `./content`
 - Clones the `TEMPLATE_DIR` directory structure to `CONTENT_DIR`.
 - Copies example content documents to `CONTENT_DIR`.
-- Creates `CONTENT_DIR` directory if it does not exist.
-- If the `CONTENT_DIR` already exists init will refuse to continue.
+- Creates `CONTENT_DIR` directory (if the `CONTENT_DIR` already exists init will
+  refuse to continue).
 
 
 /*
@@ -441,21 +452,18 @@ Checks and reports:
 ### Build command
 Build static website from content and template directories.
 
-- `BUILD_DIR` defaults to `./build`
-- `CONTENT_DIR` defaults to `./content`
-- `TEMPLATE_DIR` defaults to `./template`
 - Include draft pages if the `-drafts` option is specified.
 - Slugify content document paths if the  `-sligify` option is specified.
 
 Build sequence:
 
 - Check content, template and build directories exist.
-- Clear build directory.
+- Delete contents of build directory.
 - Copy static files from content to build directory.
 - Copy static files from template to build directory (do not overwrite existing
   files).
 - Generate all non-indexed documents.
-- Process each indexed directory generating both index and document web pages.
+- Process each indexed directory generating indexes and document web pages.
 
 /*
 ### Validate command
@@ -463,14 +471,12 @@ Build sequence:
 
 Performs HTML validation of the built website.
 
-- BUILD_DIR defaults to `./build`
 - Run all HTML pages in `BUILD_DIR` through the W3C Nu validator.
 */
 
 ### Run command
 Open a development server on the `BUILD_DIR` directory.
 
-- BUILD_DIR defaults to `./build`
 
 /*
 ### Slugify command
@@ -479,7 +485,6 @@ Open a development server on the `BUILD_DIR` directory.
 Normalize all file and directory path names in the content directory to
 only contain lower case alpha numeric and hyphen characters.
 
-- `CONTENT_DIR` defaults to `./content`
 - Multiple `-exclude FILE` options are allowed.
 - The excluded file name is relative to the `CONTENT_DIR`.
 */
