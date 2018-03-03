@@ -34,13 +34,14 @@ Small static websites with optional indexed documents (blogs posts, newsletters,
 
 
 ## Features
-- Easy to get up and running with built-in scaffolding and layouts: install ->
+- Easy to get up and running with built-in layouts: install ->
   init -> build -> serve.
-- Supports multiple groups of indexed documents each with separate tag and date
-  indexes e.g. blog posts and newsletters.
+- Supports multiple categories of indexed documents each with separate tag and
+  date indexes e.g. blog posts and newsletters.
 
 
 ## Simplest hindsite project
+`hindsite build`:
 
 ```
 /content
@@ -59,12 +60,20 @@ Hello *World*!
 layout.html:
 ```
 <!doctype html>
-<head><title>.Title</title></head>
-<body>.Body</body>
+<head><title>{{.title}}</title></head>
+<body>{{.body}}</body>
 ```
 
-Content and template directories can be the same, not recommended but useful for
-building an _example_.
+Content and template directories can be the same (though it's not a good idea to
+mix content and design):
+
+`hindsite build -content . -template .`:
+```
+index.md
+layout.html
+/build
+    index.html
+```
 
 
 ## Design
@@ -74,6 +83,7 @@ The overarching goals are simplicity and ease of use.
   generate a static website.
 - Structural transparency: The content, template and build directory structures
   match -- content and static resouces reside in the same relative locations.
+  Same directory model for content, template and build directories.
 - Structural flexibility: There are few restrictions on directory structure and
   file locations.
 
@@ -82,8 +92,8 @@ The overarching goals are simplicity and ease of use.
   Blog?](https://www.wpsitecare.com/wordpress-categories-vs-tags/).
 - No explicit slugs or permalinks.
 - Minimal explicit meta-data.
-- No _previous/next_ paging, just a _recent_, _all_, _tag_ and _tags_ indexes.
-  Paging is just unnecessary complexity -- you can page indexes up and down and search them it in the browser.
+- No pagination, just complete _recent_, _all_, _tag_ and _tags_ indexes.
+  Pagination is an unnecessary complexity -- you can page indexes up and down and search them it in the browser.
 - No [shortcodes](https://gohugo.io/content-management/shortcodes/) -- use Rimu macros.
 - No template functions just a set of template variables, see:
   * https://jekyllrb.com/docs/variables/,
@@ -142,80 +152,91 @@ alias html-validator-all='for f in $(find . -name "*.html"); do echo $f; html-va
 
 
 ## Vocabulary
-project:: A hindsite project consists of a _content directory_, a _template
+**project**: A hindsite project consists of a _content directory_, a _template
 directory_ and a _build directory_. Hindsite uses the contents of the template
 and content directories to generate a website which it writes to the build
 directory.
 
-content directory:: A directory (default name `content`) containing content
-documents, optional document meta-data and optional static resources (e.g.
-images). The content directory structure mirrors that of the template directory.
+**content directory**: A directory (default name `content`) containing content
+documents along with optional document meta-data (front matter) and optional
+static resources (e.g. images). The content directory structure mirrors that of
+the template directory.
 
-template directory:: A directory (default name `template`) containing webpage
+**template directory**: A directory (default name `template`) containing webpage
 templates along with optional configuration files and static resources to build
 a website. The template directory is a blueprint, it contains everything needed
-to build a Website except textual content.
+to build a Website minus the textual content.
 
-build directory:: A directory (default name `build`) into which the built
+**build directory**: A directory (default name `build`) into which the generated
 Website is written.
 
-content document:: A readable-text markup file (`.{md,rmu}`) that generates the
+**content document**: A readable-text markup file (`.{md,rmu}`) that generates the
 textual content of a corresponding HTML web page.
 
-template:: A Go HTML template file (`.html`). Templates reside in the template
-directory.
+**configuration file**: Optional TOML files named `config.toml` containing site
+configuration parameters and located at the root of the content directory or at
+the root of the template directory. Parameters from the content directory take
+precedence over parameters from the template directory.
 
-configuration file:: An optional TOML file containing site configuration
-parameters called `config.toml` residing at the root of the template directory.
+**template**: A Go HTML template file (`.html`). Templates reside in the template
+directory. Templates are combined with document content and meta-data to
+generate HTML website pages.
 
-layout template:: Template files named `layout.html` used to render content
-documents. A content document is rendered by first obtaining the list of layout
-templates residing on the corresponding document path in the template directory.
-The document is converted to HTML, passed to the first layout template and
-rendered. Additional layout templates are passed the output of the previous
-layout and rendered until all layouts have been processed.
+**document templates**: Document templates are used to render content documents.
+Each content document has a template named `layout.html` in the corresponding
+template directory. If there is no `layout.html` in the corresponding template
+directory then the parent template directories are searched right up to the
+templates root directory.
 
-index:: A generated HTML Webpage containing a list of content documents.
+**index templates**: Index templates are used to render document index web pages.
+They are named `{all,recent,tag,tags}.html`.
 
-indexed directory:: A directory in the content directory whose corresponding
-template directory contains one or more index templates
-(`{all,recent,tags,tag}.html`).
+**index**: A generated HTML Webpage containing a list of content documents.
 
-indexed document:: A content document residing in an indexed directory. Indexed
+**indexed directory**: A directory in the content directory whose corresponding
+template directory contains one or more index templates.
+
+**indexed document**: A content document residing in an indexed directory. Indexed
 documents must have a title and a publication date. Tags are optional.
 
-date indexes:: hindsite generates date index pages ordered by document
-publication date using `all.html` and `recent.html` templates. `all.html`
+**date indexes**: hindsite generates date index pages ordered by document
+publication date using `all.html` and `recent.html` index templates. `all.html`
 generates a list of all documents; `recent.html` generates a list of the most
 recent documents.
 
-tag:: A keyword or phrase used to categorise a content document.
+**tag**: A keyword or phrase used to categorise a content document.
 
-tag indexes:: hindsite generates tag index pages using tag meta-data and
+**tag indexes**: hindsite generates tag index pages using tag meta-data and
 `tags.html` and `tag.html` templates.
 
-static file:: A content file that is neither a document or a template. Static
-files (typically HTML, CSS and images) are copied verbatim to the corresponding
-location in the build directory.
+**static file**: A file in the content or template directories that is not a
+document or a template or a configuration file. Static files (typically CSS and
+images) are copied verbatim to the corresponding location in the build directory
+by the hindsite build command. Static files in the content directory take
+precedence over static files in the template directory.
 
-example document:: A text markup file residing in the template director. Example
-documents are are copied to the content directory when the project is
+**example document**: A text markup document residing in the template directory.
+Example documents are are copied to the content directory when the project is
 initialized. This provides a mechanism for sharing your website design complete
 with example documents: just share your website template directory.
+
+**slugify**: Ensure path names only contain lower case alpha numeric and hyphen
+characters.
 
 
 ## Implementation
 - By convention the content, template and build directories normally reside in
   the same folder, but this convention is not enforced.
 
-- There is a close one-to-one mapping between content and build file paths. This
-  lightens the congative load especially when it comes to authoring cross-page
-  URLs.
+- There is a close one-to-one mapping between content, template and build file
+  paths. This lightens the congative load especially when it comes to authoring
+  cross-page URLs.
 
 Website with blog and newsletters:
 
 ```
 /content
+    config.toml
     config.rmu
     /pages
         index.md
@@ -246,6 +267,7 @@ Website with blog and newsletters:
         layout.html
         all.html
         recent.html
+        example.md
     /static
         main.css
         logo.jpg
@@ -299,11 +321,14 @@ Website with blog and newsletters:
 
 
 ## File and directory names
-Content file and directory names should
-only contain lower case alpha numeric and hyphen characters. This is is mandatory.
-and ensures sane readable URLs without ugly encodings for illegal URL characters.
+Content file and directory names should only contain lower case alpha numeric
+and hyphen characters. This is is mandatory, it:
 
-If necessary use the `-slugify` option will nomalize all content paths.
+* Ensures consistent, readable URLs without ugly encodings for illegal URL
+  characters.
+* Allows file names to map to reasonable document titles.
+
+If necessary use the build command `-slugify` option to nomalize all content paths.
 
 
 ## Template variables
@@ -422,18 +447,13 @@ The commands are:
     build
     serve
 
-Use "go help [command]" for more information about a command.
+Use "hindsite help [command]" for more information about a command.
 
 hindsite init [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
 hindsite build [-drafts] [-slugify] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR]
-hindsite serve [-project PROJECT_DIR] [-build BUILD_DIR]
+hindsite serve [-port PORT] [-project PROJECT_DIR] [-build BUILD_DIR]
 hindsite -h | --help | help
 
-/*
-hindsite check [CONTENT_DIR]
-hindsite validate [BUILD_DIR]
-hindsite slugify [-exclude FILE] [CONTENT_DIR]
-*/
 ```
 - Content, template and build directories must be mutually exclusive (not
   contained within one another) with one exception: content and template
@@ -444,7 +464,8 @@ hindsite slugify [-exclude FILE] [CONTENT_DIR]
 - `CONTENT_DIR` defaults to `content`
 - `BUILD_DIR` defaults to `build`
 - `TEMPLATE_DIR` defaults to `template`
-- All commands support the `-v`,`-verbose` option.
+- All commands support the `-v` (verbose) option.
+- Build command supports the `-n` (dry run) option.
 
 ### Init command
 Creates new project content directory from an existing template directory.
@@ -455,16 +476,6 @@ Creates new project content directory from an existing template directory.
   refuse to continue).
 
 
-/*
-### Check command
-??? But this is covered by the build command.
-
-Checks and reports:
-
-- Non-slugified document and directory names.
-- Missing or invalid indexed document meta-data.
-*/
-
 ### Build command
 Build static website from content and template directories.
 
@@ -473,41 +484,30 @@ Build static website from content and template directories.
 
 Build sequence:
 
-- Check content, template and build directories exist.
+- Check for pathalogical content, template and build directory overlap.
+- Check the template directory structure is mirrored in the content directory.
+- Check that all directory paths and content document file names are slugified.
+- Check for missing or invalid indexed document meta-data.
 - Delete contents of build directory.
 - Copy static files from content to build directory.
 - Copy static files from template to build directory (do not overwrite existing
   files).
-- Generate all non-indexed documents.
+- Generate all non-indexed documents (documents in non-indexed directories).
 - Process each indexed directory generating indexes and document web pages.
 
-/*
-### Validate command
-??? Shouldn't this choice be left to external tools such as blc?
+Corner cases examples:
 
-Performs HTML validation of the built website.
+```
+# Template and content in ./docs output to ./build
+hindsite build -content docs -template docs
 
-- Run all HTML pages in `BUILD_DIR` through the W3C Nu validator.
-*/
+# Template and content in current directory, output to ./build
+hindsite build -content . -template .
+
+```
 
 ### Serve command
 Open a development server on the `BUILD_DIR` directory.
-
-
-/*
-### Slugify command
-??? But this is is covered by the build command `-slugify` option.
-
-Normalize all file and directory path names in the content directory to
-only contain lower case alpha numeric and hyphen characters.
-
-- Multiple `-exclude FILE` options are allowed.
-- The excluded file name is relative to the `CONTENT_DIR`.
-*/
-
-## Implementation plan
-### Stage 1
-- Start by implementing `init`, `build` and `help` commands.
 
 
 ## Implementation ideas
@@ -520,7 +520,7 @@ Use the Go [log](https://golang.org/pkg/log/) package.
 
 ## Dates
 ### Meta data
-shortDate, mediumDate, longDate::
+**shortDate, mediumDate, longDate**:
 Publication date in the config file shortDateFormat, mediumDateFormat and longDateFormat formats.
 
 Use maps for data, example
