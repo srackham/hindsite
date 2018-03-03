@@ -126,7 +126,11 @@ func (cmd *Command) build() error {
 	if !dirExists(cmd.buildDir) {
 		os.Mkdir(cmd.buildDir, 0775)
 	}
-	files, _ := filepath.Glob(path.Join(cmd.contentDir, "*.md"))
+	files, _ := filepath.Glob(path.Join(cmd.buildDir, "*"))
+	for _, f := range files {
+		os.RemoveAll(f)
+	}
+	files, _ = filepath.Glob(path.Join(cmd.contentDir, "*.md"))
 	for _, f := range files {
 		markup := readFile(f)
 		tmpl, _ := template.ParseFiles(path.Join(cmd.templateDir, "layout.html"))
