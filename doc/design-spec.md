@@ -23,6 +23,7 @@ Github name `hindsite`.
 ## Inspiration and resources
 - [Writing a Static Blog Generator in Go](https://zupzup.org/static-blog-generator-go/).
 - [How to code a markdown blogging system in Go](http://www.will3942.com/creating-blog-go).
+- [Jekyll](https://jekyllrb.com).
 - [Hugo](https://gohugo.io/).
 - [Introduction to Hugo templating](https://gohugo.io/templates/introduction/)
 - [Disqus comments](https://gohugo.io/content-management/comments/).
@@ -35,7 +36,7 @@ Small static websites with optional indexed documents (blogs posts, newsletters,
 ## Features
 - Easy to get up and running with built-in scaffolding and layouts: install ->
   init -> build -> run.
-- Supports multiple document categories each with separate tag and date
+- Supports multiple groups of indexed documents each with separate tag and date
   indexes e.g. blog posts and newsletters.
 
 
@@ -62,14 +63,9 @@ layout.html:
 <body>.Body</body>
 ```
 
-This could collapsed into a single directory (but it's not usually a good
-idea to combine content, template and build directories):
+Content and template directories can be the same, but this is not recommended
+and is only useful for building an _example_.
 
-```
-index.md
-layout.html
-index.html
-```
 
 ## Design
 The overarching goals are simplicity and ease of use.
@@ -150,20 +146,19 @@ and content directories to generate a website which it writes to the build
 directory.
 
 content directory:: A directory (default name `content`) containing content
-documents, optional document meta-data and related static resources (e.g.
-images). The content directory structure matches the template directory.
+documents, optional document meta-data and optional static resources (e.g.
+images). The content directory structure mirrors that of the template directory.
 
 template directory:: A directory (default name `template`) containing webpage
 templates along with optional configuration files and static resources to build
-a website. The template directory is a blueprint, it contains everything
-needed to build a Website.
-
+a website. The template directory is a blueprint, it contains everything needed
+to build a Website except textual content.
 
 build directory:: A directory (default name `build`) into which the built
 Website is written.
 
-content document:: A text markup file (`.{md,rmu}`) that generates the
-non-boilerplate textual content of an HTML web page.
+content document:: A readable-text markup file (`.{md,rmu}`) that generates the
+textual content of a corresponding HTML web page.
 
 template:: A Go HTML template file (`.html`). Templates reside in the template
 directory.
@@ -365,6 +360,8 @@ Per-file meta-data can be sourced from:
   https://www.npmjs.com/package/marked-metadata,
   https://gohugo.io/content-management/front-matter/):
 
+Embedded YAML with `<!--`, `-->` or `---` delimiters e.g.
+
 ```
 <!--
 title:    Foo Bar
@@ -375,7 +372,12 @@ tags:     foo foo valve, qux, baz
 draft:    true
 -->
 ```
-This is an HTML comment and will be ignored if the document is process in other contexts.
+- `tags` can be a comma-separated string or a YAML list:
+- The HTML comment delimiters are preferable because:
+  * They ignored if the document is processed by other applications.
+  * The front matter is retained by the generated HTML web page.
+- [YAML syntax](https://learn.getgrav.org/advanced/yaml).
+- See [go-yaml](https://github.com/go-yaml/yaml) package.
 
 Embedded TOML (c.f. Hugo front matter):
 
@@ -407,7 +409,19 @@ Key aliases to allow Hugo front matter consumption: description = synopsis; cate
 If you don't use tags then you don't need explicit external or embedded meta-data.
 
 ## CLI
+Usage (c.f. `go help`and `dlv help`): 
+
 ```
+hindsite command [arguments]
+
+The commands are:
+
+    init
+    build
+    run
+
+Use "go help [command]" for more information about a command.
+
 hindsite init [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
 hindsite build [-drafts] [-slugify] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR]
 hindsite run [-project PROJECT_DIR] [-build BUILD_DIR]
@@ -498,10 +512,34 @@ only contain lower case alpha numeric and hyphen characters.
 - Add Disqus comments -- I suspect this is just a content templating issue.
 
 
+## Error handling
+Use the Go [log](https://golang.org/pkg/log/) package.
+
+
 ## Dates
 ### Meta data
 shortDate, mediumDate, longDate::
 Publication date in the config file shortDateFormat, mediumDateFormat and longDateFormat formats.
+
+Use maps for data, example
+
+``` go
+package main
+import "fmt"
+import "os"
+import "html/template"
+
+type TemplateData map[string]interface{}
+
+func main() {
+    m := TemplateData{"foo":7,"bar":"<baz>"}
+	  m["qux"]=template.HTML("<baz>")
+    t, err := template.New("test").Parse("{{.foo}} {{.bar}} {{.qux}}")
+    if err != nil { fmt.Println(err); return }
+    err = t.Execute(os.Stdout, m)	// Prints: 7 &lt;baz&gt; <baz>
+    if err != nil { fmt.Println(err); return }
+}
+```
 
 ### Input formats
 The RFC 3339 format is recognised. The following relaxations are permitted:
