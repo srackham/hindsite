@@ -154,10 +154,10 @@ func (cmd *Command) init() error {
 
 func renderWebpage(markup string, tmpl *template.Template) (result string) {
 	html := blackfriday.Run([]byte(markup))
-	data := struct {
-		Title string
-		Body  template.HTML
-	}{"foobar", template.HTML(html)}
+	data := TemplateData{
+		"title": "foobar",
+		"body":  template.HTML(html),
+	}
 	buf := bytes.NewBufferString("")
 	tmpl.Execute(buf, data)
 	return buf.String()
