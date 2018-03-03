@@ -7,7 +7,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 
 	blackfriday "gopkg.in/russross/blackfriday.v2"
 )
@@ -58,7 +57,7 @@ func (cmd *Command) Parse(args []string) error {
 			cmd.drafts = true
 		case v == "-slugify":
 			cmd.slugify = true
-		case strings.Contains("-project|-content|-template|-build", v):
+		case stringlist{"-project", "-content", "-template", "-build"}.Contains(v):
 			// Consume the argument value and skip next iteration.
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", v)
@@ -93,7 +92,7 @@ func (cmd *Command) Parse(args []string) error {
 }
 
 func isCommand(name string) bool {
-	return strings.Contains("build|help|init|run", name)
+	return stringlist{"build", "help", "init", "run"}.Contains(name)
 }
 
 func (cmd *Command) Execute() error {
@@ -132,7 +131,7 @@ func (cmd *Command) build() error {
 		markup := readFile(f)
 		tmpl, _ := template.ParseFiles(path.Join(cmd.templateDir, "layout.html"))
 		output := renderWebpage(markup, tmpl)
-		outfile := path.Join(cmd.buildDir, path.Base(f[0:len(f)-len(path.Ext(f))]+".html"))
+		outfile := path.Join(cmd.buildDir, path.Base(replaceExt(f, ".html")))
 		writeFile(outfile, output)
 	}
 	return nil
