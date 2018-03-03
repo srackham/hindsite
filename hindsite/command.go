@@ -92,7 +92,7 @@ func (cmd *Command) Parse(args []string) error {
 }
 
 func isCommand(name string) bool {
-	return stringlist{"build", "help", "init", "run"}.Contains(name)
+	return stringlist{"build", "help", "init", "serve"}.Contains(name)
 }
 
 func (cmd *Command) Execute() error {
@@ -104,8 +104,8 @@ func (cmd *Command) Execute() error {
 		cmd.help()
 	case "init":
 		err = cmd.init()
-	case "run":
-		err = cmd.run()
+	case "serve":
+		err = cmd.serve()
 	default:
 		panic("illegal command: " + cmd.name)
 	}
@@ -141,7 +141,7 @@ func (cmd *Command) build() error {
 	return nil
 }
 
-func (cmd *Command) run() error {
+func (cmd *Command) serve() error {
 	// TODO
 	return nil
 }
