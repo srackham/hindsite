@@ -17,7 +17,7 @@ type Document struct {
 	html     string // Rendered content.
 }
 
-// New TODO
+// NewDocument TODO
 func NewDocument(path string) *Document {
 	// TODO
 	result := new(Document)
