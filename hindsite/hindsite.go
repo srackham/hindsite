@@ -6,8 +6,10 @@ import (
 
 func main() {
 	cmd := Command{}
-	if !cmd.Parse(os.Args) {
-		os.Exit(1)
+	if err := cmd.Parse(os.Args); err != nil {
+		die(err.Error())
 	}
-	cmd.Execute()
+	if err := cmd.Execute(); err != nil {
+		die(err.Error())
+	}
 }

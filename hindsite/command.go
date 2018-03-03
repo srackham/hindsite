@@ -24,7 +24,7 @@ type Command struct {
 	topic       string
 }
 
-func (cmd *Command) Parse(args []string) bool {
+func (cmd *Command) Parse(args []string) error {
 	cmd.projectDir = "."
 	cmd.contentDir = "content"
 	cmd.templateDir = "template"
@@ -46,14 +46,12 @@ func (cmd *Command) Parse(args []string) bool {
 				v = "help"
 			}
 			if !isCommand(v) {
-				fmt.Printf("illegal command: %s\n", v)
-				return false
+				return fmt.Errorf("illegal command: %s", v)
 			}
 			cmd.name = v
 		case i == 2 && cmd.name == "help":
 			if !isCommand(v) {
-				fmt.Printf("illegal help topic: %s\n", v)
-				return false
+				return fmt.Errorf("illegal help topic: %s", v)
 			}
 			cmd.topic = v
 		case v == "-drafts":
@@ -63,8 +61,7 @@ func (cmd *Command) Parse(args []string) bool {
 		case strings.Contains("-project|-content|-template|-build", v):
 			// Consume the argument value and skip next iteration.
 			if i+1 >= len(args) {
-				fmt.Printf("missing %s argument value\n", v)
-				return false
+				return fmt.Errorf("missing %s argument value", v)
 			}
 			switch v {
 			case "-project":
@@ -80,8 +77,7 @@ func (cmd *Command) Parse(args []string) bool {
 			}
 			skip = true
 		default:
-			fmt.Printf("illegal argument: %s\n", v)
-			return false
+			return fmt.Errorf("illegal argument: %s", v)
 		}
 	}
 	if !path.IsAbs(cmd.contentDir) {
@@ -93,38 +89,40 @@ func (cmd *Command) Parse(args []string) bool {
 	if !path.IsAbs(cmd.buildDir) {
 		cmd.buildDir = path.Join(cmd.projectDir, cmd.buildDir)
 	}
-	return true
+	return nil
 }
 
 func isCommand(name string) bool {
 	return strings.Contains("build|help|init|run", name)
 }
 
-func (cmd *Command) Execute() {
+func (cmd *Command) Execute() error {
+	var err error
 	switch cmd.name {
 	case "build":
-		cmd.build()
+		err = cmd.build()
 	case "help":
 		cmd.help()
 	case "init":
-		cmd.init()
+		err = cmd.init()
 	case "run":
-		cmd.run()
+		err = cmd.run()
 	default:
 		panic("illegal command: " + cmd.name)
 	}
+	return err
 }
 
 func (cmd *Command) help() {
 	println("Usage: hindsite command [arguments]")
 }
 
-func (cmd *Command) build() {
+func (cmd *Command) build() error {
 	if !dirExists(cmd.contentDir) {
-		die("content directory does not exist: " + cmd.contentDir)
+		return fmt.Errorf("content directory does not exist: " + cmd.contentDir)
 	}
 	if !dirExists(cmd.templateDir) {
-		die("template directory does not exist: " + cmd.templateDir)
+		return fmt.Errorf("template directory does not exist: " + cmd.templateDir)
 	}
 	if !dirExists(cmd.buildDir) {
 		os.Mkdir(cmd.buildDir, 0775)
@@ -137,15 +135,18 @@ func (cmd *Command) build() {
 		outfile := path.Join(cmd.buildDir, path.Base(f[0:len(f)-len(path.Ext(f))]+".html"))
 		writeFile(outfile, output)
 	}
+	return nil
 }
 
-func (cmd *Command) run() {
+func (cmd *Command) run() error {
 	// TODO
+	return nil
 }
 
-func (cmd *Command) init() {
+func (cmd *Command) init() error {
 	// TODO
 	// Use bindata RestoreAssets() to write the builtin example to the target template directory recursively.
+	return nil
 }
 
 func renderWebpage(markup string, tmpl *template.Template) (result string) {
