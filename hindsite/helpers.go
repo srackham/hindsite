@@ -50,22 +50,27 @@ func fileExists(name string) bool {
 	return err == nil && !info.IsDir()
 }
 
-func readFile(filename string) string {
-	bytes, err := ioutil.ReadFile(filename)
+func readFile(name string) string {
+	bytes, err := ioutil.ReadFile(name)
 	if err != nil {
 		die(err.Error())
 	}
 	return string(bytes)
 }
 
-func writeFile(filename string, text string) {
-	err := ioutil.WriteFile(filename, []byte(text), 0644)
+func writeFile(name string, text string) {
+	err := ioutil.WriteFile(name, []byte(text), 0644)
 	if err != nil {
 		die(err.Error())
 	}
 }
 
-// Replace the extension of filename (ext has leading period).
-func replaceExt(filename, ext string) string {
-	return filename[0:len(filename)-len(path.Ext(filename))] + ext
+// Return file name sans extension.
+func fileName(name string) string {
+	return replaceExt(path.Base(name), "")
+}
+
+// Replace the extension of name.
+func replaceExt(name, ext string) string {
+	return name[0:len(name)-len(path.Ext(name))] + ext
 }

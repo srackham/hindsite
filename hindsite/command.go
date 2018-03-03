@@ -1,15 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"html/template"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
-
-	blackfriday "gopkg.in/russross/blackfriday.v2"
 )
 
 type Command struct {
@@ -136,9 +133,17 @@ func (cmd *Command) build() error {
 	}
 	files, _ = filepath.Glob(path.Join(cmd.contentDir, "*.md"))
 	for _, f := range files {
-		markup := readFile(f)
-		tmpl, _ := template.ParseFiles(path.Join(cmd.templateDir, "layout.html"))
-		output := renderWebpage(markup, tmpl)
+		doc := Document{}
+		err := doc.parseFile(f)
+		if err != nil {
+			return err
+		}
+		tmpl, err := template.ParseFiles(path.Join(cmd.templateDir, "layout.html"))
+		if err != nil {
+			return err
+		}
+		data := TemplateData{}
+		output := doc.renderWebpage(tmpl, data)
 		outfile := path.Join(cmd.buildDir, path.Base(replaceExt(f, ".html")))
 		writeFile(outfile, output)
 	}
@@ -158,15 +163,4 @@ func (cmd *Command) init() error {
 	// TODO
 	// Use bindata RestoreAssets() to write the builtin example to the target template directory recursively.
 	return nil
-}
-
-func renderWebpage(markup string, tmpl *template.Template) (result string) {
-	html := blackfriday.Run([]byte(markup))
-	data := TemplateData{
-		"title": "Foobar",
-		"body":  template.HTML(html),
-	}
-	buf := bytes.NewBufferString("")
-	tmpl.Execute(buf, data)
-	return buf.String()
 }
