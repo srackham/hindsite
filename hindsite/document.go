@@ -4,6 +4,8 @@ import (
 	"time"
 )
 
+type TemplateData map[string]interface{}
+
 // Document TODO
 type Document struct {
 	Title    string

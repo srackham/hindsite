@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	blackfriday "gopkg.in/russross/blackfriday.v2"
@@ -60,8 +61,9 @@ func (cmd *Command) Parse(args []string) bool {
 		case v == "-slugify":
 			cmd.slugify = true
 		case strings.Contains("-project|-content|-template|-build", v):
-			if i >= len(args) {
-				fmt.Printf("missing argument value: %s\n", v)
+			// Consume the argument value and skip next iteration.
+			if i+1 >= len(args) {
+				fmt.Printf("missing %s argument value\n", v)
 				return false
 			}
 			switch v {
@@ -127,10 +129,14 @@ func (cmd *Command) build() {
 	if !dirExists(cmd.buildDir) {
 		os.Mkdir(cmd.buildDir, 0775)
 	}
-	markup := readFile(path.Join(cmd.contentDir, "index.md"))
-	tmpl, _ := template.ParseFiles(path.Join(cmd.templateDir, "layout.html"))
-	output := renderWebpage(markup, tmpl)
-	writeFile(path.Join(cmd.buildDir, "index.html"), output)
+	files, _ := filepath.Glob(path.Join(cmd.contentDir, "*.md"))
+	for _, f := range files {
+		markup := readFile(f)
+		tmpl, _ := template.ParseFiles(path.Join(cmd.templateDir, "layout.html"))
+		output := renderWebpage(markup, tmpl)
+		outfile := path.Join(cmd.buildDir, path.Base(f[0:len(f)-len(path.Ext(f))]+".html"))
+		writeFile(outfile, output)
+	}
 }
 
 func (cmd *Command) run() {
