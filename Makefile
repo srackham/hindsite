@@ -27,6 +27,11 @@ test: bindata
 clean:
 	go clean $(GOFLAGS) -i ./...
 
+.PHONY: docs
+docs: install
+	cp README.md doc/content/index.md
+	hindsite build -project doc
+
 .PHONY: push
 push:
 	git push -u --tags origin master

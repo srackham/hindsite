@@ -3,3 +3,4 @@ debug
 *.out
 gitignore
 examples/minimal/index.html
+build/
