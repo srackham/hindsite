@@ -4,3 +4,4 @@ debug
 gitignore
 examples/minimal/index.html
 build/
+examples/blog/
