@@ -10,7 +10,7 @@ import (
 // Helpers.
 func die(message string) {
 	if message != "" {
-		fmt.Fprintln(os.Stderr, message)
+		fmt.Fprintln(os.Stderr, "error: "+message)
 	}
 	os.Exit(1)
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -21,6 +22,7 @@ type Command struct {
 	drafts      bool
 	slugify     bool
 	topic       string
+	port        string
 }
 
 func (cmd *Command) Parse(args []string) error {
@@ -28,6 +30,7 @@ func (cmd *Command) Parse(args []string) error {
 	cmd.contentDir = "content"
 	cmd.templateDir = "template"
 	cmd.buildDir = "build"
+	cmd.port = "1212"
 	skip := false
 	for i, v := range args {
 		if skip {
@@ -57,8 +60,7 @@ func (cmd *Command) Parse(args []string) error {
 			cmd.drafts = true
 		case v == "-slugify":
 			cmd.slugify = true
-		case stringlist{"-project", "-content", "-template", "-build"}.Contains(v):
-			// Consume the argument value and skip next iteration.
+		case stringlist{"-project", "-content", "-template", "-build", "-port"}.Contains(v):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", v)
 			}
@@ -71,6 +73,8 @@ func (cmd *Command) Parse(args []string) error {
 				cmd.templateDir = args[i+1]
 			case "-build":
 				cmd.buildDir = args[i+1]
+			case "-port":
+				cmd.port = args[i+1]
 			default:
 				panic("illegal arugment: " + v)
 			}
@@ -142,8 +146,12 @@ func (cmd *Command) build() error {
 }
 
 func (cmd *Command) serve() error {
-	// TODO
-	return nil
+	if !dirExists(cmd.buildDir) {
+		return fmt.Errorf("build directory does not exist: " + cmd.buildDir)
+	}
+	http.Handle("/", http.FileServer(http.Dir(cmd.buildDir)))
+	fmt.Printf("\nServing build directory %s at http://localhost:%s/\nPress Ctrl+C to stop\n", cmd.buildDir, cmd.port)
+	return http.ListenAndServe(":"+cmd.port, nil)
 }
 
 func (cmd *Command) init() error {
@@ -155,7 +163,7 @@ func (cmd *Command) init() error {
 func renderWebpage(markup string, tmpl *template.Template) (result string) {
 	html := blackfriday.Run([]byte(markup))
 	data := TemplateData{
-		"title": "foobar",
+		"title": "Foobar",
 		"body":  template.HTML(html),
 	}
 	buf := bytes.NewBufferString("")
