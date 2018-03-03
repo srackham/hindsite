@@ -35,7 +35,7 @@ Small static websites with optional indexed documents (blogs posts, newsletters,
 
 ## Features
 - Easy to get up and running with built-in scaffolding and layouts: install ->
-  init -> build -> run.
+  init -> build -> serve.
 - Supports multiple groups of indexed documents each with separate tag and date
   indexes e.g. blog posts and newsletters.
 
@@ -63,8 +63,8 @@ layout.html:
 <body>.Body</body>
 ```
 
-Content and template directories can be the same, but this is not recommended
-and is only useful for building an _example_.
+Content and template directories can be the same, not recommended but useful for
+building an _example_.
 
 
 ## Design
@@ -85,7 +85,9 @@ The overarching goals are simplicity and ease of use.
 - No _previous/next_ paging, just a _recent_, _all_, _tag_ and _tags_ indexes.
   Paging is just unnecessary complexity -- you can page indexes up and down and search them it in the browser.
 - No [shortcodes](https://gohugo.io/content-management/shortcodes/) -- use Rimu macros.
-- No template functions just a set of template variables (https://gohugo.io/variables/).
+- No template functions just a set of template variables, see:
+  * https://jekyllrb.com/docs/variables/,
+  * https://gohugo.io/variables/).
 - No RSS -- hardly anyone even knows what it is anymore!
 
 
@@ -93,7 +95,7 @@ The overarching goals are simplicity and ease of use.
 Here are a few of the many available tools.
 
 ### Local web server
-In lieu of a built-in `run` command (not yet implemented).
+In lieu of a built-in `serve` command (not yet implemented).
 
 Run:
 
@@ -396,7 +398,7 @@ draft = "true"
 ```
 Key aliases to allow Hugo front matter consumption: description = synopsis; categories = tags.
 
-- Implicit values (if neither of the above are present):
+- Implicit values (if the document does not contain a front matter header):
   * `title` defaults to first `h1` title or, failing that, the document file
     name (sans drafts and date prefixes with hyphens replaced by spaces).
   * `date` defaults to file name `YYYY-MM-DD` date prefix e.g.
@@ -418,13 +420,13 @@ The commands are:
 
     init
     build
-    run
+    serve
 
 Use "go help [command]" for more information about a command.
 
 hindsite init [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
 hindsite build [-drafts] [-slugify] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR]
-hindsite run [-project PROJECT_DIR] [-build BUILD_DIR]
+hindsite serve [-project PROJECT_DIR] [-build BUILD_DIR]
 hindsite -h | --help | help
 
 /*
@@ -488,7 +490,7 @@ Performs HTML validation of the built website.
 - Run all HTML pages in `BUILD_DIR` through the W3C Nu validator.
 */
 
-### Run command
+### Serve command
 Open a development server on the `BUILD_DIR` directory.
 
 
@@ -531,13 +533,17 @@ import "html/template"
 
 type TemplateData map[string]interface{}
 
+func merge(m TemplateData) {
+	m["qux"]=template.HTML("<baz>")
+}
+
 func main() {
-    m := TemplateData{"foo":7,"bar":"<baz>"}
-	  m["qux"]=template.HTML("<baz>")
-    t, err := template.New("test").Parse("{{.foo}} {{.bar}} {{.qux}}")
-    if err != nil { fmt.Println(err); return }
-    err = t.Execute(os.Stdout, m)	// Prints: 7 &lt;baz&gt; <baz>
-    if err != nil { fmt.Println(err); return }
+        m := TemplateData{"foo":7,"bar":"<baz>"}
+	      merge(m)
+        t, err := template.New("test").Parse("{{.foo}} {{.bar}} {{.qux}}")
+        if err != nil { fmt.Println(err); return }
+        err = t.Execute(os.Stdout, m)	// Prints: 7 &lt;baz&gt; <baz>
+        if err != nil { fmt.Println(err); return }
 }
 ```
 
