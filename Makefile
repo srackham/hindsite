@@ -27,10 +27,15 @@ test: bindata
 clean:
 	go clean $(GOFLAGS) -i ./...
 
-.PHONY: docs
-docs: install
-	cp README.md doc/content/index.md
-	hindsite build -project doc
+.PHONY: doc
+doc: install
+	cp README.md doc/index.md
+	cd doc
+	hindsite build -content . -template .
+
+.PHONY: serve
+serve: doc
+	hindsite serve -project doc
 
 .PHONY: push
 push:
