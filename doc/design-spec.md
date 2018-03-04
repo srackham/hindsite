@@ -4,11 +4,11 @@ Notes for yet another static website generator build with Go.
 
 **Q**: Why?
 
-**A**: I decided to start blogging again after a 3 year hiatis. I had been using
+**A**: I decided to start blogging again after a 3 year hiatus. I had been using
 Hugo but my old blog would not build with the latest version of Hugo. Time to
 debug! At first things when well, after renaming couple of template variable
 identifiers my site compiled without errors, but I soon discovered that the
-posts and categeories indexes were missing. I dug deeper and all the while was
+posts and categories indexes were missing. I dug deeper and all the while was
 nagged by the thought that for a simple blog the Hugo edifice was just way to
 complex. Armed with typical programmer hubris I fancied I could build my own
 generator, one that would be a doodle for mere mortals to learn and to use (and
@@ -16,7 +16,7 @@ reuse). Good luck with that!
 
 
 # Names
-hindsite (backup name hiatis).
+hindsite (backup name hiatus).
 Github name `hindsite`.
 
 
@@ -40,38 +40,40 @@ Small static websites with optional indexed documents (blogs posts, newsletters,
   date indexes e.g. blog posts and newsletters.
 
 
-## Simplest hindsite project
-`hindsite build`:
+## Hello hindsite
+The simplest project.
 
-```
-/content
-    index.md
-/template
-    layout.html
-/build
-    index.html
-```
-
-index.md:
+`index.md` file:
 ```
 Hello *World*!
 ```
 
-layout.html:
+`layout.html` file:
 ```
 <!doctype html>
 <head><title>{{.title}}</title></head>
 <body>{{.body}}</body>
 ```
 
-Content and template directories can be the same (though it's not a good idea to
-mix content and design):
+### Using the [Standard project model](#standard-project-model)
+Build command: `hindsite build`
 
-`hindsite build -content . -template .`:
+```
+content/
+    index.md
+template/
+    layout.html
+build/
+    index.html
+```
+
+### Using the [Minimal project model](#minimal-project-model)
+Build command: `hindsite build -content . -template .`
+
 ```
 index.md
 layout.html
-/build
+build/
     index.html
 ```
 
@@ -99,6 +101,23 @@ The overarching goals are simplicity and ease of use.
   * https://jekyllrb.com/docs/variables/,
   * https://gohugo.io/variables/).
 - No RSS -- hardly anyone even knows what it is anymore!
+
+
+## Template variables
+Template variables are injected into template files during webpage generation.
+There are template variables for document front matter, index generation,
+configuration parameters and miscellaneous items such as the current date and
+time.
+
+Inside a template, variable names are prefixed with a dot and enclosed by double
+curly braces. For example the document `title` variable appears in the template
+as`{{.title}}`. See the Go [html/template
+package](https://golang.org/pkg/html/template/) more about the use of templates.
+
+Template variable names are:
+
+- Alpha-numeric starting with an alpha character.
+- Case sensitive.
 
 
 ## Validation and testing
@@ -152,10 +171,10 @@ alias html-validator-all='for f in $(find . -name "*.html"); do echo $f; html-va
 
 
 ## Vocabulary
-**project**: A hindsite project consists of a _content directory_, a _template
-directory_ and a _build directory_. Hindsite uses the contents of the template
-and content directories to generate a website which it writes to the build
-directory.
+**project**: A hindsite [project](#projects) consists of a _content directory_,
+a _template directory_ and a _build directory_. Hindsite uses the contents of
+the template and content directories to generate a website which it writes to
+the build directory.
 
 **content directory**: A directory (default name `content`) containing content
 documents along with optional document meta-data (front matter) and optional
@@ -235,66 +254,66 @@ characters.
 Website with blog and newsletters:
 
 ```
-/content
+content/
     config.toml
     config.rmu
-    /pages
+    pages/
         index.md
         about.md
-    /blog
+    blog/
         example.md
         foobar-image.png
         2008-12-10-post-zero.rmu
-    /newsletters
+    newsletters/
         2018-02-07.md
         2018-02-14.md
-    /static
-/template
+    static/
+template/
     config.toml
     layout.html
     CNAME
     favicon.ico
-    /pages
+    pages/
         layout.html
-    /blog
+    blog/
         layout.html
         all.html
         recent.html
         tags.html
         tag.html
         example.md
-    /newsletters
+    newsletters/
         layout.html
         all.html
         recent.html
         example.md
-    /static
+    static/
         main.css
         logo.jpg
-/build
+build/
     favicon.ico
     CNAME
-    /pages
+    pages/
         index.html
         about.html
-    /blog
+    blog/
         post-one.html
         foobar-image.png
         2008-12-10-post-zero.html
-    /newsletters
+    newsletters/
         2018-02-07.html
         2018-02-14.html
-    /static
+    static/
         main.css
         logo.jpg
-    /indexes
-        /blog
+    indexes/
+        blog/
             all.html
             recent.html
             tags.html
-            /tags
+            tags/
                 kotlin.html
-        /newsletters
+        newsletters/
             all.html
             recent.html
 ```
@@ -305,7 +324,7 @@ Website with blog and newsletters:
 /*
   If a same-named `.toml` is present it will be injected into the template.
   A `.toml` file with the same name as a directory is injected into all templates in the
-  directory e.g. `blog.toml` will be injeced into all documents in the `blog` directory.
+  directory e.g. `blog.toml` will be injected into all documents in the `blog` directory.
 */
 
 - Reserved directory names: `/indexes`. By convention the `/static`
@@ -435,6 +454,65 @@ Key aliases to allow Hugo front matter consumption: description = synopsis; cate
 
 If you don't use tags then you don't need explicit external or embedded meta-data.
 
+## Projects
+A hindsite project consists of a _content directory_, a _template
+directory_ and a _build directory_. Hindsite uses the contents of the template
+and content directories to generate a website which it writes to the build
+directory.
+
+Content, template and build directories must be mutually exclusive (not
+contained within one another) with the following execptions:
+
+- Content and template directories can be identical.
+- The build directory can be located at the root of the content directory.
+
+These exceptions accomodate the [Minimal project model](#minimal-project_model).
+
+Normally it's not a good idea to mix content and
+  design especially if you plan to share or reuse your project template.
+
+This allows template
+  examples to be tested and may be a useful model for simple sites (the hindsite
+  docs use this model).
+But normally it's not a good idea to mix content and
+  design especially if you plan to share or reuse your project template.
+
+TODO: Document _Standard_, _Minimal_ and _Disjoint_ project models.
+
+### Standard project model
+Separate content, template and build directories in a single directory. Content
+and design are separate. This is the default project model.
+
+```
+content/
+    content files...
+template/
+    template files...
+build/
+    website files...
+```
+Standard project model build command: `hindsite build`
+
+### Disjoint project model
+Same as Standard model but contents, template and build directories are not all
+contained in a single directory. This is useful if you need to build multiple
+websites from the same content.
+
+### Minimal project model
+A shared content and template directory containing the build directory.
+
+```
+content and template files...
+build/
+    website files...
+```
+Minimal project model build command: `hindsite build -content . -template .`
+
+This model may be useful for simple projects but it's not a good idea to mix
+content and design like this if you plan to share or reuse your project
+template.
+
+
 ## CLI
 Usage (c.f. `go help`and `dlv help`): 
 
@@ -450,14 +528,11 @@ The commands are:
 Use "hindsite help [command]" for more information about a command.
 
 hindsite init [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
-hindsite build [-drafts] [-slugify] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR]
+hindsite build [-drafts] [-slugify] [-set SET] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR]
 hindsite serve [-port PORT] [-project PROJECT_DIR] [-build BUILD_DIR]
 hindsite -h | --help | help
 
 ```
-- Content, template and build directories must be mutually exclusive (not
-  contained within one another) with one exception: content and template
-  directories can be identical (this allows template examples to be tested).
 - If content, template or build directory paths are relative they are relative
   to the project directory.
 - `PROJECT_DIR` defaults to `.`
@@ -481,10 +556,12 @@ Build static website from content and template directories.
 
 - Include draft pages if the `-drafts` option is specified.
 - Slugify content document paths if the  `-sligify` option is specified.
+- The `SET` option value is formated like `name=value`. It sets a named
+  configuration parameter and template variable. For example `-set theme=azure`
 
 Build sequence:
 
-- Check for pathalogical content, template and build directory overlap.
+- Check for pathalogical content, template and build directories overlap.
 - Check the template directory structure is mirrored in the content directory.
 - Check that all directory paths and content document file names are slugified.
 - Check for missing or invalid indexed document meta-data.
@@ -511,6 +588,7 @@ Open a development server on the `BUILD_DIR` directory.
 
 
 ## Implementation ideas
+- Put binaries on BinTray?
 - Add Disqus comments -- I suspect this is just a content templating issue.
 
 
