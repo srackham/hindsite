@@ -155,7 +155,7 @@ func (cmd *Command) serve() error {
 		return fmt.Errorf("build directory does not exist: " + cmd.buildDir)
 	}
 	http.Handle("/", http.FileServer(http.Dir(cmd.buildDir)))
-	fmt.Printf("\nServing build directory %s at http://localhost:%s/\nPress Ctrl+C to stop\n", cmd.buildDir, cmd.port)
+	fmt.Printf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", cmd.buildDir, cmd.port)
 	return http.ListenAndServe(":"+cmd.port, nil)
 }
 

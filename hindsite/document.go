@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"regexp"
 	"strings"
 	"time"
 
@@ -14,12 +15,12 @@ type TemplateData map[string]interface{}
 
 // Document TODO
 type Document struct {
-	Title    string
-	Date     time.Time
-	Synopsis string
-	Addendum string
-	Tags     []string
-	Draft    bool
+	title    string
+	date     time.Time
+	synopsis string
+	addendum string
+	tags     []string
+	draft    bool
 	path     string // File path.
 	content  string // Markup text (without front matter header).
 	html     string // Rendered content.
@@ -42,12 +43,23 @@ func (doc *Document) parseFile(name string) error {
 	doc.path = name
 	doc.content = readFile(name)
 	doc.html = string(blackfriday.Run([]byte(doc.content)))
-	doc.Title = strings.Title(strings.Replace(fileName(name), "-", " ", -1))
+	doc.title = fileName(name)
+	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
+		loc, _ := time.LoadLocation("Local")
+		t, err := time.ParseInLocation(time.RFC3339, doc.title[0:10]+"T00:00:00+00:00", loc)
+		if err != nil {
+			return err
+		}
+		doc.date = t
+		doc.title = doc.title[11:]
+	}
+	doc.title = strings.Title(strings.Replace(doc.title, "-", " ", -1))
 	return nil
 }
 
 func (doc *Document) mergeData(data TemplateData) {
-	data["title"] = doc.Title
+	data["title"] = doc.title
+	data["date"] = doc.date.Format("Jan-02-2006")
 	data["body"] = template.HTML(doc.html)
 }
 
