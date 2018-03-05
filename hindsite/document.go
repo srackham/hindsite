@@ -27,7 +27,6 @@ type Document struct {
 	addendum string
 	tags     []string
 	draft    bool
-	slug     string
 }
 
 /*
@@ -57,7 +56,6 @@ func (doc *Document) parseFile(name string) error {
 	}
 	doc.urlpath = filepath.Dir(doc.urlpath)
 	doc.urlpath = filepath.Join(doc.urlpath, doc.title+".html")
-	// doc.slug = doc.title
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		loc, _ := time.LoadLocation("Local")
 		t, err := time.ParseInLocation(time.RFC3339, doc.title[0:10]+"T00:00:00+00:00", loc)
