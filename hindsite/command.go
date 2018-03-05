@@ -143,33 +143,45 @@ func (cmd *Command) build() error {
 		if info.IsDir() {
 			return nil
 		}
-		if filepath.Ext(f) != ".md" {
-			return nil
-		}
 		println("infile: " + f)
-		doc := Document{}
-		err = doc.parseFile(f)
-		if err != nil {
-			return err
-		}
-		if doc.draft && !cmd.drafts {
+		switch filepath.Ext(f) {
+		case ".toml", ".yaml", ".html":
+			// Skip configuration and template files.
 			return nil
-		}
-		outfile := path.Join(cmd.buildDir, doc.urlpath)
-		println("outfile: " + outfile)
-		outdir := filepath.Dir(outfile)
-		if !dirExists(outdir) {
-			if err = os.MkdirAll(outdir, 0775); err != nil {
+		case ".md":
+			doc := Document{}
+			err = doc.parseFile(f)
+			if err != nil {
 				return err
 			}
+			if doc.draft && !cmd.drafts {
+				return nil
+			}
+			outfile := path.Join(cmd.buildDir, doc.urlpath)
+			mkFileDir(outfile)
+			tmpl, err := template.ParseFiles(path.Join(cmd.templateDir, "layout.html"))
+			if err != nil {
+				return err
+			}
+			data := TemplateData{}
+			output := doc.renderWebpage(tmpl, data)
+			writeFile(outfile, output)
+			println("outfile: " + outfile)
+		default:
+			// Copy static files verbatim.
+			outfile, err := filepath.Rel(cmd.contentDir, f)
+			if err != nil {
+				return err
+			}
+			outfile = path.Join(cmd.buildDir, outfile)
+			mkFileDir(outfile)
+			copyFile(f, outfile)
+			// err = copyFile(f, outfile)
+			// if err != nil {
+			// 	return err
+			// }
+			println("outfile: " + outfile)
 		}
-		tmpl, err := template.ParseFiles(path.Join(cmd.templateDir, "layout.html"))
-		if err != nil {
-			return err
-		}
-		data := TemplateData{}
-		output := doc.renderWebpage(tmpl, data)
-		writeFile(outfile, output)
 		return nil
 	})
 	if err != nil {

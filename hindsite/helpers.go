@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 )
 
 // Helpers.
@@ -50,6 +51,7 @@ func fileExists(name string) bool {
 	return err == nil && !info.IsDir()
 }
 
+// TODO return error.
 func readFile(name string) string {
 	bytes, err := ioutil.ReadFile(name)
 	if err != nil {
@@ -58,6 +60,7 @@ func readFile(name string) string {
 	return string(bytes)
 }
 
+// TODO return error.
 func writeFile(name string, text string) {
 	err := ioutil.WriteFile(name, []byte(text), 0644)
 	if err != nil {
@@ -73,4 +76,19 @@ func fileName(name string) string {
 // Replace the extension of name.
 func replaceExt(name, ext string) string {
 	return name[0:len(name)-len(path.Ext(name))] + ext
+}
+
+// TODO return error.
+func copyFile(from, to string) {
+	writeFile(to, readFile(from))
+}
+
+func mkFileDir(filename string) error {
+	dir := filepath.Dir(filename)
+	if !dirExists(dir) {
+		if err := os.MkdirAll(dir, 0775); err != nil {
+			return err
+		}
+	}
+	return nil
 }
