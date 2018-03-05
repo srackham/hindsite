@@ -15,15 +15,18 @@ type TemplateData map[string]interface{}
 
 // Document TODO
 type Document struct {
+	filepath string // Content document file path.
+	urlpath  string // Build path relatative to build directory.
+	content  string // Markup text (without front matter header).
+	html     string // Rendered content.
+	// Front matter.
 	title    string
 	date     time.Time
 	synopsis string
 	addendum string
 	tags     []string
 	draft    bool
-	path     string // File path.
-	content  string // Markup text (without front matter header).
-	html     string // Rendered content.
+	slug     string
 }
 
 /*
@@ -40,10 +43,14 @@ func (doc *Document) parseFile(name string) error {
 	if !fileExists(name) {
 		return fmt.Errorf("missing document: %s", name)
 	}
-	doc.path = name
-	doc.content = readFile(name)
-	doc.html = string(blackfriday.Run([]byte(doc.content)))
+	doc.filepath = name
+	// Synthesis default front matter from file name.
 	doc.title = fileName(name)
+	if doc.title[0] == '~' {
+		doc.draft = true
+		doc.title = doc.title[1:]
+	}
+	doc.slug = doc.title
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		loc, _ := time.LoadLocation("Local")
 		t, err := time.ParseInLocation(time.RFC3339, doc.title[0:10]+"T00:00:00+00:00", loc)
@@ -54,6 +61,14 @@ func (doc *Document) parseFile(name string) error {
 		doc.title = doc.title[11:]
 	}
 	doc.title = strings.Title(strings.Replace(doc.title, "-", " ", -1))
+	// Parse embedded front matter.
+	doc.content = readFile(doc.filepath)
+	if !doc.draft {
+
+	}
+	// doc.urlpath = filepath.Rel(cmd.)
+	// Render document.
+	doc.html = string(blackfriday.Run([]byte(doc.content)))
 	return nil
 }
 

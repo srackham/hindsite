@@ -133,10 +133,14 @@ func (cmd *Command) build() error {
 	}
 	files, _ = filepath.Glob(path.Join(cmd.contentDir, "*.md"))
 	for _, f := range files {
+		println("infile: " + f)
 		doc := Document{}
 		err := doc.parseFile(f)
 		if err != nil {
 			return err
+		}
+		if doc.draft && !cmd.drafts {
+			continue
 		}
 		tmpl, err := template.ParseFiles(path.Join(cmd.templateDir, "layout.html"))
 		if err != nil {
@@ -144,7 +148,9 @@ func (cmd *Command) build() error {
 		}
 		data := TemplateData{}
 		output := doc.renderWebpage(tmpl, data)
-		outfile := path.Join(cmd.buildDir, path.Base(replaceExt(f, ".html")))
+		// outfile := path.Join(cmd.buildDir, doc.urlpath)
+		outfile := path.Join(cmd.buildDir, doc.slug+".html")
+		println("outfile: " + outfile)
 		writeFile(outfile, output)
 	}
 	return nil
