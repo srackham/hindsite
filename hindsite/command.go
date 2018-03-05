@@ -130,20 +130,38 @@ func (cmd *Command) build() error {
 	if !dirExists(cmd.buildDir) {
 		os.Mkdir(cmd.buildDir, 0775)
 	}
+	// Delete everything in the build directory.
 	files, _ := filepath.Glob(path.Join(cmd.buildDir, "*"))
 	for _, f := range files {
 		os.RemoveAll(f)
 	}
-	files, _ = filepath.Glob(path.Join(cmd.contentDir, "*.md"))
-	for _, f := range files {
+	// Process all content documents in the content directory.
+	err := filepath.Walk(cmd.contentDir, func(f string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if filepath.Ext(f) != ".md" {
+			return nil
+		}
 		println("infile: " + f)
 		doc := Document{}
-		err := doc.parseFile(f)
+		err = doc.parseFile(f)
 		if err != nil {
 			return err
 		}
 		if doc.draft && !cmd.drafts {
-			continue
+			return nil
+		}
+		outfile := path.Join(cmd.buildDir, doc.urlpath)
+		println("outfile: " + outfile)
+		outdir := filepath.Dir(outfile)
+		if !dirExists(outdir) {
+			if err = os.MkdirAll(outdir, 0775); err != nil {
+				return err
+			}
 		}
 		tmpl, err := template.ParseFiles(path.Join(cmd.templateDir, "layout.html"))
 		if err != nil {
@@ -151,9 +169,11 @@ func (cmd *Command) build() error {
 		}
 		data := TemplateData{}
 		output := doc.renderWebpage(tmpl, data)
-		outfile := path.Join(cmd.buildDir, doc.urlpath)
-		println("outfile: " + outfile)
 		writeFile(outfile, output)
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 	return nil
 }
