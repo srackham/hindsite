@@ -12,7 +12,7 @@ SHELL := bash
 GOFLAGS ?=
 
 .PHONY: install
-install: bindata
+install: test
 	go install $(GOFLAGS) ./...
 
 .PHONY: build
@@ -36,6 +36,11 @@ doc: install
 .PHONY: serve
 serve: doc
 	hindsite serve -project doc
+
+.PHONY: blog
+blog: install
+	hindsite build -project ./examples/blog
+	hindsite serve -project ./examples/blog
 
 .PHONY: push
 push:
