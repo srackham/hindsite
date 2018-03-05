@@ -143,6 +143,7 @@ func (cmd *Command) build() error {
 		if info.IsDir() {
 			return nil
 		}
+		// TODO: Skip build directory.
 		println("infile: " + f)
 		switch filepath.Ext(f) {
 		case ".toml", ".yaml", ".html":
@@ -157,22 +158,22 @@ func (cmd *Command) build() error {
 			if doc.draft && !cmd.drafts {
 				return nil
 			}
-			outfile := path.Join(cmd.buildDir, doc.urlpath)
-			err = mkFileDir(outfile)
-			if err != nil {
-				return err
-			}
 			tmpl, err := template.ParseFiles(path.Join(cmd.templateDir, "layout.html"))
 			if err != nil {
 				return err
 			}
 			data := TemplateData{}
-			output := doc.renderWebpage(tmpl, data)
-			err = writeFile(outfile, output)
+			html := doc.renderWebpage(tmpl, data)
+			err = mkFileDir(doc.buildpath)
 			if err != nil {
 				return err
 			}
-			println("outfile: " + outfile)
+			err = writeFile(doc.buildpath, html)
+			if err != nil {
+				return err
+			}
+			println("outfile: " + doc.buildpath)
+			println("URL: " + doc.urlpath)
 		default:
 			// Copy static files verbatim.
 			outfile, err := filepath.Rel(cmd.contentDir, f)

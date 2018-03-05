@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 )
 
 // Helpers.
@@ -88,4 +89,15 @@ func mkFileDir(filename string) error {
 		}
 	}
 	return nil
+}
+
+/*
+Date/time functions.
+*/
+func parseDate(text string, loc *time.Location) (time.Time, error) {
+	if loc == nil {
+		loc, _ = time.LoadLocation("Local")
+	}
+	// TODO handle other formats to capture time.
+	return time.ParseInLocation(time.RFC3339, text[0:10]+"T00:00:00+00:00", loc)
 }
