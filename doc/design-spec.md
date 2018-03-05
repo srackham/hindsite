@@ -242,6 +242,8 @@ with example documents: just share your website template directory.
 **slugify**: Ensure path names only contain lower case alpha numeric and hyphen
 characters.
 
+**front matter**: Meta-data embedded at the start of content documents.
+
 
 ## Implementation
 - By convention the content, template and build directories normally reside in
@@ -356,22 +358,24 @@ with context-specific data.
 
 Variable contexts:
 
-- Content document.
+- Layout (content document) templates.
 - Date index templates.
 - Tag index templates.
 
-/*
-Configuration data and document meta-data Meta-data is aggregated before for
-template substitution as follows:
+## Configuration and front matter variables
+Additional build information is sourced from configuration files and document front matter.
 
-1. Global `config.toml` (in root of content directory).
-2. Local `config.toml` (in template directory).
-3. Document meta-data.
+### Configuration files
+TODO: Should multiple configuratoin files in the document path be aggregated
+(template path then content path, top to bottom)?
 
-Meta-data priority: document (highest), local, global (lowest).
-*/
+- Configuration files and front matter are optional.
+- Configuration files and front matter are encoded in TOML or YAML (take your pick).
+- Configuration files are named `config.{toml,yaml}` and are located and are
+  located at the roots of the contents and templates directories (values from
+  the latter take precedence).
 
-Example global `config.toml` file:
+Example `config.toml` file:
 
 ```
 # Is prepended to all root-relative URLs.
@@ -394,17 +398,10 @@ mediumDateFormat = ""
 longDateFormat = ""
 ```
 
-The optional `config.rmu` file in the content directory will be prepended to all Rimu files
-before they are rendered and mostly used to define macro values.
-
-Per-file meta-data can be sourced from:
-
-/*
-- A same-named `.toml` file.
-*/
-- Embedded parameters at the start of content files (c.f.
-  https://www.npmjs.com/package/marked-metadata,
-  https://gohugo.io/content-management/front-matter/):
+## Front matter
+Document front matter is embedded at the start of content files (c.f.
+https://www.npmjs.com/package/marked-metadata,
+https://gohugo.io/content-management/front-matter/).
 
 Embedded YAML with `<!--`, `-->` or `---` delimiters e.g.
 
@@ -418,9 +415,11 @@ tags:     foo foo valve, qux, baz
 draft:    true
 -->
 ```
-- `tags` can be a comma-separated string or a YAML list:
+- `tags` are a comma-separated string. Tags can also be encoded as a YAML list
+  or a TOML array called `categories` c.f. Hugo.
+- The variable name `description` can be used instead of `synopsis`.
 - The HTML comment delimiters are preferable because:
-  * They ignored if the document is processed by other applications.
+  * They ignored if the document is rendered by other applications.
   * The front matter is retained by the generated HTML web page.
 - [YAML syntax](https://learn.getgrav.org/advanced/yaml).
 - See [go-yaml](https://github.com/go-yaml/yaml) package.
@@ -440,19 +439,18 @@ categories = [
 draft = "true"
 +++
 ```
-Key aliases to allow Hugo front matter consumption: description = synopsis; categories = tags.
 
-- Implicit values (if the document does not contain a front matter header):
-  * `title` defaults to first `h1` title or, failing that, the document file
-    name (sans drafts and date prefixes with hyphens replaced by spaces).
-  * `date` defaults to file name `YYYY-MM-DD` date prefix e.g.
-    `2018-02-14-newsletter.md`.
-  * `author` defaults to value in `config.toml` or, failing that, blank.
-  * `synopsis` defaults to the first paragraph.
-  * `addendum` defaults to blank.
-  * `draft` is true if the first letter of the content file name is a tilda.
+Implicit values (if the document does not contain a front matter header):
 
-If you don't use tags then you don't need explicit external or embedded meta-data.
+- `title` defaults to first `h1` title or, failing that, the document file name
+  (sans drafts and date prefixes with hyphens replaced by spaces).
+- `date` defaults to file name `YYYY-MM-DD-` date prefix e.g.
+  `2018-02-14-newsletter.md`.
+- `author` defaults to the configuration file value, failing that, blank.
+- `synopsis` defaults to the first paragraph.
+- `addendum` defaults to blank.
+- `draft` is true if the first letter of the content file name is a tilda.
+
 
 ## Projects
 A hindsite project consists of a _content directory_, a _template
@@ -513,6 +511,15 @@ content and design like this if you plan to share or reuse your project
 template.
 
 
+## Content document markup
+Content documents can be written in Markdown or Rimu.
+
+### Rimu markup
+The optional `config.rmu` file at the root of content directory will be
+prepended to all Rimu files before they are rendered and mostly used to define
+macro values.
+
+
 ## CLI
 Usage (c.f. `go help`and `dlv help`): 
 
@@ -528,7 +535,7 @@ The commands are:
 Use "hindsite help [command]" for more information about a command.
 
 hindsite init [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
-hindsite build [-drafts] [-slugify] [-set SET] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR]
+hindsite build [-drafts] [-slugify] [-set VALUE] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR]
 hindsite serve [-port PORT] [-project PROJECT_DIR] [-build BUILD_DIR]
 hindsite -h | --help | help
 
@@ -539,7 +546,7 @@ hindsite -h | --help | help
 - `CONTENT_DIR` defaults to `content`
 - `BUILD_DIR` defaults to `build`
 - `TEMPLATE_DIR` defaults to `template`
-- All commands support the `-v` (verbose) option.
+- All commands support the `-v` (verbose) option (and `-vv` very verbose option?).
 - Build command supports the `-n` (dry run) option.
 
 ### Init command
@@ -556,8 +563,9 @@ Build static website from content and template directories.
 
 - Include draft pages if the `-drafts` option is specified.
 - Slugify content document paths if the  `-sligify` option is specified.
-- The `SET` option value is formated like `name=value`. It sets a named
-  configuration parameter and template variable. For example `-set theme=azure`
+- The `-set` option `VALUE` is formated like `name=value`. It sets a named
+  configuration parameter and template variable, for example `-set theme=azure`.
+  Can be used multiple times.
 
 Build sequence:
 
