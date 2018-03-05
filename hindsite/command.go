@@ -158,14 +158,20 @@ func (cmd *Command) build() error {
 				return nil
 			}
 			outfile := path.Join(cmd.buildDir, doc.urlpath)
-			mkFileDir(outfile)
+			err = mkFileDir(outfile)
+			if err != nil {
+				return err
+			}
 			tmpl, err := template.ParseFiles(path.Join(cmd.templateDir, "layout.html"))
 			if err != nil {
 				return err
 			}
 			data := TemplateData{}
 			output := doc.renderWebpage(tmpl, data)
-			writeFile(outfile, output)
+			err = writeFile(outfile, output)
+			if err != nil {
+				return err
+			}
 			println("outfile: " + outfile)
 		default:
 			// Copy static files verbatim.
@@ -174,12 +180,14 @@ func (cmd *Command) build() error {
 				return err
 			}
 			outfile = path.Join(cmd.buildDir, outfile)
-			mkFileDir(outfile)
-			copyFile(f, outfile)
-			// err = copyFile(f, outfile)
-			// if err != nil {
-			// 	return err
-			// }
+			err = mkFileDir(outfile)
+			if err != nil {
+				return err
+			}
+			err = copyFile(f, outfile)
+			if err != nil {
+				return err
+			}
 			println("outfile: " + outfile)
 		}
 		return nil

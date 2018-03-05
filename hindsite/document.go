@@ -67,7 +67,10 @@ func (doc *Document) parseFile(name string) error {
 	}
 	doc.title = strings.Title(strings.Replace(doc.title, "-", " ", -1))
 	// Parse embedded front matter.
-	doc.content = readFile(doc.filepath)
+	doc.content, err = readFile(doc.filepath)
+	if err != nil {
+		return err
+	}
 	if !doc.draft {
 
 	}

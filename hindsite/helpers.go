@@ -51,21 +51,13 @@ func fileExists(name string) bool {
 	return err == nil && !info.IsDir()
 }
 
-// TODO return error.
-func readFile(name string) string {
+func readFile(name string) (string, error) {
 	bytes, err := ioutil.ReadFile(name)
-	if err != nil {
-		die(err.Error())
-	}
-	return string(bytes)
+	return string(bytes), err
 }
 
-// TODO return error.
-func writeFile(name string, text string) {
-	err := ioutil.WriteFile(name, []byte(text), 0644)
-	if err != nil {
-		die(err.Error())
-	}
+func writeFile(name string, text string) error {
+	return ioutil.WriteFile(name, []byte(text), 0644)
 }
 
 // Return file name sans extension.
@@ -79,8 +71,13 @@ func replaceExt(name, ext string) string {
 }
 
 // TODO return error.
-func copyFile(from, to string) {
-	writeFile(to, readFile(from))
+func copyFile(from, to string) error {
+	contents, err := readFile(from)
+	if err != nil {
+		return err
+	}
+	err = writeFile(to, contents)
+	return err
 }
 
 func mkFileDir(filename string) error {
