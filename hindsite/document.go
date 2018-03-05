@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -50,7 +51,13 @@ func (doc *Document) parseFile(name string) error {
 		doc.draft = true
 		doc.title = doc.title[1:]
 	}
-	doc.slug = doc.title
+	var err error
+	if doc.urlpath, err = filepath.Rel(Cmd.contentDir, doc.filepath); err != nil {
+		return err
+	}
+	doc.urlpath = filepath.Dir(doc.urlpath)
+	doc.urlpath = filepath.Join(doc.urlpath, doc.title+".html")
+	// doc.slug = doc.title
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		loc, _ := time.LoadLocation("Local")
 		t, err := time.ParseInLocation(time.RFC3339, doc.title[0:10]+"T00:00:00+00:00", loc)
@@ -74,7 +81,7 @@ func (doc *Document) parseFile(name string) error {
 
 func (doc *Document) mergeData(data TemplateData) {
 	data["title"] = doc.title
-	data["date"] = doc.date.Format("Jan-02-2006")
+	data["date"] = doc.date.Format("02-Jan-2006")
 	data["body"] = template.HTML(doc.html)
 }
 

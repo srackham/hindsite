@@ -5,11 +5,11 @@ import (
 )
 
 func main() {
-	cmd := Command{}
-	if err := cmd.Parse(os.Args); err != nil {
+	Cmd = Command{}
+	if err := Cmd.Parse(os.Args); err != nil {
 		die(err.Error())
 	}
-	if err := cmd.Execute(); err != nil {
+	if err := Cmd.Execute(); err != nil {
 		die(err.Error())
 	}
 }

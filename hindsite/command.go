@@ -22,6 +22,9 @@ type Command struct {
 	port        string
 }
 
+// Cmd is singleton command.
+var Cmd = Command{}
+
 func (cmd *Command) Parse(args []string) error {
 	cmd.projectDir = "."
 	cmd.contentDir = "content"
@@ -148,8 +151,7 @@ func (cmd *Command) build() error {
 		}
 		data := TemplateData{}
 		output := doc.renderWebpage(tmpl, data)
-		// outfile := path.Join(cmd.buildDir, doc.urlpath)
-		outfile := path.Join(cmd.buildDir, doc.slug+".html")
+		outfile := path.Join(cmd.buildDir, doc.urlpath)
 		println("outfile: " + outfile)
 		writeFile(outfile, output)
 	}
