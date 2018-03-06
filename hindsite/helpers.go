@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 )
 
@@ -62,12 +62,12 @@ func writeFile(name string, text string) error {
 
 // Return file name sans extension.
 func fileName(name string) string {
-	return replaceExt(path.Base(name), "")
+	return replaceExt(filepath.Base(name), "")
 }
 
 // Replace the extension of name.
 func replaceExt(name, ext string) string {
-	return name[0:len(name)-len(path.Ext(name))] + ext
+	return name[0:len(name)-len(filepath.Ext(name))] + ext
 }
 
 // TODO return error.

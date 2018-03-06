@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -34,15 +33,6 @@ type Document struct {
 	draft    bool
 }
 
-/*
-// NewDocument TODO
-func NewDocument(docfile string) *Document {
-	// TODO
-	result := new(Document)
-	return result
-}
-*/
-
 // Parse document content and front matter.
 func (doc *Document) parseFile(name string) error {
 	if !fileExists(name) {
@@ -61,7 +51,7 @@ func (doc *Document) parseFile(name string) error {
 	}
 	p = filepath.Dir(p)
 	p = filepath.Join(p, doc.title+".html")
-	doc.buildpath = path.Join(Cmd.buildDir, p)
+	doc.buildpath = filepath.Join(Cmd.buildDir, p)
 	doc.urlpath = "/" + filepath.ToSlash(p)
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		d, err := parseDate(doc.title[0:10], nil)

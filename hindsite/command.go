@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 )
 
@@ -83,14 +82,14 @@ func (cmd *Command) Parse(args []string) error {
 			return fmt.Errorf("illegal argument: %s", v)
 		}
 	}
-	if !path.IsAbs(cmd.contentDir) {
-		cmd.contentDir = path.Join(cmd.projectDir, cmd.contentDir)
+	if !filepath.IsAbs(cmd.contentDir) {
+		cmd.contentDir = filepath.Join(cmd.projectDir, cmd.contentDir)
 	}
-	if !path.IsAbs(cmd.templateDir) {
-		cmd.templateDir = path.Join(cmd.projectDir, cmd.templateDir)
+	if !filepath.IsAbs(cmd.templateDir) {
+		cmd.templateDir = filepath.Join(cmd.projectDir, cmd.templateDir)
 	}
-	if !path.IsAbs(cmd.buildDir) {
-		cmd.buildDir = path.Join(cmd.projectDir, cmd.buildDir)
+	if !filepath.IsAbs(cmd.buildDir) {
+		cmd.buildDir = filepath.Join(cmd.projectDir, cmd.buildDir)
 	}
 	return nil
 }
@@ -131,7 +130,7 @@ func (cmd *Command) build() error {
 		os.Mkdir(cmd.buildDir, 0775)
 	}
 	// Delete everything in the build directory.
-	files, _ := filepath.Glob(path.Join(cmd.buildDir, "*"))
+	files, _ := filepath.Glob(filepath.Join(cmd.buildDir, "*"))
 	for _, f := range files {
 		os.RemoveAll(f)
 	}
@@ -158,7 +157,7 @@ func (cmd *Command) build() error {
 			if doc.draft && !cmd.drafts {
 				return nil
 			}
-			tmpl, err := template.ParseFiles(path.Join(cmd.templateDir, "layout.html"))
+			tmpl, err := template.ParseFiles(filepath.Join(cmd.templateDir, "layout.html"))
 			if err != nil {
 				return err
 			}
@@ -180,7 +179,7 @@ func (cmd *Command) build() error {
 			if err != nil {
 				return err
 			}
-			outfile = path.Join(cmd.buildDir, outfile)
+			outfile = filepath.Join(cmd.buildDir, outfile)
 			err = mkMissingDir(filepath.Dir(outfile))
 			if err != nil {
 				return err
