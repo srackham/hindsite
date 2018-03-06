@@ -164,12 +164,6 @@ alias html-validator-all='for f in $(find . -name "*.html"); do echo $f; html-va
 - Use the Go [html package](https://godoc.org/golang.org/x/net/html) to parse HTML.
 
 
-## User notes
-- Use root-relative links in templates because templates typically generate multiple rendered files
-  at differing locations.
-  See https://www.w3schools.com/html/html_filepaths.asp
-
-
 ## Vocabulary
 **project**: A hindsite [project](#projects) consists of a _content directory_,
 a _template directory_ and a _build directory_. Hindsite uses the contents of
@@ -349,6 +343,41 @@ and hyphen characters. This is is mandatory, it:
 * Allows file names to map to reasonable document titles.
 
 If necessary use the build command `-slugify` option to nomalize all content paths.
+
+
+## URLs
+Hindsite synthesizes document URLs for index page links. By default synthesized
+URLs are root-relative to the content directory. For example:
+
+    Content directory: /tmp/project/content
+    Content document:  /tmp/project/content/posts/post1.md
+    Synthesised URL:   /posts/post1.html
+
+This works fine if you deploy the build to the root of your website. For example
+if your website address is `http://example.com` then the synthesised
+root-relative `/posts/post1.html` URL is equivalent to
+`http://example.com/posts/post1.html`.
+
+If you are deploying to a server subdirectory then you need to set the
+`urlprefix` configuration variable to ensure synthesized URLs are rooted
+correctly. For example, if are deploying to the server `http://example.com/blog`
+directory you need to set `urlprefix` to `/blog`. The synthesized URL from the
+previous example now becomes `/blog/posts/post1.html` (equivalent to
+`http://example.com/blog/posts/post1.html`).
+
+To synthesize absolute URLs include the URL domain in `urlprefix`. Using the
+previous example, setting `urlprefix` to `http://example.com/blog` will
+synthesize the absolute URL `http://example.com/blog/posts/post1.html`.
+
+Use relative URLs for authored links between document pages -- it's less verbose
+and side-steps root-relative URL issues. For example `./post2.html` links to a
+document in the same directory.
+
+See [HTML File Paths](https://www.w3schools.com/html/html_filepaths.asp).
+
+If you want to hide URL file name extensions you will need to configure your
+server, see [How to remove file extension from website
+address?](https://stackoverflow.com/questions/6534904/how-to-remove-file-extension-from-website-address).
 
 
 ## Template variables
