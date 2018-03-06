@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-type Command struct {
+type command struct {
 	name        string
 	executable  string
 	projectDir  string
@@ -24,10 +24,10 @@ type Command struct {
 	port        string
 }
 
-// Cmd is singleton command.
-var Cmd = Command{}
+// Cmd is global singleton.
+var Cmd = command{}
 
-func (cmd *Command) Parse(args []string) error {
+func (cmd *command) Parse(args []string) error {
 	cmd.projectDir = "."
 	cmd.contentDir = "content"
 	cmd.templateDir = "template"
@@ -117,7 +117,7 @@ func isCommand(name string) bool {
 	return stringlist{"build", "help", "init", "serve"}.Contains(name)
 }
 
-func (cmd *Command) Execute() error {
+func (cmd *command) Execute() error {
 	var err error
 	switch cmd.name {
 	case "build":
@@ -134,11 +134,11 @@ func (cmd *Command) Execute() error {
 	return err
 }
 
-func (cmd *Command) help() {
+func (cmd *command) help() {
 	println("Usage: hindsite command [arguments]")
 }
 
-func (cmd *Command) build() error {
+func (cmd *command) build() error {
 	if !dirExists(cmd.contentDir) {
 		return fmt.Errorf("content directory does not exist: " + cmd.contentDir)
 	}
@@ -168,7 +168,7 @@ func (cmd *Command) build() error {
 			// Skip configuration and template files.
 			return nil
 		case ".md":
-			doc := Document{}
+			doc := document{}
 			err = doc.parseFile(f)
 			if err != nil {
 				return err
@@ -180,7 +180,7 @@ func (cmd *Command) build() error {
 			if err != nil {
 				return err
 			}
-			data := TemplateData{}
+			data := templateData{}
 			html := doc.renderWebpage(tmpl, data)
 			err = mkMissingDir(filepath.Dir(doc.buildpath))
 			if err != nil {
@@ -191,7 +191,7 @@ func (cmd *Command) build() error {
 				return err
 			}
 			println("outfile: " + doc.buildpath)
-			println("URL: " + doc.urlpath)
+			println("URL: " + doc.url)
 		default:
 			// Copy static files verbatim.
 			outfile, err := filepath.Rel(cmd.contentDir, f)
@@ -214,10 +214,16 @@ func (cmd *Command) build() error {
 	if err != nil {
 		return err
 	}
+	// Build indexes.
+	for _, idx := range Indexes {
+		if err := idx.build(); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
-func (cmd *Command) serve() error {
+func (cmd *command) serve() error {
 	if !dirExists(cmd.buildDir) {
 		return fmt.Errorf("build directory does not exist: " + cmd.buildDir)
 	}
@@ -247,7 +253,7 @@ func (cmd *Command) serve() error {
 	return http.ListenAndServe(":"+cmd.port, nil)
 }
 
-func (cmd *Command) init() error {
+func (cmd *command) init() error {
 	// TODO
 	// Use bindata RestoreAssets() to write the builtin example to the target template directory recursively.
 	return nil

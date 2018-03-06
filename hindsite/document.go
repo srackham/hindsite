@@ -15,13 +15,12 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-type TemplateData map[string]interface{}
+type templateData map[string]interface{}
 
-// Document TODO
-type Document struct {
+// document TODO
+type document struct {
 	contentpath string // Content directory file path.
 	buildpath   string // Build directory file path.
-	urlpath     string // URL path relatative to server root with leading slash.
 	content     string // Markup text (without front matter header).
 	html        string // Rendered content.
 	// Front matter.
@@ -29,18 +28,19 @@ type Document struct {
 	date     time.Time
 	synopsis string
 	addendum string
+	url      string // URL path relatative to server root with leading slash.
 	tags     []string
 	draft    bool
 }
 
 // Parse document content and front matter.
-func (doc *Document) parseFile(name string) error {
-	if !fileExists(name) {
-		return fmt.Errorf("missing document: %s", name)
+func (doc *document) parseFile(contentfile string) error {
+	if !fileExists(contentfile) {
+		return fmt.Errorf("missing document: %s", contentfile)
 	}
-	doc.contentpath = name
-	// Synthesis default front matter from file name.
-	doc.title = fileName(name)
+	doc.contentpath = contentfile
+	// Synthesis title, url, draft front matter from content document file name.
+	doc.title = fileName(contentfile)
 	if doc.title[0] == '~' {
 		doc.draft = true
 		doc.title = doc.title[1:]
@@ -52,7 +52,7 @@ func (doc *Document) parseFile(name string) error {
 	p = filepath.Dir(p)
 	p = filepath.Join(p, doc.title+".html")
 	doc.buildpath = filepath.Join(Cmd.buildDir, p)
-	doc.urlpath = Config.urlprefix + "/" + filepath.ToSlash(p)
+	doc.url = Config.urlprefix + "/" + filepath.ToSlash(p)
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		d, err := parseDate(doc.title[0:10], nil)
 		if err != nil {
@@ -73,11 +73,12 @@ func (doc *Document) parseFile(name string) error {
 	}
 	// Render document.
 	doc.html = string(blackfriday.Run([]byte(doc.content)))
+	Indexes.add(doc)
 	return nil
 }
 
 // Extract and parse front matter from the start of the document.
-func (doc *Document) extractFrontMatter() error {
+func (doc *document) extractFrontMatter() error {
 	scanner := bufio.NewScanner(strings.NewReader(doc.content))
 	if !scanner.Scan() {
 		return scanner.Err()
@@ -169,17 +170,17 @@ func (doc *Document) extractFrontMatter() error {
 	return nil
 }
 
-func (doc *Document) mergeToTemplateData(data TemplateData) {
+func (doc *document) mergeToTemplateData(data templateData) {
 	data["body"] = template.HTML(doc.html)
 	data["title"] = doc.title
 	data["date"] = doc.date.Format("02-Jan-2006")
 	data["tags"] = strings.Join(doc.tags, ", ")
 	data["synopsis"] = doc.synopsis
 	data["addendum"] = doc.addendum
-	data["url"] = doc.urlpath
+	data["url"] = doc.url
 }
 
-func (doc *Document) renderWebpage(tmpl *template.Template, data TemplateData) string {
+func (doc *document) renderWebpage(tmpl *template.Template, data templateData) string {
 	doc.mergeToTemplateData(data)
 	buf := bytes.NewBufferString("")
 	tmpl.Execute(buf, data)
