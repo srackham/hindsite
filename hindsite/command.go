@@ -82,6 +82,12 @@ func (cmd *Command) Parse(args []string) error {
 			return fmt.Errorf("illegal argument: %s", v)
 		}
 	}
+	// Clean and convert directories to absolute paths.
+	var err error
+	cmd.projectDir, err = filepath.Abs(cmd.projectDir)
+	if err != nil {
+		return err
+	}
 	if !filepath.IsAbs(cmd.contentDir) {
 		cmd.contentDir = filepath.Join(cmd.projectDir, cmd.contentDir)
 	}
@@ -91,6 +97,7 @@ func (cmd *Command) Parse(args []string) error {
 	if !filepath.IsAbs(cmd.buildDir) {
 		cmd.buildDir = filepath.Join(cmd.projectDir, cmd.buildDir)
 	}
+	// TODO: Check for pathalogical directory overlaps.
 	return nil
 }
 
