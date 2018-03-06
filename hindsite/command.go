@@ -164,7 +164,7 @@ func (cmd *Command) build() error {
 			}
 			data := TemplateData{}
 			html := doc.renderWebpage(tmpl, data)
-			err = mkFileDir(doc.buildpath)
+			err = mkMissingDir(filepath.Dir(doc.buildpath))
 			if err != nil {
 				return err
 			}
@@ -181,7 +181,7 @@ func (cmd *Command) build() error {
 				return err
 			}
 			outfile = path.Join(cmd.buildDir, outfile)
-			err = mkFileDir(outfile)
+			err = mkMissingDir(filepath.Dir(outfile))
 			if err != nil {
 				return err
 			}

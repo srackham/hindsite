@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"path/filepath"
 	"time"
 )
 
@@ -81,8 +80,7 @@ func copyFile(from, to string) error {
 	return err
 }
 
-func mkFileDir(filename string) error {
-	dir := filepath.Dir(filename)
+func mkMissingDir(dir string) error {
 	if !dirExists(dir) {
 		if err := os.MkdirAll(dir, 0775); err != nil {
 			return err
