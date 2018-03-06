@@ -192,10 +192,9 @@ Website is written.
 **content document**: A readable-text markup file (`.{md,rmu}`) that generates the
 textual content of a corresponding HTML web page.
 
-**configuration file**: Optional TOML files named `config.toml` containing site
-configuration parameters and located at the root of the content directory or at
-the root of the template directory. Parameters from the content directory take
-precedence over parameters from the template directory.
+**configuration file**: Optional TOML or YAML files `config.{toml,yaml}`
+containing configuration parameters located in the content
+template directories.
 
 **template**: A Go HTML template file (`.html`). Templates reside in the template
 directory. Templates are combined with document content and meta-data to
@@ -366,7 +365,7 @@ Variable contexts:
 Additional build information is sourced from configuration files and document front matter.
 
 ### Configuration files
-TODO: Should multiple configuratoin files in the document path be aggregated
+TODO: Should multiple configuration files in the document path be aggregated
 (template path then content path, top to bottom)?
 
 - Configuration files and front matter are optional.
@@ -378,11 +377,14 @@ TODO: Should multiple configuratoin files in the document path be aggregated
 Example `config.toml` file:
 
 ```
-# Is prepended to all root-relative URLs.
-# DO NOT IMPLEMENT UNTIL NEEDED.
-rootPrefix= "/stuarts-notes"
+# prepended to all synthesised root-relative URLs.
+urlprefix = "/blog"
 
-# Use this index file if there is no /index.html file.
+# Site language code.
+lang = "en"
+
+# Use this file if there is no /index.html file.
+# Implemented with brute-force copy.
 homePage = "/indexes/blog/recent.html"
 
 # Maximum number of recent index entries.
@@ -442,14 +444,17 @@ draft = "true"
 
 Implicit values (if the document does not contain a front matter header):
 
-- `title` defaults to first `h1` title or, failing that, the document file name
-  (sans drafts and date prefixes with hyphens replaced by spaces).
+- `title` defaults the document file name (sans drafts and date prefixes with
+  hyphens replaced by spaces). NOTE: decided not to extract first `h1` title as
+  that necessitates rendering the page first.
 - `date` defaults to file name `YYYY-MM-DD-` date prefix e.g.
   `2018-02-14-newsletter.md`.
 - `author` defaults to the configuration file value, failing that, blank.
-- `synopsis` defaults to the first paragraph.
+- `synopsis` defaults to blank. NOTE: decided not to extract the first paragraph
+  as that necessitates rendering the page first.
 - `addendum` defaults to blank.
-- `draft` is true if the first letter of the content file name is a tilda.
+- `draft` is true if the first letter of the content file name is a tilda (this
+  overrides the front matter `drafts` variable).
 
 
 ## Projects
@@ -620,15 +625,16 @@ import "html/template"
 type TemplateData map[string]interface{}
 
 func merge(m TemplateData) {
-	m["qux"]=template.HTML("<baz>")
+	m["qu_x"]=template.HTML("<baz>")
+	m["baz"] = map[string]string{"a":"A","b":"B"}
 }
 
 func main() {
         m := TemplateData{"foo":7,"bar":"<baz>"}
 	      merge(m)
-        t, err := template.New("test").Parse("{{.foo}} {{.bar}} {{.qux}}")
+        t, err := template.New("test").Parse("{{.foo}} {{.bar}} {{.qu_x}} {{.baz.a}} {{.baz.b}}")
         if err != nil { fmt.Println(err); return }
-        err = t.Execute(os.Stdout, m)	// Prints: 7 &lt;baz&gt; <baz>
+        err = t.Execute(os.Stdout, m)	// Prints: 7 &lt;baz&gt; <baz> A B
         if err != nil { fmt.Println(err); return }
 }
 ```
@@ -665,3 +671,12 @@ See:
 - https://www.ietf.org/rfc/rfc3339.txt
 - https://golang.org/pkg/time/
 
+
+## Testing
+Need to test of example projects and then compare the contents of the
+build directory to an `expected` directory for equality.
+
+- This would provide a way to test arbitrarily complex projects.
+- But approach is unwieldy for error scenarios.
+- The test cases to include ./examples/
+- Use these projects for benchmarks.
