@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type Command struct {
@@ -209,7 +211,28 @@ func (cmd *Command) serve() error {
 	if !dirExists(cmd.buildDir) {
 		return fmt.Errorf("build directory does not exist: " + cmd.buildDir)
 	}
-	http.Handle("/", http.FileServer(http.Dir(cmd.buildDir)))
+	// Tweaked http.StripPrefix() handler
+	// (https://golang.org/pkg/net/http/#StripPrefix). If URL does not start with
+	// prefix serve unmodified URL. This accomodates the `urlprefix` configuration
+	// variable. The prefixed synthesised root-relative URLs are re-rooted to  URLs
+	stripPrefix := func(prefix string, h http.Handler) http.Handler {
+		if prefix == "" {
+			return h
+		}
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if p := strings.TrimPrefix(r.URL.Path, prefix); len(p) < len(r.URL.Path) {
+				r2 := new(http.Request)
+				*r2 = *r
+				r2.URL = new(url.URL)
+				*r2.URL = *r.URL
+				r2.URL.Path = p
+				h.ServeHTTP(w, r2)
+			} else {
+				h.ServeHTTP(w, r)
+			}
+		})
+	}
+	http.Handle("/", stripPrefix(Config.urlprefix, http.FileServer(http.Dir(cmd.buildDir))))
 	fmt.Printf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", cmd.buildDir, cmd.port)
 	return http.ListenAndServe(":"+cmd.port, nil)
 }

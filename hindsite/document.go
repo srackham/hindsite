@@ -52,7 +52,7 @@ func (doc *Document) parseFile(name string) error {
 	p = filepath.Dir(p)
 	p = filepath.Join(p, doc.title+".html")
 	doc.buildpath = filepath.Join(Cmd.buildDir, p)
-	doc.urlpath = "/" + filepath.ToSlash(p)
+	doc.urlpath = Config.urlprefix + "/" + filepath.ToSlash(p)
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		d, err := parseDate(doc.title[0:10], nil)
 		if err != nil {
@@ -176,6 +176,7 @@ func (doc *Document) mergeToTemplateData(data TemplateData) {
 	data["tags"] = strings.Join(doc.tags, ", ")
 	data["synopsis"] = doc.synopsis
 	data["addendum"] = doc.addendum
+	data["url"] = doc.urlpath
 }
 
 func (doc *Document) renderWebpage(tmpl *template.Template, data TemplateData) string {

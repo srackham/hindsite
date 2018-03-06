@@ -89,6 +89,14 @@ func mkMissingDir(dir string) error {
 	return nil
 }
 
+// Search for files from base directory up to root directory.
+// Return found files and error.
+// Files are ordered by location (base to root).
+func filesInPath(base, root string, globs []string) (files []string, err error) {
+	// TODO
+	return []string{}, nil
+}
+
 /*
 Date/time functions.
 */
