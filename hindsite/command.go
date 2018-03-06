@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -61,21 +62,30 @@ func (cmd *Command) Parse(args []string) error {
 			cmd.drafts = true
 		case v == "-slugify":
 			cmd.slugify = true
-		case stringlist{"-project", "-content", "-template", "-build", "-port"}.Contains(v):
+		case stringlist{"-project", "-content", "-template", "-build", "-port", "-set"}.Contains(v):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", v)
 			}
+			arg := args[i+1]
 			switch v {
 			case "-project":
-				cmd.projectDir = args[i+1]
+				cmd.projectDir = arg
 			case "-content":
-				cmd.contentDir = args[i+1]
+				cmd.contentDir = arg
 			case "-template":
-				cmd.templateDir = args[i+1]
+				cmd.templateDir = arg
 			case "-build":
-				cmd.buildDir = args[i+1]
+				cmd.buildDir = arg
 			case "-port":
-				cmd.port = args[i+1]
+				cmd.port = arg
+			case "-set":
+				m := regexp.MustCompile(`^(\w+?)=(.*)$`).FindStringSubmatch(arg)
+				if m == nil {
+					return fmt.Errorf("illegal -set name=value argument: %s", arg)
+				}
+				if err := Config.set(m[1], m[2]); err != nil {
+					return err
+				}
 			default:
 				panic("illegal arugment: " + v)
 			}
