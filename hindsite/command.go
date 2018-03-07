@@ -298,13 +298,11 @@ func (cmd *command) serve() error {
 		return fmt.Errorf("build directory does not exist: " + cmd.buildDir)
 	}
 	// Tweaked http.StripPrefix() handler
-	// (https://golang.org/pkg/net/http/#StripPrefix). If URL does not start with
-	// prefix serve unmodified URL.
+	// (https://golang.org/pkg/net/http/#StripPrefix). If URL does not start
+	// with prefix serve unmodified URL.
 	stripPrefix := func(prefix string, h http.Handler) http.Handler {
-		if prefix == "" {
-			return h
-		}
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			verbose("request: " + r.URL.Path)
 			if p := strings.TrimPrefix(r.URL.Path, prefix); len(p) < len(r.URL.Path) {
 				r2 := new(http.Request)
 				*r2 = *r
