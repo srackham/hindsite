@@ -169,10 +169,14 @@ func (cmd *command) build() error {
 	if !dirExists(cmd.templateDir) {
 		return fmt.Errorf("template directory does not exist: " + cmd.templateDir)
 	}
-	// Walk content directory. Check for slugification.
-	// TODO
-	// If content directory != build directory, walk template directory. Check for slugification.
-	// TODO
+	if err := cmd.slugifyDir(cmd.contentDir); err != nil {
+		return err
+	}
+	if cmd.contentDir != cmd.templateDir {
+		if err := cmd.slugifyDir(cmd.templateDir); err != nil {
+			return err
+		}
+	}
 	if !dirExists(cmd.buildDir) {
 		if err := os.Mkdir(cmd.buildDir, 0775); err != nil {
 			return err
@@ -254,6 +258,12 @@ func (cmd *command) build() error {
 			return err
 		}
 	}
+	return nil
+}
+
+// Recursively and slugify directory and file names.
+func (cmd *command) slugifyDir(dir string) error {
+	// TODO
 	return nil
 }
 
