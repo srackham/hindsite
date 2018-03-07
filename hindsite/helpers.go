@@ -106,6 +106,23 @@ func filesInPath(base, root string, globs []string) (files []string, err error) 
 	return []string{}, nil
 }
 
+// Returns true if oldfile's modification time is older than newfile's by at
+// least one second.
+func fileIsOlder(oldfile, newfile string) (bool, error) {
+	info, err := os.Stat(newfile)
+	if err != nil {
+		return false, err
+	}
+	newtime := info.ModTime()
+	info, err = os.Stat(oldfile)
+	if err != nil {
+		return false, err
+	}
+	oldtime := info.ModTime()
+	diff := newtime.Sub(oldtime)
+	return diff > 0 && diff.Truncate(1000*time.Millisecond) != 0, nil
+}
+
 /*
 Date/time functions.
 */

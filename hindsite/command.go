@@ -21,6 +21,7 @@ type command struct {
 	slugify     bool
 	topic       string
 	port        string
+	update      bool
 	verbose     bool
 }
 
@@ -62,6 +63,8 @@ func (cmd *command) Parse(args []string) error {
 			cmd.drafts = true
 		case v == "-slugify":
 			cmd.slugify = true
+		case v == "-update":
+			cmd.update = true
 		case v == "-v":
 			cmd.verbose = true
 		case stringlist{"-project", "-content", "-template", "-build", "-port", "-set"}.Contains(v):
@@ -184,17 +187,32 @@ func (cmd *command) build() error {
 			return err
 		}
 	}
-	// Delete everything in the build directory.
-	files, _ := filepath.Glob(filepath.Join(cmd.buildDir, "*"))
-	for _, f := range files {
-		if err := os.RemoveAll(f); err != nil {
-			return err
+	if !cmd.update {
+		// Delete everything in the build directory.
+		files, _ := filepath.Glob(filepath.Join(cmd.buildDir, "*"))
+		for _, f := range files {
+			if err := os.RemoveAll(f); err != nil {
+				return err
+			}
 		}
 	}
 	// Process all content documents in the content directory.
 	err := filepath.Walk(cmd.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
+		}
+		update := func(outfile string) (result bool) {
+			// Return true if the -update option is not set otherwise return
+			// true if the outfile is missing or is older than the document
+			// file.
+			if !cmd.update || !fileExists(outfile) {
+				return true
+			}
+			result, err := fileIsOlder(outfile, f)
+			if err != nil {
+				return true
+			}
+			return result
 		}
 		if info.IsDir() {
 			if f == Cmd.buildDir {
@@ -211,7 +229,9 @@ func (cmd *command) build() error {
 			doc := document{}
 			err = doc.parseFile(f)
 			if err != nil {
-				return err
+			}
+			if !update(doc.buildpath) {
+				return nil
 			}
 			if doc.draft && !cmd.drafts {
 				verbose("skipping: " + f)
@@ -234,12 +254,15 @@ func (cmd *command) build() error {
 			verbose(doc.String())
 		default:
 			// Copy static files verbatim.
-			verbose("copying:  " + f)
 			outfile, err := filepath.Rel(cmd.contentDir, f)
 			if err != nil {
 				return err
 			}
 			outfile = filepath.Join(cmd.buildDir, outfile)
+			if !update(outfile) {
+				return nil
+			}
+			verbose("copying:  " + f)
 			err = mkMissingDir(filepath.Dir(outfile))
 			if err != nil {
 				return err
