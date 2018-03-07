@@ -201,19 +201,6 @@ func (cmd *command) build() error {
 		if err != nil {
 			return err
 		}
-		update := func(outfile string) (result bool) {
-			// Return true if the -update option is not set otherwise return
-			// true if the outfile is missing or is older than the document
-			// file.
-			if !cmd.update || !fileExists(outfile) {
-				return true
-			}
-			result, err := fileIsOlder(outfile, f)
-			if err != nil {
-				return true
-			}
-			return result
-		}
 		if info.IsDir() {
 			if f == Cmd.buildDir {
 				return filepath.SkipDir
@@ -230,7 +217,7 @@ func (cmd *command) build() error {
 			err = doc.parseFile(f)
 			if err != nil {
 			}
-			if !update(doc.buildpath) {
+			if cmd.upToDate(f, doc.buildpath) {
 				return nil
 			}
 			if doc.draft && !cmd.drafts {
@@ -259,7 +246,7 @@ func (cmd *command) build() error {
 				return err
 			}
 			outfile = filepath.Join(cmd.buildDir, outfile)
-			if !update(outfile) {
+			if cmd.upToDate(f, outfile) {
 				return nil
 			}
 			verbose("copying:  " + f)
@@ -285,6 +272,19 @@ func (cmd *command) build() error {
 		}
 	}
 	return nil
+}
+
+func (cmd *command) upToDate(infile, outfile string) (result bool) {
+	// Return true if the -update option is set and the infile is older than the
+	// outfile.
+	if !cmd.update || !fileExists(outfile) {
+		return false
+	}
+	result, err := fileIsOlder(infile, outfile)
+	if err != nil {
+		return false
+	}
+	return result
 }
 
 // Recursively and slugify directory and file names.
