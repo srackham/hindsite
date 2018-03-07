@@ -22,7 +22,6 @@ type document struct {
 	contentpath string // Content directory file path.
 	buildpath   string // Build directory file path.
 	content     string // Markup text (without front matter header).
-	html        string // Rendered content.
 	// Front matter.
 	title    string
 	date     time.Time
@@ -71,8 +70,6 @@ func (doc *document) parseFile(contentfile string) error {
 	if err != nil {
 		return err
 	}
-	// Render document.
-	doc.html = string(blackfriday.Run([]byte(doc.content)))
 	Indexes.add(doc)
 	return nil
 }
@@ -171,7 +168,6 @@ func (doc *document) extractFrontMatter() error {
 }
 
 func (doc *document) mergeToTemplateData(data templateData) {
-	data["body"] = template.HTML(doc.html)
 	data["title"] = doc.title
 	data["date"] = doc.date.Format("02-Jan-2006")
 	data["tags"] = strings.Join(doc.tags, ", ")
@@ -180,9 +176,35 @@ func (doc *document) mergeToTemplateData(data templateData) {
 	data["url"] = doc.url
 }
 
-func (doc *document) renderWebpage(tmpl *template.Template, data templateData) string {
+// func (doc *document) toString() (result string) {
+// 	result += "---\n"
+// 	for k, v := range doc.frontMatter() {
+// 		result += fmt.Sprintf("%-8s: %s\n", k, v)
+// 	}
+// 	result += "---"
+// 	return result
+// }
+
+// Render document markup and document variables with the document layout template.
+// Return rendered HTML.
+func (doc *document) render() (string, error) {
+	// Render document.
+	var body string
+	switch filepath.Ext(doc.contentpath) {
+	case ".md":
+		body = string(blackfriday.Run([]byte(doc.content)))
+	}
+	// TODO: Look up layout.
+	layout := filepath.Join(Cmd.templateDir, "layout.html")
+	tmpl, err := template.ParseFiles(layout)
+	if err != nil {
+		return "", err
+	}
+	data := templateData{}
+	data["body"] = template.HTML(body)
+	// data.add(doc.frontMatter())
 	doc.mergeToTemplateData(data)
 	buf := bytes.NewBufferString("")
 	tmpl.Execute(buf, data)
-	return buf.String()
+	return buf.String(), nil
 }

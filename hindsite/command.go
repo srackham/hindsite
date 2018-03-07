@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"net/http"
 	"net/url"
 	"os"
@@ -209,21 +208,20 @@ func (cmd *command) build() error {
 			verbose("skipping: " + f)
 			return nil
 		case ".md":
-			verbose("render:   " + f)
 			doc := document{}
 			err = doc.parseFile(f)
 			if err != nil {
 				return err
 			}
 			if doc.draft && !cmd.drafts {
+				verbose("skipping: " + f)
 				return nil
 			}
-			tmpl, err := template.ParseFiles(filepath.Join(cmd.templateDir, "layout.html"))
+			verbose("render:   " + f)
+			html, err := doc.render()
 			if err != nil {
 				return err
 			}
-			data := templateData{}
-			html := doc.renderWebpage(tmpl, data)
 			err = mkMissingDir(filepath.Dir(doc.buildpath))
 			if err != nil {
 				return err
@@ -233,7 +231,6 @@ func (cmd *command) build() error {
 				return err
 			}
 			verbose("outfile:  " + doc.buildpath)
-			verbose("URL:      " + doc.url)
 		default:
 			// Copy static files verbatim.
 			verbose("copying:  " + f)
