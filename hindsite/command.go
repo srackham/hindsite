@@ -207,7 +207,7 @@ func (cmd *command) build() error {
 			// Skip configuration and template files.
 			verbose("skipping: " + f)
 			return nil
-		case ".md":
+		case ".md", ".rmu":
 			doc := document{}
 			err = doc.parseFile(f)
 			if err != nil {

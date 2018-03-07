@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/srackham/go-rimu/rimu"
 	blackfriday "gopkg.in/russross/blackfriday.v2"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -190,6 +191,8 @@ func (doc *document) render() (string, error) {
 	switch filepath.Ext(doc.contentpath) {
 	case ".md":
 		body = string(blackfriday.Run([]byte(doc.content)))
+	case ".rmu":
+		body = rimu.Render(doc.content, rimu.RenderOptions{})
 	}
 	// TODO: Look up layout.
 	layout := filepath.Join(Cmd.templateDir, "layout.html")
