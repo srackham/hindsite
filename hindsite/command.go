@@ -109,7 +109,31 @@ func (cmd *command) Parse(args []string) error {
 	if !filepath.IsAbs(cmd.buildDir) {
 		cmd.buildDir = filepath.Join(cmd.projectDir, cmd.buildDir)
 	}
-	// TODO: Check for pathalogical directory overlaps.
+	// Content and build directories can be the same. The build directory is
+	// allowed at root of content directory. In all other cases content,
+	// template and build directories cannot be nested.
+	checkOverlap := func(name1, dir1, name2, dir2 string) error {
+		if len(strings.TrimPrefix(dir1, dir2)) < len(dir1) {
+			return fmt.Errorf("%s directory cannot reside inside %s directory", name1, name2)
+		}
+		if len(strings.TrimPrefix(dir2, dir1)) < len(dir2) {
+			return fmt.Errorf("%s directory cannot reside inside %s directory", name2, name1)
+		}
+		return nil
+	}
+	if Cmd.contentDir != Cmd.templateDir {
+		if err := checkOverlap("content", Cmd.contentDir, "template", cmd.templateDir); err != nil {
+			return err
+		}
+	}
+	if filepath.Dir(Cmd.buildDir) != Cmd.contentDir {
+		if err := checkOverlap("build", Cmd.buildDir, "content", cmd.contentDir); err != nil {
+			return err
+		}
+		if err := checkOverlap("build", Cmd.buildDir, "template", cmd.templateDir); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -147,7 +171,7 @@ func (cmd *command) build() error {
 	}
 	// Walk content directory. Check for slugification.
 	// TODO
-	// Walk template directory. Check for slugification.
+	// If content directory != build directory, walk template directory. Check for slugification.
 	// TODO
 	if !dirExists(cmd.buildDir) {
 		if err := os.Mkdir(cmd.buildDir, 0775); err != nil {
@@ -167,9 +191,11 @@ func (cmd *command) build() error {
 			return err
 		}
 		if info.IsDir() {
+			if f == Cmd.buildDir {
+				return filepath.SkipDir
+			}
 			return nil
 		}
-		// TODO: Skip build directory.
 		println("infile: " + f)
 		switch filepath.Ext(f) {
 		case ".toml", ".yaml", ".html":
@@ -237,8 +263,7 @@ func (cmd *command) serve() error {
 	}
 	// Tweaked http.StripPrefix() handler
 	// (https://golang.org/pkg/net/http/#StripPrefix). If URL does not start with
-	// prefix serve unmodified URL. This accomodates the `urlprefix` configuration
-	// variable. The prefixed synthesised root-relative URLs are re-rooted to  URLs
+	// prefix serve unmodified URL.
 	stripPrefix := func(prefix string, h http.Handler) http.Handler {
 		if prefix == "" {
 			return h
