@@ -21,7 +21,7 @@ func die(message string) {
 // Print message if `-v` verbose option set.
 func verbose(message string) {
 	if Cmd.verbose {
-		println(message)
+		fmt.Println(message)
 	}
 }
 
