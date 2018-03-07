@@ -145,13 +145,21 @@ func (cmd *command) build() error {
 	if !dirExists(cmd.templateDir) {
 		return fmt.Errorf("template directory does not exist: " + cmd.templateDir)
 	}
+	// Walk content directory. Check for slugification.
+	// TODO
+	// Walk template directory. Check for slugification.
+	// TODO
 	if !dirExists(cmd.buildDir) {
-		os.Mkdir(cmd.buildDir, 0775)
+		if err := os.Mkdir(cmd.buildDir, 0775); err != nil {
+			return err
+		}
 	}
 	// Delete everything in the build directory.
 	files, _ := filepath.Glob(filepath.Join(cmd.buildDir, "*"))
 	for _, f := range files {
-		os.RemoveAll(f)
+		if err := os.RemoveAll(f); err != nil {
+			return err
+		}
 	}
 	// Process all content documents in the content directory.
 	err := filepath.Walk(cmd.contentDir, func(f string, info os.FileInfo, err error) error {
