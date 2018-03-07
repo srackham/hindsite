@@ -15,8 +15,6 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-type templateData map[string]interface{}
-
 // document TODO
 type document struct {
 	contentpath string // Content directory file path.
@@ -167,23 +165,25 @@ func (doc *document) extractFrontMatter() error {
 	return nil
 }
 
-func (doc *document) mergeToTemplateData(data templateData) {
+func (doc *document) frontMatter() (data templateData) {
+	data = templateData{}
 	data["title"] = doc.title
 	data["date"] = doc.date.Format("02-Jan-2006")
 	data["tags"] = strings.Join(doc.tags, ", ")
 	data["synopsis"] = doc.synopsis
 	data["addendum"] = doc.addendum
 	data["url"] = doc.url
+	return data
 }
 
-// func (doc *document) toString() (result string) {
-// 	result += "---\n"
-// 	for k, v := range doc.frontMatter() {
-// 		result += fmt.Sprintf("%-8s: %s\n", k, v)
-// 	}
-// 	result += "---"
-// 	return result
-// }
+func (doc *document) String() (result string) {
+	result += "---\n"
+	for k, v := range doc.frontMatter() {
+		result += fmt.Sprintf("%-8s: %s\n", k, v)
+	}
+	result += "---"
+	return result
+}
 
 // Render document markup and document variables with the document layout template.
 // Return rendered HTML.
@@ -202,8 +202,7 @@ func (doc *document) render() (string, error) {
 	}
 	data := templateData{}
 	data["body"] = template.HTML(body)
-	// data.add(doc.frontMatter())
-	doc.mergeToTemplateData(data)
+	data.add(doc.frontMatter())
 	buf := bytes.NewBufferString("")
 	tmpl.Execute(buf, data)
 	return buf.String(), nil
