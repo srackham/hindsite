@@ -231,6 +231,7 @@ func (cmd *command) build() error {
 				return err
 			}
 			verbose("outfile:  " + doc.buildpath)
+			verbose(doc.String())
 		default:
 			// Copy static files verbatim.
 			verbose("copying:  " + f)

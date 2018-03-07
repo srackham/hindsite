@@ -176,13 +176,10 @@ func (doc *document) frontMatter() (data templateData) {
 	return data
 }
 
+// Return front matter as YAML formatted string.
 func (doc *document) String() (result string) {
-	result += "---\n"
-	for k, v := range doc.frontMatter() {
-		result += fmt.Sprintf("%-8s: %s\n", k, v)
-	}
-	result += "---"
-	return result
+	d, _ := yaml.Marshal(doc.frontMatter())
+	return string(d)
 }
 
 // Render document markup and document variables with the document layout template.
@@ -201,8 +198,8 @@ func (doc *document) render() (string, error) {
 		return "", err
 	}
 	data := templateData{}
-	data["body"] = template.HTML(body)
 	data.add(doc.frontMatter())
+	data["body"] = template.HTML(body)
 	buf := bytes.NewBufferString("")
 	tmpl.Execute(buf, data)
 	return buf.String(), nil
