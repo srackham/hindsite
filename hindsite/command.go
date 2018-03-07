@@ -22,6 +22,7 @@ type command struct {
 	slugify     bool
 	topic       string
 	port        string
+	verbose     bool
 }
 
 // Cmd is global singleton.
@@ -62,6 +63,8 @@ func (cmd *command) Parse(args []string) error {
 			cmd.drafts = true
 		case v == "-slugify":
 			cmd.slugify = true
+		case v == "-v":
+			cmd.verbose = true
 		case stringlist{"-project", "-content", "-template", "-build", "-port", "-set"}.Contains(v):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", v)
@@ -200,12 +203,13 @@ func (cmd *command) build() error {
 			}
 			return nil
 		}
-		println("infile: " + f)
 		switch filepath.Ext(f) {
 		case ".toml", ".yaml", ".html":
 			// Skip configuration and template files.
+			verbose("skipping: " + f)
 			return nil
 		case ".md":
+			verbose("render:   " + f)
 			doc := document{}
 			err = doc.parseFile(f)
 			if err != nil {
@@ -228,10 +232,11 @@ func (cmd *command) build() error {
 			if err != nil {
 				return err
 			}
-			println("outfile: " + doc.buildpath)
-			println("URL: " + doc.url)
+			verbose("outfile:  " + doc.buildpath)
+			verbose("URL:      " + doc.url)
 		default:
 			// Copy static files verbatim.
+			verbose("copying:  " + f)
 			outfile, err := filepath.Rel(cmd.contentDir, f)
 			if err != nil {
 				return err
@@ -245,7 +250,7 @@ func (cmd *command) build() error {
 			if err != nil {
 				return err
 			}
-			println("outfile: " + outfile)
+			verbose("outfile:  " + outfile)
 		}
 		return nil
 	})

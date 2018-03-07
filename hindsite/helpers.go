@@ -8,12 +8,21 @@ import (
 	"time"
 )
 
-// Helpers.
+/*
+Miscellaneous functions.
+*/
 func die(message string) {
 	if message != "" {
 		fmt.Fprintln(os.Stderr, "error: "+message)
 	}
 	os.Exit(1)
+}
+
+// Print message if `-v` verbose option set.
+func verbose(message string) {
+	if Cmd.verbose {
+		println(message)
+	}
 }
 
 /*
