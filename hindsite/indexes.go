@@ -14,11 +14,22 @@ var Indexes indexes
 
 // If document belongs to an index then add it.
 // If necessary create and append new index.
-func (idxs *indexes) add(doc *document) {
+func (idxs *indexes) add(doc *document) error {
 	// TODO
+	return nil
 }
 
-// Build index files.
+// Build all indexes.
+func (idxs *indexes) build() error {
+	for _, idx := range *idxs {
+		if err := idx.build(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Build index.
 func (idx *index) build() error {
 	// TODO
 	return nil

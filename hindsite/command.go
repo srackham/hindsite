@@ -267,11 +267,9 @@ func (cmd *command) build() error {
 	if err != nil {
 		return err
 	}
-	// Build indexes.
-	for _, idx := range Indexes {
-		if err := idx.build(); err != nil {
-			return err
-		}
+	err = Indexes.build()
+	if err != nil {
+		return err
 	}
 	return nil
 }

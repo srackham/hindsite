@@ -71,7 +71,10 @@ func (doc *document) parseFile(contentfile string) error {
 	if err != nil {
 		return err
 	}
-	Indexes.add(doc)
+	err = Indexes.add(doc)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
