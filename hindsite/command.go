@@ -21,7 +21,7 @@ type command struct {
 	slugify     bool
 	topic       string
 	port        string
-	update      bool
+	clean       bool
 	verbose     bool
 }
 
@@ -63,8 +63,8 @@ func (cmd *command) Parse(args []string) error {
 			cmd.drafts = true
 		case v == "-slugify":
 			cmd.slugify = true
-		case v == "-update":
-			cmd.update = true
+		case v == "-clean":
+			cmd.clean = true
 		case v == "-v":
 			cmd.verbose = true
 		case stringlist{"-project", "-content", "-template", "-build", "-port", "-set"}.Contains(v):
@@ -187,7 +187,7 @@ func (cmd *command) build() error {
 			return err
 		}
 	}
-	if !cmd.update {
+	if cmd.clean {
 		// Delete everything in the build directory.
 		files, _ := filepath.Glob(filepath.Join(cmd.buildDir, "*"))
 		for _, f := range files {
@@ -196,6 +196,8 @@ func (cmd *command) build() error {
 			}
 		}
 	}
+	// Copy all static files from template directory to build directory.
+	// TODO
 	// Process all content documents in the content directory.
 	err := filepath.Walk(cmd.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -210,7 +212,7 @@ func (cmd *command) build() error {
 		switch filepath.Ext(f) {
 		case ".toml", ".yaml", ".html":
 			// Skip configuration and template files.
-			verbose("skipping: " + f)
+			verbose("skipping excluded: " + f)
 			return nil
 		case ".md", ".rmu":
 			doc := document{}
@@ -221,7 +223,7 @@ func (cmd *command) build() error {
 				return nil
 			}
 			if doc.draft && !cmd.drafts {
-				verbose("skipping: " + f)
+				verbose("skipping draft: " + f)
 				return nil
 			}
 			verbose("render:   " + f)
@@ -275,9 +277,9 @@ func (cmd *command) build() error {
 }
 
 func (cmd *command) upToDate(infile, outfile string) (result bool) {
-	// Return true if the -update option is set and the infile is older than the
+	// Return true if the -clean option is not set and the infile is older than the
 	// outfile.
-	if !cmd.update || !fileExists(outfile) {
+	if cmd.clean || !fileExists(outfile) {
 		return false
 	}
 	result, err := fileIsOlder(infile, outfile)

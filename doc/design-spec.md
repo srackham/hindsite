@@ -380,6 +380,12 @@ server, see [How to remove file extension from website
 address?](https://stackoverflow.com/questions/6534904/how-to-remove-file-extension-from-website-address).
 
 
+## Indexes
+- The default indexes directory name is `indexes` located at the root of the build directory.
+- The location can be changed to anywhere inside the build directory using the
+  build command `-index INDEX_DIR` option.
+
+
 ## Template variables
 Template variables contain content, content meta-data, configuration data along
 with context-specific data.
@@ -428,6 +434,53 @@ shortDateFormat = ""
 mediumDateFormat = ""
 longDateFormat = ""
 ```
+
+Use maps for template data, example
+
+``` yaml
+animals:
+  horse: big
+  mouse: small
+```
+
+``` toml
+[animals]
+horse = "big"
+mouse = "small"
+```
+
+Generates a Go field `Animals` containing a map:
+
+```
+Animals: map[string]string{
+  "horse": "big",
+  "mouse": "small",
+}
+```
+
+``` go
+package main
+import "fmt"
+import "os"
+import "html/template"
+
+type TemplateData map[string]interface{}
+
+func merge(m TemplateData) {
+	m["qu_x"]=template.HTML("<baz>")
+	m["baz"] = map[string]string{"a":"A","b":"B"}
+}
+
+func main() {
+        m := TemplateData{"foo":7,"bar":"<baz>"}
+	      merge(m)
+        t, err := template.New("test").Parse("{{.foo}} {{.bar}} {{.qu_x}} {{.baz.a}} {{.baz.b}}")
+        if err != nil { fmt.Println(err); return }
+        err = t.Execute(os.Stdout, m)	// Prints: 7 &lt;baz&gt; <baz> A B
+        if err != nil { fmt.Println(err); return }
+}
+```
+
 
 ## Front matter
 Document front matter is embedded at the start of content files (c.f.
@@ -569,7 +622,7 @@ The commands are:
 Use "hindsite help [command]" for more information about a command.
 
 hindsite init [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
-hindsite build [-drafts] [-slugify] [-set VALUE] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR]
+hindsite build [-clean] [-drafts] [-slugify] [-set VALUE] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR] -index [INDEX_DIR]
 hindsite serve [-port PORT] [-project PROJECT_DIR] [-build BUILD_DIR]
 hindsite -h | --help | help
 
@@ -580,7 +633,7 @@ hindsite -h | --help | help
 - `CONTENT_DIR` defaults to `content`
 - `BUILD_DIR` defaults to `build`
 - `TEMPLATE_DIR` defaults to `template`
-- All commands support the `-v` (verbose) option (and `-vv` very verbose option?).
+- All commands support the `-v` (verbose) option).
 - Build command supports the `-n` (dry run) option.
 
 ### Init command
@@ -600,6 +653,9 @@ Build static website from content and template directories.
 - The `-set` option `VALUE` is formated like `name=value`. It sets a named
   configuration parameter and template variable, for example `-set theme=azure`.
   Can be used multiple times.
+- If the `-clean` option is specified the the entire contents of the build
+  directory is deleted forcing all files to be rebuilt. By default only missing
+  and modified files are processed.
 
 Build sequence:
 
@@ -628,47 +684,22 @@ hindsite build -content . -template .
 ### Serve command
 Open a development server on the `BUILD_DIR` directory.
 
+- The `-port PORT` option sets the server port (defaults to 1212).
+
 
 ## Implementation ideas
 - Put binaries on BinTray?
 - Add Disqus comments -- I suspect this is just a content templating issue.
 
 
-## Error handling
-Use the Go [log](https://golang.org/pkg/log/) package.
+### Implementation notes
+- Internally all directory and file paths are absolute and platform specific (manipulated by the `path/filepath` package).
 
-
-## Dates
-### Meta data
+### Dates
+- Template variables:
 **shortDate, mediumDate, longDate**:
 Publication date in the config file shortDateFormat, mediumDateFormat and longDateFormat formats.
 
-Use maps for data, example
-
-``` go
-package main
-import "fmt"
-import "os"
-import "html/template"
-
-type TemplateData map[string]interface{}
-
-func merge(m TemplateData) {
-	m["qu_x"]=template.HTML("<baz>")
-	m["baz"] = map[string]string{"a":"A","b":"B"}
-}
-
-func main() {
-        m := TemplateData{"foo":7,"bar":"<baz>"}
-	      merge(m)
-        t, err := template.New("test").Parse("{{.foo}} {{.bar}} {{.qu_x}} {{.baz.a}} {{.baz.b}}")
-        if err != nil { fmt.Println(err); return }
-        err = t.Execute(os.Stdout, m)	// Prints: 7 &lt;baz&gt; <baz> A B
-        if err != nil { fmt.Println(err); return }
-}
-```
-
-### Input formats
 The RFC 3339 format is recognised. The following relaxations are permitted:
 
 - If the time zone offet is omitted then the `timezone` configuration value is used;

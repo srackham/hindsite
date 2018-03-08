@@ -39,8 +39,8 @@ serve: doc
 
 .PHONY: blog
 blog: install
-	hindsite build -project ./examples/blog -set urlprefix=/blog
-	hindsite serve -project ./examples/blog -set urlprefix=/blog
+	hindsite build -project ./examples/blog -set urlprefix=/blog -v
+	hindsite serve -project ./examples/blog -set urlprefix=/blog -v
 
 .PHONY: push
 push:
