@@ -381,9 +381,16 @@ address?](https://stackoverflow.com/questions/6534904/how-to-remove-file-extensi
 
 
 ## Indexes
-- The default indexes directory name is `indexes` located at the root of the build directory.
-- The location can be changed to anywhere inside the build directory using the
-  build command `-index INDEX_DIR` option.
+- Recent, All and Tags document indexes are created by the build command.
+- The project can contain any number of indexed content directories.
+- Any content directory can be indexed by placing one or more index
+  templates in the corresponding template directory.
+- An index includes all documents from all subdirectories.
+- Indexes can be nested.
+- By default all built index pages are written to the `indexes` directory
+  located at the root of the build directory.
+- The location of the built index pages can be changed to anywhere inside the
+  build directory using the build command `-index INDEX_DIR` option.
 
 
 ## Template variables
@@ -418,9 +425,9 @@ urlprefix = "/blog"
 # Site language code.
 lang = "en"
 
-# Use this file if there is no /index.html file.
-# Implemented with brute-force copy.
-homePage = "/indexes/blog/recent.html"
+# Build uses this to copy a file to /index.html (assuming you need it and it do not have it).
+# The value is a file path (either absolute or relative to the build directory).
+homePage = "indexes/blog/recent.html"
 
 # Maximum number of recent index entries.
 maxRecent = 100
@@ -627,12 +634,13 @@ hindsite serve [-port PORT] [-project PROJECT_DIR] [-build BUILD_DIR]
 hindsite -h | --help | help
 
 ```
-- If content, template or build directory paths are relative they are relative
-  to the project directory.
+<!-- - If content, template or build directory paths are relative they are relative
+  to the project directory. -->
 - `PROJECT_DIR` defaults to `.`
 - `CONTENT_DIR` defaults to `content`
 - `BUILD_DIR` defaults to `build`
 - `TEMPLATE_DIR` defaults to `template`
+- `INDEX_DIR` defaults to `BUILD_DIR/indexes`
 - All commands support the `-v` (verbose) option).
 - Build command supports the `-n` (dry run) option.
 
@@ -651,10 +659,10 @@ Build static website from content and template directories.
 - Include draft pages if the `-drafts` option is specified.
 - Slugify content document paths if the  `-sligify` option is specified.
 - The `-set` option `VALUE` is formated like `name=value`. It sets a named
-  configuration parameter and template variable, for example `-set theme=azure`.
-  Can be used multiple times.
+  configuration parameter and template variable, for example
+  `-set urlprefix=/blog`.
 - If the `-clean` option is specified the the entire contents of the build
-  directory is deleted forcing all files to be rebuilt. By default only missing
+  directory is deleted, forcing all files to be rebuilt. By default only missing
   and modified files are processed.
 
 Build sequence:
@@ -662,13 +670,14 @@ Build sequence:
 - Check for pathalogical content, template and build directories overlap.
 - Check the template directory structure is mirrored in the content directory.
 - Check that all directory paths and content document file names are slugified.
-- Check for missing or invalid indexed document meta-data.
-- Delete contents of build directory.
-- Copy static files from content to build directory.
-- Copy static files from template to build directory (do not overwrite existing
+- Check configuration file validity.
+- Delete contents of build directory (`-clean` build option).
+- Copy static files from template to build directory.
   files).
-- Generate all non-indexed documents (documents in non-indexed directories).
-- Process each indexed directory generating indexes and document web pages.
+- Copy static files from content to build directory (content directory files
+  take precedence).
+- Process all content documents.
+- Process each indexed directory generating index and document web pages.
 
 Corner cases examples:
 

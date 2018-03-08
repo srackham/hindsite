@@ -17,7 +17,7 @@ type command struct {
 	contentDir  string
 	templateDir string
 	buildDir    string
-	indexesDir  string
+	indexDir    string
 	drafts      bool
 	slugify     bool
 	topic       string
@@ -68,7 +68,7 @@ func (cmd *command) Parse(args []string) error {
 			cmd.clean = true
 		case v == "-v":
 			cmd.verbose = true
-		case stringlist{"-project", "-content", "-template", "-build", "-indexes", "-port", "-set"}.Contains(v):
+		case stringlist{"-project", "-content", "-template", "-build", "-index", "-port", "-set"}.Contains(v):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", v)
 			}
@@ -82,8 +82,8 @@ func (cmd *command) Parse(args []string) error {
 				cmd.templateDir = arg
 			case "-build":
 				cmd.buildDir = arg
-			case "-indexes":
-				cmd.indexesDir = arg
+			case "-index":
+				cmd.indexDir = arg
 			case "-port":
 				cmd.port = arg
 			case "-set":
@@ -118,11 +118,11 @@ func (cmd *command) Parse(args []string) error {
 	if !filepath.IsAbs(cmd.buildDir) {
 		cmd.buildDir = filepath.Join(cmd.projectDir, cmd.buildDir)
 	}
-	if cmd.indexesDir == "" {
-		cmd.indexesDir = filepath.Join(cmd.buildDir, "indexes")
+	if cmd.indexDir == "" {
+		cmd.indexDir = filepath.Join(cmd.buildDir, "index")
 	} else {
-		if !filepath.IsAbs(cmd.indexesDir) {
-			cmd.indexesDir = filepath.Join(cmd.projectDir, cmd.indexesDir)
+		if !filepath.IsAbs(cmd.indexDir) {
+			cmd.indexDir = filepath.Join(cmd.projectDir, cmd.indexDir)
 		}
 	}
 	// Content and build directories can be the same. The build directory is
@@ -150,10 +150,10 @@ func (cmd *command) Parse(args []string) error {
 			return err
 		}
 	}
-	fmt.Println(cmd.indexesDir)
+	fmt.Println(cmd.indexDir)
 	fmt.Println(cmd.buildDir + string(filepath.Separator))
-	if !strings.HasPrefix(cmd.indexesDir, cmd.buildDir+string(filepath.Separator)) {
-		return fmt.Errorf("indexes directory must reside in build directory: %s", cmd.buildDir)
+	if !strings.HasPrefix(cmd.indexDir, cmd.buildDir+string(filepath.Separator)) {
+		return fmt.Errorf("index directory must reside in build directory: %s", cmd.buildDir)
 	}
 	return nil
 }
