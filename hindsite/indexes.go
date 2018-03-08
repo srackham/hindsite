@@ -1,11 +1,14 @@
 package main
 
-import "strings"
+import (
+	"path/filepath"
+	"strings"
+)
 
 type index struct {
-	templateDir string     // The template directory that contains the index templates.
-	buildDir    string     // The build directory that the index pages are written.
-	docs        []document // Parsed documents belonging to index.
+	templateDir string      // The template directory that contains the index templates.
+	buildDir    string      // The build directory that the index pages are written.
+	docs        []*document // Parsed documents belonging to index.
 }
 
 type indexes []index
@@ -20,8 +23,8 @@ func (idxs *indexes) init(templateDir string) error {
 // Add document to all indexes that it belongs to.
 func (idxs indexes) addDocument(doc *document) error {
 	for i, idx := range idxs {
-		if strings.HasPrefix(doc.templatepath, idx.templateDir) {
-			idxs[i].docs = append(idx.docs, *doc)
+		if strings.HasPrefix(doc.templatepath, idx.templateDir+string(filepath.Separator)) {
+			idxs[i].docs = append(idx.docs, doc)
 		}
 	}
 	return nil

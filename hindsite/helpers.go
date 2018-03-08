@@ -102,6 +102,7 @@ func mkMissingDir(dir string) error {
 // Search for files from base directory up to root directory.
 // Return found files.
 // Files are ordered by location (base to root).
+// If a directory in the base path does not exist it is silent skipped.
 // If n >= 0 the function returns first n matched files.
 func filesInPath(base, root string, patterns []string, n int) (files []string, err error) {
 	if !filepath.IsAbs(base) {
