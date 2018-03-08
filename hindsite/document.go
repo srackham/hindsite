@@ -18,9 +18,10 @@ import (
 
 // document TODO
 type document struct {
-	contentpath string // Content directory file path.
-	buildpath   string // Build directory file path.
-	content     string // Markup text (without front matter header).
+	contentpath  string
+	buildpath    string
+	templatepath string // Used for template directory searches.
+	content      string // Markup text (without front matter header).
 	// Front matter.
 	title    string
 	date     time.Time
@@ -50,6 +51,7 @@ func (doc *document) parseFile(contentfile string) error {
 	p = filepath.Dir(p)
 	p = filepath.Join(p, doc.title+".html")
 	doc.buildpath = filepath.Join(Cmd.buildDir, p)
+	doc.templatepath = filepath.Join(Cmd.templateDir, p)
 	doc.url = Config.urlprefix + "/" + filepath.ToSlash(p)
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		d, err := parseDate(doc.title[0:10], nil)
@@ -194,9 +196,14 @@ func (doc *document) render() (string, error) {
 	case ".rmu":
 		body = rimu.Render(doc.content, rimu.RenderOptions{})
 	}
-	// TODO: Look up layout.
-	layout := filepath.Join(Cmd.templateDir, "layout.html")
-	tmpl, err := template.ParseFiles(layout)
+	layouts, err := filesInPath(filepath.Dir(doc.templatepath), Cmd.templateDir, []string{"layout.html"}, 1)
+	if err != nil {
+		return "", err
+	}
+	if len(layouts) == 0 {
+		return "", fmt.Errorf("missing layout.html template for: %s", doc.contentpath)
+	}
+	tmpl, err := template.ParseFiles(layouts[0])
 	if err != nil {
 		return "", err
 	}

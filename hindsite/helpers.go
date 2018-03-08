@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -99,15 +100,45 @@ func mkMissingDir(dir string) error {
 }
 
 // Search for files from base directory up to root directory.
-// Return found files and error.
+// Return found files.
 // Files are ordered by location (base to root).
-func filesInPath(base, root string, globs []string) (files []string, err error) {
-	// TODO
-	return []string{}, nil
+// If n >= 0 the function returns first n matched files.
+func filesInPath(base, root string, patterns []string, n int) (files []string, err error) {
+	if !filepath.IsAbs(base) {
+		return files, fmt.Errorf("base path is not absolute: %s", base)
+	}
+	if !filepath.IsAbs(root) {
+		return files, fmt.Errorf("root path is not absolute: %s", root)
+	}
+	if base != root && !strings.HasPrefix(base, root+string(filepath.Separator)) {
+		return files, fmt.Errorf("root is not an ancestor of base: %s: %s", root, base)
+	}
+	p := base
+	count := 0
+	for {
+		for _, pat := range patterns {
+			matches, err := filepath.Glob(filepath.Join(p, pat))
+			if err != nil {
+				return files, err
+			}
+			for _, match := range matches {
+				if count >= n {
+					break
+				}
+				files = append(files, match)
+				count++
+			}
+		}
+		if p == root {
+			break
+		}
+		p = filepath.Dir(p)
+	}
+	return files, nil
 }
 
-// Returns true if oldfile's modification time is older than newfile's by at
-// least one second.
+// Returns true if oldfile's modification time is older than newfile's rounded
+// to the nearest second.
 func fileIsOlder(oldfile, newfile string) (bool, error) {
 	info, err := os.Stat(newfile)
 	if err != nil {
@@ -120,7 +151,7 @@ func fileIsOlder(oldfile, newfile string) (bool, error) {
 	}
 	oldtime := info.ModTime()
 	diff := newtime.Sub(oldtime)
-	return diff > 0 && diff.Truncate(1000*time.Millisecond) != 0, nil
+	return diff > 0 && diff.Truncate(1*time.Second) != 0, nil
 }
 
 /*
