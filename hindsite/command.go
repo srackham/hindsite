@@ -68,7 +68,7 @@ func (cmd *command) Parse(args []string) error {
 			cmd.clean = true
 		case v == "-v":
 			cmd.verbose = true
-		case stringlist{"-project", "-content", "-template", "-build", "-port", "-set"}.Contains(v):
+		case stringlist{"-project", "-content", "-template", "-build", "-indexes", "-port", "-set"}.Contains(v):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", v)
 			}
@@ -82,6 +82,8 @@ func (cmd *command) Parse(args []string) error {
 				cmd.templateDir = arg
 			case "-build":
 				cmd.buildDir = arg
+			case "-indexes":
+				cmd.indexesDir = arg
 			case "-port":
 				cmd.port = arg
 			case "-set":
@@ -106,6 +108,7 @@ func (cmd *command) Parse(args []string) error {
 	if err != nil {
 		return err
 	}
+	// TODO: Dirs are RELATIVE TO os.Getwd()
 	if !filepath.IsAbs(cmd.contentDir) {
 		cmd.contentDir = filepath.Join(cmd.projectDir, cmd.contentDir)
 	}
@@ -114,6 +117,13 @@ func (cmd *command) Parse(args []string) error {
 	}
 	if !filepath.IsAbs(cmd.buildDir) {
 		cmd.buildDir = filepath.Join(cmd.projectDir, cmd.buildDir)
+	}
+	if cmd.indexesDir == "" {
+		cmd.indexesDir = filepath.Join(cmd.buildDir, "indexes")
+	} else {
+		if !filepath.IsAbs(cmd.indexesDir) {
+			cmd.indexesDir = filepath.Join(cmd.projectDir, cmd.indexesDir)
+		}
 	}
 	// Content and build directories can be the same. The build directory is
 	// allowed at root of content directory. In all other cases content,
@@ -139,6 +149,11 @@ func (cmd *command) Parse(args []string) error {
 		if err := checkOverlap("build", Cmd.buildDir, "template", cmd.templateDir); err != nil {
 			return err
 		}
+	}
+	fmt.Println(cmd.indexesDir)
+	fmt.Println(cmd.buildDir + string(filepath.Separator))
+	if !strings.HasPrefix(cmd.indexesDir, cmd.buildDir+string(filepath.Separator)) {
+		return fmt.Errorf("indexes directory must reside in build directory: %s", cmd.buildDir)
 	}
 	return nil
 }
