@@ -30,10 +30,6 @@ type command struct {
 var Cmd = command{}
 
 func (cmd *command) Parse(args []string) error {
-	cmd.projectDir = "."
-	cmd.contentDir = "content"
-	cmd.templateDir = "template"
-	cmd.buildDir = "build"
 	cmd.port = "1212"
 	skip := false
 	for i, v := range args {
@@ -103,27 +99,33 @@ func (cmd *command) Parse(args []string) error {
 		}
 	}
 	// Clean and convert directories to absolute paths.
+	// Internally all file paths are absolute.
+	getPath := func(path, defaultPath string) (string, error) {
+		if path == "" {
+			path = defaultPath
+		}
+		return filepath.Abs(path)
+	}
 	var err error
-	cmd.projectDir, err = filepath.Abs(cmd.projectDir)
+	cmd.projectDir, err = getPath(cmd.projectDir, ".")
 	if err != nil {
 		return err
 	}
-	// TODO: Dirs are RELATIVE TO os.Getwd()
-	if !filepath.IsAbs(cmd.contentDir) {
-		cmd.contentDir = filepath.Join(cmd.projectDir, cmd.contentDir)
+	cmd.contentDir, err = getPath(cmd.contentDir, filepath.Join(cmd.projectDir, "content"))
+	if err != nil {
+		return err
 	}
-	if !filepath.IsAbs(cmd.templateDir) {
-		cmd.templateDir = filepath.Join(cmd.projectDir, cmd.templateDir)
+	cmd.templateDir, err = getPath(cmd.templateDir, filepath.Join(cmd.projectDir, "template"))
+	if err != nil {
+		return err
 	}
-	if !filepath.IsAbs(cmd.buildDir) {
-		cmd.buildDir = filepath.Join(cmd.projectDir, cmd.buildDir)
+	cmd.buildDir, err = getPath(cmd.buildDir, filepath.Join(cmd.projectDir, "build"))
+	if err != nil {
+		return err
 	}
-	if cmd.indexDir == "" {
-		cmd.indexDir = filepath.Join(cmd.buildDir, "index")
-	} else {
-		if !filepath.IsAbs(cmd.indexDir) {
-			cmd.indexDir = filepath.Join(cmd.projectDir, cmd.indexDir)
-		}
+	cmd.indexDir, err = getPath(cmd.indexDir, filepath.Join(cmd.buildDir, "indexes"))
+	if err != nil {
+		return err
 	}
 	// Content and build directories can be the same. The build directory is
 	// allowed at root of content directory. In all other cases content,
@@ -150,8 +152,6 @@ func (cmd *command) Parse(args []string) error {
 			return err
 		}
 	}
-	fmt.Println(cmd.indexDir)
-	fmt.Println(cmd.buildDir + string(filepath.Separator))
 	if !strings.HasPrefix(cmd.indexDir, cmd.buildDir+string(filepath.Separator)) {
 		return fmt.Errorf("index directory must reside in build directory: %s", cmd.buildDir)
 	}
