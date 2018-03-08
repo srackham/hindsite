@@ -20,14 +20,14 @@ import (
 type document struct {
 	contentpath  string
 	buildpath    string
-	templatepath string // Used for template directory searches.
+	templatepath string // Virtual path used to find document related templates.
 	content      string // Markup text (without front matter header).
 	// Front matter.
 	title    string
 	date     time.Time
 	synopsis string
 	addendum string
-	url      string // URL path relatative to server root with leading slash.
+	url      string // Absolute or root-relative URL.
 	tags     []string
 	draft    bool
 }
@@ -68,10 +68,6 @@ func (doc *document) parseFile(contentfile string) error {
 		return err
 	}
 	err = doc.extractFrontMatter()
-	if err != nil {
-		return err
-	}
-	err = Indexes.add(doc)
 	if err != nil {
 		return err
 	}

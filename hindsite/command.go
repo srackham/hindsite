@@ -17,6 +17,7 @@ type command struct {
 	contentDir  string
 	templateDir string
 	buildDir    string
+	indexesDir  string
 	drafts      bool
 	slugify     bool
 	topic       string
@@ -198,6 +199,10 @@ func (cmd *command) build() error {
 	}
 	// Copy all static files from template directory to build directory.
 	// TODO
+
+	// Initialize indexes builder.
+	idxs := indexes{}
+	idxs.init(cmd.templateDir)
 	// Process all content documents in the content directory.
 	err := filepath.Walk(cmd.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -218,6 +223,10 @@ func (cmd *command) build() error {
 			doc := document{}
 			err = doc.parseFile(f)
 			if err != nil {
+			}
+			err = idxs.addDocument(&doc)
+			if err != nil {
+				return err
 			}
 			if cmd.upToDate(f, doc.buildpath) {
 				return nil
@@ -267,7 +276,7 @@ func (cmd *command) build() error {
 	if err != nil {
 		return err
 	}
-	err = Indexes.build()
+	err = idxs.build()
 	if err != nil {
 		return err
 	}
