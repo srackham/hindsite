@@ -253,10 +253,7 @@ func (cmd *command) build() error {
 			err = doc.parseFile(f)
 			if err != nil {
 			}
-			err = idxs.addDocument(&doc)
-			if err != nil {
-				return err
-			}
+			idxs.addDocument(&doc)
 			if cmd.upToDate(f, doc.buildpath) {
 				return nil
 			}
