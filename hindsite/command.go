@@ -152,7 +152,7 @@ func (cmd *command) Parse(args []string) error {
 			return err
 		}
 	}
-	if !strings.HasPrefix(cmd.indexDir, cmd.buildDir+string(filepath.Separator)) {
+	if !pathIsInDir(cmd.indexDir, cmd.buildDir) {
 		return fmt.Errorf("index directory must reside in build directory: %s", cmd.buildDir)
 	}
 	return nil
@@ -212,28 +212,42 @@ func (cmd *command) build() error {
 			}
 		}
 	}
-	// Copy all static files from template directory to build directory.
-	// TODO
-
+	if cmd.contentDir != cmd.templateDir {
+		// Copy static files from template directory to build directory.
+		err := filepath.Walk(cmd.templateDir, func(f string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			// Skip configuration and template files.
+			switch filepath.Ext(f) {
+			case ".toml", ".yaml", ".html":
+				return nil
+			}
+			if !info.IsDir() {
+				return cmd.copyStaticFile(f)
+			}
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+	}
 	// Initialize indexes builder.
 	idxs := indexes{}
 	idxs.init(cmd.templateDir)
-	// Process all content documents in the content directory.
+	// Render content documents and copy static files from the content directory.
 	err := filepath.Walk(cmd.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if info.IsDir() {
 			if f == Cmd.buildDir {
+				// Do not process the build directory.
 				return filepath.SkipDir
 			}
 			return nil
 		}
 		switch filepath.Ext(f) {
-		case ".toml", ".yaml", ".html":
-			// Skip configuration and template files.
-			verbose("skipping excluded: " + f)
-			return nil
 		case ".md", ".rmu":
 			doc := document{}
 			err = doc.parseFile(f)
@@ -247,10 +261,10 @@ func (cmd *command) build() error {
 				return nil
 			}
 			if doc.draft && !cmd.drafts {
-				verbose("skipping draft: " + f)
+				verbose("skip draft: " + f)
 				return nil
 			}
-			verbose("render:   " + f)
+			verbose("render: " + f)
 			html, err := doc.render()
 			if err != nil {
 				return err
@@ -263,28 +277,23 @@ func (cmd *command) build() error {
 			if err != nil {
 				return err
 			}
-			verbose("outfile:  " + doc.buildpath)
+			verbose("write:  " + doc.buildpath)
 			verbose(doc.String())
+		case ".toml", ".yaml":
+			verbose("skip configuration: " + f)
+			return nil
+		case ".html":
+			if cmd.contentDir == cmd.templateDir {
+				verbose("skip template: " + f)
+			} else {
+				if err := cmd.copyStaticFile(f); err != nil {
+					return err
+				}
+			}
 		default:
-			// Copy static files verbatim.
-			outfile, err := filepath.Rel(cmd.contentDir, f)
-			if err != nil {
+			if err := cmd.copyStaticFile(f); err != nil {
 				return err
 			}
-			outfile = filepath.Join(cmd.buildDir, outfile)
-			if cmd.upToDate(f, outfile) {
-				return nil
-			}
-			verbose("copying:  " + f)
-			err = mkMissingDir(filepath.Dir(outfile))
-			if err != nil {
-				return err
-			}
-			err = copyFile(f, outfile)
-			if err != nil {
-				return err
-			}
-			verbose("outfile:  " + outfile)
 		}
 		return nil
 	})
@@ -309,6 +318,40 @@ func (cmd *command) upToDate(infile, outfile string) (result bool) {
 		return false
 	}
 	return result
+}
+
+// Copy file from content or template directory to corresponding location in build directory.
+// Creates any missing build directories.
+func (cmd *command) copyStaticFile(f string) error {
+	// Copy static files verbatim.
+	var inDir string
+	switch {
+	case pathIsInDir(f, cmd.contentDir):
+		inDir = cmd.contentDir
+	case pathIsInDir(f, cmd.templateDir):
+		inDir = cmd.templateDir
+	default:
+		return fmt.Errorf("file is not in content or template directory: %s", f)
+	}
+	outfile, err := filepath.Rel(inDir, f)
+	if err != nil {
+		return err
+	}
+	outfile = filepath.Join(cmd.buildDir, outfile)
+	if cmd.upToDate(f, outfile) {
+		return nil
+	}
+	verbose("copy static: " + f)
+	err = mkMissingDir(filepath.Dir(outfile))
+	if err != nil {
+		return err
+	}
+	err = copyFile(f, outfile)
+	if err != nil {
+		return err
+	}
+	verbose("write:       " + outfile)
+	return nil
 }
 
 // Recursively and slugify directory and file names.

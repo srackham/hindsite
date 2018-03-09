@@ -80,7 +80,6 @@ func replaceExt(name, ext string) string {
 	return name[0:len(name)-len(filepath.Ext(name))] + ext
 }
 
-// TODO return error.
 func copyFile(from, to string) error {
 	contents, err := readFile(from)
 	if err != nil {
@@ -99,6 +98,10 @@ func mkMissingDir(dir string) error {
 	return nil
 }
 
+func pathIsInDir(p, dir string) bool {
+	return strings.HasPrefix(p, dir+string(filepath.Separator))
+}
+
 // Search for files from base directory up to root directory.
 // Return found files.
 // Files are ordered by location (base to root).
@@ -111,7 +114,7 @@ func filesInPath(base, root string, patterns []string, n int) (files []string, e
 	if !filepath.IsAbs(root) {
 		return files, fmt.Errorf("root path is not absolute: %s", root)
 	}
-	if base != root && !strings.HasPrefix(base, root+string(filepath.Separator)) {
+	if base != root && !pathIsInDir(base, root) {
 		return files, fmt.Errorf("root is not an ancestor of base: %s: %s", root, base)
 	}
 	p := base
