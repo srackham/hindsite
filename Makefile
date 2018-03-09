@@ -29,9 +29,9 @@ clean:
 
 .PHONY: doc
 doc: install
-	cp README.md doc/index.md
+	cp -p README.md doc/index.md
 	cd doc
-	hindsite build -content . -template .
+	hindsite build -content . -template . -v
 
 .PHONY: serve
 serve: doc

@@ -221,11 +221,9 @@ recent documents.
 **tag indexes**: hindsite generates tag index pages using tag meta-data and
 `tags.html` and `tag.html` templates.
 
-**static file**: A file in the content or template directories that is not a
-document or a template or a configuration file. Static files (typically CSS and
-images) are copied verbatim to the corresponding location in the build directory
-by the hindsite build command. Static files in the content directory take
-precedence over static files in the template directory.
+**static file**: A [static file](#static-file.html) is a file in the content or
+template directories that is not a document or a template or a configuration
+file.
 
 **example document**: A text markup document residing in the template directory.
 Example documents are are copied to the content directory when the project is
@@ -427,10 +425,13 @@ lang = "en"
 
 # Build uses this to copy a file to /index.html (assuming you need it and it do not have it).
 # The value is a file path (either absolute or relative to the build directory).
-homePage = "indexes/blog/recent.html"
+homepage = "indexes/blog/recent.html"
 
 # Maximum number of recent index entries.
-maxRecent = 100
+recent = 100
+
+# Excluded files
+exclude = "config.rmu"
 
 # Default document author.
 author = "Joe Bloggs"
@@ -604,6 +605,15 @@ This model may be useful for simple projects but it's not a good idea to mix
 content and design like this if you plan to share or reuse your project
 template.
 
+
+## Static files
+A static is j file in the content or template directories that is not a
+document or a template or a configuration file. Static files (typically CSS and
+images) are copied verbatim to the corresponding location in the build directory
+by the build command. The content directory is processed after the template
+directory.
+
+### Static file exclusion
 
 ## Content document markup
 Content documents can be written in Markdown or Rimu.
