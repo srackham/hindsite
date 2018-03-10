@@ -11,12 +11,11 @@ import (
 var templateFileNames = stringlist{"all.html", "recent.html", "tags.html", "tag.html"}
 
 type index struct {
-	templateDir   string            // The template directory that contains the index templates.
-	templateFiles []string          // List of template file names.
-	buildDir      string            // The build directory that the index pages are written.
-	url           string            // URL of index directory.
-	docs          []*document       // Parsed documents belonging to index.
-	tagURLs       map[string]string // Maps tags to tag index URL.
+	templateDir string                 // The template directory that contains the index templates.
+	buildDir    string                 // The build directory that the index pages are written.
+	url         string                 // URL of index directory.
+	docs        []*document            // Parsed documents belonging to index.
+	tagdocs     map[string][]*document // Groups indexed documents by tag.
 }
 
 type indexes []index
@@ -28,20 +27,20 @@ func (idxs *indexes) init(templateDir string) error {
 			return err
 		}
 		if info.IsDir() {
-			files, err := filepath.Glob(filepath.Join(f, "*"))
+			files, err := filepath.Glob(filepath.Join(f, "*.html"))
 			if err != nil {
 				return err
 			}
-			tmplFiles := []string{}
+			found := false
 			for _, fn := range files {
 				if templateFileNames.Contains(fn) {
-					tmplFiles = append(tmplFiles, fn)
+					found = true
+					break
 				}
 			}
-			if len(tmplFiles) > 0 {
+			if found {
 				idx := index{}
 				idx.templateDir = f
-				idx.templateFiles = tmplFiles
 				p, err := filepath.Rel(templateDir, f)
 				if err != nil {
 					return err
@@ -76,51 +75,101 @@ func (idxs indexes) build() error {
 }
 
 func (idx index) build() error {
-	render := func(tmplfile string, datafunc func(idx index) templateData) error {
-		if !templateFileNames.Contains(tmplfile) {
-			return nil
-		}
-		tmpl, err := template.ParseFiles(filepath.Join(idx.templateDir, tmplfile))
+	render := func(tmplfile string, data templateData, outfile string) error {
+		tmpl, err := template.ParseFiles(tmplfile)
 		if err != nil {
 			return err
 		}
-		data := datafunc(idx)
 		buf := bytes.NewBufferString("")
-		tmpl.Execute(buf, data)
+		if err := tmpl.Execute(buf, data); err != nil {
+			return err
+		}
 		html := buf.String()
-		return writeFile(filepath.Join(idx.buildDir, tmplfile), html)
+		if err := mkMissingDir(filepath.Dir(outfile)); err != nil {
+			return err
+		}
+		return writeFile(outfile, html)
 	}
-	if err := render("all.html", index.allData); err != nil {
-		return err
+	tmplfile := filepath.Join(idx.templateDir, "all.html")
+	var outfile string
+	if fileExists(tmplfile) {
+		outfile = filepath.Join(idx.buildDir, "all.html")
+		err := render(tmplfile, docsByDate(idx.docs, -1), outfile)
+		if err != nil {
+			return err
+		}
 	}
-	if err := render("recent.html", index.recentData); err != nil {
-		return err
+	tmplfile = filepath.Join(idx.templateDir, "recent.html")
+	if fileExists(tmplfile) {
+		outfile = filepath.Join(idx.buildDir, "recent.html")
+		err := render(tmplfile, docsByDate(idx.docs, 5), outfile)
+		if err != nil {
+			return err
+		}
+	}
+	tagsTemplate := filepath.Join(idx.templateDir, "tags.html")
+	tagTemplate := filepath.Join(idx.templateDir, "tag.html")
+	if fileExists(tagsTemplate) || fileExists(tagTemplate) {
+		// Build idx.tagdocs[].
+		for _, doc := range idx.docs {
+			for _, tag := range doc.tags {
+				idx.tagdocs[tag] = append(idx.tagdocs[tag], doc)
+			}
+		}
+		if fileExists(tagsTemplate) {
+			outfile = filepath.Join(idx.buildDir, "tags.html")
+			err := render(tagsTemplate, idx.tagsData(), outfile)
+			if err != nil {
+				return err
+			}
+		}
+		if fileExists(tagTemplate) {
+			for tag := range idx.tagdocs {
+				err := render(tagsTemplate, docsByDate(idx.tagdocs[tag], -1),
+					filepath.Join(idx.buildDir, "tags", slugify(tag, nil)+".html"))
+				if err != nil {
+					return err
+				}
+			}
+		}
 	}
 	return nil
 }
 
-// Template data sorted by date descending.
+// Dcouments template data sorted by date descending.
 // n >= 0 limits the maxiumum number returned.
-func (idx index) dataByDate(n int) templateData {
+func docsByDate(docs []*document, n int) templateData {
 	// Sort index documents by decending date.
-	sort.Slice(idx.docs, func(i, j int) bool {
-		return !idx.docs[i].date.Before(idx.docs[j].date)
+	sort.Slice(docs, func(i, j int) bool {
+		return !docs[i].date.Before(docs[j].date)
 	})
 	// Build list of document template data.
-	docs := []templateData{}
-	for i, doc := range idx.docs {
+	data := []templateData{}
+	for i, doc := range docs {
 		if n >= 0 && i < n {
 			break
 		}
-		docs = append(docs, doc.frontMatter())
+		data = append(data, doc.frontMatter())
 	}
-	return templateData{"docs": docs}
+	return templateData{"docs": data}
 }
 
-func (idx index) allData() templateData {
-	return idx.dataByDate(-1)
+type tagData struct {
+	tag string
+	url string
 }
 
-func (idx index) recentData() templateData {
-	return idx.dataByDate(5)
+func (idx index) tagsData() templateData {
+	tags := []tagData{}
+	for tag := range idx.tagdocs {
+		data := tagData{
+			tag,
+			idx.url + "/tags/" + slugify(tag, nil) + ".html",
+		}
+		tags = append(tags, data)
+	}
+	sort.Slice(tags, func(i, j int) bool {
+		return tags[i].tag < tags[j].tag
+	})
+	return templateData{"tags": tags}
 }

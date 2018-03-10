@@ -26,9 +26,15 @@ func verbose(message string) {
 	}
 }
 
+func slugify(text string, exclude []string) string {
+	// TODO
+	return strings.ToLower(strings.Replace(text, " ", "-", -1))
+}
+
 /*
 String lists.
 */
+// TODO Should we not just add methods to sort.StringSlice https://golang.org/pkg/sort/#StringSlice
 type stringlist []string
 
 // Returns the first index of the target string `t`, or
