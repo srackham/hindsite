@@ -253,12 +253,12 @@ func (cmd *command) build() error {
 			err = doc.parseFile(f)
 			if err != nil {
 			}
-			idxs.addDocument(&doc)
-			if cmd.upToDate(f, doc.buildpath) {
-				return nil
-			}
 			if doc.draft && !cmd.drafts {
 				verbose("skip draft: " + f)
+				return nil
+			}
+			idxs.addDocument(&doc)
+			if cmd.upToDate(f, doc.buildpath) && cmd.upToDate(doc.layoutpath, doc.buildpath) {
 				return nil
 			}
 			verbose("render: " + f)

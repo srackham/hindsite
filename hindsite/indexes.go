@@ -33,7 +33,7 @@ func (idxs *indexes) init(templateDir string) error {
 			}
 			found := false
 			for _, fn := range files {
-				if templateFileNames.Contains(fn) {
+				if templateFileNames.Contains(filepath.Base(fn)) {
 					found = true
 					break
 				}
@@ -46,6 +46,9 @@ func (idxs *indexes) init(templateDir string) error {
 					return err
 				}
 				idx.buildDir = filepath.Join(Cmd.buildDir, p)
+				if p == "." {
+					p = ""
+				}
 				idx.url = Config.urlprefix + "/" + filepath.ToSlash(p)
 				*idxs = append(*idxs, idx)
 			}
@@ -146,7 +149,7 @@ func docsByDate(docs []*document, n int) templateData {
 	// Build list of document template data.
 	data := []templateData{}
 	for i, doc := range docs {
-		if n >= 0 && i < n {
+		if n >= 0 && i >= n {
 			break
 		}
 		data = append(data, doc.frontMatter())

@@ -20,6 +20,7 @@ import (
 type document struct {
 	contentpath  string
 	buildpath    string
+	layoutpath   string
 	templatepath string // Virtual path used to find document related templates.
 	content      string // Markup text (without front matter header).
 	// Front matter.
@@ -71,6 +72,15 @@ func (doc *document) parseFile(contentfile string) error {
 	if err != nil {
 		return err
 	}
+	// Find document layout template.
+	layouts, err := filesInPath(filepath.Dir(doc.templatepath), Cmd.templateDir, []string{"layout.html"}, 1)
+	if err != nil {
+		return err
+	}
+	if len(layouts) == 0 {
+		return fmt.Errorf("missing layout.html template for: %s", doc.contentpath)
+	}
+	doc.layoutpath = layouts[0]
 	return nil
 }
 
@@ -195,14 +205,7 @@ func (doc *document) render() (string, error) {
 	case ".rmu":
 		body = rimu.Render(doc.content, rimu.RenderOptions{})
 	}
-	layouts, err := filesInPath(filepath.Dir(doc.templatepath), Cmd.templateDir, []string{"layout.html"}, 1)
-	if err != nil {
-		return "", err
-	}
-	if len(layouts) == 0 {
-		return "", fmt.Errorf("missing layout.html template for: %s", doc.contentpath)
-	}
-	tmpl, err := template.ParseFiles(layouts[0])
+	tmpl, err := template.ParseFiles(doc.layoutpath)
 	if err != nil {
 		return "", err
 	}
