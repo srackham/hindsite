@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
+	"strings"
 )
 
 type index struct {
@@ -16,6 +19,12 @@ type index struct {
 
 type indexes []index
 
+func newIndex() index {
+	idx := index{}
+	idx.tagdocs = map[string][]*document{}
+	return idx
+}
+
 func isIndexFile(filename string) bool {
 	return stringlist{
 		"all.html",
@@ -27,7 +36,7 @@ func isIndexFile(filename string) bool {
 
 // Search templateDir directory for indexed directories and add them to indexes.
 // indexDir is the directory in the build directory that contains built indexes.
-func (idxs *indexes) init(indexDir, templateDir string) error {
+func (idxs *indexes) init(templateDir, buildDir, indexDir string) error {
 	err := filepath.Walk(templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -45,17 +54,18 @@ func (idxs *indexes) init(indexDir, templateDir string) error {
 				}
 			}
 			if found {
-				idx := index{}
+				idx := newIndex()
 				idx.templateDir = f
 				p, err := filepath.Rel(templateDir, f)
 				if err != nil {
 					return err
 				}
-				idx.indexDir = filepath.Join(Cmd.indexDir, p)
-				if p == "." {
-					p = ""
+				idx.indexDir = filepath.Join(indexDir, p)
+				p, err = filepath.Rel(buildDir, indexDir)
+				if err != nil {
+					return err
 				}
-				idx.url = Config.urlprefix + "/" + filepath.ToSlash(p)
+				idx.url = path.Join(Config.urlprefix, filepath.ToSlash(p))
 				*idxs = append(*idxs, idx)
 			}
 		}
@@ -106,6 +116,12 @@ func (idx index) build() error {
 	tagsTemplate := filepath.Join(idx.templateDir, "tags.html")
 	tagTemplate := filepath.Join(idx.templateDir, "tag.html")
 	if fileExists(tagsTemplate) || fileExists(tagTemplate) {
+		if !fileExists(tagTemplate) {
+			return fmt.Errorf("missing tag template: %s", tagTemplate)
+		}
+		if !fileExists(tagsTemplate) {
+			return fmt.Errorf("missing tags template: %s", tagsTemplate)
+		}
 		// Build idx.tagdocs[].
 		for _, doc := range idx.docs {
 			for _, tag := range doc.tags {
@@ -122,8 +138,10 @@ func (idx index) build() error {
 		}
 		if fileExists(tagTemplate) {
 			for tag := range idx.tagdocs {
-				err := renderTemplate(tagsTemplate, docsByDate(idx.tagdocs[tag], -1),
-					filepath.Join(idx.indexDir, "tags", slugify(tag, nil)+".html"))
+				data := docsByDate(idx.tagdocs[tag], -1)
+				data["tag"] = tag
+				outfile = filepath.Join(idx.indexDir, "tags", slugify(tag, nil)+".html")
+				err := renderTemplate(tagTemplate, data, outfile)
 				verbose("write index: " + outfile)
 				if err != nil {
 					return err
@@ -152,22 +170,17 @@ func docsByDate(docs []*document, n int) templateData {
 	return templateData{"docs": data}
 }
 
-type tagData struct {
-	tag string
-	url string
-}
-
 func (idx index) tagsData() templateData {
-	tags := []tagData{}
+	tags := []map[string]string{}
 	for tag := range idx.tagdocs {
-		data := tagData{
-			tag,
-			idx.url + "/tags/" + slugify(tag, nil) + ".html",
+		data := map[string]string{
+			"tag": tag,
+			"url": path.Join(idx.url, "tags", slugify(tag, nil)+".html"),
 		}
 		tags = append(tags, data)
 	}
 	sort.Slice(tags, func(i, j int) bool {
-		return tags[i].tag < tags[j].tag
+		return strings.ToLower(tags[i]["tag"]) < strings.ToLower(tags[j]["tag"])
 	})
 	return templateData{"tags": tags}
 }

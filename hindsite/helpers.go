@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -44,9 +45,24 @@ func renderTemplate(tmplfile string, data templateData, outfile string) error {
 	return writeFile(outfile, html)
 }
 
-func slugify(text string, exclude []string) string {
-	// TODO
-	return strings.ToLower(strings.Replace(text, " ", "-", -1))
+// Transform text into a slug (lowercase alpha-numeric + hyphens).
+func slugify(text string, exclude stringlist) string {
+	slug := text
+	slug = regexp.MustCompile(`\W+`).ReplaceAllString(slug, "-") // Replace non-alphanumeric characters with dashes.
+	slug = regexp.MustCompile(`-+`).ReplaceAllString(slug, "-")  // Replace multiple dashes with single dash.
+	slug = strings.Trim(slug, "-")                               // Trim leading and trailing dashes.
+	slug = strings.ToLower(slug)
+	if slug == "" {
+		slug = "x"
+	}
+	if exclude.IndexOf(slug) > -1 {
+		i := 2
+		for exclude.IndexOf(slug+"-"+fmt.Sprint(i)) > -1 {
+			i++
+		}
+		slug += "-" + fmt.Sprint(i)
+	}
+	return slug
 }
 
 /*
