@@ -8,8 +8,6 @@ import (
 	"sort"
 )
 
-var templateFileNames = stringlist{"all.html", "recent.html", "tags.html", "tag.html"}
-
 type index struct {
 	templateDir string                 // The template directory that contains the index templates.
 	indexDir    string                 // The build directory that the index pages are written.
@@ -19,6 +17,15 @@ type index struct {
 }
 
 type indexes []index
+
+func isIndexFile(filename string) bool {
+	return stringlist{
+		"all.html",
+		"recent.html",
+		"tags.html",
+		"tag.html",
+	}.Contains(filepath.Base(filename))
+}
 
 // Search templateDir directory for indexed directories and add them to indexes.
 // indexDir is the directory in the build directory that contains built indexes.
@@ -34,7 +41,7 @@ func (idxs *indexes) init(indexDir, templateDir string) error {
 			}
 			found := false
 			for _, fn := range files {
-				if templateFileNames.Contains(filepath.Base(fn)) {
+				if isIndexFile(fn) {
 					found = true
 					break
 				}
