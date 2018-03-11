@@ -2,9 +2,7 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
-	"html/template"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -194,25 +192,14 @@ func (doc *document) String() (result string) {
 	return string(d)
 }
 
-// Render document markup and document variables with the document layout template.
-// Return rendered HTML.
-func (doc *document) render() (string, error) {
+// Render document markup to HTML.
+func (doc *document) render() (html string) {
 	// Render document.
-	var body string
 	switch filepath.Ext(doc.contentpath) {
 	case ".md":
-		body = string(blackfriday.Run([]byte(doc.content)))
+		html = string(blackfriday.Run([]byte(doc.content)))
 	case ".rmu":
-		body = rimu.Render(doc.content, rimu.RenderOptions{})
+		html = rimu.Render(doc.content, rimu.RenderOptions{})
 	}
-	tmpl, err := template.ParseFiles(doc.layoutpath)
-	if err != nil {
-		return "", err
-	}
-	data := templateData{}
-	data.add(doc.frontMatter())
-	data["body"] = template.HTML(body)
-	buf := bytes.NewBufferString("")
-	tmpl.Execute(buf, data)
-	return buf.String(), nil
+	return html
 }

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -24,6 +26,22 @@ func verbose(message string) {
 	if Cmd.verbose {
 		fmt.Println(message)
 	}
+}
+
+func renderTemplate(tmplfile string, data templateData, outfile string) error {
+	tmpl, err := template.ParseFiles(tmplfile)
+	if err != nil {
+		return err
+	}
+	buf := bytes.NewBufferString("")
+	if err := tmpl.Execute(buf, data); err != nil {
+		return err
+	}
+	html := buf.String()
+	if err := mkMissingDir(filepath.Dir(outfile)); err != nil {
+		return err
+	}
+	return writeFile(outfile, html)
 }
 
 func slugify(text string, exclude []string) string {

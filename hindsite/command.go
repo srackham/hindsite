@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 	"net/url"
 	"os"
@@ -262,15 +263,10 @@ func (cmd *command) build() error {
 				return nil
 			}
 			verbose("render: " + f)
-			html, err := doc.render()
-			if err != nil {
-				return err
-			}
-			err = mkMissingDir(filepath.Dir(doc.buildpath))
-			if err != nil {
-				return err
-			}
-			err = writeFile(doc.buildpath, html)
+			data := templateData{}
+			data.add(doc.frontMatter())
+			data["body"] = template.HTML(doc.render())
+			err = renderTemplate(doc.layoutpath, data, doc.buildpath)
 			if err != nil {
 				return err
 			}

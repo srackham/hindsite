@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"html/template"
 	"os"
 	"path/filepath"
 	"sort"
@@ -86,27 +84,12 @@ func (idxs indexes) build() error {
 }
 
 func (idx index) build() error {
-	render := func(tmplfile string, data templateData, outfile string) error {
-		tmpl, err := template.ParseFiles(tmplfile)
-		if err != nil {
-			return err
-		}
-		buf := bytes.NewBufferString("")
-		if err := tmpl.Execute(buf, data); err != nil {
-			return err
-		}
-		html := buf.String()
-		if err := mkMissingDir(filepath.Dir(outfile)); err != nil {
-			return err
-		}
-		verbose("write index: " + outfile)
-		return writeFile(outfile, html)
-	}
 	tmplfile := filepath.Join(idx.templateDir, "all.html")
 	var outfile string
 	if fileExists(tmplfile) {
 		outfile = filepath.Join(idx.indexDir, "all.html")
-		err := render(tmplfile, docsByDate(idx.docs, -1), outfile)
+		err := renderTemplate(tmplfile, docsByDate(idx.docs, -1), outfile)
+		verbose("write index: " + outfile)
 		if err != nil {
 			return err
 		}
@@ -114,7 +97,8 @@ func (idx index) build() error {
 	tmplfile = filepath.Join(idx.templateDir, "recent.html")
 	if fileExists(tmplfile) {
 		outfile = filepath.Join(idx.indexDir, "recent.html")
-		err := render(tmplfile, docsByDate(idx.docs, 5), outfile)
+		err := renderTemplate(tmplfile, docsByDate(idx.docs, 5), outfile)
+		verbose("write index: " + outfile)
 		if err != nil {
 			return err
 		}
@@ -130,15 +114,17 @@ func (idx index) build() error {
 		}
 		if fileExists(tagsTemplate) {
 			outfile = filepath.Join(idx.indexDir, "tags.html")
-			err := render(tagsTemplate, idx.tagsData(), outfile)
+			err := renderTemplate(tagsTemplate, idx.tagsData(), outfile)
+			verbose("write index: " + outfile)
 			if err != nil {
 				return err
 			}
 		}
 		if fileExists(tagTemplate) {
 			for tag := range idx.tagdocs {
-				err := render(tagsTemplate, docsByDate(idx.tagdocs[tag], -1),
+				err := renderTemplate(tagsTemplate, docsByDate(idx.tagdocs[tag], -1),
 					filepath.Join(idx.indexDir, "tags", slugify(tag, nil)+".html"))
+				verbose("write index: " + outfile)
 				if err != nil {
 					return err
 				}
