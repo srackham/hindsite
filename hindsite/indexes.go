@@ -15,6 +15,7 @@ type index struct {
 	url         string                 // URL of index directory.
 	docs        []*document            // Parsed documents belonging to index.
 	tagdocs     map[string][]*document // Groups indexed documents by tag.
+	tagfiles    map[string]string      // Slugified tag file names.
 }
 
 type indexes []index
@@ -22,6 +23,7 @@ type indexes []index
 func newIndex() index {
 	idx := index{}
 	idx.tagdocs = map[string][]*document{}
+	idx.tagfiles = map[string]string{}
 	return idx
 }
 
@@ -128,6 +130,13 @@ func (idx index) build() error {
 				idx.tagdocs[tag] = append(idx.tagdocs[tag], doc)
 			}
 		}
+		// Build idx.tagfiles[].
+		slugs := []string{}
+		for tag := range idx.tagdocs {
+			slug := slugify(tag, slugs)
+			slugs = append(slugs, slug)
+			idx.tagfiles[tag] = slug + ".html"
+		}
 		if fileExists(tagsTemplate) {
 			outfile = filepath.Join(idx.indexDir, "tags.html")
 			err := renderTemplate(tagsTemplate, idx.tagsData(), outfile)
@@ -140,7 +149,7 @@ func (idx index) build() error {
 			for tag := range idx.tagdocs {
 				data := docsByDate(idx.tagdocs[tag], -1)
 				data["tag"] = tag
-				outfile = filepath.Join(idx.indexDir, "tags", slugify(tag, nil)+".html")
+				outfile = filepath.Join(idx.indexDir, "tags", idx.tagfiles[tag])
 				err := renderTemplate(tagTemplate, data, outfile)
 				verbose("write index: " + outfile)
 				if err != nil {
@@ -175,7 +184,7 @@ func (idx index) tagsData() templateData {
 	for tag := range idx.tagdocs {
 		data := map[string]string{
 			"tag": tag,
-			"url": path.Join(idx.url, "tags", slugify(tag, nil)+".html"),
+			"url": path.Join(idx.url, "tags", idx.tagfiles[tag]),
 		}
 		tags = append(tags, data)
 	}
