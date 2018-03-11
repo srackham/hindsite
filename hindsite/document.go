@@ -193,6 +193,7 @@ func (doc *document) frontMatter() (data templateData) {
 	data["tags"] = strings.Join(doc.tags, ", ")
 	data["synopsis"] = doc.synopsis
 	data["addendum"] = doc.addendum
+	data["slug"] = doc.slug
 	data["url"] = doc.url
 	return data
 }
