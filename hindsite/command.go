@@ -233,10 +233,8 @@ func (cmd *command) build() error {
 			return err
 		}
 	}
-	// Initialize indexes builder.
-	idxs := indexes{}
-	idxs.init(cmd.templateDir, cmd.buildDir, cmd.indexDir)
-	// Render content documents and copy static files from the content directory.
+	// Parse content documents and copy static files to the build directory.
+	docs := []*document{}
 	err := filepath.Walk(cmd.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -258,20 +256,7 @@ func (cmd *command) build() error {
 				verbose("skip draft: " + f)
 				return nil
 			}
-			idxs.addDocument(&doc)
-			if cmd.upToDate(f, doc.buildpath) && cmd.upToDate(doc.layoutpath, doc.buildpath) {
-				return nil
-			}
-			verbose("render: " + f)
-			data := templateData{}
-			data.add(doc.frontMatter())
-			data["body"] = template.HTML(doc.render())
-			err = renderTemplate(doc.layoutpath, data, doc.buildpath)
-			if err != nil {
-				return err
-			}
-			verbose("write:  " + doc.buildpath)
-			verbose(doc.String())
+			docs = append(docs, &doc)
 		case ".toml", ".yaml":
 			verbose("skip configuration: " + f)
 			return nil
@@ -293,9 +278,31 @@ func (cmd *command) build() error {
 	if err != nil {
 		return err
 	}
+	// Build indexes.
+	idxs := indexes{}
+	idxs.init(cmd.templateDir, cmd.buildDir, cmd.indexDir)
+	for _, doc := range docs {
+		idxs.addDocument(doc)
+	}
 	err = idxs.build()
 	if err != nil {
 		return err
+	}
+	// Render documents.
+	for _, doc := range docs {
+		if cmd.upToDate(doc.contentpath, doc.buildpath) && cmd.upToDate(doc.layoutpath, doc.buildpath) {
+			continue
+		}
+		verbose("render: " + doc.contentpath)
+		data := templateData{}
+		data.add(doc.frontMatter())
+		data["body"] = template.HTML(doc.render())
+		err = renderTemplate(doc.layoutpath, data, doc.buildpath)
+		if err != nil {
+			return err
+		}
+		verbose("write:  " + doc.buildpath)
+		verbose(doc.String())
 	}
 	return nil
 }
