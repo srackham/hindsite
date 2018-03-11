@@ -4,5 +4,6 @@ debug
 gitignore
 examples/minimal/index.html
 build/
+doc/index.md
 .vscode/
 examples/blog/

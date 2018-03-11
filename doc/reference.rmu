@@ -201,27 +201,16 @@ directory then the parent template directories are searched right up to the
 templates root directory.
 
 **index templates**: Index templates are used to render document index web pages.
-They are named `{all,recent,tag,tags}.html`.
 
-**index**: A generated HTML Webpage containing a list of content documents.
+**document index**: A generated HTML Webpage containing a list of content documents.
 
-**indexed directory**: A directory in the content directory whose corresponding
-template directory contains one or more index templates.
+**tag**: A keyword or phrase used to categorize a content document.
 
-**indexed document**: A content document residing in an indexed directory. Indexed
-documents must have a title and a publication date. Tags are optional.
+**tag index**: Indexed document tags can be used to generate a tag index along
+with per tag document indexes.
 
-**date indexes**: hindsite generates date index pages ordered by document
-publication date using `all.html` and `recent.html` index templates. `all.html`
-generates a list of all documents; `recent.html` generates a list of the most
-recent documents.
 
-**tag**: A keyword or phrase used to categorise a content document.
-
-**tag indexes**: hindsite generates tag index pages using tag meta-data and
-`tags.html` and `tag.html` templates.
-
-**static file**: A [static file](#static-file.html) is a file in the content or
+**static file**: A [static file](#static-files.html) is a file in the content or
 template directories that is not a document or a template or a configuration
 file.
 
@@ -320,27 +309,15 @@ build/
   directory e.g. `blog.toml` will be injected into all documents in the `blog` directory.
 */
 
-- Reserved directory names: `/indexes`. By convention the `/static`
-  directory contains static asset files, but this is not enforced.
-
-- The `/indexes` build directory contains a sub-directory for each indexed directory.
-  Each sub-directory may contain:
-
-  * `recent.html`: a list of the most recent posts.
-  * `all.html`: a list of the all posts.
-  * `tags.html`: a list of post tags linked to files named like `tags/TAG_NAME.html` (one per tag)
-    each containing a list of related posts. The `TAG_NAME` is slugified.
-
-
 ## File and directory names
 Content file and directory names should only contain lower case alpha numeric
-and hyphen characters. This is is mandatory, it:
+and hyphen characters. This is is mandatory and:
 
 * Ensures consistent, readable URLs without ugly encodings for illegal URL
   characters.
 * Allows file names to map to reasonable document titles.
 
-If necessary use the build command `-slugify` option to nomalize all content paths.
+If necessary use the build command `-slugify` option to normalize all content paths.
 
 
 ## URLs
@@ -378,17 +355,55 @@ server, see [How to remove file extension from website
 address?](https://stackoverflow.com/questions/6534904/how-to-remove-file-extension-from-website-address).
 
 
-## Indexes
+## Document Indexes
 - Recent, All and Tags document indexes are created by the build command.
 - The project can contain any number of indexed content directories.
 - Any content directory can be indexed by placing one or more index
   templates in the corresponding template directory.
-- An index includes all documents from all subdirectories.
-- Indexes can be nested.
-- By default all built index pages are written to the `indexes` directory
+- An index contains documents from the index directory and all subdirectories.
+- Indexes can be nested. This allows categorized document subdirectories to have
+  separate indexes along with aggregated parent directory indexes.
+- By default all built index pages are written to a directory named `indexes`
   located at the root of the build directory.
 - The location of the built index pages can be changed to anywhere inside the
   build directory using the build command `-index INDEX_DIR` option.
+
+
+TODO
+
+- There are two types of indexes: date indexes and tags indexes.
+- They are named `{all,recent,tag,tags}.html`.
+
+
+**indexed document**: A content document residing in an indexed directory. Indexed
+documents must have a title and a publication date. Tags are optional.
+
+**indexed directory**: A directory in the content directory that generates document indexes.
+whose corresponding
+template directory contains one or more index templates.
+
+**indexes directory**: A directory in the build directory containing generated
+index pages.
+
+**date indexes**: Date index pages ordered by document
+publication date using `all.html` and `recent.html` index templates. `all.html`
+generates a list of all documents; `recent.html` generates a list of the most
+recent documents.
+
+
+hindsite generates tag index pages using tag meta-data and
+`tags.html` and `tag.html` templates.
+## Document indexes
+- The indexes directory contains a directory for each indexed document directory.
+- The indexes directory is
+- Each index directory may contain:
+
+  * `recent.html`: a list of the most recent posts.
+  * `all.html`: a list of the all posts.
+  * `tags.html`: a list of post tags linked to files named like
+    `tags/SLUGIFIED_TAG_NAME.html` (one per tag) each containing a list of
+    related posts. The `TAG_NAME` is slugified.
+
 
 
 ## Template variables
@@ -420,17 +435,14 @@ Example `config.toml` file:
 # prepended to all synthesised root-relative URLs.
 urlprefix = "/blog"
 
-# Site language code.
-lang = "en"
-
 # Build uses this to copy a file to /index.html (assuming you need it and it do not have it).
-# The value is a file path (either absolute or relative to the build directory).
+# The value is a file path (relative to the build directory).
 homepage = "indexes/blog/recent.html"
 
 # Maximum number of recent index entries.
-recent = 100
+recent = 10
 
-# Excluded files
+# A `|` separated list of file names that should not be processed (wildcards allowed).
 exclude = "config.rmu"
 
 # Default document author.
@@ -438,57 +450,17 @@ author = "Joe Bloggs"
 
 # date/time.
 timezone = "Local"
-shortDateFormat = ""
-mediumDateFormat = ""
-longDateFormat = ""
+# Date and time formats for variables: date, time, datetime, shortdate, mediumdate, ...
+shortdate= ""
+mediumdate= ""
+longdate= ""
+shorttime = ""
+mediumtime = ""
+longtime = ""
+shortdatetime = ""
+mediumdatetime = ""
+longdatetime = ""
 ```
-
-Use maps for template data, example
-
-``` yaml
-animals:
-  horse: big
-  mouse: small
-```
-
-``` toml
-[animals]
-horse = "big"
-mouse = "small"
-```
-
-Generates a Go field `Animals` containing a map:
-
-```
-Animals: map[string]string{
-  "horse": "big",
-  "mouse": "small",
-}
-```
-
-``` go
-package main
-import "fmt"
-import "os"
-import "html/template"
-
-type TemplateData map[string]interface{}
-
-func merge(m TemplateData) {
-	m["qu_x"]=template.HTML("<baz>")
-	m["baz"] = map[string]string{"a":"A","b":"B"}
-}
-
-func main() {
-        m := TemplateData{"foo":7,"bar":"<baz>"}
-	      merge(m)
-        t, err := template.New("test").Parse("{{.foo}} {{.bar}} {{.qu_x}} {{.baz.a}} {{.baz.b}}")
-        if err != nil { fmt.Println(err); return }
-        err = t.Execute(os.Stdout, m)	// Prints: 7 &lt;baz&gt; <baz> A B
-        if err != nil { fmt.Println(err); return }
-}
-```
-
 
 ## Front matter
 Document front matter is embedded at the start of content files (c.f.
@@ -531,6 +503,10 @@ categories = [
 draft = "true"
 +++
 ```
+See:
+
+- [TOML](https://github.com/toml-lang/toml#user-content-inline-table).
+- Go TOML parser https://github.com/BurntSushi/toml
 
 Implicit values (if the document does not contain a front matter header):
 
@@ -573,8 +549,9 @@ But normally it's not a good idea to mix content and
 TODO: Document _Standard_, _Minimal_ and _Disjoint_ project models.
 
 ### Standard project model
-Separate content, template and build directories in a single directory. Content
-and design are separate. This is the default project model.
+The standard project consists of separate content, template and build
+directories in a single directory. Content and design are separate. This is the
+default project model.
 
 ```
 content/
@@ -584,36 +561,52 @@ template/
 build/
     website files...
 ```
-Standard project model build command: `hindsite build`
+Standard model build command: cd to the project directory then:
 
-### Disjoint project model
-Same as Standard model but contents, template and build directories are not all
-contained in a single directory. This is useful if you need to build multiple
-websites from the same content.
+    hindsite build
 
 ### Minimal project model
-A shared content and template directory containing the build directory.
+The minimal project consistes of a common content and template directory
+containing the build directory.
 
 ```
 content and template files...
 build/
     website files...
 ```
-Minimal project model build command: `hindsite build -content . -template .`
+Minimal model build command: cd to the project directory then:
+
+    hindsite build -content . -template .
 
 This model may be useful for simple projects but it's not a good idea to mix
 content and design like this if you plan to share or reuse your project
 template.
 
+### Multi-content and Multi-template projects
+Content and template directories are not bound exclusively to each other: a
+single template process multiple content directories just as a single content
+directory can be processed by multiple templates.
+
 
 ## Static files
-A static is j file in the content or template directories that is not a
+A static is a file in the content or template directories that is not a
 document or a template or a configuration file. Static files (typically CSS and
 images) are copied verbatim to the corresponding location in the build directory
 by the build command. The content directory is processed after the template
 directory.
 
 ### Static file exclusion
+The `config.{toml,yaml}` configuration file `exclude` value is a `|` separated
+list of file names to be excluded (wildcards allowed). Static files that match
+these files names are not copied to the build directory. The `exclude` file
+names can contain wildcards conforming to the Go [filepath.Match()
+function](https://golang.org/pkg/path/filepath/#Match). To exclude entire
+directories specify a directory path relative to the content or templates
+directories ending with a slash character.
+
+NOTE: I think we should extend `exclude` to all files, it's more general and
+simpler to understand.
+
 
 ## Content document markup
 Content documents can be written in Markdown or Rimu.
@@ -644,15 +637,12 @@ hindsite serve [-port PORT] [-project PROJECT_DIR] [-build BUILD_DIR]
 hindsite -h | --help | help
 
 ```
-<!-- - If content, template or build directory paths are relative they are relative
-  to the project directory. -->
 - `PROJECT_DIR` defaults to `.`
 - `CONTENT_DIR` defaults to `content`
 - `BUILD_DIR` defaults to `build`
 - `TEMPLATE_DIR` defaults to `template`
 - `INDEX_DIR` defaults to `BUILD_DIR/indexes`
 - All commands support the `-v` (verbose) option).
-- Build command supports the `-n` (dry run) option.
 
 ### Init command
 Creates new project content directory from an existing template directory.
@@ -672,13 +662,13 @@ Build static website from content and template directories.
   configuration parameter and template variable, for example
   `-set urlprefix=/blog`.
 - If the `-clean` option is specified the the entire contents of the build
-  directory is deleted, forcing all files to be rebuilt. By default only missing
-  and modified files are processed.
+  directory is deleted, forcing all files to be rebuilt. By default, only new
+  and updated documents or documents whose layout template has been modified are
+  processed.
 
 Build sequence:
 
 - Check for pathalogical content, template and build directories overlap.
-- Check the template directory structure is mirrored in the content directory.
 - Check that all directory paths and content document file names are slugified.
 - Check configuration file validity.
 - Delete contents of build directory (`-clean` build option).
@@ -687,9 +677,9 @@ Build sequence:
 - Copy static files from content to build directory (content directory files
   take precedence).
 - Process all content documents.
-- Process each indexed directory generating index and document web pages.
+- Process each indexed directory generating index web pages.
 
-Corner cases examples:
+Corner-case examples:
 
 ```
 # Template and content in ./docs output to ./build

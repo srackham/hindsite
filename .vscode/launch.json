@@ -22,7 +22,8 @@
             "program": "${fileDirname}",
             "env": {},
             // "args": ["build","-project","${fileDirname}/../examples/minimal"],
-            "args": ["build","-project","${fileDirname}/../examples/blog"],
+            // "args": ["build","-project","${fileDirname}/../examples/blog"],
+            "args": ["build","-project","/tmp/blog"],
             "showLog": true
         }
     ]

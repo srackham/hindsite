@@ -21,4 +21,4 @@ The overriding design criteria are simplicity and transparency.
 
 Hindsite is written in Go and it's very fast, give it a go.
 
-See the [Hindsite Design Spec](design-spec.html).
+See the [Hindsite Reference](reference.html).
