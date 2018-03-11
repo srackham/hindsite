@@ -12,7 +12,7 @@ var templateFileNames = stringlist{"all.html", "recent.html", "tags.html", "tag.
 
 type index struct {
 	templateDir string                 // The template directory that contains the index templates.
-	buildDir    string                 // The build directory that the index pages are written.
+	indexDir    string                 // The build directory that the index pages are written.
 	url         string                 // URL of index directory.
 	docs        []*document            // Parsed documents belonging to index.
 	tagdocs     map[string][]*document // Groups indexed documents by tag.
@@ -20,8 +20,9 @@ type index struct {
 
 type indexes []index
 
-// Search templates directory for indexes and add them to indexes.
-func (idxs *indexes) init(templateDir string) error {
+// Search templateDir directory for indexed directories and add them to indexes.
+// indexDir is the directory in the build directory that contains built indexes.
+func (idxs *indexes) init(indexDir, templateDir string) error {
 	err := filepath.Walk(templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -45,7 +46,7 @@ func (idxs *indexes) init(templateDir string) error {
 				if err != nil {
 					return err
 				}
-				idx.buildDir = filepath.Join(Cmd.buildDir, p)
+				idx.indexDir = filepath.Join(Cmd.indexDir, p)
 				if p == "." {
 					p = ""
 				}
@@ -91,12 +92,13 @@ func (idx index) build() error {
 		if err := mkMissingDir(filepath.Dir(outfile)); err != nil {
 			return err
 		}
+		verbose("write index: " + outfile)
 		return writeFile(outfile, html)
 	}
 	tmplfile := filepath.Join(idx.templateDir, "all.html")
 	var outfile string
 	if fileExists(tmplfile) {
-		outfile = filepath.Join(idx.buildDir, "all.html")
+		outfile = filepath.Join(idx.indexDir, "all.html")
 		err := render(tmplfile, docsByDate(idx.docs, -1), outfile)
 		if err != nil {
 			return err
@@ -104,7 +106,7 @@ func (idx index) build() error {
 	}
 	tmplfile = filepath.Join(idx.templateDir, "recent.html")
 	if fileExists(tmplfile) {
-		outfile = filepath.Join(idx.buildDir, "recent.html")
+		outfile = filepath.Join(idx.indexDir, "recent.html")
 		err := render(tmplfile, docsByDate(idx.docs, 5), outfile)
 		if err != nil {
 			return err
@@ -120,7 +122,7 @@ func (idx index) build() error {
 			}
 		}
 		if fileExists(tagsTemplate) {
-			outfile = filepath.Join(idx.buildDir, "tags.html")
+			outfile = filepath.Join(idx.indexDir, "tags.html")
 			err := render(tagsTemplate, idx.tagsData(), outfile)
 			if err != nil {
 				return err
@@ -129,7 +131,7 @@ func (idx index) build() error {
 		if fileExists(tagTemplate) {
 			for tag := range idx.tagdocs {
 				err := render(tagsTemplate, docsByDate(idx.tagdocs[tag], -1),
-					filepath.Join(idx.buildDir, "tags", slugify(tag, nil)+".html"))
+					filepath.Join(idx.indexDir, "tags", slugify(tag, nil)+".html"))
 				if err != nil {
 					return err
 				}

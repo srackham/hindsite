@@ -234,7 +234,7 @@ func (cmd *command) build() error {
 	}
 	// Initialize indexes builder.
 	idxs := indexes{}
-	idxs.init(cmd.templateDir)
+	idxs.init(cmd.indexDir, cmd.templateDir)
 	// Render content documents and copy static files from the content directory.
 	err := filepath.Walk(cmd.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
