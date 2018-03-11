@@ -81,6 +81,9 @@ func (idxs indexes) addDocument(doc *document) {
 	for i, idx := range idxs {
 		if pathIsInDir(doc.templatepath, idx.templateDir) {
 			idxs[i].docs = append(idx.docs, doc)
+			if doc.rootIndex == nil {
+				doc.rootIndex = &idxs[i]
+			}
 		}
 	}
 }
@@ -96,25 +99,6 @@ func (idxs indexes) build() error {
 }
 
 func (idx index) build() error {
-	tmplfile := filepath.Join(idx.templateDir, "all.html")
-	var outfile string
-	if fileExists(tmplfile) {
-		outfile = filepath.Join(idx.indexDir, "all.html")
-		err := renderTemplate(tmplfile, docsByDate(idx.docs, -1), outfile)
-		verbose("write index: " + outfile)
-		if err != nil {
-			return err
-		}
-	}
-	tmplfile = filepath.Join(idx.templateDir, "recent.html")
-	if fileExists(tmplfile) {
-		outfile = filepath.Join(idx.indexDir, "recent.html")
-		err := renderTemplate(tmplfile, docsByDate(idx.docs, 5), outfile)
-		verbose("write index: " + outfile)
-		if err != nil {
-			return err
-		}
-	}
 	tagsTemplate := filepath.Join(idx.templateDir, "tags.html")
 	tagTemplate := filepath.Join(idx.templateDir, "tag.html")
 	if fileExists(tagsTemplate) || fileExists(tagTemplate) {
@@ -137,7 +121,7 @@ func (idx index) build() error {
 			slugs = append(slugs, slug)
 			idx.tagfiles[tag] = slug + ".html"
 		}
-		outfile = filepath.Join(idx.indexDir, "tags.html")
+		outfile := filepath.Join(idx.indexDir, "tags.html")
 		err := renderTemplate(tagsTemplate, idx.tagsData(), outfile)
 		verbose("write index: " + outfile)
 		if err != nil {
@@ -152,6 +136,25 @@ func (idx index) build() error {
 			if err != nil {
 				return err
 			}
+		}
+	}
+	tmplfile := filepath.Join(idx.templateDir, "all.html")
+	var outfile string
+	if fileExists(tmplfile) {
+		outfile = filepath.Join(idx.indexDir, "all.html")
+		err := renderTemplate(tmplfile, docsByDate(idx.docs, -1), outfile)
+		verbose("write index: " + outfile)
+		if err != nil {
+			return err
+		}
+	}
+	tmplfile = filepath.Join(idx.templateDir, "recent.html")
+	if fileExists(tmplfile) {
+		outfile = filepath.Join(idx.indexDir, "recent.html")
+		err := renderTemplate(tmplfile, docsByDate(idx.docs, 5), outfile)
+		verbose("write index: " + outfile)
+		if err != nil {
+			return err
 		}
 	}
 	return nil

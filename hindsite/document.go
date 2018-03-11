@@ -22,6 +22,7 @@ type document struct {
 	layoutpath   string
 	templatepath string // Virtual path used to find document related templates.
 	content      string // Markup text (without front matter header).
+	rootIndex    *index // Top-level document index (nil if document is not indexed).
 	// Front matter.
 	title    string
 	date     time.Time
@@ -190,11 +191,22 @@ func (doc *document) frontMatter() (data templateData) {
 	data = templateData{}
 	data["title"] = doc.title
 	data["date"] = doc.date.Format("02-Jan-2006")
-	data["tags"] = strings.Join(doc.tags, ", ")
 	data["synopsis"] = doc.synopsis
 	data["addendum"] = doc.addendum
 	data["slug"] = doc.slug
 	data["url"] = doc.url
+	tags := []map[string]string{}
+	for _, tag := range doc.tags {
+		url := ""
+		if doc.rootIndex != nil {
+			url = path.Join(doc.rootIndex.url, "tags", doc.rootIndex.tagfiles[tag])
+		}
+		tags = append(tags, map[string]string{
+			"tag": tag,
+			"url": url,
+		})
+	}
+	data["tags"] = tags
 	return data
 }
 
