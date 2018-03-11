@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -29,6 +30,7 @@ type document struct {
 	url      string // Absolute or root-relative URL.
 	tags     []string
 	draft    bool
+	slug     string
 }
 
 // Parse document content and front matter.
@@ -69,6 +71,11 @@ func (doc *document) parseFile(contentfile string) error {
 	err = doc.extractFrontMatter()
 	if err != nil {
 		return err
+	}
+	// If necessary change output file names to match document slug variable.
+	if doc.slug != "" {
+		doc.buildpath = filepath.Join(filepath.Dir(doc.buildpath), doc.slug+".html")
+		doc.url = path.Join(path.Dir(doc.url), doc.slug+".html")
 	}
 	// Find document layout template.
 	layouts, err := filesInPath(filepath.Dir(doc.templatepath), Cmd.templateDir, []string{"layout.html"}, 1)
@@ -126,6 +133,7 @@ func (doc *document) extractFrontMatter() error {
 		Tags        string
 		Categories  []string
 		Draft       bool
+		Slug        string
 	}{}
 	switch format {
 	case "toml":
@@ -171,6 +179,9 @@ func (doc *document) extractFrontMatter() error {
 	}
 	if !doc.draft { // File name tilda flag overrides embedded draft flag.
 		doc.draft = fm.Draft
+	}
+	if fm.Slug != "" {
+		doc.slug = fm.Slug
 	}
 	return nil
 }
