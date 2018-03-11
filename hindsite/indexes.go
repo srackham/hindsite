@@ -14,7 +14,7 @@ type index struct {
 	indexDir    string                 // The build directory that the index pages are written.
 	url         string                 // URL of index directory.
 	docs        []*document            // Parsed documents belonging to index.
-	tagdocs     map[string][]*document // Groups indexed documents by tag.
+	tagdocs     map[string][]*document // Partitions index documents by tag.
 	tagfiles    map[string]string      // Slugified tag file names.
 }
 
@@ -63,7 +63,7 @@ func (idxs *indexes) init(templateDir, buildDir, indexDir string) error {
 					return err
 				}
 				idx.indexDir = filepath.Join(indexDir, p)
-				p, err = filepath.Rel(buildDir, indexDir)
+				p, err = filepath.Rel(buildDir, idx.indexDir)
 				if err != nil {
 					return err
 				}
@@ -137,24 +137,20 @@ func (idx index) build() error {
 			slugs = append(slugs, slug)
 			idx.tagfiles[tag] = slug + ".html"
 		}
-		if fileExists(tagsTemplate) {
-			outfile = filepath.Join(idx.indexDir, "tags.html")
-			err := renderTemplate(tagsTemplate, idx.tagsData(), outfile)
+		outfile = filepath.Join(idx.indexDir, "tags.html")
+		err := renderTemplate(tagsTemplate, idx.tagsData(), outfile)
+		verbose("write index: " + outfile)
+		if err != nil {
+			return err
+		}
+		for tag := range idx.tagdocs {
+			data := docsByDate(idx.tagdocs[tag], -1)
+			data["tag"] = tag
+			outfile = filepath.Join(idx.indexDir, "tags", idx.tagfiles[tag])
+			err := renderTemplate(tagTemplate, data, outfile)
 			verbose("write index: " + outfile)
 			if err != nil {
 				return err
-			}
-		}
-		if fileExists(tagTemplate) {
-			for tag := range idx.tagdocs {
-				data := docsByDate(idx.tagdocs[tag], -1)
-				data["tag"] = tag
-				outfile = filepath.Join(idx.indexDir, "tags", idx.tagfiles[tag])
-				err := renderTemplate(tagTemplate, data, outfile)
-				verbose("write index: " + outfile)
-				if err != nil {
-					return err
-				}
 			}
 		}
 	}
@@ -180,7 +176,7 @@ func docsByDate(docs []*document, n int) templateData {
 }
 
 func (idx index) tagsData() templateData {
-	tags := []map[string]string{}
+	tags := []map[string]string{} // An array of "tag", "url" key value maps.
 	for tag := range idx.tagdocs {
 		data := map[string]string{
 			"tag": tag,
