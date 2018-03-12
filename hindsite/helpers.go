@@ -29,13 +29,9 @@ func verbose(message string) {
 	}
 }
 
-func renderTemplate(tmplfile string, data templateData, outfile string) error {
-	tmpl, err := template.ParseFiles(tmplfile)
-	if err != nil {
-		return err
-	}
+func renderTemplate(templates *template.Template, name string, data templateData, outfile string) error {
 	buf := bytes.NewBufferString("")
-	if err := tmpl.Execute(buf, data); err != nil {
+	if err := templates.ExecuteTemplate(buf, name, data); err != nil {
 		return err
 	}
 	html := buf.String()

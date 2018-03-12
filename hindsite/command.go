@@ -140,16 +140,16 @@ func (cmd *command) Parse(args []string) error {
 		}
 		return nil
 	}
-	if Cmd.contentDir != Cmd.templateDir {
-		if err := checkOverlap("content", Cmd.contentDir, "template", cmd.templateDir); err != nil {
+	if cmd.contentDir != cmd.templateDir {
+		if err := checkOverlap("content", cmd.contentDir, "template", cmd.templateDir); err != nil {
 			return err
 		}
 	}
-	if filepath.Dir(Cmd.buildDir) != Cmd.contentDir {
-		if err := checkOverlap("build", Cmd.buildDir, "content", cmd.contentDir); err != nil {
+	if filepath.Dir(cmd.buildDir) != cmd.contentDir {
+		if err := checkOverlap("build", cmd.buildDir, "content", cmd.contentDir); err != nil {
 			return err
 		}
-		if err := checkOverlap("build", Cmd.buildDir, "template", cmd.templateDir); err != nil {
+		if err := checkOverlap("build", cmd.buildDir, "template", cmd.templateDir); err != nil {
 			return err
 		}
 	}
@@ -219,19 +219,35 @@ func (cmd *command) build() error {
 			}
 		}
 	}
+	templates := template.New("")
 	if cmd.contentDir != cmd.templateDir {
-		// Copy static files from template directory to build directory.
+		// Copy static files from template directory to build directory and compile templates.
 		err := filepath.Walk(cmd.templateDir, func(f string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
-			// Skip configuration and template files.
-			switch filepath.Ext(f) {
-			case ".toml", ".yaml", ".html":
-				return nil
-			}
 			if !info.IsDir() {
-				return cmd.copyStaticFile(f)
+				switch filepath.Ext(f) {
+				case ".toml", ".yaml":
+					// Skip configuration file.
+					return nil
+				case ".html":
+					// Compile template.
+					text, err := readFile(f)
+					if err != nil {
+						return err
+					}
+					name, err := filepath.Rel(cmd.templateDir, f)
+					if err != nil {
+						return err
+					}
+					_, err = templates.New(name).Parse(text)
+					if err != nil {
+						return err
+					}
+				default:
+					return cmd.copyStaticFile(f)
+				}
 			}
 			return nil
 		})
@@ -246,7 +262,7 @@ func (cmd *command) build() error {
 			return err
 		}
 		if info.IsDir() {
-			if f == Cmd.buildDir {
+			if f == cmd.buildDir {
 				// Do not process the build directory.
 				return filepath.SkipDir
 			}
@@ -290,7 +306,7 @@ func (cmd *command) build() error {
 	for _, doc := range docs {
 		idxs.addDocument(doc)
 	}
-	err = idxs.build()
+	err = idxs.build(templates)
 	if err != nil {
 		return err
 	}
@@ -303,7 +319,11 @@ func (cmd *command) build() error {
 		data := templateData{}
 		data.add(doc.frontMatter())
 		data["body"] = template.HTML(doc.render())
-		err = renderTemplate(doc.layoutpath, data, doc.buildpath)
+		tmpl, err := filepath.Rel(cmd.templateDir, doc.layoutpath)
+		if err != nil {
+			return err
+		}
+		err = renderTemplate(templates, tmpl, data, doc.buildpath)
 		if err != nil {
 			return err
 		}
