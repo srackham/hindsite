@@ -219,7 +219,7 @@ func (cmd *command) build() error {
 			}
 		}
 	}
-	templates := template.New("")
+	tmpls := newTemplates(cmd.templateDir)
 	if cmd.contentDir != cmd.templateDir {
 		// Copy static files from template directory to build directory and compile templates.
 		err := filepath.Walk(cmd.templateDir, func(f string, info os.FileInfo, err error) error {
@@ -233,15 +233,9 @@ func (cmd *command) build() error {
 					return nil
 				case ".html":
 					// Compile template.
-					text, err := readFile(f)
-					if err != nil {
-						return err
-					}
-					name, err := filepath.Rel(cmd.templateDir, f)
-					if err != nil {
-						return err
-					}
-					_, err = templates.New(name).Parse(text)
+					tmpl := tmpls.name(f)
+					verbose("add template: " + tmpl)
+					err := tmpls.add(tmpl)
 					if err != nil {
 						return err
 					}
@@ -306,7 +300,7 @@ func (cmd *command) build() error {
 	for _, doc := range docs {
 		idxs.addDocument(doc)
 	}
-	err = idxs.build(templates)
+	err = idxs.build(tmpls)
 	if err != nil {
 		return err
 	}
@@ -319,11 +313,8 @@ func (cmd *command) build() error {
 		data := templateData{}
 		data.add(doc.frontMatter())
 		data["body"] = template.HTML(doc.render())
-		tmpl, err := filepath.Rel(cmd.templateDir, doc.layoutpath)
-		if err != nil {
-			return err
-		}
-		err = renderTemplate(templates, tmpl, data, doc.buildpath)
+		tmpl := tmpls.name(doc.layoutpath)
+		err = tmpls.render(tmpl, data, doc.buildpath)
 		if err != nil {
 			return err
 		}

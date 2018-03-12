@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -27,18 +25,6 @@ func verbose(message string) {
 	if Cmd.verbose {
 		fmt.Println(message)
 	}
-}
-
-func renderTemplate(templates *template.Template, name string, data templateData, outfile string) error {
-	buf := bytes.NewBufferString("")
-	if err := templates.ExecuteTemplate(buf, name, data); err != nil {
-		return err
-	}
-	html := buf.String()
-	if err := mkMissingDir(filepath.Dir(outfile)); err != nil {
-		return err
-	}
-	return writeFile(outfile, html)
 }
 
 // Transform text into a slug (lowercase alpha-numeric + hyphens).

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"os"
 	"path"
 	"path/filepath"
@@ -11,7 +10,7 @@ import (
 )
 
 type index struct {
-	templateDir string                 // The directory that contains the index templates (relative to the project template directory).
+	templateDir string                 // The directory that contains the index templates.
 	indexDir    string                 // The build directory that the index pages are written to.
 	url         string                 // URL of index directory.
 	docs        []*document            // Parsed documents belonging to index.
@@ -58,11 +57,11 @@ func (idxs *indexes) init(templateDir, buildDir, indexDir string) error {
 			}
 			if found {
 				idx := newIndex()
+				idx.templateDir = f
 				p, err := filepath.Rel(templateDir, f)
 				if err != nil {
 					return err
 				}
-				idx.templateDir = p
 				idx.indexDir = filepath.Join(indexDir, p)
 				p, err = filepath.Rel(buildDir, idx.indexDir)
 				if err != nil {
@@ -80,7 +79,7 @@ func (idxs *indexes) init(templateDir, buildDir, indexDir string) error {
 // Add document to all indexes that it belongs to.
 func (idxs indexes) addDocument(doc *document) {
 	for i, idx := range idxs {
-		if pathIsInDir(doc.templatepath, filepath.Join(Cmd.templateDir, idx.templateDir)) {
+		if pathIsInDir(doc.templatepath, idx.templateDir) {
 			idxs[i].docs = append(idx.docs, doc)
 			if doc.rootIndex == nil {
 				doc.rootIndex = &idxs[i]
@@ -90,24 +89,24 @@ func (idxs indexes) addDocument(doc *document) {
 }
 
 // Build all indexes.
-func (idxs indexes) build(templates *template.Template) error {
+func (idxs indexes) build(tmpls templates) error {
 	for _, idx := range idxs {
-		if err := idx.build(templates); err != nil {
+		if err := idx.build(tmpls); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (idx index) build(templates *template.Template) error {
-	tagsTemplate := filepath.Join(idx.templateDir, "tags.html")
-	tagTemplate := filepath.Join(idx.templateDir, "tag.html")
-	if templates.Lookup(tagsTemplate) != nil || templates.Lookup(tagTemplate) != nil {
-		if templates.Lookup(tagTemplate) == nil {
-			return fmt.Errorf("missing tag template: %s", tagTemplate)
-		}
-		if templates.Lookup(tagsTemplate) == nil {
+func (idx index) build(tmpls templates) error {
+	tagsTemplate := tmpls.name(idx.templateDir, "tags.html")
+	tagTemplate := tmpls.name(idx.templateDir, "tag.html")
+	if tmpls.contains(tagsTemplate) || tmpls.contains(tagTemplate) {
+		if !tmpls.contains(tagsTemplate) {
 			return fmt.Errorf("missing tags template: %s", tagsTemplate)
+		}
+		if !tmpls.contains(tagTemplate) {
+			return fmt.Errorf("missing tag template: %s", tagTemplate)
 		}
 		// Build idx.tagdocs[].
 		for _, doc := range idx.docs {
@@ -123,7 +122,7 @@ func (idx index) build(templates *template.Template) error {
 			idx.tagfiles[tag] = slug + ".html"
 		}
 		outfile := filepath.Join(idx.indexDir, "tags.html")
-		err := renderTemplate(templates, tagsTemplate, idx.tagsData(), outfile)
+		err := tmpls.render(tagsTemplate, idx.tagsData(), outfile)
 		verbose("write index: " + outfile)
 		if err != nil {
 			return err
@@ -132,27 +131,27 @@ func (idx index) build(templates *template.Template) error {
 			data := docsByDate(idx.tagdocs[tag], -1)
 			data["tag"] = tag
 			outfile = filepath.Join(idx.indexDir, "tags", idx.tagfiles[tag])
-			err := renderTemplate(templates, tagTemplate, data, outfile)
+			err := tmpls.render(tagTemplate, data, outfile)
 			verbose("write index: " + outfile)
 			if err != nil {
 				return err
 			}
 		}
 	}
-	tmpl := filepath.Join(idx.templateDir, "all.html")
+	tmpl := tmpls.name(idx.templateDir, "all.html")
 	var outfile string
-	if templates.Lookup(tmpl) != nil {
+	if tmpls.contains(tmpl) {
 		outfile = filepath.Join(idx.indexDir, "all.html")
-		err := renderTemplate(templates, tmpl, docsByDate(idx.docs, -1), outfile)
+		err := tmpls.render(tmpl, docsByDate(idx.docs, -1), outfile)
 		verbose("write index: " + outfile)
 		if err != nil {
 			return err
 		}
 	}
-	tmpl = filepath.Join(idx.templateDir, "recent.html")
-	if templates.Lookup(tmpl) != nil {
+	tmpl = tmpls.name(idx.templateDir, "recent.html")
+	if tmpls.contains(tmpl) {
 		outfile = filepath.Join(idx.indexDir, "recent.html")
-		err := renderTemplate(templates, tmpl, docsByDate(idx.docs, 5), outfile)
+		err := tmpls.render(tmpl, docsByDate(idx.docs, 5), outfile)
 		verbose("write index: " + outfile)
 		if err != nil {
 			return err
