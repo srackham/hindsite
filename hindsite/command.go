@@ -153,7 +153,7 @@ func (cmd *command) Parse(args []string) error {
 			return err
 		}
 	}
-	if !pathIsInDir(cmd.indexDir, cmd.buildDir) {
+	if !(pathIsInDir(cmd.indexDir, cmd.buildDir) || cmd.indexDir == cmd.buildDir) {
 		return fmt.Errorf("index directory must reside in build directory: %s", cmd.buildDir)
 	}
 	return nil
