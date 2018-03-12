@@ -250,7 +250,7 @@ func (cmd *command) build() error {
 		}
 	}
 	// Parse content documents and copy static files to the build directory.
-	docs := []*document{}
+	docs := documents{}
 	err := filepath.Walk(cmd.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err

@@ -34,6 +34,8 @@ type document struct {
 	slug     string
 }
 
+type documents = []*document
+
 // Parse document content and front matter.
 func (doc *document) parseFile(contentfile string) error {
 	if !fileExists(contentfile) {

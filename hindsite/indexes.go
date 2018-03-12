@@ -10,19 +10,19 @@ import (
 )
 
 type index struct {
-	templateDir string                 // The directory that contains the index templates.
-	indexDir    string                 // The build directory that the index pages are written to.
-	url         string                 // URL of index directory.
-	docs        []*document            // Parsed documents belonging to index.
-	tagdocs     map[string][]*document // Partitions index documents by tag.
-	tagfiles    map[string]string      // Slugified tag file names.
+	templateDir string               // The directory that contains the index templates.
+	indexDir    string               // The build directory that the index pages are written to.
+	url         string               // URL of index directory.
+	docs        documents            // Parsed documents belonging to index.
+	tagdocs     map[string]documents // Partitions index documents by tag.
+	tagfiles    map[string]string    // Slugified tag file names.
 }
 
 type indexes []index
 
 func newIndex() index {
 	idx := index{}
-	idx.tagdocs = map[string][]*document{}
+	idx.tagdocs = map[string]documents{}
 	idx.tagfiles = map[string]string{}
 	return idx
 }
@@ -162,7 +162,7 @@ func (idx index) build(tmpls templates) error {
 
 // Dcouments template data sorted by date descending.
 // n >= 0 limits the maxiumum number returned.
-func docsByDate(docs []*document, n int) templateData {
+func docsByDate(docs documents, n int) templateData {
 	// Sort index documents by decending date.
 	sort.Slice(docs, func(i, j int) bool {
 		return !docs[i].date.Before(docs[j].date)
