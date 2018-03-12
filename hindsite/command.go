@@ -25,6 +25,7 @@ type command struct {
 	port        string
 	clean       bool
 	verbose     bool
+	set         map[string]string // -set option name/values map.
 }
 
 // Cmd is global singleton.
@@ -32,6 +33,7 @@ var Cmd = command{}
 
 func (cmd *command) Parse(args []string) error {
 	cmd.port = "1212"
+	cmd.set = map[string]string{}
 	skip := false
 	for i, v := range args {
 		if skip {
@@ -88,9 +90,7 @@ func (cmd *command) Parse(args []string) error {
 				if m == nil {
 					return fmt.Errorf("illegal -set name=value argument: %s", arg)
 				}
-				if err := Config.set(m[1], m[2]); err != nil {
-					return err
-				}
+				cmd.set[m[1]] = m[2]
 			default:
 				panic("illegal arugment: " + v)
 			}
@@ -155,6 +155,12 @@ func (cmd *command) Parse(args []string) error {
 	}
 	if !(pathIsInDir(cmd.indexDir, cmd.buildDir) || cmd.indexDir == cmd.buildDir) {
 		return fmt.Errorf("index directory must reside in build directory: %s", cmd.buildDir)
+	}
+	// Set configuration values.
+	for k, v := range cmd.set {
+		if err := Config.set(k, v); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -303,6 +309,21 @@ func (cmd *command) build() error {
 		}
 		verbose("write:  " + doc.buildpath)
 		verbose(doc.String())
+	}
+	if Config.homepage != "" {
+		// Install home page.
+		src := Config.homepage
+		dst := filepath.Join(cmd.buildDir, "index.html")
+		if !fileExists(src) {
+			return fmt.Errorf("homepage file missing: %s", src)
+		}
+		if !cmd.upToDate(src, dst) {
+			verbose("copy homepage: " + src)
+			if err := copyFile(src, dst); err != nil {
+				return err
+			}
+			verbose("write:         " + dst)
+		}
 	}
 	return nil
 }
