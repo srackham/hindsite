@@ -19,7 +19,6 @@ import (
 type document struct {
 	contentpath  string
 	buildpath    string
-	layoutpath   string
 	templatepath string // Virtual path used to find document related templates.
 	content      string // Markup text (without front matter header).
 	rootIndex    *index // Top-level document index (nil if document is not indexed).
@@ -32,6 +31,7 @@ type document struct {
 	tags     []string
 	draft    bool
 	slug     string
+	layout   string // Document template name.
 }
 
 type documents = []*document
@@ -80,15 +80,17 @@ func (doc *document) parseFile(contentfile string) error {
 		doc.buildpath = filepath.Join(filepath.Dir(doc.buildpath), doc.slug+".html")
 		doc.url = path.Join(path.Dir(doc.url), doc.slug+".html")
 	}
-	// Find document layout template.
-	layouts, err := filesInPath(filepath.Dir(doc.templatepath), Cmd.templateDir, []string{"layout.html"}, 1)
-	if err != nil {
-		return err
+	if doc.layout == "" {
+		// Find document layout template.
+		layouts, err := filesInPath(filepath.Dir(doc.templatepath), Cmd.templateDir, []string{"layout.html"}, 1)
+		if err != nil {
+			return err
+		}
+		if len(layouts) == 0 {
+			return fmt.Errorf("missing layout.html template for: %s", doc.contentpath)
+		}
+		doc.layout = layouts[0]	// To be converted to template by caller.
 	}
-	if len(layouts) == 0 {
-		return fmt.Errorf("missing layout.html template for: %s", doc.contentpath)
-	}
-	doc.layoutpath = layouts[0]
 	return nil
 }
 
@@ -137,6 +139,7 @@ func (doc *document) extractFrontMatter() error {
 		Categories  []string
 		Draft       bool
 		Slug        string
+		Layout        string
 	}{}
 	switch format {
 	case "toml":
@@ -185,6 +188,9 @@ func (doc *document) extractFrontMatter() error {
 	}
 	if fm.Slug != "" {
 		doc.slug = fm.Slug
+	}
+	if fm.Layout != "" {
+		doc.layout = fm.Layout
 	}
 	return nil
 }

@@ -34,6 +34,11 @@ func (tmpls templates) name(elem ...string) string {
 	return filepath.ToSlash(name)
 }
 
+// Return template source file name.
+func (tmpls templates) fileName(name string) string {
+	return filepath.Join(tmpls.templateDir, name)
+}
+
 // Parses the corresponding file from the templates directory and adds it to templates.
 func (tmpls templates) add(name string) error {
 	tmplfile := filepath.Join(tmpls.templateDir, name)

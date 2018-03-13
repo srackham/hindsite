@@ -272,6 +272,9 @@ func (cmd *command) build() error {
 				verbose("skip draft: " + f)
 				return nil
 			}
+			if filepath.IsAbs(doc.layout) {
+				doc.layout = tmpls.name(doc.layout)
+			}
 			docs = append(docs, &doc)
 		case ".toml", ".yaml":
 			verbose("skip configuration: " + f)
@@ -306,15 +309,14 @@ func (cmd *command) build() error {
 	}
 	// Render documents.
 	for _, doc := range docs {
-		if cmd.upToDate(doc.contentpath, doc.buildpath) && cmd.upToDate(doc.layoutpath, doc.buildpath) {
+		if cmd.upToDate(doc.contentpath, doc.buildpath) && cmd.upToDate(tmpls.fileName(doc.layout), doc.buildpath) {
 			continue
 		}
 		verbose("render: " + doc.contentpath)
 		data := templateData{}
 		data.add(doc.frontMatter())
 		data["body"] = template.HTML(doc.render())
-		tmpl := tmpls.name(doc.layoutpath)
-		err = tmpls.render(tmpl, data, doc.buildpath)
+		err = tmpls.render(doc.layout, data, doc.buildpath)
 		if err != nil {
 			return err
 		}
