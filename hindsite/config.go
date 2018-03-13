@@ -13,8 +13,12 @@ type config struct {
 	homepage  string // Use this file in the build directory for /index.html.
 }
 
-// Config is global singleton.
+// Config global singleton.
 var Config config
+
+func init() {
+	Config.urlprefix = "/"
+}
 
 func (conf *config) set(name, value string) error {
 	switch name {
@@ -34,10 +38,5 @@ func (conf *config) set(name, value string) error {
 	default:
 		return fmt.Errorf("illegal configuration parameter name: %s", name)
 	}
-	return nil
-}
-
-// TODO ???
-func (conf *config) toURL(rootdir, filename string) error {
 	return nil
 }

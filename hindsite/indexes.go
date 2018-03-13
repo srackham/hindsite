@@ -108,6 +108,7 @@ func (idx index) build(tmpls templates) error {
 		if !tmpls.contains(tagTemplate) {
 			return fmt.Errorf("missing tag template: %s", tagTemplate)
 		}
+		// TODO: Break if all idx.docs are older than tags.html outfile.
 		// Build idx.tagdocs[].
 		for _, doc := range idx.docs {
 			for _, tag := range doc.tags {
@@ -128,6 +129,7 @@ func (idx index) build(tmpls templates) error {
 			return err
 		}
 		for tag := range idx.tagdocs {
+			// TODO: Break if all idx.tagdocs[tag] document s are older than outfile.
 			data := docsByDate(idx.tagdocs[tag], -1)
 			data["tag"] = tag
 			outfile = filepath.Join(idx.indexDir, "tags", idx.tagfiles[tag])

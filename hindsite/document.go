@@ -56,7 +56,7 @@ func (doc *document) parseFile(contentfile string) error {
 	p = filepath.Join(p, doc.title+".html")
 	doc.buildpath = filepath.Join(Cmd.buildDir, p)
 	doc.templatepath = filepath.Join(Cmd.templateDir, p)
-	doc.url = Config.urlprefix + "/" + filepath.ToSlash(p)
+	doc.url = path.Join(Config.urlprefix, filepath.ToSlash(p))
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		d, err := parseDate(doc.title[0:10], nil)
 		if err != nil {
@@ -89,7 +89,7 @@ func (doc *document) parseFile(contentfile string) error {
 		if len(layouts) == 0 {
 			return fmt.Errorf("missing layout.html template for: %s", doc.contentpath)
 		}
-		doc.layout = layouts[0]	// To be converted to template by caller.
+		doc.layout = layouts[0] // To be converted to template by caller.
 	}
 	return nil
 }
@@ -139,7 +139,7 @@ func (doc *document) extractFrontMatter() error {
 		Categories  []string
 		Draft       bool
 		Slug        string
-		Layout        string
+		Layout      string
 	}{}
 	switch format {
 	case "toml":
