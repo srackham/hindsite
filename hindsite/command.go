@@ -216,10 +216,6 @@ func (cmd *command) init() error {
 		if err := RestoreAssets(cmd.templateDir, ""); err != nil {
 			return err
 		}
-	} else {
-		if !dirExists(cmd.templateDir) {
-			return fmt.Errorf("missing template directory: " + cmd.templateDir)
-		}
 	}
 	// Initialize content from template directory.
 	if err := mkMissingDir(cmd.contentDir); err != nil {
