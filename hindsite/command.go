@@ -277,8 +277,7 @@ func (cmd *command) build() error {
 		}
 	}
 	if cmd.clean {
-		// Delete everything in the build directory. The deletes superfluous
-		// files and forces all files to be rebuilt.
+		// Delete everything in the build directory.
 		files, _ := filepath.Glob(filepath.Join(cmd.buildDir, "*"))
 		for _, f := range files {
 			if err := os.RemoveAll(f); err != nil {
@@ -408,6 +407,8 @@ func (cmd *command) build() error {
 	return nil
 }
 
+// Return true if the target file is newer than modified time or newer than any
+// document.
 func rebuild(target string, modified time.Time, docs ...*document) bool {
 	info, err := os.Stat(target)
 	if err != nil {

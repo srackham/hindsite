@@ -164,7 +164,7 @@ func (idx index) build(tmpls templates, modified time.Time) error {
 	tmpl = tmpls.name(idx.templateDir, "recent.html")
 	if tmpls.contains(tmpl) {
 		outfile = filepath.Join(idx.indexDir, "recent.html")
-		docs := idx.docs.byDate().first(5)
+		docs := idx.docs.byDate().first(Config.recent)
 		if rebuild(outfile, modified, docs...) {
 			err := tmpls.render(tmpl, docs.frontMatter(), outfile)
 			verbose("write index: " + outfile)
