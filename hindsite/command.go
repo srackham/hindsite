@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -25,6 +26,7 @@ type command struct {
 	topic       string
 	port        string
 	clean       bool
+	builtin     bool
 	verbose     bool
 	set         map[string]string // -set option name/values map.
 }
@@ -36,44 +38,46 @@ func (cmd *command) Parse(args []string) error {
 	cmd.port = "1212"
 	cmd.set = map[string]string{}
 	skip := false
-	for i, v := range args {
+	for i, opt := range args {
 		if skip {
 			skip = false
 			continue
 		}
 		switch {
 		case i == 0:
-			cmd.executable = v
+			cmd.executable = opt
 			if len(args) == 1 {
 				cmd.name = "help"
 			}
 		case i == 1:
-			if v == "-h" || v == "--help" {
-				v = "help"
+			if opt == "-h" || opt == "--help" {
+				opt = "help"
 			}
-			if !isCommand(v) {
-				return fmt.Errorf("illegal command: %s", v)
+			if !isCommand(opt) {
+				return fmt.Errorf("illegal command: %s", opt)
 			}
-			cmd.name = v
+			cmd.name = opt
 		case i == 2 && cmd.name == "help":
-			if !isCommand(v) {
-				return fmt.Errorf("illegal help topic: %s", v)
+			if !isCommand(opt) {
+				return fmt.Errorf("illegal help topic: %s", opt)
 			}
-			cmd.topic = v
-		case v == "-drafts":
+			cmd.topic = opt
+		case opt == "-drafts":
 			cmd.drafts = true
-		case v == "-slugify":
+		case opt == "-slugify":
 			cmd.slugify = true
-		case v == "-clean":
+		case opt == "-clean":
 			cmd.clean = true
-		case v == "-v":
+		case opt == "-builtin":
+			cmd.builtin = true
+		case opt == "-v":
 			cmd.verbose = true
-		case stringlist{"-project", "-content", "-template", "-build", "-index", "-port", "-set"}.Contains(v):
+		case stringlist{"-project", "-content", "-template", "-build", "-index", "-port", "-set"}.Contains(opt):
 			if i+1 >= len(args) {
-				return fmt.Errorf("missing %s argument value", v)
+				return fmt.Errorf("missing %s argument value", opt)
 			}
 			arg := args[i+1]
-			switch v {
+			switch opt {
 			case "-project":
 				cmd.projectDir = arg
 			case "-content":
@@ -93,11 +97,11 @@ func (cmd *command) Parse(args []string) error {
 				}
 				cmd.set[m[1]] = m[2]
 			default:
-				panic("illegal arugment: " + v)
+				panic("illegal arugment: " + opt)
 			}
 			skip = true
 		default:
-			return fmt.Errorf("illegal argument: %s", v)
+			return fmt.Errorf("illegal argument: %s", opt)
 		}
 	}
 	// Clean and convert directories to absolute paths.
@@ -187,16 +191,81 @@ func (cmd *command) Execute() error {
 	return err
 }
 
+func (cmd *command) init() error {
+	if dirExists(cmd.contentDir) {
+		files, err := ioutil.ReadDir(cmd.contentDir)
+		if err != nil {
+			return err
+		}
+		if len(files) > 0 {
+			return fmt.Errorf("non-empty content directory: " + cmd.contentDir)
+		}
+	}
+	if cmd.builtin {
+		// Load template directory from the built-in project.
+		if dirExists(cmd.templateDir) {
+			files, err := ioutil.ReadDir(cmd.templateDir)
+			if err != nil {
+				return err
+			}
+			if len(files) > 0 {
+				return fmt.Errorf("non-empty template directory: " + cmd.templateDir)
+			}
+		}
+		verbose("installing builtin template")
+		if err := RestoreAssets(cmd.templateDir, ""); err != nil {
+			return err
+		}
+	} else {
+		if !dirExists(cmd.templateDir) {
+			return fmt.Errorf("missing template directory: " + cmd.templateDir)
+		}
+	}
+	// Initialize content from template directory.
+	if err := mkMissingDir(cmd.contentDir); err != nil {
+		return err
+	}
+	err := filepath.Walk(cmd.templateDir, func(f string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if f == cmd.templateDir {
+			return nil
+		}
+		dst, err := pathTranslate(f, cmd.templateDir, cmd.contentDir)
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			verbose("make directory:   " + dst)
+			err = mkMissingDir(dst)
+		} else {
+			// Copy example documents to content directory.
+			switch filepath.Ext(f) {
+			case ".md", ".rmu":
+				verbose("copy example: " + f)
+				err = copyFile(f, dst)
+				if err != nil {
+					return err
+				}
+				verbose("write:        " + dst)
+			}
+		}
+		return err
+	})
+	return err
+}
+
 func (cmd *command) help() {
 	println("Usage: hindsite command [arguments]")
 }
 
 func (cmd *command) build() error {
 	if !dirExists(cmd.contentDir) {
-		return fmt.Errorf("content directory does not exist: " + cmd.contentDir)
+		return fmt.Errorf("missing content directory: " + cmd.contentDir)
 	}
 	if !dirExists(cmd.templateDir) {
-		return fmt.Errorf("template directory does not exist: " + cmd.templateDir)
+		return fmt.Errorf("missing template directory: " + cmd.templateDir)
 	}
 	if err := cmd.slugifyDir(cmd.contentDir); err != nil {
 		return err
@@ -235,6 +304,8 @@ func (cmd *command) build() error {
 				if isOlder(confMod, info.ModTime()) {
 					confMod = info.ModTime()
 				}
+			case ".md", ".rmu":
+				// Skip examples.
 			case ".html":
 				// Compile template.
 				if isOlder(confMod, info.ModTime()) {
@@ -410,7 +481,7 @@ func (cmd *command) slugifyDir(dir string) error {
 
 func (cmd *command) serve() error {
 	if !dirExists(cmd.buildDir) {
-		return fmt.Errorf("build directory does not exist: " + cmd.buildDir)
+		return fmt.Errorf("missing build directory: " + cmd.buildDir)
 	}
 	// Tweaked http.StripPrefix() handler
 	// (https://golang.org/pkg/net/http/#StripPrefix). If URL does not start
@@ -433,10 +504,4 @@ func (cmd *command) serve() error {
 	http.Handle("/", stripPrefix(Config.urlprefix, http.FileServer(http.Dir(cmd.buildDir))))
 	fmt.Printf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", cmd.buildDir, cmd.port)
 	return http.ListenAndServe(":"+cmd.port, nil)
-}
-
-func (cmd *command) init() error {
-	// TODO
-	// Use bindata RestoreAssets() to write the builtin example to the target template directory recursively.
-	return nil
 }

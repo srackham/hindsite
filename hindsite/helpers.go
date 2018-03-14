@@ -124,6 +124,18 @@ func pathIsInDir(p, dir string) bool {
 	return strings.HasPrefix(p, dir+string(filepath.Separator))
 }
 
+// Translate srcPath to corresponding path in dstRoot.
+func pathTranslate(srcPath, srcRoot, dstRoot string) (string, error) {
+	if !pathIsInDir(srcPath, srcRoot) {
+		panic("pathTranslate: srcPath not in srcRoot")
+	}
+	dstPath, err := filepath.Rel(srcRoot, srcPath)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dstRoot, dstPath), nil
+}
+
 // Search for files from base directory up to root directory.
 // Return found files.
 // Files are ordered by location (base to root).
