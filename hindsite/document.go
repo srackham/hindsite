@@ -3,9 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"os"
 	"path"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -19,9 +21,10 @@ import (
 type document struct {
 	contentpath  string
 	buildpath    string
-	templatepath string // Virtual path used to find document related templates.
-	content      string // Markup text (without front matter header).
-	rootIndex    *index // Top-level document index (nil if document is not indexed).
+	templatepath string    // Virtual path used to find document related templates.
+	content      string    // Markup text (without front matter header).
+	rootIndex    *index    // Top-level document index (nil if document is not indexed).
+	modified     time.Time // Document source file modified timestamp.
 	// Front matter.
 	title    string
 	date     time.Time
@@ -34,13 +37,18 @@ type document struct {
 	layout   string // Document template name.
 }
 
-type documents = []*document
+type documents []*document
 
 // Parse document content and front matter.
 func (doc *document) parseFile(contentfile string) error {
 	if !fileExists(contentfile) {
 		return fmt.Errorf("missing document: %s", contentfile)
 	}
+	info, err := os.Stat(contentfile)
+	if err != nil {
+		return err
+	}
+	doc.modified = info.ModTime()
 	doc.contentpath = contentfile
 	// Synthesis title, url, draft front matter from content document file name.
 	doc.title = fileName(contentfile)
@@ -234,4 +242,55 @@ func (doc *document) render() (html string) {
 		html = rimu.Render(doc.content, rimu.RenderOptions{})
 	}
 	return html
+}
+
+/*
+// Return true if all source document modified times are older than modtime.
+func (docs documents) allOlderThan(modtime time.Time) bool {
+	for _, doc := range docs {
+		if !isOlder(doc.modified, modtime) {
+			return false
+		}
+	}
+	return true
+}
+
+// Return true if all source documents are older than file f.
+func (docs documents) upToDate(f string) bool {
+	info, err := os.Stat(f)
+	if err != nil {
+		return false
+	}
+	return docs.allOlderThan(info.ModTime())
+}
+*/
+
+// Return documents slice sorted by date descending.
+func (docs documents) byDate() documents {
+	// Sort documents by decending date.
+	sort.Slice(docs, func(i, j int) bool {
+		return !docs[i].date.Before(docs[j].date)
+	})
+	return docs
+}
+
+// Return slice of first n documents.
+func (docs documents) first(n int) documents {
+	result := documents{}
+	for i, doc := range docs {
+		if n >= 0 && i >= n {
+			break
+		}
+		result = append(result, doc)
+	}
+	return result
+}
+
+// Return documents front matter template data.
+func (docs documents) frontMatter() templateData {
+	data := []templateData{}
+	for _, doc := range docs {
+		data = append(data, doc.frontMatter())
+	}
+	return templateData{"docs": data}
 }

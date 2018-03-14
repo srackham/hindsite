@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 )
 
 type index struct {
@@ -88,17 +89,18 @@ func (idxs indexes) addDocument(doc *document) {
 	}
 }
 
-// Build all indexes.
-func (idxs indexes) build(tmpls templates) error {
+// Build all indexes. modified is the date of the most recently modified
+// configuration or template file.
+func (idxs indexes) build(tmpls templates, modified time.Time) error {
 	for _, idx := range idxs {
-		if err := idx.build(tmpls); err != nil {
+		if err := idx.build(tmpls, modified); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (idx index) build(tmpls templates) error {
+func (idx index) build(tmpls templates, modified time.Time) error {
 	tagsTemplate := tmpls.name(idx.templateDir, "tags.html")
 	tagTemplate := tmpls.name(idx.templateDir, "tag.html")
 	if tmpls.contains(tagsTemplate) || tmpls.contains(tagTemplate) {
@@ -108,76 +110,70 @@ func (idx index) build(tmpls templates) error {
 		if !tmpls.contains(tagTemplate) {
 			return fmt.Errorf("missing tag template: %s", tagTemplate)
 		}
-		// TODO: Break if all idx.docs are older than tags.html outfile.
-		// Build idx.tagdocs[].
-		for _, doc := range idx.docs {
-			for _, tag := range doc.tags {
-				idx.tagdocs[tag] = append(idx.tagdocs[tag], doc)
+		outfile := filepath.Join(idx.indexDir, "tags.html")
+		if rebuild(outfile, modified, idx.docs...) {
+			// Build idx.tagdocs[].
+			for _, doc := range idx.docs {
+				for _, tag := range doc.tags {
+					idx.tagdocs[tag] = append(idx.tagdocs[tag], doc)
+				}
+			}
+			// Build idx.tagfiles[].
+			slugs := []string{}
+			for tag := range idx.tagdocs {
+				slug := slugify(tag, slugs)
+				slugs = append(slugs, slug)
+				idx.tagfiles[tag] = slug + ".html"
+			}
+			// Render tags index.
+			err := tmpls.render(tagsTemplate, idx.tagsData(), outfile)
+			verbose("write index: " + outfile)
+			if err != nil {
+				return err
+			}
+			// Render per-tag indexes.
+			for tag := range idx.tagdocs {
+				outfile := filepath.Join(idx.indexDir, "tags", idx.tagfiles[tag])
+				if rebuild(outfile, modified, idx.tagdocs[tag]...) {
+					data := idx.tagdocs[tag].byDate().frontMatter()
+					data["tag"] = tag
+					err := tmpls.render(tagTemplate, data, outfile)
+					verbose("write index: " + outfile)
+					if err != nil {
+						return err
+					}
+				}
 			}
 		}
-		// Build idx.tagfiles[].
-		slugs := []string{}
-		for tag := range idx.tagdocs {
-			slug := slugify(tag, slugs)
-			slugs = append(slugs, slug)
-			idx.tagfiles[tag] = slug + ".html"
-		}
-		outfile := filepath.Join(idx.indexDir, "tags.html")
-		err := tmpls.render(tagsTemplate, idx.tagsData(), outfile)
-		verbose("write index: " + outfile)
-		if err != nil {
-			return err
-		}
-		for tag := range idx.tagdocs {
-			// TODO: Break if all idx.tagdocs[tag] document s are older than outfile.
-			data := docsByDate(idx.tagdocs[tag], -1)
-			data["tag"] = tag
-			outfile = filepath.Join(idx.indexDir, "tags", idx.tagfiles[tag])
-			err := tmpls.render(tagTemplate, data, outfile)
+	}
+	// Render all index.
+	tmpl := tmpls.name(idx.templateDir, "all.html")
+	var outfile string
+	if tmpls.contains(tmpl) {
+		outfile = filepath.Join(idx.indexDir, "all.html")
+		docs := idx.docs.byDate()
+		if rebuild(outfile, modified, docs...) {
+			err := tmpls.render(tmpl, docs.frontMatter(), outfile)
 			verbose("write index: " + outfile)
 			if err != nil {
 				return err
 			}
 		}
 	}
-	tmpl := tmpls.name(idx.templateDir, "all.html")
-	var outfile string
-	if tmpls.contains(tmpl) {
-		outfile = filepath.Join(idx.indexDir, "all.html")
-		err := tmpls.render(tmpl, docsByDate(idx.docs, -1), outfile)
-		verbose("write index: " + outfile)
-		if err != nil {
-			return err
-		}
-	}
+	// Render recent index.
 	tmpl = tmpls.name(idx.templateDir, "recent.html")
 	if tmpls.contains(tmpl) {
 		outfile = filepath.Join(idx.indexDir, "recent.html")
-		err := tmpls.render(tmpl, docsByDate(idx.docs, 5), outfile)
-		verbose("write index: " + outfile)
-		if err != nil {
-			return err
+		docs := idx.docs.byDate().first(5)
+		if rebuild(outfile, modified, docs...) {
+			err := tmpls.render(tmpl, docs.frontMatter(), outfile)
+			verbose("write index: " + outfile)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
-}
-
-// Dcouments template data sorted by date descending.
-// n >= 0 limits the maxiumum number returned.
-func docsByDate(docs documents, n int) templateData {
-	// Sort index documents by decending date.
-	sort.Slice(docs, func(i, j int) bool {
-		return !docs[i].date.Before(docs[j].date)
-	})
-	// Build list of document template data.
-	data := []templateData{}
-	for i, doc := range docs {
-		if n >= 0 && i >= n {
-			break
-		}
-		data = append(data, doc.frontMatter())
-	}
-	return templateData{"docs": data}
 }
 
 func (idx index) tagsData() templateData {

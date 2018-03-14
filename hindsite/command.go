@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 )
 
 type command struct {
@@ -211,7 +212,8 @@ func (cmd *command) build() error {
 		}
 	}
 	if cmd.clean {
-		// Delete everything in the build directory.
+		// Delete everything in the build directory. The deletes superfluous
+		// files and forces all files to be rebuilt.
 		files, _ := filepath.Glob(filepath.Join(cmd.buildDir, "*"))
 		for _, f := range files {
 			if err := os.RemoveAll(f); err != nil {
@@ -220,38 +222,41 @@ func (cmd *command) build() error {
 		}
 	}
 	tmpls := newTemplates(cmd.templateDir)
-	if cmd.contentDir != cmd.templateDir {
-		// Copy static files from template directory to build directory and compile templates.
-		err := filepath.Walk(cmd.templateDir, func(f string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if !info.IsDir() {
-				switch filepath.Ext(f) {
-				case ".toml", ".yaml":
-					// Skip configuration file.
-					return nil
-				case ".html":
-					// Compile template.
-					tmpl := tmpls.name(f)
-					verbose("add template: " + tmpl)
-					err := tmpls.add(tmpl)
-					if err != nil {
-						return err
-					}
-				default:
-					return cmd.copyStaticFile(f)
-				}
-			}
-			return nil
-		})
+	var confMod time.Time // The most recent date a change was made to a configuration file or a template file.
+	// Copy static files from template directory to build directory and parse all template files.
+	err := filepath.Walk(cmd.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
+		if !info.IsDir() {
+			switch filepath.Ext(f) {
+			case ".toml", ".yaml":
+				// Skip configuration file.
+				if isOlder(confMod, info.ModTime()) {
+					confMod = info.ModTime()
+				}
+			case ".html":
+				// Compile template.
+				if isOlder(confMod, info.ModTime()) {
+					confMod = info.ModTime()
+				}
+				tmpl := tmpls.name(f)
+				verbose("add template: " + tmpl)
+				err = tmpls.add(tmpl)
+			default:
+				if cmd.contentDir != cmd.templateDir {
+					err = cmd.copyStaticFile(f)
+				}
+			}
+		}
+		return err
+	})
+	if err != nil {
+		return err
 	}
 	// Parse content documents and copy static files to the build directory.
 	docs := documents{}
-	err := filepath.Walk(cmd.contentDir, func(f string, info os.FileInfo, err error) error {
+	err = filepath.Walk(cmd.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -277,22 +282,17 @@ func (cmd *command) build() error {
 			}
 			docs = append(docs, &doc)
 		case ".toml", ".yaml":
-			verbose("skip configuration: " + f)
-			return nil
+			if isOlder(confMod, info.ModTime()) {
+				confMod = info.ModTime()
+			}
 		case ".html":
-			if cmd.contentDir == cmd.templateDir {
-				verbose("skip template: " + f)
-			} else {
-				if err := cmd.copyStaticFile(f); err != nil {
-					return err
-				}
+			if cmd.contentDir != cmd.templateDir {
+				err = cmd.copyStaticFile(f)
 			}
 		default:
-			if err := cmd.copyStaticFile(f); err != nil {
-				return err
-			}
+			err = cmd.copyStaticFile(f)
 		}
-		return nil
+		return err
 	})
 	if err != nil {
 		return err
@@ -303,13 +303,13 @@ func (cmd *command) build() error {
 	for _, doc := range docs {
 		idxs.addDocument(doc)
 	}
-	err = idxs.build(tmpls)
+	err = idxs.build(tmpls, confMod)
 	if err != nil {
 		return err
 	}
 	// Render documents.
 	for _, doc := range docs {
-		if cmd.upToDate(doc.contentpath, doc.buildpath) && cmd.upToDate(tmpls.fileName(doc.layout), doc.buildpath) {
+		if !rebuild(doc.buildpath, confMod, doc) {
 			continue
 		}
 		verbose("render: " + doc.contentpath)
@@ -330,7 +330,7 @@ func (cmd *command) build() error {
 		if !fileExists(src) {
 			return fmt.Errorf("homepage file missing: %s", src)
 		}
-		if !cmd.upToDate(src, dst) {
+		if !upToDate(dst, src) {
 			verbose("copy homepage: " + src)
 			if err := copyFile(src, dst); err != nil {
 				return err
@@ -341,13 +341,27 @@ func (cmd *command) build() error {
 	return nil
 }
 
-func (cmd *command) upToDate(infile, outfile string) (result bool) {
-	// Return true if the -clean option is not set and the infile is older than the
-	// outfile.
-	if cmd.clean || !fileExists(outfile) {
-		return false
+func rebuild(target string, modified time.Time, docs ...*document) bool {
+	info, err := os.Stat(target)
+	if err != nil {
+		return true
 	}
-	result, err := fileIsOlder(infile, outfile)
+	targetMod := info.ModTime()
+	if isOlder(targetMod, modified) {
+		return true
+	}
+	for _, doc := range docs {
+		if isOlder(targetMod, doc.modified) {
+			return true
+		}
+	}
+	return false
+}
+
+// Return false target file is newer than the prerequisite file or if target
+// does not exist.
+func upToDate(target, prerequisite string) bool {
+	result, err := fileIsOlder(prerequisite, target)
 	if err != nil {
 		return false
 	}
@@ -372,7 +386,7 @@ func (cmd *command) copyStaticFile(f string) error {
 		return err
 	}
 	outfile = filepath.Join(cmd.buildDir, outfile)
-	if cmd.upToDate(f, outfile) {
+	if upToDate(outfile, f) {
 		return nil
 	}
 	verbose("copy static: " + f)
