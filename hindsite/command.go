@@ -305,18 +305,18 @@ func (cmd *command) build() error {
 					confMod = info.ModTime()
 				}
 			case ".md", ".rmu":
-				// Skip examples.
+				// Skip example.
 			case ".html":
 				// Compile template.
 				if isOlder(confMod, info.ModTime()) {
 					confMod = info.ModTime()
 				}
 				tmpl := tmpls.name(f)
-				verbose("add template: " + tmpl)
+				verbose("parse template: " + tmpl)
 				err = tmpls.add(tmpl)
 			default:
 				if cmd.contentDir != cmd.templateDir {
-					err = cmd.copyStaticFile(f)
+					err = cmd.copyStaticFile(f, cmd.templateDir, cmd.buildDir)
 				}
 			}
 		}
@@ -358,10 +358,10 @@ func (cmd *command) build() error {
 			}
 		case ".html":
 			if cmd.contentDir != cmd.templateDir {
-				err = cmd.copyStaticFile(f)
+				err = cmd.copyStaticFile(f, cmd.contentDir, cmd.buildDir)
 			}
 		default:
-			err = cmd.copyStaticFile(f)
+			err = cmd.copyStaticFile(f, cmd.contentDir, cmd.buildDir)
 		}
 		return err
 	})
@@ -439,37 +439,27 @@ func upToDate(target, prerequisite string) bool {
 	return result
 }
 
-// Copy file from content or template directory to corresponding location in build directory.
-// Creates any missing build directories.
-func (cmd *command) copyStaticFile(f string) error {
-	// Copy static files verbatim.
-	var inDir string
-	switch {
-	case pathIsInDir(f, cmd.contentDir):
-		inDir = cmd.contentDir
-	case pathIsInDir(f, cmd.templateDir):
-		inDir = cmd.templateDir
-	default:
-		return fmt.Errorf("file is not in content or template directory: %s", f)
-	}
-	outfile, err := filepath.Rel(inDir, f)
+// Copy srcFile to corresponding path in dstRoot.
+// Skip if the destination file is up to date.
+// Creates any missing destination directories.
+func (cmd *command) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
+	dstFile, err := pathTranslate(srcFile, srcRoot, dstRoot)
 	if err != nil {
 		return err
 	}
-	outfile = filepath.Join(cmd.buildDir, outfile)
-	if upToDate(outfile, f) {
+	if upToDate(dstFile, srcFile) {
 		return nil
 	}
-	verbose("copy static: " + f)
-	err = mkMissingDir(filepath.Dir(outfile))
+	verbose("copy static: " + srcFile)
+	err = mkMissingDir(filepath.Dir(dstFile))
 	if err != nil {
 		return err
 	}
-	err = copyFile(f, outfile)
+	err = copyFile(srcFile, dstFile)
 	if err != nil {
 		return err
 	}
-	verbose("write:       " + outfile)
+	verbose("write:       " + dstFile)
 	return nil
 }
 
