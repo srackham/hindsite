@@ -25,8 +25,8 @@ var Config config
 
 func newConfig() config {
 	conf := config{}
-	Config.urlprefix = "/"
-	Config.recent = 5
+	conf.urlprefix = "/"
+	conf.recent = 5
 	return conf
 }
 
@@ -111,4 +111,20 @@ func (conf *config) parseFile(f string) error {
 		}
 	}
 	return nil
+}
+
+// Return configuration as YAML formatted string.
+func (conf *config) data() (data templateData) {
+	data = templateData{}
+	data["author"] = conf.author
+	data["homepage"] = conf.homepage
+	data["recent"] = strconv.Itoa(conf.recent)
+	data["urlprefix"] = conf.urlprefix
+	return data
+}
+
+// Return configuration as YAML formatted string.
+func (conf *config) String() (result string) {
+	d, _ := yaml.Marshal(conf.data())
+	return string(d)
 }

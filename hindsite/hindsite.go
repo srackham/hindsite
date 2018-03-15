@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	Cmd = command{}
+	Cmd = newCommand()
 	Config = newConfig()
 	if err := Cmd.Parse(os.Args); err != nil {
 		die(err.Error())

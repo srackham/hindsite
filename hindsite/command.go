@@ -30,7 +30,11 @@ type command struct {
 }
 
 // Cmd is global singleton.
-var Cmd = command{}
+var Cmd command
+
+func newCommand() command {
+	return command{}
+}
 
 func (cmd *command) Parse(args []string) error {
 	cmd.port = "1212"
@@ -173,6 +177,7 @@ func (cmd *command) Execute() error {
 			}
 		}
 	}
+	verbose("config: \n" + Config.String())
 	// Execute command.
 	switch cmd.name {
 	case "build":
