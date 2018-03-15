@@ -69,7 +69,7 @@ func (cmd *command) Parse(args []string) error {
 			cmd.builtin = true
 		case opt == "-v":
 			cmd.verbose = true
-		case stringlist{"-project", "-content", "-template", "-build", "-index", "-port", "-set"}.Contains(opt):
+		case stringlist{"-project", "-content", "-template", "-build", "-index", "-port"}.Contains(opt):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
 			}
@@ -166,6 +166,7 @@ func (cmd *command) Execute() error {
 		for _, conf := range []string{"config.toml", "config.yaml"} {
 			f := filepath.Join(dir, conf)
 			if fileExists(f) {
+				verbose("read config: " + f)
 				if err := Config.parseFile(f); err != nil {
 					return err
 				}
@@ -464,6 +465,12 @@ func (cmd *command) slugifyDir(dir string) error {
 }
 
 func (cmd *command) serve() error {
+	if !dirExists(cmd.contentDir) {
+		fmt.Fprintln(os.Stderr, "warning: missing content directory: "+cmd.contentDir)
+	}
+	if !dirExists(cmd.templateDir) {
+		fmt.Fprintln(os.Stderr, "warning: missing template directory: "+cmd.templateDir)
+	}
 	if !dirExists(cmd.buildDir) {
 		return fmt.Errorf("missing build directory: " + cmd.buildDir)
 	}
