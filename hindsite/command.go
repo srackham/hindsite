@@ -161,12 +161,6 @@ func (cmd *command) Parse(args []string) error {
 	if !(pathIsInDir(cmd.indexDir, cmd.buildDir) || cmd.indexDir == cmd.buildDir) {
 		return fmt.Errorf("index directory must reside in build directory: %s", cmd.buildDir)
 	}
-	// Set configuration values.
-	for k, v := range cmd.set {
-		if err := Config.set(k, v); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -176,6 +170,24 @@ func isCommand(name string) bool {
 
 func (cmd *command) Execute() error {
 	var err error
+	// Parse configuration files from template and content directories (content directory config has precedence).
+	for _, dir := range []string{cmd.templateDir, cmd.contentDir} {
+		for _, conf := range []string{"config.toml", "config.yaml"} {
+			f := filepath.Join(dir, conf)
+			if fileExists(f) {
+				if err := Config.parseFile(f); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	// Set command-line configuration values (they take precedence over configuration files).
+	Config.updated = false
+	for k, v := range cmd.set {
+		if err := Config.set(k, v); err != nil {
+			return err
+		}
+	}
 	switch cmd.name {
 	case "build":
 		err = cmd.build()
@@ -287,6 +299,10 @@ func (cmd *command) build() error {
 	}
 	tmpls := newTemplates(cmd.templateDir)
 	var confMod time.Time // The most recent date a change was made to a configuration file or a template file.
+	if Config.updated {
+		// Command-line configuration parameters force all indexes and documents to rebuild.
+		confMod = time.Now()
+	}
 	// Copy static files from template directory to build directory and parse all template files.
 	err := filepath.Walk(cmd.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
