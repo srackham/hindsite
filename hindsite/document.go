@@ -41,7 +41,7 @@ type document struct {
 type documents []*document
 
 // Parse document content and front matter.
-func (doc *document) parseFile(contentfile string) error {
+func (doc *document) parseFile(contentfile string, tmpls templates) error {
 	if !fileExists(contentfile) {
 		return fmt.Errorf("missing document: %s", contentfile)
 	}
@@ -99,7 +99,7 @@ func (doc *document) parseFile(contentfile string) error {
 		if len(layouts) == 0 {
 			return fmt.Errorf("missing layout.html template for: %s", doc.contentpath)
 		}
-		doc.layout = layouts[0] // To be converted to template by caller.
+		doc.layout = tmpls.name(layouts[0])
 	}
 	return nil
 }

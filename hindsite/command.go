@@ -339,15 +339,12 @@ func (cmd *command) build() error {
 		switch filepath.Ext(f) {
 		case ".md", ".rmu":
 			doc := document{}
-			err = doc.parseFile(f)
+			err = doc.parseFile(f, tmpls)
 			if err != nil {
 			}
 			if doc.draft && !cmd.drafts {
 				verbose("skip draft: " + f)
 				return nil
-			}
-			if filepath.IsAbs(doc.layout) {
-				doc.layout = tmpls.name(doc.layout)
 			}
 			docs = append(docs, &doc)
 		case ".toml", ".yaml":
