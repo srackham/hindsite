@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -28,7 +27,6 @@ type command struct {
 	clean       bool
 	builtin     bool
 	verbose     bool
-	set         map[string]string // -set option name/values map.
 }
 
 // Cmd is global singleton.
@@ -36,7 +34,6 @@ var Cmd = command{}
 
 func (cmd *command) Parse(args []string) error {
 	cmd.port = "1212"
-	cmd.set = map[string]string{}
 	skip := false
 	for i, opt := range args {
 		if skip {
@@ -90,12 +87,6 @@ func (cmd *command) Parse(args []string) error {
 				cmd.indexDir = arg
 			case "-port":
 				cmd.port = arg
-			case "-set":
-				m := regexp.MustCompile(`^(\w+?)=(.*)$`).FindStringSubmatch(arg)
-				if m == nil {
-					return fmt.Errorf("illegal -set name=value argument: %s", arg)
-				}
-				cmd.set[m[1]] = m[2]
 			default:
 				panic("illegal arugment: " + opt)
 			}
@@ -181,13 +172,7 @@ func (cmd *command) Execute() error {
 			}
 		}
 	}
-	// Set command-line configuration values (they take precedence over configuration files).
-	Config.updated = false
-	for k, v := range cmd.set {
-		if err := Config.set(k, v); err != nil {
-			return err
-		}
-	}
+	// Execute command.
 	switch cmd.name {
 	case "build":
 		err = cmd.build()
@@ -299,10 +284,6 @@ func (cmd *command) build() error {
 	}
 	tmpls := newTemplates(cmd.templateDir)
 	var confMod time.Time // The most recent date a change was made to a configuration file or a template file.
-	if Config.updated {
-		// Command-line configuration parameters force all indexes and documents to rebuild.
-		confMod = time.Now()
-	}
 	// Copy static files from template directory to build directory and parse all template files.
 	err := filepath.Walk(cmd.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {

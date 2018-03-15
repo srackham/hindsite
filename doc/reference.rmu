@@ -645,7 +645,7 @@ The commands are:
 Use "hindsite help [command]" for more information about a command.
 
 hindsite init [-builtin] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
-hindsite build [-clean] [-drafts] [-slugify] [-set VALUE] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR] -index [INDEX_DIR]
+hindsite build [-clean] [-drafts] [-slugify] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR] -index [INDEX_DIR]
 hindsite serve [-port PORT] [-project PROJECT_DIR] [-build BUILD_DIR]
 hindsite -h | --help | help
 
@@ -672,9 +672,6 @@ Build static website from content and template directories.
 
 - Include draft pages if the `-drafts` option is specified.
 - Slugify content document paths if the  `-sligify` option is specified.
-- The `-set` option `VALUE` is formated like `name=value`. It sets a named
-  configuration parameter and template variable, for example
-  `-set urlprefix=/blog`.
 - If the `-clean` option is specified the the entire contents of the build
   directory is deleted, forcing all files to be rebuilt. By default, only new
   and updated documents or documents whose layout template has been modified are
@@ -716,10 +713,6 @@ built.
 An index file is rebuilt if any contributing documents been modified since it
 was last built or if any project configuration or template file has been
 modified since it was last built.
-
-Setting configuration options from the command-line using the `-set` option will
-trigger a rebuild of all documents and indexes. For production builds, use the
-configuration file instead.
 
 ### Serve command
 the _serve_ command opens a development server on the `BUILD_DIR` directory.

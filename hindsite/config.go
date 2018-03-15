@@ -18,7 +18,6 @@ type config struct {
 	homepage  string // Use this file (relative to the build directory) for /index.html.
 	recent    int    // Maximum number of recent index entries.
 	urlprefix string // For document and index page URLs.
-	updated   bool   // True if any config parameters were updated.
 }
 
 // Config global singleton.
@@ -61,7 +60,6 @@ func (conf *config) set(name, value string) error {
 	default:
 		return fmt.Errorf("illegal configuration parameter name: %s", name)
 	}
-	conf.updated = true
 	return nil
 }
 
