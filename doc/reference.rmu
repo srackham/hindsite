@@ -79,7 +79,11 @@ build/
 
 
 ## Design
-The overarching goals are simplicity and ease of use.
+The overarching goal is a minimal cognative footprint i.e. easy to understand.
+This is especially important for casual users who may go months between website updates.
+
+A hindsite project consists of three directories:
+TODO
 
 - Hindsite textual content (Markdown files) is rendered with templates to
   generate a static website.
@@ -103,7 +107,12 @@ The overarching goals are simplicity and ease of use.
 - No RSS -- hardly anyone even knows what it is anymore!
 
 
-## Template variables
+## Templates
+TODO
+- Templates don't have to be one per file, you can define multiple in a single file.
+- Layout templates can be specified in the front matter and can be any defined template.
+
+### Template variables
 Template variables are injected into template files during webpage generation.
 There are template variables for document front matter, index generation,
 configuration parameters and miscellaneous items such as the current date and
@@ -116,7 +125,7 @@ package](https://golang.org/pkg/html/template/) more about the use of templates.
 
 Template variable names are:
 
-- Alpha-numeric starting with an alpha character.
+- Lower case alpha-numeric starting with an alpha character.
 - Case sensitive.
 
 
@@ -192,9 +201,10 @@ template directories.
 
 **template**: A Go HTML template file (`.html`). Templates reside in the template
 directory. Templates are combined with document content and meta-data to
-generate HTML website pages.
+generate HTML document and index pages.
 
-**document templates**: Document templates are used to render content documents.
+**document templates**: Document templates (also called layout templates) are used to render content documents.
+TODO: Can be specified explicity by template name or ...
 Each content document has a template named `layout.html` in the corresponding
 template directory. If there is no `layout.html` in the corresponding template
 directory then the parent template directories are searched right up to the
@@ -395,8 +405,8 @@ hindsite generates tag index pages using tag meta-data and
 `tags.html` and `tag.html` templates.
 ## Document indexes
 - The indexes directory contains a directory for each indexed document directory.
-- The indexes directory is
-- Each index directory may contain:
+- The indexes directory is TODO
+- Each individual index directory may contain:
 
   * `recent.html`: a list of the most recent posts.
   * `all.html`: a list of the all posts.
@@ -413,7 +423,7 @@ with context-specific data.
 Variable contexts:
 
 - Layout (content document) templates.
-- Date index templates.
+- Document index templates.
 - Tag index templates.
 
 ## Configuration and front matter variables
@@ -432,17 +442,18 @@ TODO: Should multiple configuration files in the document path be aggregated
 Example `config.toml` file:
 
 ```
-# prepended to all synthesised root-relative URLs.
+# prepended to synthesised root-relative URLs.
 urlprefix = "/blog"
 
 # Build uses this to copy a file to /index.html (assuming you need it and it do not have it).
 # The value is a file path (relative to the build directory).
 homepage = "indexes/blog/recent.html"
 
-# Maximum number of recent index entries.
-recent = 10
+# Maximum number of all and recent index entries.
+??? all = 1000
+recent =k10
 
-# A `|` separated list of file names that should not be processed (wildcards allowed).
+# A `|` separated list of file and directory names that should not be processed (wildcards allowed).
 exclude = "config.rmu"
 
 # Default document author.
@@ -476,6 +487,7 @@ synopsis: An brief history of the origins of the foofoo valve.
 addendum: This article was updated March, 2018.
 date:     2018-02-16
 tags:     foo foo valve, qux, baz
+slug:     foofoo-valve-history
 draft:    true
 -->
 ```
@@ -500,6 +512,7 @@ categories = [
   "qux",
   "baz"
 ]
+slug = "foofoo-valve-history"
 draft = "true"
 +++
 ```
@@ -631,7 +644,7 @@ The commands are:
 
 Use "hindsite help [command]" for more information about a command.
 
-hindsite init [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
+hindsite init [-builtin] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
 hindsite build [-clean] [-drafts] [-slugify] [-set VALUE] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR] -index [INDEX_DIR]
 hindsite serve [-port PORT] [-project PROJECT_DIR] [-build BUILD_DIR]
 hindsite -h | --help | help
@@ -647,10 +660,11 @@ hindsite -h | --help | help
 ### Init command
 Creates new project content directory from an existing template directory.
 
+- If the `-builtin` option is specified the template directory will be
+  initialized with the built-in example project.
 - Clones the `TEMPLATE_DIR` directory structure to `CONTENT_DIR`.
 - Copies example content documents to `CONTENT_DIR`.
-- Creates `CONTENT_DIR` directory (if the `CONTENT_DIR` already exists init will
-  refuse to continue).
+- If the `CONTENT_DIR` contains existing files hindsite will refuse to continue.
 
 
 ### Build command
@@ -690,10 +704,28 @@ hindsite build -content . -template .
 
 ```
 
+#### Incremental build
+Hindsite only rebuilds those documents and indexes that require updating.
+Incremental builds are faster and they also facilitate incremental deployment.
+Use the `-clean` build command option if you want to force a complete rebuild.
+
+A document is rebuilt if it has been modified since it was last built or if any
+project configuration or template file has been modified since it was last
+built.
+
+An index file is rebuilt if any contributing documents been modified since it
+was last built or if any project configuration or template file has been
+modified since it was last built.
+
+Setting configuration options from the command-line using the `-set` option will
+trigger a rebuild of all documents and indexes. For production builds, use the
+configuration file instead.
+
 ### Serve command
-Open a development server on the `BUILD_DIR` directory.
+the _serve_ command opens a development server on the `BUILD_DIR` directory.
 
 - The `-port PORT` option sets the server port (defaults to 1212).
+- I correctly handles the `urlprefix` configuration option.
 
 
 ## Implementation ideas
