@@ -28,6 +28,7 @@ type document struct {
 	// Front matter.
 	title    string
 	date     time.Time
+	author   string
 	synopsis string
 	addendum string
 	url      string // Absolute or root-relative URL.
@@ -75,6 +76,7 @@ func (doc *document) parseFile(contentfile string) error {
 	}
 	doc.title = strings.Title(strings.Replace(doc.title, "-", " ", -1))
 	// Parse embedded front matter.
+	doc.author = Config.author // Default author.
 	doc.content, err = readFile(doc.contentpath)
 	if err != nil {
 		return err
@@ -141,10 +143,11 @@ func (doc *document) extractFrontMatter() error {
 		Title       string
 		Date        string
 		Synopsis    string
+		Author      string
 		Description string
 		Addendum    string
-		Tags        string
-		Categories  []string
+		Tags        string   // Comma-separated tags.
+		Categories  []string // Tags slice.
 		Draft       bool
 		Slug        string
 		Layout      string
@@ -172,6 +175,9 @@ func (doc *document) extractFrontMatter() error {
 			return err
 		}
 		doc.date = d
+	}
+	if fm.Author != "" {
+		doc.author = fm.Author
 	}
 	if fm.Synopsis != "" {
 		doc.synopsis = fm.Synopsis
@@ -207,6 +213,7 @@ func (doc *document) frontMatter() (data templateData) {
 	data = templateData{}
 	data["title"] = doc.title
 	data["date"] = doc.date.Format("02-Jan-2006")
+	data["author"] = doc.author
 	data["synopsis"] = doc.synopsis
 	data["addendum"] = doc.addendum
 	data["slug"] = doc.slug
@@ -243,27 +250,6 @@ func (doc *document) render() (html string) {
 	}
 	return html
 }
-
-/*
-// Return true if all source document modified times are older than modtime.
-func (docs documents) allOlderThan(modtime time.Time) bool {
-	for _, doc := range docs {
-		if !isOlder(doc.modified, modtime) {
-			return false
-		}
-	}
-	return true
-}
-
-// Return true if all source documents are older than file f.
-func (docs documents) upToDate(f string) bool {
-	info, err := os.Stat(f)
-	if err != nil {
-		return false
-	}
-	return docs.allOlderThan(info.ModTime())
-}
-*/
 
 // Return documents slice sorted by date descending.
 func (docs documents) byDate() documents {

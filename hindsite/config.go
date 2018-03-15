@@ -12,6 +12,7 @@ import (
 type config struct {
 	urlprefix string // For document and index page URLs.
 	homepage  string // Use this file in the build directory for /index.html.
+	author    string // Default document author.
 	recent    int    // Maximum number of recent index entries.
 }
 
@@ -25,6 +26,8 @@ func init() {
 
 func (conf *config) set(name, value string) error {
 	switch name {
+	case "author":
+		conf.author = value
 	case "homepage":
 		if !filepath.IsAbs(value) {
 			value = filepath.Join(Cmd.buildDir, value)
