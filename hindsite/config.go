@@ -20,9 +20,6 @@ type config struct {
 	urlprefix string // For document and index page URLs.
 }
 
-// Config global singleton.
-var Config config
-
 func newConfig() config {
 	conf := config{}
 	conf.urlprefix = "/"

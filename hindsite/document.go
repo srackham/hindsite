@@ -41,7 +41,7 @@ type document struct {
 type documents []*document
 
 // Parse document content and front matter.
-func (doc *document) parseFile(contentfile string, proj *project, tmpls templates) error {
+func (doc *document) parseFile(contentfile string, proj *project) error {
 	if !fileExists(contentfile) {
 		return fmt.Errorf("missing document: %s", contentfile)
 	}
@@ -65,7 +65,7 @@ func (doc *document) parseFile(contentfile string, proj *project, tmpls template
 	p = filepath.Join(p, doc.title+".html")
 	doc.buildpath = filepath.Join(proj.buildDir, p)
 	doc.templatepath = filepath.Join(proj.templateDir, p)
-	doc.url = path.Join(Config.urlprefix, filepath.ToSlash(p))
+	doc.url = path.Join(proj.conf.urlprefix, filepath.ToSlash(p))
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		d, err := parseDate(doc.title[0:10], nil)
 		if err != nil {
@@ -76,7 +76,7 @@ func (doc *document) parseFile(contentfile string, proj *project, tmpls template
 	}
 	doc.title = strings.Title(strings.Replace(doc.title, "-", " ", -1))
 	// Parse embedded front matter.
-	doc.author = Config.author // Default author.
+	doc.author = proj.conf.author // Default author.
 	doc.content, err = readFile(doc.contentpath)
 	if err != nil {
 		return err
@@ -99,7 +99,7 @@ func (doc *document) parseFile(contentfile string, proj *project, tmpls template
 		if len(layouts) == 0 {
 			return fmt.Errorf("missing layout.html template for: %s", doc.contentpath)
 		}
-		doc.layout = tmpls.name(layouts[0])
+		doc.layout = proj.tmpls.name(layouts[0])
 	}
 	return nil
 }

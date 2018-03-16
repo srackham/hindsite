@@ -68,7 +68,7 @@ func (idxs *indexes) init(proj *project) error {
 				if err != nil {
 					return err
 				}
-				idx.url = path.Join(Config.urlprefix, filepath.ToSlash(p))
+				idx.url = path.Join(proj.conf.urlprefix, filepath.ToSlash(p))
 				*idxs = append(*idxs, idx)
 			}
 		}
@@ -91,16 +91,17 @@ func (idxs indexes) addDocument(doc *document) {
 
 // Build all indexes. modified is the date of the most recently modified
 // configuration or template file.
-func (idxs indexes) build(proj *project, tmpls templates, modified time.Time) error {
+func (idxs indexes) build(proj *project, modified time.Time) error {
 	for _, idx := range idxs {
-		if err := idx.build(proj, tmpls, modified); err != nil {
+		if err := idx.build(proj, modified); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (idx index) build(proj *project, tmpls templates, modified time.Time) error {
+func (idx index) build(proj *project, modified time.Time) error {
+	tmpls := &proj.tmpls // Lexical shortcut.
 	tagsTemplate := tmpls.name(idx.templateDir, "tags.html")
 	tagTemplate := tmpls.name(idx.templateDir, "tag.html")
 	if tmpls.contains(tagsTemplate) || tmpls.contains(tagTemplate) {
@@ -164,7 +165,7 @@ func (idx index) build(proj *project, tmpls templates, modified time.Time) error
 	tmpl = tmpls.name(idx.templateDir, "recent.html")
 	if tmpls.contains(tmpl) {
 		outfile = filepath.Join(idx.indexDir, "recent.html")
-		docs := idx.docs.byDate().first(Config.recent)
+		docs := idx.docs.byDate().first(proj.conf.recent)
 		if rebuild(outfile, modified, docs...) {
 			err := tmpls.render(tmpl, docs.frontMatter(), outfile)
 			proj.println("write index: " + outfile)

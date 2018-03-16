@@ -6,7 +6,6 @@ import (
 
 func main() {
 	proj := newProject()
-	Config = newConfig()
 	if err := proj.parseArgs(os.Args); err != nil {
 		die(err.Error())
 	}

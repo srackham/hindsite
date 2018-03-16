@@ -27,7 +27,8 @@ type project struct {
 	clean       bool
 	builtin     bool
 	verbose     bool
-	// config      config // Root configuration.
+	conf        config // Root configuration.
+	tmpls       templates
 }
 
 func newProject() project {
@@ -174,18 +175,19 @@ func isCommand(name string) bool {
 func (proj *project) execute() error {
 	var err error
 	// Parse configuration files from template and content directories (content directory has precedence).
+	proj.conf = newConfig()
 	for _, dir := range []string{proj.templateDir, proj.contentDir} {
-		for _, conf := range []string{"config.toml", "config.yaml"} {
-			f := filepath.Join(dir, conf)
+		for _, cf := range []string{"config.toml", "config.yaml"} {
+			f := filepath.Join(dir, cf)
 			if fileExists(f) {
 				proj.println("read config: " + f)
-				if err := Config.parseFile(proj, f); err != nil {
+				if err := proj.conf.parseFile(proj, f); err != nil {
 					return err
 				}
 			}
 		}
 	}
-	proj.println("config: \n" + Config.String())
+	proj.println("config: \n" + proj.conf.String())
 	// Execute command.
 	switch proj.command {
 	case "build":
@@ -296,7 +298,7 @@ func (proj *project) build() error {
 			}
 		}
 	}
-	tmpls := newTemplates(proj.templateDir)
+	proj.tmpls = newTemplates(proj.templateDir)
 	var confMod time.Time // The most recent date a change was made to a configuration file or a template file.
 	// Copy static files from template directory to build directory and parse all template files.
 	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
@@ -317,9 +319,9 @@ func (proj *project) build() error {
 				if isOlder(confMod, info.ModTime()) {
 					confMod = info.ModTime()
 				}
-				tmpl := tmpls.name(f)
+				tmpl := proj.tmpls.name(f)
 				proj.println("parse template: " + tmpl)
-				err = tmpls.add(tmpl)
+				err = proj.tmpls.add(tmpl)
 			default:
 				if proj.contentDir != proj.templateDir {
 					err = proj.copyStaticFile(f, proj.templateDir, proj.buildDir)
@@ -347,7 +349,7 @@ func (proj *project) build() error {
 		switch filepath.Ext(f) {
 		case ".md", ".rmu":
 			doc := document{}
-			err = doc.parseFile(f, proj, tmpls)
+			err = doc.parseFile(f, proj)
 			if err != nil {
 			}
 			if doc.draft && !proj.drafts {
@@ -377,7 +379,7 @@ func (proj *project) build() error {
 	for _, doc := range docs {
 		idxs.addDocument(doc)
 	}
-	err = idxs.build(proj, tmpls, confMod)
+	err = idxs.build(proj, confMod)
 	if err != nil {
 		return err
 	}
@@ -390,16 +392,16 @@ func (proj *project) build() error {
 		data := templateData{}
 		data.add(doc.frontMatter())
 		data["body"] = template.HTML(doc.render())
-		err = tmpls.render(doc.layout, data, doc.buildpath)
+		err = proj.tmpls.render(doc.layout, data, doc.buildpath)
 		if err != nil {
 			return err
 		}
 		proj.println("write:  " + doc.buildpath)
 		proj.println(doc.String())
 	}
-	if Config.homepage != "" {
+	if proj.conf.homepage != "" {
 		// Install home page.
-		src := Config.homepage
+		src := proj.conf.homepage
 		dst := filepath.Join(proj.buildDir, "index.html")
 		if !fileExists(src) {
 			return fmt.Errorf("homepage file missing: %s", src)
@@ -502,7 +504,7 @@ func (proj *project) serve() error {
 			}
 		})
 	}
-	http.Handle("/", stripPrefix(Config.urlprefix, http.FileServer(http.Dir(proj.buildDir))))
+	http.Handle("/", stripPrefix(proj.conf.urlprefix, http.FileServer(http.Dir(proj.buildDir))))
 	fmt.Printf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port)
 	return http.ListenAndServe(":"+proj.port, nil)
 }
