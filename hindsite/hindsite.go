@@ -5,12 +5,12 @@ import (
 )
 
 func main() {
-	Cmd = newCommand()
+	proj := newProject()
 	Config = newConfig()
-	if err := Cmd.Parse(os.Args); err != nil {
+	if err := proj.parseArgs(os.Args); err != nil {
 		die(err.Error())
 	}
-	if err := Cmd.Execute(); err != nil {
+	if err := proj.execute(); err != nil {
 		die(err.Error())
 	}
 }

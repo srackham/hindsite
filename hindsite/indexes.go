@@ -39,8 +39,8 @@ func isIndexFile(filename string) bool {
 
 // Search templateDir directory for indexed directories and add them to indexes.
 // indexDir is the directory in the build directory that contains built indexes.
-func (idxs *indexes) init(templateDir, buildDir, indexDir string) error {
-	err := filepath.Walk(templateDir, func(f string, info os.FileInfo, err error) error {
+func (idxs *indexes) init(proj *project) error {
+	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -59,12 +59,12 @@ func (idxs *indexes) init(templateDir, buildDir, indexDir string) error {
 			if found {
 				idx := newIndex()
 				idx.templateDir = f
-				p, err := filepath.Rel(templateDir, f)
+				p, err := filepath.Rel(proj.templateDir, f)
 				if err != nil {
 					return err
 				}
-				idx.indexDir = filepath.Join(indexDir, p)
-				p, err = filepath.Rel(buildDir, idx.indexDir)
+				idx.indexDir = filepath.Join(proj.indexDir, p)
+				p, err = filepath.Rel(proj.buildDir, idx.indexDir)
 				if err != nil {
 					return err
 				}
@@ -91,16 +91,16 @@ func (idxs indexes) addDocument(doc *document) {
 
 // Build all indexes. modified is the date of the most recently modified
 // configuration or template file.
-func (idxs indexes) build(tmpls templates, modified time.Time) error {
+func (idxs indexes) build(proj *project, tmpls templates, modified time.Time) error {
 	for _, idx := range idxs {
-		if err := idx.build(tmpls, modified); err != nil {
+		if err := idx.build(proj, tmpls, modified); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (idx index) build(tmpls templates, modified time.Time) error {
+func (idx index) build(proj *project, tmpls templates, modified time.Time) error {
 	tagsTemplate := tmpls.name(idx.templateDir, "tags.html")
 	tagTemplate := tmpls.name(idx.templateDir, "tag.html")
 	if tmpls.contains(tagsTemplate) || tmpls.contains(tagTemplate) {
@@ -127,7 +127,7 @@ func (idx index) build(tmpls templates, modified time.Time) error {
 			}
 			// Render tags index.
 			err := tmpls.render(tagsTemplate, idx.tagsData(), outfile)
-			verbose("write index: " + outfile)
+			proj.println("write index: " + outfile)
 			if err != nil {
 				return err
 			}
@@ -138,7 +138,7 @@ func (idx index) build(tmpls templates, modified time.Time) error {
 					data := idx.tagdocs[tag].byDate().frontMatter()
 					data["tag"] = tag
 					err := tmpls.render(tagTemplate, data, outfile)
-					verbose("write index: " + outfile)
+					proj.println("write index: " + outfile)
 					if err != nil {
 						return err
 					}
@@ -154,7 +154,7 @@ func (idx index) build(tmpls templates, modified time.Time) error {
 		docs := idx.docs.byDate()
 		if rebuild(outfile, modified, docs...) {
 			err := tmpls.render(tmpl, docs.frontMatter(), outfile)
-			verbose("write index: " + outfile)
+			proj.println("write index: " + outfile)
 			if err != nil {
 				return err
 			}
@@ -167,7 +167,7 @@ func (idx index) build(tmpls templates, modified time.Time) error {
 		docs := idx.docs.byDate().first(Config.recent)
 		if rebuild(outfile, modified, docs...) {
 			err := tmpls.render(tmpl, docs.frontMatter(), outfile)
-			verbose("write index: " + outfile)
+			proj.println("write index: " + outfile)
 			if err != nil {
 				return err
 			}

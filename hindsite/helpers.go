@@ -20,13 +20,6 @@ func die(message string) {
 	os.Exit(1)
 }
 
-// Print message if `-v` verbose option set.
-func verbose(message string) {
-	if Cmd.verbose {
-		fmt.Println(message)
-	}
-}
-
 // Transform text into a slug (lowercase alpha-numeric + hyphens).
 func slugify(text string, exclude stringlist) string {
 	slug := text

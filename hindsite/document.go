@@ -41,7 +41,7 @@ type document struct {
 type documents []*document
 
 // Parse document content and front matter.
-func (doc *document) parseFile(contentfile string, tmpls templates) error {
+func (doc *document) parseFile(contentfile string, proj *project, tmpls templates) error {
 	if !fileExists(contentfile) {
 		return fmt.Errorf("missing document: %s", contentfile)
 	}
@@ -57,14 +57,14 @@ func (doc *document) parseFile(contentfile string, tmpls templates) error {
 		doc.draft = true
 		doc.title = doc.title[1:]
 	}
-	p, err := filepath.Rel(Cmd.contentDir, doc.contentpath)
+	p, err := filepath.Rel(proj.contentDir, doc.contentpath)
 	if err != nil {
 		return err
 	}
 	p = filepath.Dir(p)
 	p = filepath.Join(p, doc.title+".html")
-	doc.buildpath = filepath.Join(Cmd.buildDir, p)
-	doc.templatepath = filepath.Join(Cmd.templateDir, p)
+	doc.buildpath = filepath.Join(proj.buildDir, p)
+	doc.templatepath = filepath.Join(proj.templateDir, p)
 	doc.url = path.Join(Config.urlprefix, filepath.ToSlash(p))
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		d, err := parseDate(doc.title[0:10], nil)
@@ -92,7 +92,7 @@ func (doc *document) parseFile(contentfile string, tmpls templates) error {
 	}
 	if doc.layout == "" {
 		// Find document layout template.
-		layouts, err := filesInPath(filepath.Dir(doc.templatepath), Cmd.templateDir, []string{"layout.html"}, 1)
+		layouts, err := filesInPath(filepath.Dir(doc.templatepath), proj.templateDir, []string{"layout.html"}, 1)
 		if err != nil {
 			return err
 		}

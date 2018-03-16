@@ -30,15 +30,15 @@ func newConfig() config {
 	return conf
 }
 
-func (conf *config) set(name, value string) error {
+func (conf *config) set(name, value string, proj *project) error {
 	switch name {
 	case "author":
 		conf.author = value
 	case "homepage":
 		if !filepath.IsAbs(value) {
-			value = filepath.Join(Cmd.buildDir, value)
-		} else if !pathIsInDir(value, Cmd.buildDir) {
-			return fmt.Errorf("homepage must reside in build directory: %s", Cmd.buildDir)
+			value = filepath.Join(proj.buildDir, value)
+		} else if !pathIsInDir(value, proj.buildDir) {
+			return fmt.Errorf("homepage must reside in build directory: %s", proj.buildDir)
 		}
 		conf.homepage = value
 	case "recent":
@@ -64,7 +64,7 @@ func (conf *config) set(name, value string) error {
 }
 
 // Parse config file.
-func (conf *config) parseFile(f string) error {
+func (conf *config) parseFile(f string, proj *project) error {
 	text, err := ioutil.ReadFile(f)
 	if err != nil {
 		return err
@@ -91,22 +91,22 @@ func (conf *config) parseFile(f string) error {
 	}
 	// Merge parsed configuration.
 	if cf.Author != "" {
-		if err := conf.set("author", cf.Author); err != nil {
+		if err := conf.set("author", cf.Author, proj); err != nil {
 			return err
 		}
 	}
 	if cf.Homepage != "" {
-		if err := conf.set("homepage", cf.Homepage); err != nil {
+		if err := conf.set("homepage", cf.Homepage, proj); err != nil {
 			return err
 		}
 	}
 	if cf.Recent != "" {
-		if err := conf.set("recent", cf.Recent); err != nil {
+		if err := conf.set("recent", cf.Recent, proj); err != nil {
 			return err
 		}
 	}
 	if cf.URLPrefix != "" {
-		if err := conf.set("urlprefix", cf.URLPrefix); err != nil {
+		if err := conf.set("urlprefix", cf.URLPrefix, proj); err != nil {
 			return err
 		}
 	}

@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-type command struct {
-	name        string
+type project struct {
+	command     string
 	executable  string
 	projectDir  string
 	contentDir  string
@@ -27,17 +27,22 @@ type command struct {
 	clean       bool
 	builtin     bool
 	verbose     bool
+	// config      config // Root configuration.
 }
 
-// Cmd is global singleton.
-var Cmd command
-
-func newCommand() command {
-	return command{}
+func newProject() project {
+	return project{}
 }
 
-func (cmd *command) Parse(args []string) error {
-	cmd.port = "1212"
+// Print message if `-v` verbose option set.
+func (proj *project) println(message string) {
+	if proj.verbose {
+		fmt.Println(message)
+	}
+}
+
+func (proj *project) parseArgs(args []string) error {
+	proj.port = "1212"
 	skip := false
 	for i, opt := range args {
 		if skip {
@@ -46,9 +51,9 @@ func (cmd *command) Parse(args []string) error {
 		}
 		switch {
 		case i == 0:
-			cmd.executable = opt
+			proj.executable = opt
 			if len(args) == 1 {
-				cmd.name = "help"
+				proj.command = "help"
 			}
 		case i == 1:
 			if opt == "-h" || opt == "--help" {
@@ -57,22 +62,22 @@ func (cmd *command) Parse(args []string) error {
 			if !isCommand(opt) {
 				return fmt.Errorf("illegal command: %s", opt)
 			}
-			cmd.name = opt
-		case i == 2 && cmd.name == "help":
+			proj.command = opt
+		case i == 2 && proj.command == "help":
 			if !isCommand(opt) {
 				return fmt.Errorf("illegal help topic: %s", opt)
 			}
-			cmd.topic = opt
+			proj.topic = opt
 		case opt == "-drafts":
-			cmd.drafts = true
+			proj.drafts = true
 		case opt == "-slugify":
-			cmd.slugify = true
+			proj.slugify = true
 		case opt == "-clean":
-			cmd.clean = true
+			proj.clean = true
 		case opt == "-builtin":
-			cmd.builtin = true
+			proj.builtin = true
 		case opt == "-v":
-			cmd.verbose = true
+			proj.verbose = true
 		case stringlist{"-project", "-content", "-template", "-build", "-index", "-port"}.Contains(opt):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
@@ -80,17 +85,17 @@ func (cmd *command) Parse(args []string) error {
 			arg := args[i+1]
 			switch opt {
 			case "-project":
-				cmd.projectDir = arg
+				proj.projectDir = arg
 			case "-content":
-				cmd.contentDir = arg
+				proj.contentDir = arg
 			case "-template":
-				cmd.templateDir = arg
+				proj.templateDir = arg
 			case "-build":
-				cmd.buildDir = arg
+				proj.buildDir = arg
 			case "-index":
-				cmd.indexDir = arg
+				proj.indexDir = arg
 			case "-port":
-				cmd.port = arg
+				proj.port = arg
 			default:
 				panic("illegal arugment: " + opt)
 			}
@@ -108,23 +113,23 @@ func (cmd *command) Parse(args []string) error {
 		return filepath.Abs(path)
 	}
 	var err error
-	cmd.projectDir, err = getPath(cmd.projectDir, ".")
+	proj.projectDir, err = getPath(proj.projectDir, ".")
 	if err != nil {
 		return err
 	}
-	cmd.contentDir, err = getPath(cmd.contentDir, filepath.Join(cmd.projectDir, "content"))
+	proj.contentDir, err = getPath(proj.contentDir, filepath.Join(proj.projectDir, "content"))
 	if err != nil {
 		return err
 	}
-	cmd.templateDir, err = getPath(cmd.templateDir, filepath.Join(cmd.projectDir, "template"))
+	proj.templateDir, err = getPath(proj.templateDir, filepath.Join(proj.projectDir, "template"))
 	if err != nil {
 		return err
 	}
-	cmd.buildDir, err = getPath(cmd.buildDir, filepath.Join(cmd.projectDir, "build"))
+	proj.buildDir, err = getPath(proj.buildDir, filepath.Join(proj.projectDir, "build"))
 	if err != nil {
 		return err
 	}
-	cmd.indexDir, err = getPath(cmd.indexDir, filepath.Join(cmd.buildDir, "indexes"))
+	proj.indexDir, err = getPath(proj.indexDir, filepath.Join(proj.buildDir, "indexes"))
 	if err != nil {
 		return err
 	}
@@ -140,21 +145,24 @@ func (cmd *command) Parse(args []string) error {
 		}
 		return nil
 	}
-	if cmd.contentDir != cmd.templateDir {
-		if err := checkOverlap("content", cmd.contentDir, "template", cmd.templateDir); err != nil {
+	if proj.contentDir != proj.templateDir {
+		if err := checkOverlap("content", proj.contentDir, "template", proj.templateDir); err != nil {
 			return err
 		}
 	}
-	if filepath.Dir(cmd.buildDir) != cmd.contentDir {
-		if err := checkOverlap("build", cmd.buildDir, "content", cmd.contentDir); err != nil {
+	if filepath.Dir(proj.buildDir) != proj.contentDir {
+		if err := checkOverlap("build", proj.buildDir, "content", proj.contentDir); err != nil {
 			return err
 		}
-		if err := checkOverlap("build", cmd.buildDir, "template", cmd.templateDir); err != nil {
+		if err := checkOverlap("build", proj.buildDir, "template", proj.templateDir); err != nil {
 			return err
 		}
 	}
-	if !(pathIsInDir(cmd.indexDir, cmd.buildDir) || cmd.indexDir == cmd.buildDir) {
-		return fmt.Errorf("index directory must reside in build directory: %s", cmd.buildDir)
+	if !(pathIsInDir(proj.indexDir, proj.buildDir) || proj.indexDir == proj.buildDir) {
+		return fmt.Errorf("index directory must reside in build directory: %s", proj.buildDir)
+	}
+	if !dirExists(proj.projectDir) {
+		return fmt.Errorf("missing project directory: " + proj.projectDir)
 	}
 	return nil
 }
@@ -163,91 +171,91 @@ func isCommand(name string) bool {
 	return stringlist{"build", "help", "init", "serve"}.Contains(name)
 }
 
-func (cmd *command) Execute() error {
+func (proj *project) execute() error {
 	var err error
-	// Parse configuration files from template and content directories (content directory config has precedence).
-	for _, dir := range []string{cmd.templateDir, cmd.contentDir} {
+	// Parse configuration files from template and content directories (content directory has precedence).
+	for _, dir := range []string{proj.templateDir, proj.contentDir} {
 		for _, conf := range []string{"config.toml", "config.yaml"} {
 			f := filepath.Join(dir, conf)
 			if fileExists(f) {
-				verbose("read config: " + f)
-				if err := Config.parseFile(f); err != nil {
+				proj.println("read config: " + f)
+				if err := Config.parseFile(f, proj); err != nil {
 					return err
 				}
 			}
 		}
 	}
-	verbose("config: \n" + Config.String())
+	proj.println("config: \n" + Config.String())
 	// Execute command.
-	switch cmd.name {
+	switch proj.command {
 	case "build":
-		err = cmd.build()
+		err = proj.build()
 	case "help":
-		cmd.help()
+		proj.help()
 	case "init":
-		err = cmd.init()
+		err = proj.init()
 	case "serve":
-		err = cmd.serve()
+		err = proj.serve()
 	default:
-		panic("illegal command: " + cmd.name)
+		panic("illegal command: " + proj.command)
 	}
 	return err
 }
 
-func (cmd *command) init() error {
-	if dirExists(cmd.contentDir) {
-		files, err := ioutil.ReadDir(cmd.contentDir)
+func (proj *project) init() error {
+	if dirExists(proj.contentDir) {
+		files, err := ioutil.ReadDir(proj.contentDir)
 		if err != nil {
 			return err
 		}
 		if len(files) > 0 {
-			return fmt.Errorf("non-empty content directory: " + cmd.contentDir)
+			return fmt.Errorf("non-empty content directory: " + proj.contentDir)
 		}
 	}
-	if cmd.builtin {
+	if proj.builtin {
 		// Load template directory from the built-in project.
-		if dirExists(cmd.templateDir) {
-			files, err := ioutil.ReadDir(cmd.templateDir)
+		if dirExists(proj.templateDir) {
+			files, err := ioutil.ReadDir(proj.templateDir)
 			if err != nil {
 				return err
 			}
 			if len(files) > 0 {
-				return fmt.Errorf("non-empty template directory: " + cmd.templateDir)
+				return fmt.Errorf("non-empty template directory: " + proj.templateDir)
 			}
 		}
-		verbose("installing builtin template")
-		if err := RestoreAssets(cmd.templateDir, ""); err != nil {
+		proj.println("installing builtin template")
+		if err := RestoreAssets(proj.templateDir, ""); err != nil {
 			return err
 		}
 	}
 	// Initialize content from template directory.
-	if err := mkMissingDir(cmd.contentDir); err != nil {
+	if err := mkMissingDir(proj.contentDir); err != nil {
 		return err
 	}
-	err := filepath.Walk(cmd.templateDir, func(f string, info os.FileInfo, err error) error {
+	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if f == cmd.templateDir {
+		if f == proj.templateDir {
 			return nil
 		}
-		dst, err := pathTranslate(f, cmd.templateDir, cmd.contentDir)
+		dst, err := pathTranslate(f, proj.templateDir, proj.contentDir)
 		if err != nil {
 			return err
 		}
 		if info.IsDir() {
-			verbose("make directory:   " + dst)
+			proj.println("make directory:   " + dst)
 			err = mkMissingDir(dst)
 		} else {
 			// Copy example documents to content directory.
 			switch filepath.Ext(f) {
 			case ".md", ".rmu":
-				verbose("copy example: " + f)
+				proj.println("copy example: " + f)
 				err = copyFile(f, dst)
 				if err != nil {
 					return err
 				}
-				verbose("write:        " + dst)
+				proj.println("write:        " + dst)
 			}
 		}
 		return err
@@ -255,43 +263,43 @@ func (cmd *command) init() error {
 	return err
 }
 
-func (cmd *command) help() {
+func (proj *project) help() {
 	println("Usage: hindsite command [arguments]")
 }
 
-func (cmd *command) build() error {
-	if !dirExists(cmd.contentDir) {
-		return fmt.Errorf("missing content directory: " + cmd.contentDir)
+func (proj *project) build() error {
+	if !dirExists(proj.contentDir) {
+		return fmt.Errorf("missing content directory: " + proj.contentDir)
 	}
-	if !dirExists(cmd.templateDir) {
-		return fmt.Errorf("missing template directory: " + cmd.templateDir)
+	if !dirExists(proj.templateDir) {
+		return fmt.Errorf("missing template directory: " + proj.templateDir)
 	}
-	if err := cmd.slugifyDir(cmd.contentDir); err != nil {
+	if err := proj.slugifyDir(proj.contentDir); err != nil {
 		return err
 	}
-	if cmd.contentDir != cmd.templateDir {
-		if err := cmd.slugifyDir(cmd.templateDir); err != nil {
+	if proj.contentDir != proj.templateDir {
+		if err := proj.slugifyDir(proj.templateDir); err != nil {
 			return err
 		}
 	}
-	if !dirExists(cmd.buildDir) {
-		if err := os.Mkdir(cmd.buildDir, 0775); err != nil {
+	if !dirExists(proj.buildDir) {
+		if err := os.Mkdir(proj.buildDir, 0775); err != nil {
 			return err
 		}
 	}
-	if cmd.clean {
+	if proj.clean {
 		// Delete everything in the build directory.
-		files, _ := filepath.Glob(filepath.Join(cmd.buildDir, "*"))
+		files, _ := filepath.Glob(filepath.Join(proj.buildDir, "*"))
 		for _, f := range files {
 			if err := os.RemoveAll(f); err != nil {
 				return err
 			}
 		}
 	}
-	tmpls := newTemplates(cmd.templateDir)
+	tmpls := newTemplates(proj.templateDir)
 	var confMod time.Time // The most recent date a change was made to a configuration file or a template file.
 	// Copy static files from template directory to build directory and parse all template files.
-	err := filepath.Walk(cmd.templateDir, func(f string, info os.FileInfo, err error) error {
+	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -310,11 +318,11 @@ func (cmd *command) build() error {
 					confMod = info.ModTime()
 				}
 				tmpl := tmpls.name(f)
-				verbose("parse template: " + tmpl)
+				proj.println("parse template: " + tmpl)
 				err = tmpls.add(tmpl)
 			default:
-				if cmd.contentDir != cmd.templateDir {
-					err = cmd.copyStaticFile(f, cmd.templateDir, cmd.buildDir)
+				if proj.contentDir != proj.templateDir {
+					err = proj.copyStaticFile(f, proj.templateDir, proj.buildDir)
 				}
 			}
 		}
@@ -325,12 +333,12 @@ func (cmd *command) build() error {
 	}
 	// Parse content documents and copy static files to the build directory.
 	docs := documents{}
-	err = filepath.Walk(cmd.contentDir, func(f string, info os.FileInfo, err error) error {
+	err = filepath.Walk(proj.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if info.IsDir() {
-			if f == cmd.buildDir {
+			if f == proj.buildDir {
 				// Do not process the build directory.
 				return filepath.SkipDir
 			}
@@ -339,11 +347,11 @@ func (cmd *command) build() error {
 		switch filepath.Ext(f) {
 		case ".md", ".rmu":
 			doc := document{}
-			err = doc.parseFile(f, tmpls)
+			err = doc.parseFile(f, proj, tmpls)
 			if err != nil {
 			}
-			if doc.draft && !cmd.drafts {
-				verbose("skip draft: " + f)
+			if doc.draft && !proj.drafts {
+				proj.println("skip draft: " + f)
 				return nil
 			}
 			docs = append(docs, &doc)
@@ -352,11 +360,11 @@ func (cmd *command) build() error {
 				confMod = info.ModTime()
 			}
 		case ".html":
-			if cmd.contentDir != cmd.templateDir {
-				err = cmd.copyStaticFile(f, cmd.contentDir, cmd.buildDir)
+			if proj.contentDir != proj.templateDir {
+				err = proj.copyStaticFile(f, proj.contentDir, proj.buildDir)
 			}
 		default:
-			err = cmd.copyStaticFile(f, cmd.contentDir, cmd.buildDir)
+			err = proj.copyStaticFile(f, proj.contentDir, proj.buildDir)
 		}
 		return err
 	})
@@ -365,11 +373,11 @@ func (cmd *command) build() error {
 	}
 	// Build indexes.
 	idxs := indexes{}
-	idxs.init(cmd.templateDir, cmd.buildDir, cmd.indexDir)
+	idxs.init(proj)
 	for _, doc := range docs {
 		idxs.addDocument(doc)
 	}
-	err = idxs.build(tmpls, confMod)
+	err = idxs.build(proj, tmpls, confMod)
 	if err != nil {
 		return err
 	}
@@ -378,7 +386,7 @@ func (cmd *command) build() error {
 		if !rebuild(doc.buildpath, confMod, doc) {
 			continue
 		}
-		verbose("render: " + doc.contentpath)
+		proj.println("render: " + doc.contentpath)
 		data := templateData{}
 		data.add(doc.frontMatter())
 		data["body"] = template.HTML(doc.render())
@@ -386,22 +394,22 @@ func (cmd *command) build() error {
 		if err != nil {
 			return err
 		}
-		verbose("write:  " + doc.buildpath)
-		verbose(doc.String())
+		proj.println("write:  " + doc.buildpath)
+		proj.println(doc.String())
 	}
 	if Config.homepage != "" {
 		// Install home page.
 		src := Config.homepage
-		dst := filepath.Join(cmd.buildDir, "index.html")
+		dst := filepath.Join(proj.buildDir, "index.html")
 		if !fileExists(src) {
 			return fmt.Errorf("homepage file missing: %s", src)
 		}
 		if !upToDate(dst, src) {
-			verbose("copy homepage: " + src)
+			proj.println("copy homepage: " + src)
 			if err := copyFile(src, dst); err != nil {
 				return err
 			}
-			verbose("write:         " + dst)
+			proj.println("write:         " + dst)
 		}
 	}
 	return nil
@@ -439,7 +447,7 @@ func upToDate(target, prerequisite string) bool {
 // Copy srcFile to corresponding path in dstRoot.
 // Skip if the destination file is up to date.
 // Creates any missing destination directories.
-func (cmd *command) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
+func (proj *project) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
 	dstFile, err := pathTranslate(srcFile, srcRoot, dstRoot)
 	if err != nil {
 		return err
@@ -447,7 +455,7 @@ func (cmd *command) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
 	if upToDate(dstFile, srcFile) {
 		return nil
 	}
-	verbose("copy static: " + srcFile)
+	proj.println("copy static: " + srcFile)
 	err = mkMissingDir(filepath.Dir(dstFile))
 	if err != nil {
 		return err
@@ -456,32 +464,32 @@ func (cmd *command) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
 	if err != nil {
 		return err
 	}
-	verbose("write:       " + dstFile)
+	proj.println("write:       " + dstFile)
 	return nil
 }
 
 // Recursively and slugify directory and file names.
-func (cmd *command) slugifyDir(dir string) error {
+func (proj *project) slugifyDir(dir string) error {
 	// TODO
 	return nil
 }
 
-func (cmd *command) serve() error {
-	if !dirExists(cmd.contentDir) {
-		fmt.Fprintln(os.Stderr, "warning: missing content directory: "+cmd.contentDir)
+func (proj *project) serve() error {
+	if !dirExists(proj.buildDir) {
+		return fmt.Errorf("missing build directory: " + proj.buildDir)
 	}
-	if !dirExists(cmd.templateDir) {
-		fmt.Fprintln(os.Stderr, "warning: missing template directory: "+cmd.templateDir)
+	if !dirExists(proj.contentDir) {
+		fmt.Fprintln(os.Stderr, "warning: missing content directory: "+proj.contentDir)
 	}
-	if !dirExists(cmd.buildDir) {
-		return fmt.Errorf("missing build directory: " + cmd.buildDir)
+	if !dirExists(proj.templateDir) {
+		fmt.Fprintln(os.Stderr, "warning: missing template directory: "+proj.templateDir)
 	}
 	// Tweaked http.StripPrefix() handler
 	// (https://golang.org/pkg/net/http/#StripPrefix). If URL does not start
 	// with prefix serve unmodified URL.
 	stripPrefix := func(prefix string, h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			verbose("request: " + r.URL.Path)
+			proj.println("request: " + r.URL.Path)
 			if p := strings.TrimPrefix(r.URL.Path, prefix); len(p) < len(r.URL.Path) {
 				r2 := new(http.Request)
 				*r2 = *r
@@ -494,7 +502,7 @@ func (cmd *command) serve() error {
 			}
 		})
 	}
-	http.Handle("/", stripPrefix(Config.urlprefix, http.FileServer(http.Dir(cmd.buildDir))))
-	fmt.Printf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", cmd.buildDir, cmd.port)
-	return http.ListenAndServe(":"+cmd.port, nil)
+	http.Handle("/", stripPrefix(Config.urlprefix, http.FileServer(http.Dir(proj.buildDir))))
+	fmt.Printf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port)
+	return http.ListenAndServe(":"+proj.port, nil)
 }
