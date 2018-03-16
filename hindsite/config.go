@@ -30,7 +30,7 @@ func newConfig() config {
 	return conf
 }
 
-func (conf *config) set(name, value string, proj *project) error {
+func (conf *config) set(proj *project, name, value string) error {
 	switch name {
 	case "author":
 		conf.author = value
@@ -64,7 +64,7 @@ func (conf *config) set(name, value string, proj *project) error {
 }
 
 // Parse config file.
-func (conf *config) parseFile(f string, proj *project) error {
+func (conf *config) parseFile(proj *project, f string) error {
 	text, err := ioutil.ReadFile(f)
 	if err != nil {
 		return err
@@ -91,22 +91,22 @@ func (conf *config) parseFile(f string, proj *project) error {
 	}
 	// Merge parsed configuration.
 	if cf.Author != "" {
-		if err := conf.set("author", cf.Author, proj); err != nil {
+		if err := conf.set(proj, "author", cf.Author); err != nil {
 			return err
 		}
 	}
 	if cf.Homepage != "" {
-		if err := conf.set("homepage", cf.Homepage, proj); err != nil {
+		if err := conf.set(proj, "homepage", cf.Homepage); err != nil {
 			return err
 		}
 	}
 	if cf.Recent != "" {
-		if err := conf.set("recent", cf.Recent, proj); err != nil {
+		if err := conf.set(proj, "recent", cf.Recent); err != nil {
 			return err
 		}
 	}
 	if cf.URLPrefix != "" {
-		if err := conf.set("urlprefix", cf.URLPrefix, proj); err != nil {
+		if err := conf.set(proj, "urlprefix", cf.URLPrefix); err != nil {
 			return err
 		}
 	}

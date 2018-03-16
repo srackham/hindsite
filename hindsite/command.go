@@ -179,7 +179,7 @@ func (proj *project) execute() error {
 			f := filepath.Join(dir, conf)
 			if fileExists(f) {
 				proj.println("read config: " + f)
-				if err := Config.parseFile(f, proj); err != nil {
+				if err := Config.parseFile(proj, f); err != nil {
 					return err
 				}
 			}
