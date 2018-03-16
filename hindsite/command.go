@@ -319,9 +319,8 @@ func (proj *project) build() error {
 				if isOlder(confMod, info.ModTime()) {
 					confMod = info.ModTime()
 				}
-				tmpl := proj.tmpls.name(f)
-				proj.println("parse template: " + tmpl)
-				err = proj.tmpls.add(tmpl)
+				proj.println("parse template: " + f)
+				err = proj.tmpls.add(f)
 			default:
 				if proj.contentDir != proj.templateDir {
 					err = proj.copyStaticFile(f, proj.templateDir, proj.buildDir)

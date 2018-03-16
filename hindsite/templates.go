@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"path/filepath"
 )
@@ -30,7 +29,10 @@ func (tmpls templates) contains(name string) bool {
 // template name is relative to the project template directory and is
 // slash-separated (platform independent).
 func (tmpls templates) name(elem ...string) string {
-	name, _ := filepath.Rel(tmpls.templateDir, filepath.Join(elem...))
+	name, err := filepath.Rel(tmpls.templateDir, filepath.Join(elem...))
+	if err != nil {
+		panic(err) // Template file should always be in template directory.
+	}
 	return filepath.ToSlash(name)
 }
 
@@ -40,15 +42,12 @@ func (tmpls templates) fileName(name string) string {
 }
 
 // Parses the corresponding file from the templates directory and adds it to templates.
-func (tmpls templates) add(name string) error {
-	tmplfile := filepath.Join(tmpls.templateDir, name)
-	if !fileExists(tmplfile) {
-		return fmt.Errorf("missing template file: %s", tmplfile)
-	}
+func (tmpls templates) add(tmplfile string) error {
 	text, err := readFile(tmplfile)
 	if err != nil {
 		return err
 	}
+	name := tmpls.name(tmplfile)
 	_, err = tmpls.templates.New(name).Parse(text)
 	return err
 }
