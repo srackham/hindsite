@@ -68,7 +68,7 @@ func (idxs *indexes) init(proj *project) error {
 				if err != nil {
 					return err
 				}
-				idx.url = path.Join(proj.conf.urlprefix, filepath.ToSlash(p))
+				idx.url = path.Join(proj.rootConf.urlprefix, filepath.ToSlash(p))
 				*idxs = append(*idxs, idx)
 			}
 		}
@@ -165,7 +165,7 @@ func (idx index) build(proj *project, modified time.Time) error {
 	tmpl = tmpls.name(idx.templateDir, "recent.html")
 	if tmpls.contains(tmpl) {
 		outfile = filepath.Join(idx.indexDir, "recent.html")
-		docs := idx.docs.byDate().first(proj.conf.recent)
+		docs := idx.docs.byDate().first(proj.rootConf.recent)
 		if rebuild(outfile, modified, docs...) {
 			err := tmpls.render(tmpl, docs.frontMatter(), outfile)
 			proj.println("write index: " + outfile)

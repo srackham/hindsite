@@ -20,6 +20,11 @@ type config struct {
 	urlprefix string // For document and index page URLs.
 }
 
+type configs []struct {
+	dir  string // Directory contain a configuration file.
+	conf config // Combined YAML + TOML config.
+}
+
 func newConfig() config {
 	conf := config{}
 	conf.urlprefix = "/"
@@ -110,6 +115,20 @@ func (conf *config) parseFile(proj *project, f string) error {
 	return nil
 }
 
+// Parse and merge YAML and TOML config files in directory dir.
+func (conf *config) parseConfigFiles(proj *project, dir string) error {
+	for _, cf := range []string{"config.toml", "config.yaml"} {
+		f := filepath.Join(dir, cf)
+		if fileExists(f) {
+			proj.println("read config: " + f)
+			if err := conf.parseFile(proj, f); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 // Return configuration as YAML formatted string.
 func (conf *config) data() (data templateData) {
 	data = templateData{}
@@ -124,4 +143,12 @@ func (conf *config) data() (data templateData) {
 func (conf *config) String() (result string) {
 	d, _ := yaml.Marshal(conf.data())
 	return string(d)
+}
+
+// Return merged configurations for contentDir and templateDir locations.
+// TODO: This routine will be called many times with the same arguments
+// and the same results, caching the results would speed it up.
+func (confs configs) configFor(contentDir, templateDir string) config {
+	result := newConfig()
+	return result
 }

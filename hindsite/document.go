@@ -65,7 +65,7 @@ func (doc *document) parseFile(contentfile string, proj *project) error {
 	p = filepath.Join(p, doc.title+".html")
 	doc.buildpath = filepath.Join(proj.buildDir, p)
 	doc.templatepath = filepath.Join(proj.templateDir, p)
-	doc.url = path.Join(proj.conf.urlprefix, filepath.ToSlash(p))
+	doc.url = path.Join(proj.rootConf.urlprefix, filepath.ToSlash(p))
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		d, err := parseDate(doc.title[0:10], nil)
 		if err != nil {
@@ -76,7 +76,7 @@ func (doc *document) parseFile(contentfile string, proj *project) error {
 	}
 	doc.title = strings.Title(strings.Replace(doc.title, "-", " ", -1))
 	// Parse embedded front matter.
-	doc.author = proj.conf.author // Default author.
+	doc.author = proj.rootConf.author // Default author.
 	doc.content, err = readFile(doc.contentpath)
 	if err != nil {
 		return err

@@ -27,7 +27,7 @@ type project struct {
 	clean       bool
 	builtin     bool
 	verbose     bool
-	conf        config // Root configuration.
+	rootConf    config
 	tmpls       templates
 }
 
@@ -175,19 +175,13 @@ func isCommand(name string) bool {
 func (proj *project) execute() error {
 	var err error
 	// Parse configuration files from template and content directories (content directory has precedence).
-	proj.conf = newConfig()
+	proj.rootConf = newConfig()
 	for _, dir := range []string{proj.templateDir, proj.contentDir} {
-		for _, cf := range []string{"config.toml", "config.yaml"} {
-			f := filepath.Join(dir, cf)
-			if fileExists(f) {
-				proj.println("read config: " + f)
-				if err := proj.conf.parseFile(proj, f); err != nil {
-					return err
-				}
-			}
+		if err := proj.rootConf.parseConfigFiles(proj, dir); err != nil {
+			return err
 		}
 	}
-	proj.println("config: \n" + proj.conf.String())
+	proj.println("config: \n" + proj.rootConf.String())
 	// Execute command.
 	switch proj.command {
 	case "build":
@@ -398,9 +392,9 @@ func (proj *project) build() error {
 		proj.println("write:  " + doc.buildpath)
 		proj.println(doc.String())
 	}
-	if proj.conf.homepage != "" {
+	if proj.rootConf.homepage != "" {
 		// Install home page.
-		src := proj.conf.homepage
+		src := proj.rootConf.homepage
 		dst := filepath.Join(proj.buildDir, "index.html")
 		if !fileExists(src) {
 			return fmt.Errorf("homepage file missing: %s", src)
@@ -503,7 +497,7 @@ func (proj *project) serve() error {
 			}
 		})
 	}
-	http.Handle("/", stripPrefix(proj.conf.urlprefix, http.FileServer(http.Dir(proj.buildDir))))
+	http.Handle("/", stripPrefix(proj.rootConf.urlprefix, http.FileServer(http.Dir(proj.buildDir))))
 	fmt.Printf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port)
 	return http.ListenAndServe(":"+proj.port, nil)
 }
