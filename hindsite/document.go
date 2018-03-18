@@ -91,15 +91,17 @@ func (doc *document) parseFile(contentfile string, proj *project) error {
 		doc.url = path.Join(path.Dir(doc.url), doc.slug+".html")
 	}
 	if doc.layout == "" {
-		// Find document layout template.
-		layouts, err := filesInPath(filepath.Dir(doc.templatepath), proj.templateDir, []string{"layout.html"}, 1)
-		if err != nil {
-			return err
+		// Find nearest document layout template.
+		layout := ""
+		for _, tmpl := range proj.tmpls.layouts {
+			if len(tmpl) > len(layout) && pathIsInDir(doc.templatepath, filepath.Dir(tmpl)) {
+				layout = tmpl
+			}
 		}
-		if len(layouts) == 0 {
+		if layout == "" {
 			return fmt.Errorf("missing layout.html template for: %s", doc.contentpath)
 		}
-		doc.layout = proj.tmpls.name(layouts[0])
+		doc.layout = proj.tmpls.name(layout)
 	}
 	return nil
 }

@@ -8,6 +8,7 @@ import (
 
 type templates struct {
 	templateDir string
+	layouts     []string // Layout templates file names.
 	templates   *template.Template
 }
 
@@ -36,20 +37,26 @@ func (tmpls templates) name(elem ...string) string {
 	return filepath.ToSlash(name)
 }
 
+// TODO: UNUSED.
 // Return template source file name.
 func (tmpls templates) fileName(name string) string {
 	return filepath.Join(tmpls.templateDir, name)
 }
 
 // Parses the corresponding file from the templates directory and adds it to templates.
-func (tmpls templates) add(tmplfile string) error {
+func (tmpls *templates) add(tmplfile string) error {
 	text, err := readFile(tmplfile)
 	if err != nil {
 		return err
 	}
 	name := tmpls.name(tmplfile)
-	_, err = tmpls.templates.New(name).Parse(text)
-	return err
+	if _, err = tmpls.templates.New(name).Parse(text); err != nil {
+		return err
+	}
+	if filepath.Base(tmplfile) == "layout.html" {
+		tmpls.layouts = append(tmpls.layouts, tmplfile)
+	}
+	return nil
 }
 
 // Render named template to file.

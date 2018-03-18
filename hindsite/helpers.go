@@ -129,6 +129,7 @@ func pathTranslate(srcPath, srcRoot, dstRoot string) (string, error) {
 	return filepath.Join(dstRoot, dstPath), nil
 }
 
+// TODO: UNUSED
 // Search for files from base directory up to root directory.
 // Return found files.
 // Files are ordered by location (base to root).
