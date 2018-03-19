@@ -11,6 +11,8 @@ import (
 )
 
 type index struct {
+	conf        config               // Merged configuration for this index.
+	contentDir  string               // The directory that contains the indexed documents.
 	templateDir string               // The directory that contains the index templates.
 	indexDir    string               // The build directory that the index pages are written to.
 	url         string               // URL of index directory.
@@ -63,12 +65,17 @@ func (idxs *indexes) init(proj *project) error {
 				if err != nil {
 					return err
 				}
+				idx.contentDir = filepath.Join(proj.contentDir, p)
+				if !dirExists(idx.contentDir) {
+					fmt.Errorf("missing indexed content directory: %s", idx.contentDir)
+				}
 				idx.indexDir = filepath.Join(proj.indexDir, p)
 				p, err = filepath.Rel(proj.buildDir, idx.indexDir)
 				if err != nil {
 					return err
 				}
-				idx.url = path.Join(proj.rootConf.urlprefix, filepath.ToSlash(p))
+				idx.conf = proj.configFor(idx.contentDir, idx.templateDir)
+				idx.url = path.Join(idx.conf.urlprefix, filepath.ToSlash(p))
 				*idxs = append(*idxs, idx)
 			}
 		}
@@ -165,7 +172,7 @@ func (idx index) build(proj *project, modified time.Time) error {
 	tmpl = tmpls.name(idx.templateDir, "recent.html")
 	if tmpls.contains(tmpl) {
 		outfile = filepath.Join(idx.indexDir, "recent.html")
-		docs := idx.docs.byDate().first(proj.rootConf.recent)
+		docs := idx.docs.byDate().first(idx.conf.recent)
 		if rebuild(outfile, modified, docs...) {
 			err := tmpls.render(tmpl, docs.frontMatter(), outfile)
 			proj.println("write index: " + outfile)

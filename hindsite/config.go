@@ -153,6 +153,7 @@ func (proj *project) parseConfigs() error {
 			}
 			if found {
 				proj.confs = append(proj.confs, conf)
+				proj.println(conf.String())
 			}
 			return nil
 		})
@@ -188,10 +189,10 @@ func (conf *config) merge(from config) {
 }
 
 // Return merged configuration that will be applied to files in contentDir and
-// templateDir locations.
-
-// TODO: This routine will be called many times with the same arguments
-// and the same results, caching the results would speed it up.
+// templateDir locations. Content directory configuration files take precedence
+// over template directory configuration files. proj.confs are sorted by
+// project.confs.origin ascending which ensures configuration directory
+// heirarchy precedence.
 func (proj *project) configFor(contentDir, templateDir string) config {
 	result := config{recent: 5, urlprefix: "/"} // Set default configuration.
 	for _, conf := range proj.confs {
@@ -205,19 +206,4 @@ func (proj *project) configFor(contentDir, templateDir string) config {
 		}
 	}
 	return result
-}
-
-// TODO: UNUSED
-// Parse and merge YAML and TOML config files in directory dir.
-func (conf *config) parseConfigFiles(proj *project, dir string) error {
-	for _, cf := range []string{"config.toml", "config.yaml"} {
-		f := filepath.Join(dir, cf)
-		if fileExists(f) {
-			proj.println("read config: " + f)
-			if err := conf.parseFile(proj, f); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }

@@ -179,7 +179,7 @@ func (proj *project) execute() error {
 		return err
 	}
 	proj.rootConf = proj.configFor(proj.contentDir, proj.templateDir)
-	proj.println("config: \n" + proj.rootConf.String())
+	proj.println("root config: \n" + proj.rootConf.String())
 	// Execute command.
 	switch proj.command {
 	case "build":
