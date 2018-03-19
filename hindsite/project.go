@@ -28,6 +28,7 @@ type project struct {
 	builtin     bool
 	verbose     bool
 	rootConf    config
+	confs       configs
 	tmpls       templates
 }
 
@@ -174,13 +175,10 @@ func isCommand(name string) bool {
 
 func (proj *project) execute() error {
 	var err error
-	// Parse configuration files from template and content directories (content directory has precedence).
-	proj.rootConf = newConfig()
-	for _, dir := range []string{proj.templateDir, proj.contentDir} {
-		if err := proj.rootConf.parseConfigFiles(proj, dir); err != nil {
-			return err
-		}
+	if err := proj.parseConfigs(); err != nil {
+		return err
 	}
+	proj.rootConf = proj.configFor(proj.contentDir, proj.templateDir)
 	proj.println("config: \n" + proj.rootConf.String())
 	// Execute command.
 	switch proj.command {

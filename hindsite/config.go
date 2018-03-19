@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -14,23 +16,14 @@ import (
 
 // config defines global configuration parameters.
 type config struct {
+	origin    string // Configuration file directory.
 	author    string // Default document author.
 	homepage  string // Use this file (relative to the build directory) for /index.html.
 	recent    int    // Maximum number of recent index entries.
 	urlprefix string // For document and index page URLs.
 }
 
-type configs []struct {
-	dir  string // Directory contain a configuration file.
-	conf config // Combined YAML + TOML config.
-}
-
-func newConfig() config {
-	conf := config{}
-	conf.urlprefix = "/"
-	conf.recent = 5
-	return conf
-}
+type configs []config
 
 func (conf *config) set(proj *project, name, value string) error {
 	switch name {
@@ -115,20 +108,6 @@ func (conf *config) parseFile(proj *project, f string) error {
 	return nil
 }
 
-// Parse and merge YAML and TOML config files in directory dir.
-func (conf *config) parseConfigFiles(proj *project, dir string) error {
-	for _, cf := range []string{"config.toml", "config.yaml"} {
-		f := filepath.Join(dir, cf)
-		if fileExists(f) {
-			proj.println("read config: " + f)
-			if err := conf.parseFile(proj, f); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
 // Return configuration as YAML formatted string.
 func (conf *config) data() (data templateData) {
 	data = templateData{}
@@ -145,10 +124,100 @@ func (conf *config) String() (result string) {
 	return string(d)
 }
 
-// Return merged configurations for contentDir and templateDir locations.
+// Parse all config files from project content and templates directory into
+// project confs.
+func (proj *project) parseConfigs() error {
+	for _, d := range []string{proj.contentDir, proj.templateDir} {
+		if proj.contentDir == proj.templateDir && d == proj.templateDir {
+			break
+		}
+		err := filepath.Walk(d, func(f string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if !info.IsDir() {
+				return nil
+			}
+			conf := config{}
+			conf.origin = f
+			found := false
+			for _, v := range []string{"config.toml", "config.yaml"} {
+				cf := filepath.Join(f, v)
+				if fileExists(cf) {
+					found = true
+					proj.println("read config: " + cf)
+					if err := conf.parseFile(proj, cf); err != nil {
+						return err
+					}
+				}
+			}
+			if found {
+				proj.confs = append(proj.confs, conf)
+			}
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+	}
+	// Sort configurations by ascending origin directory to ensure deeper
+	// configurations have precedence.
+	sort.Slice(proj.confs, func(i, j int) bool {
+		return proj.confs[i].origin < proj.confs[j].origin
+	})
+	return nil
+}
+
+// Merge non-"zero" configuration fields into configuration.
+func (conf *config) merge(from config) {
+	if from.origin != "" {
+		conf.origin = from.origin
+	}
+	if from.author != "" {
+		conf.author = from.author
+	}
+	if from.homepage != "" {
+		conf.homepage = from.homepage
+	}
+	if from.recent != 0 {
+		conf.recent = from.recent
+	}
+	if from.urlprefix != "" {
+		conf.urlprefix = from.urlprefix
+	}
+}
+
+// Return merged configuration that will be applied to files in contentDir and
+// templateDir locations.
+
 // TODO: This routine will be called many times with the same arguments
 // and the same results, caching the results would speed it up.
-func (confs configs) configFor(contentDir, templateDir string) config {
-	result := newConfig()
+func (proj *project) configFor(contentDir, templateDir string) config {
+	result := config{recent: 5, urlprefix: "/"} // Set default configuration.
+	for _, conf := range proj.confs {
+		if templateDir == conf.origin || pathIsInDir(templateDir, conf.origin) {
+			result.merge(conf)
+		}
+	}
+	for _, conf := range proj.confs {
+		if contentDir == conf.origin || pathIsInDir(contentDir, conf.origin) {
+			result.merge(conf)
+		}
+	}
 	return result
+}
+
+// TODO: UNUSED
+// Parse and merge YAML and TOML config files in directory dir.
+func (conf *config) parseConfigFiles(proj *project, dir string) error {
+	for _, cf := range []string{"config.toml", "config.yaml"} {
+		f := filepath.Join(dir, cf)
+		if fileExists(f) {
+			proj.println("read config: " + f)
+			if err := conf.parseFile(proj, f); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
