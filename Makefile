@@ -17,7 +17,13 @@ install: test
 
 .PHONY: build
 build: bindata
-	go build $(GOFLAGS) -o /tmp/hindsite ./...
+	mkdir -p ./bin
+	go build $(GOFLAGS) -o ./bin/hindsite ./...
+
+.PHONY: build-win
+build-win: bindata
+	mkdir -p ./bin
+	GOOS=windows GOARCH=386 go build $(GOFLAGS) -o ./bin/hindsite.exe ./...
 
 .PHONY: test
 test: bindata
