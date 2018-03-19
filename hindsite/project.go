@@ -297,6 +297,13 @@ func (proj *project) build() error {
 		if err != nil {
 			return err
 		}
+		if info.IsDir() {
+			if f == proj.buildDir {
+				// Do not process the build directory.
+				return filepath.SkipDir
+			}
+			return nil
+		}
 		if !info.IsDir() {
 			switch filepath.Ext(f) {
 			case ".toml", ".yaml":
@@ -314,9 +321,7 @@ func (proj *project) build() error {
 				proj.println("parse template: " + f)
 				err = proj.tmpls.add(f)
 			default:
-				if proj.contentDir != proj.templateDir {
-					err = proj.copyStaticFile(f, proj.templateDir, proj.buildDir)
-				}
+				err = proj.copyStaticFile(f, proj.templateDir, proj.buildDir)
 			}
 		}
 		return err
@@ -357,7 +362,9 @@ func (proj *project) build() error {
 				err = proj.copyStaticFile(f, proj.contentDir, proj.buildDir)
 			}
 		default:
-			err = proj.copyStaticFile(f, proj.contentDir, proj.buildDir)
+			if proj.contentDir != proj.templateDir {
+				err = proj.copyStaticFile(f, proj.contentDir, proj.buildDir)
+			}
 		}
 		return err
 	})
