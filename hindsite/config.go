@@ -7,16 +7,15 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/BurntSushi/toml"
 	yaml "gopkg.in/yaml.v2"
 )
 
-// config defines global configuration parameters.
 type config struct {
-	origin    string // Configuration file directory.
+	origin string // Configuration file directory.
+	// Configuration parameters.
 	author    string // Default document author.
 	homepage  string // Use this file (relative to the build directory) for /index.html.
 	recent    int    // Maximum number of recent index entries.
@@ -24,39 +23,6 @@ type config struct {
 }
 
 type configs []config
-
-func (conf *config) set(proj *project, name, value string) error {
-	switch name {
-	case "author":
-		conf.author = value
-	case "homepage":
-		if !filepath.IsAbs(value) {
-			value = filepath.Join(proj.buildDir, value)
-		} else if !pathIsInDir(value, proj.buildDir) {
-			return fmt.Errorf("homepage must reside in build directory: %s", proj.buildDir)
-		}
-		conf.homepage = value
-	case "recent":
-		re := regexp.MustCompile(`^\d+$`)
-		if !re.MatchString(value) {
-			return fmt.Errorf("illegal recent value: %s", value)
-		}
-		i, err := strconv.ParseInt(value, 10, 64)
-		if err != nil {
-			return err
-		}
-		conf.recent = int(i)
-	case "urlprefix":
-		re := regexp.MustCompile(`^((http|/)\S+|)$`)
-		if !re.MatchString(value) {
-			return fmt.Errorf("illegal urlprefix value: %s", value)
-		}
-		conf.urlprefix = strings.TrimSuffix(value, "/")
-	default:
-		return fmt.Errorf("illegal configuration parameter name: %s", name)
-	}
-	return nil
-}
 
 // Parse config file.
 func (conf *config) parseFile(proj *project, f string) error {
@@ -68,7 +34,7 @@ func (conf *config) parseFile(proj *project, f string) error {
 		Author    string
 		Homepage  string
 		URLPrefix string
-		Recent    string
+		Recent    int
 	}{}
 	switch filepath.Ext(f) {
 	case ".toml":
@@ -84,26 +50,29 @@ func (conf *config) parseFile(proj *project, f string) error {
 	default:
 		panic("illegal configuration file extension")
 	}
-	// Merge parsed configuration.
+	// Validate and merge parsed configuration.
 	if cf.Author != "" {
-		if err := conf.set(proj, "author", cf.Author); err != nil {
-			return err
-		}
+		conf.author = cf.Author
 	}
 	if cf.Homepage != "" {
-		if err := conf.set(proj, "homepage", cf.Homepage); err != nil {
-			return err
+		value := cf.Homepage
+		if !filepath.IsAbs(value) {
+			value = filepath.Join(proj.buildDir, value)
+		} else if !pathIsInDir(value, proj.buildDir) {
+			return fmt.Errorf("homepage must reside in build directory: %s", proj.buildDir)
 		}
+		conf.homepage = value
 	}
-	if cf.Recent != "" {
-		if err := conf.set(proj, "recent", cf.Recent); err != nil {
-			return err
-		}
+	if cf.Recent != 0 {
+		conf.recent = cf.Recent
 	}
 	if cf.URLPrefix != "" {
-		if err := conf.set(proj, "urlprefix", cf.URLPrefix); err != nil {
-			return err
+		value := cf.URLPrefix
+		re := regexp.MustCompile(`^((http|/)\S+|)$`)
+		if !re.MatchString(value) {
+			return fmt.Errorf("illegal urlprefix value: %s", value)
 		}
+		conf.urlprefix = strings.TrimSuffix(value, "/")
 	}
 	return nil
 }
@@ -113,7 +82,7 @@ func (conf *config) data() (data templateData) {
 	data = templateData{}
 	data["author"] = conf.author
 	data["homepage"] = conf.homepage
-	data["recent"] = strconv.Itoa(conf.recent)
+	data["recent"] = conf.recent
 	data["urlprefix"] = conf.urlprefix
 	return data
 }
@@ -125,7 +94,7 @@ func (conf *config) String() (result string) {
 }
 
 // Parse all config files from project content and templates directory into
-// project confs.
+// `proj.confs`.
 func (proj *project) parseConfigs() error {
 	for _, d := range []string{proj.contentDir, proj.templateDir} {
 		if proj.contentDir == proj.templateDir && d == proj.templateDir {
@@ -188,11 +157,12 @@ func (conf *config) merge(from config) {
 	}
 }
 
-// Return merged configuration that will be applied to files in contentDir and
-// templateDir locations. Content directory configuration files take precedence
-// over template directory configuration files. proj.confs are sorted by
-// project.confs.origin ascending which ensures configuration directory
-// heirarchy precedence.
+// Merge configuration files that lie in the contentDir and templateDir
+// directory paths. Process files in the templateDir (working from top (lowest
+// precedence) to bottom) then process files in the contentDir (working top to
+// bottom (highest precedence)). The `proj.confs` have been sorted by
+// configuration `origin` in ascending order to ensure the directory heirarchy
+// precedence.
 func (proj *project) configFor(contentDir, templateDir string) config {
 	result := config{recent: 5, urlprefix: "/"} // Set default configuration.
 	for _, conf := range proj.confs {
