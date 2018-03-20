@@ -100,6 +100,7 @@ func (proj *project) parseConfigs() error {
 		if proj.contentDir == proj.templateDir && d == proj.templateDir {
 			break
 		}
+		// TODO: EXCLUDE BUILD DIRECTORY.
 		err := filepath.Walk(d, func(f string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -135,6 +136,8 @@ func (proj *project) parseConfigs() error {
 	sort.Slice(proj.confs, func(i, j int) bool {
 		return proj.confs[i].origin < proj.confs[j].origin
 	})
+	proj.rootConf = proj.configFor(proj.contentDir, proj.templateDir)
+	proj.println("root config: \n" + proj.rootConf.String())
 	return nil
 }
 

@@ -46,6 +46,7 @@ func (idxs *indexes) init(proj *project) error {
 		if err != nil {
 			return err
 		}
+		// TODO: EXCLUDE BUILD DIRECTORY.
 		if info.IsDir() {
 			files, err := filepath.Glob(filepath.Join(f, "*.html"))
 			if err != nil {

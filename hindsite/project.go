@@ -174,13 +174,8 @@ func isCommand(name string) bool {
 }
 
 func (proj *project) execute() error {
-	var err error
-	if err := proj.parseConfigs(); err != nil {
-		return err
-	}
-	proj.rootConf = proj.configFor(proj.contentDir, proj.templateDir)
-	proj.println("root config: \n" + proj.rootConf.String())
 	// Execute command.
+	var err error
 	switch proj.command {
 	case "build":
 		err = proj.build()
@@ -220,6 +215,10 @@ func (proj *project) init() error {
 		proj.println("installing builtin template")
 		if err := RestoreAssets(proj.templateDir, ""); err != nil {
 			return err
+		}
+	} else {
+		if !dirExists(proj.templateDir) {
+			return fmt.Errorf("missing template directory: " + proj.templateDir)
 		}
 	}
 	// Initialize content from template directory.
@@ -280,6 +279,9 @@ func (proj *project) build() error {
 		if err := os.Mkdir(proj.buildDir, 0775); err != nil {
 			return err
 		}
+	}
+	if err := proj.parseConfigs(); err != nil {
+		return err
 	}
 	if proj.clean {
 		// Delete everything in the build directory.
@@ -483,6 +485,9 @@ func (proj *project) serve() error {
 	}
 	if !dirExists(proj.templateDir) {
 		fmt.Fprintln(os.Stderr, "warning: missing template directory: "+proj.templateDir)
+	}
+	if err := proj.parseConfigs(); err != nil {
+		return err
 	}
 	// Tweaked http.StripPrefix() handler
 	// (https://golang.org/pkg/net/http/#StripPrefix). If URL does not start
