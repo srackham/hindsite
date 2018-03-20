@@ -19,9 +19,17 @@ type index struct {
 	docs        documents            // Parsed documents belonging to index.
 	tagdocs     map[string]documents // Partitions index documents by tag.
 	tagfiles    map[string]string    // Slugified tag file names.
+	pages       []page               // Paginated docs.
 }
 
 type indexes []index
+
+type page struct {
+	url  string
+	next string // URL.
+	prev string // URL.
+	docs documents
+}
 
 func newIndex() index {
 	idx := index{}
@@ -40,13 +48,11 @@ func isIndexFile(filename string) bool {
 }
 
 // Search templateDir directory for indexed directories and add them to indexes.
-// indexDir is the directory in the build directory that contains built indexes.
 func (idxs *indexes) init(proj *project) error {
 	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		// TODO: EXCLUDE BUILD DIRECTORY.
 		if info.IsDir() {
 			files, err := filepath.Glob(filepath.Join(f, "*.html"))
 			if err != nil {
@@ -68,7 +74,7 @@ func (idxs *indexes) init(proj *project) error {
 				}
 				idx.contentDir = filepath.Join(proj.contentDir, p)
 				if !dirExists(idx.contentDir) {
-					fmt.Errorf("missing indexed content directory: %s", idx.contentDir)
+					return fmt.Errorf("missing indexed content directory: %s", idx.contentDir)
 				}
 				idx.indexDir = filepath.Join(proj.indexDir, p)
 				p, err = filepath.Rel(proj.buildDir, idx.indexDir)
@@ -100,6 +106,22 @@ func (idxs indexes) addDocument(doc *document) {
 // Build all indexes. modified is the date of the most recently modified
 // configuration or template file.
 func (idxs indexes) build(proj *project, modified time.Time) error {
+	// Sort index documents then assign previous and next documents according to
+	// the primary index ordering.
+	// NOTE: Document prev/next corresponds to the primary index.
+	for _, idx1 := range idxs {
+		primary := true
+		for _, idx2 := range idxs {
+			if pathIsInDir(idx1.templateDir, idx2.templateDir) {
+				primary = false
+			}
+		}
+		idx1.docs.sortByDate()
+		if primary {
+			idx1.docs.setPrevNext()
+		}
+	}
+	// Build all indexes.
 	for _, idx := range idxs {
 		if err := idx.build(proj, modified); err != nil {
 			return err
@@ -144,7 +166,7 @@ func (idx index) build(proj *project, modified time.Time) error {
 			for tag := range idx.tagdocs {
 				outfile := filepath.Join(idx.indexDir, "tags", idx.tagfiles[tag])
 				if rebuild(outfile, modified, idx.tagdocs[tag]...) {
-					data := idx.tagdocs[tag].byDate().frontMatter()
+					data := idx.tagdocs[tag].frontMatter()
 					data["tag"] = tag
 					err := tmpls.render(tagTemplate, data, outfile)
 					proj.println("write index: " + outfile)
@@ -160,7 +182,7 @@ func (idx index) build(proj *project, modified time.Time) error {
 	var outfile string
 	if tmpls.contains(tmpl) {
 		outfile = filepath.Join(idx.indexDir, "all.html")
-		docs := idx.docs.byDate()
+		docs := idx.docs
 		if rebuild(outfile, modified, docs...) {
 			err := tmpls.render(tmpl, docs.frontMatter(), outfile)
 			proj.println("write index: " + outfile)
@@ -173,7 +195,7 @@ func (idx index) build(proj *project, modified time.Time) error {
 	tmpl = tmpls.name(idx.templateDir, "recent.html")
 	if tmpls.contains(tmpl) {
 		outfile = filepath.Join(idx.indexDir, "recent.html")
-		docs := idx.docs.byDate().first(idx.conf.recent)
+		docs := idx.docs.first(idx.conf.recent)
 		if rebuild(outfile, modified, docs...) {
 			err := tmpls.render(tmpl, docs.frontMatter(), outfile)
 			proj.println("write index: " + outfile)

@@ -270,9 +270,9 @@ The options are:
     -build    BUILD_DIR
     -index    INDEX_DIR
     -port     PORT
+    -builtin  TEMPLATE
     -clean
     -drafts
-    -builtin
     -v
 `)
 }
@@ -362,7 +362,6 @@ func (proj *project) build() error {
 	if err != nil {
 		return err
 	}
-	// Build indexes.
 	idxs := indexes{}
 	idxs.init(proj)
 	for _, doc := range docs {

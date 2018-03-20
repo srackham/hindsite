@@ -26,6 +26,8 @@ type document struct {
 	content      string    // Markup text (without front matter header).
 	rootIndex    *index    // Top-level document index (nil if document is not indexed).
 	modified     time.Time // Document source file modified timestamp.
+	prev         *document // Previous document in primary index.
+	next         *document // Next document in primary index.
 	// Front matter.
 	title    string
 	date     time.Time
@@ -222,6 +224,18 @@ func (doc *document) frontMatter() (data templateData) {
 	data["addendum"] = doc.addendum
 	data["slug"] = doc.slug
 	data["url"] = doc.url
+	prev := templateData{}
+	if doc.prev != nil {
+		prev["title"] = doc.prev.title
+		prev["url"] = doc.prev.url
+	}
+	data["prev"] = prev
+	next := templateData{}
+	if doc.next != nil {
+		next["title"] = doc.next.title
+		next["url"] = doc.next.url
+	}
+	data["next"] = next
 	tags := []map[string]string{}
 	for _, tag := range doc.tags {
 		url := ""
@@ -255,13 +269,29 @@ func (doc *document) render() (html string) {
 	return html
 }
 
+// Assign previous and next according to the current sort order.
+func (docs documents) setPrevNext() documents {
+	for i, doc := range docs {
+		if i == 0 {
+			doc.prev = nil
+		} else {
+			doc.prev = docs[i-1]
+		}
+		if i >= len(docs)-1 {
+			doc.next = nil
+		} else {
+			doc.next = docs[i+1]
+		}
+	}
+	return docs
+}
+
 // Return documents slice sorted by date descending.
-func (docs documents) byDate() documents {
+func (docs documents) sortByDate() {
 	// Sort documents by decending date.
 	sort.Slice(docs, func(i, j int) bool {
 		return !docs[i].date.Before(docs[j].date)
 	})
-	return docs
 }
 
 // Return slice of first n documents.
