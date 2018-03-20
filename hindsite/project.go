@@ -252,13 +252,7 @@ func (proj *project) help() {
 }
 
 func (proj *project) build() error {
-	if !dirExists(proj.contentDir) {
-		return fmt.Errorf("missing content directory: " + proj.contentDir)
-	}
-	if !dirExists(proj.templateDir) {
-		return fmt.Errorf("missing template directory: " + proj.templateDir)
-	}
-	if err := proj.parseConfigs(); err != nil {
+	if err := proj.loadConfig(); err != nil {
 		return err
 	}
 	if !dirExists(proj.buildDir) {
@@ -439,18 +433,22 @@ func (proj *project) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
 	return nil
 }
 
-func (proj *project) serve() error {
-	if !dirExists(proj.buildDir) {
-		return fmt.Errorf("missing build directory: " + proj.buildDir)
-	}
+func (proj *project) loadConfig() error {
 	if !dirExists(proj.contentDir) {
 		return fmt.Errorf("missing content directory: " + proj.contentDir)
 	}
 	if !dirExists(proj.templateDir) {
 		return fmt.Errorf("missing template directory: " + proj.templateDir)
 	}
-	if err := proj.parseConfigs(); err != nil {
+	return proj.parseConfigs()
+}
+
+func (proj *project) serve() error {
+	if err := proj.loadConfig(); err != nil {
 		return err
+	}
+	if !dirExists(proj.buildDir) {
+		return fmt.Errorf("missing build directory: " + proj.buildDir)
 	}
 	// Tweaked http.StripPrefix() handler
 	// (https://golang.org/pkg/net/http/#StripPrefix). If URL does not start
