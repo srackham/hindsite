@@ -21,7 +21,6 @@ type project struct {
 	buildDir    string
 	indexDir    string
 	drafts      bool
-	slugify     bool
 	topic       string
 	port        string
 	clean       bool
@@ -72,8 +71,6 @@ func (proj *project) parseArgs(args []string) error {
 			proj.topic = opt
 		case opt == "-drafts":
 			proj.drafts = true
-		case opt == "-slugify":
-			proj.slugify = true
 		case opt == "-clean":
 			proj.clean = true
 		case opt == "-builtin":
@@ -261,19 +258,13 @@ func (proj *project) build() error {
 	if !dirExists(proj.templateDir) {
 		return fmt.Errorf("missing template directory: " + proj.templateDir)
 	}
-	if err := proj.slugifyDir(proj.contentDir); err != nil {
-		return err
-	}
-	if err := proj.slugifyDir(proj.templateDir); err != nil {
+	if err := proj.parseConfigs(); err != nil {
 		return err
 	}
 	if !dirExists(proj.buildDir) {
 		if err := os.Mkdir(proj.buildDir, 0775); err != nil {
 			return err
 		}
-	}
-	if err := proj.parseConfigs(); err != nil {
-		return err
 	}
 	if proj.clean {
 		// Delete everything in the build directory.
@@ -448,21 +439,15 @@ func (proj *project) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
 	return nil
 }
 
-// Recursively and slugify directory and file names.
-func (proj *project) slugifyDir(dir string) error {
-	// TODO
-	return nil
-}
-
 func (proj *project) serve() error {
 	if !dirExists(proj.buildDir) {
 		return fmt.Errorf("missing build directory: " + proj.buildDir)
 	}
 	if !dirExists(proj.contentDir) {
-		fmt.Fprintln(os.Stderr, "warning: missing content directory: "+proj.contentDir)
+		return fmt.Errorf("missing content directory: " + proj.contentDir)
 	}
 	if !dirExists(proj.templateDir) {
-		fmt.Fprintln(os.Stderr, "warning: missing template directory: "+proj.templateDir)
+		return fmt.Errorf("missing template directory: " + proj.templateDir)
 	}
 	if err := proj.parseConfigs(); err != nil {
 		return err

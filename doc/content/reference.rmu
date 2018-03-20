@@ -216,9 +216,6 @@ Example documents are are copied to the content directory when the project is
 initialized. This provides a mechanism for sharing your website design complete
 with example documents: just share your website template directory.
 
-**slugify**: Ensure path names only contain lower case alpha numeric and hyphen
-characters.
-
 **front matter**: Meta-data embedded at the start of content documents.
 
 
@@ -313,8 +310,6 @@ and hyphen characters. This is is mandatory and:
 * Ensures consistent, readable URLs without ugly encodings for illegal URL
   characters.
 * Allows file names to map to reasonable document titles.
-
-If necessary use the build command `-slugify` option to normalize all content paths.
 
 
 ## URLs
@@ -619,7 +614,7 @@ The options are:
 
 
 hindsite init [-builtin] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
-hindsite build [-clean] [-drafts] [-slugify] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR] -index [INDEX_DIR]
+hindsite build [-clean] [-drafts] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR] -index [INDEX_DIR]
 hindsite serve [-port PORT] [-project PROJECT_DIR] [-build BUILD_DIR]
 hindsite -h | --help | help
 
@@ -645,7 +640,6 @@ Creates new project content directory from an existing template directory.
 Build static website from content and template directories.
 
 - Include draft pages if the `-drafts` option is specified.
-- Slugify content document paths if the  `-sligify` option is specified.
 - If the `-clean` option is specified the the entire contents of the build
   directory is deleted, forcing all files to be rebuilt. By default, only new
   and updated documents or documents whose layout template has been modified are
