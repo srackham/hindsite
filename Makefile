@@ -20,7 +20,7 @@ build: bindata
 	mkdir -p ./bin
 	go build $(GOFLAGS) -o ./bin/hindsite ./...
 
-.PHONY: build-win
+.PHONY: build-win32
 build-win: bindata
 	mkdir -p ./bin
 	GOOS=windows GOARCH=386 go build $(GOFLAGS) -o ./bin/hindsite.exe ./...
@@ -35,9 +35,8 @@ clean:
 
 .PHONY: doc
 doc: install
-	cp -p README.md doc/index.md
-	cd doc
-	hindsite build -content . -template . -v
+	cp -p README.md doc/content/index.md
+	hindsite build -project doc -v
 
 .PHONY: serve
 serve: doc

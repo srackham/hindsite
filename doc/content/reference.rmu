@@ -41,7 +41,17 @@ Small static websites with optional indexed documents (blogs posts, newsletters,
 
 
 ## Hello hindsite
-The simplest project.
+The simplest project:
+
+```
+content/
+    index.md
+template/
+    layout.html
+build/
+    index.html
+```
+Build command: `hindsite build`
 
 `index.md` file:
 ```
@@ -54,29 +64,6 @@ Hello *World*!
 <head><title>{{.title}}</title></head>
 <body>{{.body}}</body>
 ```
-
-### Using the [Standard project model](#standard-project-model)
-Build command: `hindsite build`
-
-```
-content/
-    index.md
-template/
-    layout.html
-build/
-    index.html
-```
-
-### Using the [Minimal project model](#minimal-project-model)
-Build command: `hindsite build -content . -template .`
-
-```
-index.md
-layout.html
-build/
-    index.html
-```
-
 
 ## Design
 The overarching goal is a minimal cognative footprint i.e. easy to understand.
@@ -543,28 +530,8 @@ and content directories to generate a website which it writes to the build
 directory.
 
 Content, template and build directories must be mutually exclusive (not
-contained within one another) with the following execptions:
-
-- Content and template directories can be identical.
-- The build directory can be located at the root of the content directory.
-
-These exceptions accomodate the [Minimal project model](#minimal-project_model).
-
-Normally it's not a good idea to mix content and
-  design especially if you plan to share or reuse your project template.
-
-This allows template
-  examples to be tested and may be a useful model for simple sites (the hindsite
-  docs use this model).
-But normally it's not a good idea to mix content and
-  design especially if you plan to share or reuse your project template.
-
-TODO: Document _Standard_, _Minimal_ and _Disjoint_ project models.
-
-### Standard project model
-The standard project consists of separate content, template and build
-directories in a single directory. Content and design are separate. This is the
-default project model.
+contained within one another). Typically all three directories are in a single
+project directory:
 
 ```
 content/
@@ -574,27 +541,6 @@ template/
 build/
     website files...
 ```
-Standard model build command: cd to the project directory then:
-
-    hindsite build
-
-### Minimal project model
-The minimal project consistes of a common content and template directory
-containing the build directory.
-
-```
-content and template files...
-build/
-    website files...
-```
-Minimal model build command: cd to the project directory then:
-
-    hindsite build -content . -template .
-
-This model may be useful for simple projects but it's not a good idea to mix
-content and design like this if you plan to share or reuse your project
-template.
-
 ### Multi-content and Multi-template projects
 Content and template directories are not bound exclusively to each other: a
 single template process multiple content directories just as a single content
@@ -631,18 +577,46 @@ macro values.
 
 
 ## CLI
-Usage (c.f. `go help`and `dlv help`): 
 
+hindsite help:
 ```
-hindsite command [arguments]
+hindsite is a static website generator
+
+Usage:
+
+    hindsite command [options]...
 
 The commands are:
 
-    init
-    build
-    serve
+    init    create a new project
+    build   generate the website
+    serve   start development webserver
 
 Use "hindsite help [command]" for more information about a command.
+
+Additional help topics:
+
+    project describes a hindsite project
+    vocab   the hindsite vocabulary
+```
+
+### init command
+hindsite help init:
+```
+Create a new project
+
+Usage:
+
+    hindsite init [options]...
+
+The options are:
+
+    -project  PROJECT_DIR
+    -content  CONTENT_DIR
+    -template TEMPLATE_DIR
+    -build    BUILD_DIR
+    -index    INDEX_DIR
+
 
 hindsite init [-builtin] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
 hindsite build [-clean] [-drafts] [-slugify] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR] -index [INDEX_DIR]
@@ -718,7 +692,8 @@ modified since it was last built.
 the _serve_ command opens a development server on the `BUILD_DIR` directory.
 
 - The `-port PORT` option sets the server port (defaults to 1212).
-- I correctly handles the `urlprefix` configuration option.
+- It handles the `urlprefix` configuration option correctly.
+
 
 
 ## Implementation ideas

@@ -3,7 +3,9 @@ debug
 *.out
 gitignore
 examples/minimal/index.html
+bin/
 build/
 doc/index.md
 .vscode/
 examples/blog/
+examples/benchmark.zip
