@@ -36,16 +36,16 @@ clean:
 .PHONY: doc
 doc: install
 	cp -p README.md doc/content/index.md
-	hindsite build -project doc -v
+	hindsite build doc -v
 
 .PHONY: serve
 serve: doc
-	hindsite serve -project doc
+	hindsite serve doc
 
 .PHONY: blog
 blog: install
-	hindsite build -project ./examples/blog -v
-	hindsite serve -project ./examples/blog -v
+	hindsite build ./examples/blog -v
+	hindsite serve ./examples/blog -v
 
 .PHONY: push
 push:

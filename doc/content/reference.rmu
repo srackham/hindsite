@@ -575,17 +575,33 @@ macro values.
 
 hindsite help:
 ```
-hindsite is a static website generator
+Hindsite is a static website generator.
 
 Usage:
 
-    hindsite command [options]...
+    hindsite init  [PROJECT_DIR] [OPTIONS]
+    hindsite build [PROJECT_DIR] [OPTIONS]
+    hindsite serve [PROJECT_DIR] [OPTIONS]
+    hindsite help  [TOPIC]
 
 The commands are:
 
     init    create a new project
     build   generate the website
     serve   start development webserver
+    help    display documentation
+
+The options are:
+
+    -content  CONTENT_DIR
+    -template TEMPLATE_DIR
+    -build    BUILD_DIR
+    -index    INDEX_DIR
+    -port     PORT
+    -clean
+    -drafts
+    -builtin
+    -v
 
 Use "hindsite help [command]" for more information about a command.
 
@@ -604,13 +620,6 @@ Usage:
 
     hindsite init [options]...
 
-The options are:
-
-    -project  PROJECT_DIR
-    -content  CONTENT_DIR
-    -template TEMPLATE_DIR
-    -build    BUILD_DIR
-    -index    INDEX_DIR
 
 
 hindsite init [-builtin] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]

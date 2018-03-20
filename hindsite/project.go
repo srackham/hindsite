@@ -64,11 +64,12 @@ func (proj *project) parseArgs(args []string) error {
 				return fmt.Errorf("illegal command: %s", opt)
 			}
 			proj.command = opt
-		case i == 2 && proj.command == "help":
-			if !isCommand(opt) {
-				return fmt.Errorf("illegal help topic: %s", opt)
+		case i == 2:
+			if proj.command == "help" {
+				proj.topic = opt
+			} else {
+				proj.projectDir = opt
 			}
-			proj.topic = opt
 		case opt == "-drafts":
 			proj.drafts = true
 		case opt == "-clean":
@@ -77,14 +78,12 @@ func (proj *project) parseArgs(args []string) error {
 			proj.builtin = true
 		case opt == "-v":
 			proj.verbose = true
-		case stringlist{"-p", "-project", "-content", "-template", "-build", "-index", "-port"}.Contains(opt):
+		case stringlist{"-content", "-template", "-build", "-index", "-port"}.Contains(opt):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
 			}
 			arg := args[i+1]
 			switch opt {
-			case "-p", "-project":
-				proj.projectDir = arg
 			case "-content":
 				proj.contentDir = arg
 			case "-template":
@@ -248,7 +247,34 @@ func (proj *project) init() error {
 }
 
 func (proj *project) help() {
-	println("Usage: hindsite command [arguments]")
+	println(`Hindsite is a static website generator.
+
+Usage:
+
+    hindsite init  [PROJECT_DIR] [OPTIONS]
+    hindsite build [PROJECT_DIR] [OPTIONS]
+    hindsite serve [PROJECT_DIR] [OPTIONS]
+    hindsite help  [TOPIC]
+
+The commands are:
+
+    init    create a new project
+    build   generate the website
+    serve   start development webserver
+    help    display documentation
+
+The options are:
+
+    -content  CONTENT_DIR
+    -template TEMPLATE_DIR
+    -build    BUILD_DIR
+    -index    INDEX_DIR
+    -port     PORT
+    -clean
+    -drafts
+    -builtin
+    -v
+`)
 }
 
 func (proj *project) build() error {
