@@ -80,13 +80,13 @@ func (proj *project) parseArgs(args []string) error {
 			proj.builtin = true
 		case opt == "-v":
 			proj.verbose = true
-		case stringlist{"-project", "-content", "-template", "-build", "-index", "-port"}.Contains(opt):
+		case stringlist{"-p", "-project", "-content", "-template", "-build", "-index", "-port"}.Contains(opt):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
 			}
 			arg := args[i+1]
 			switch opt {
-			case "-project":
+			case "-p", "-project":
 				proj.projectDir = arg
 			case "-content":
 				proj.contentDir = arg
@@ -325,6 +325,7 @@ func (proj *project) build() error {
 		if !info.IsDir() {
 			switch filepath.Ext(f) {
 			case ".md", ".rmu":
+				// Parse document.
 				doc := document{}
 				err = doc.parseFile(f, proj)
 				if err != nil {
@@ -335,6 +336,7 @@ func (proj *project) build() error {
 				}
 				docs = append(docs, &doc)
 			case ".toml", ".yaml":
+				// Skip configuration file.
 				if isOlder(confMod, info.ModTime()) {
 					confMod = info.ModTime()
 				}
