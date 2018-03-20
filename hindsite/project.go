@@ -119,6 +119,9 @@ func (proj *project) parseArgs(args []string) error {
 	if err != nil {
 		return err
 	}
+	if !dirExists(proj.projectDir) {
+		return fmt.Errorf("missing project directory: " + proj.projectDir)
+	}
 	proj.contentDir, err = getPath(proj.contentDir, filepath.Join(proj.projectDir, "content"))
 	if err != nil {
 		return err
@@ -135,9 +138,7 @@ func (proj *project) parseArgs(args []string) error {
 	if err != nil {
 		return err
 	}
-	// Content and build directories can be the same. The build directory is
-	// allowed at root of content directory. In all other cases content,
-	// template and build directories cannot be nested.
+	// Content, template and build directories cannot be nested.
 	checkOverlap := func(name1, dir1, name2, dir2 string) error {
 		if len(strings.TrimPrefix(dir1, dir2)) < len(dir1) {
 			return fmt.Errorf("%s directory cannot reside inside %s directory", name1, name2)
@@ -147,24 +148,17 @@ func (proj *project) parseArgs(args []string) error {
 		}
 		return nil
 	}
-	if proj.contentDir != proj.templateDir {
-		if err := checkOverlap("content", proj.contentDir, "template", proj.templateDir); err != nil {
-			return err
-		}
+	if err := checkOverlap("content", proj.contentDir, "template", proj.templateDir); err != nil {
+		return err
 	}
-	if filepath.Dir(proj.buildDir) != proj.contentDir {
-		if err := checkOverlap("build", proj.buildDir, "content", proj.contentDir); err != nil {
-			return err
-		}
-		if err := checkOverlap("build", proj.buildDir, "template", proj.templateDir); err != nil {
-			return err
-		}
+	if err := checkOverlap("build", proj.buildDir, "content", proj.contentDir); err != nil {
+		return err
+	}
+	if err := checkOverlap("build", proj.buildDir, "template", proj.templateDir); err != nil {
+		return err
 	}
 	if !(pathIsInDir(proj.indexDir, proj.buildDir) || proj.indexDir == proj.buildDir) {
 		return fmt.Errorf("index directory must reside in build directory: %s", proj.buildDir)
-	}
-	if !dirExists(proj.projectDir) {
-		return fmt.Errorf("missing project directory: " + proj.projectDir)
 	}
 	return nil
 }
@@ -270,10 +264,8 @@ func (proj *project) build() error {
 	if err := proj.slugifyDir(proj.contentDir); err != nil {
 		return err
 	}
-	if proj.contentDir != proj.templateDir {
-		if err := proj.slugifyDir(proj.templateDir); err != nil {
-			return err
-		}
+	if err := proj.slugifyDir(proj.templateDir); err != nil {
+		return err
 	}
 	if !dirExists(proj.buildDir) {
 		if err := os.Mkdir(proj.buildDir, 0775); err != nil {
@@ -298,13 +290,6 @@ func (proj *project) build() error {
 	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
-		}
-		if info.IsDir() {
-			if f == proj.buildDir {
-				// Do not process the build directory.
-				return filepath.SkipDir
-			}
-			return nil
 		}
 		if !info.IsDir() {
 			switch filepath.Ext(f) {
@@ -337,34 +322,25 @@ func (proj *project) build() error {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() {
-			if f == proj.buildDir {
-				// Do not process the build directory.
-				return filepath.SkipDir
-			}
-			return nil
-		}
-		switch filepath.Ext(f) {
-		case ".md", ".rmu":
-			doc := document{}
-			err = doc.parseFile(f, proj)
-			if err != nil {
-			}
-			if doc.draft && !proj.drafts {
-				proj.println("skip draft: " + f)
-				return nil
-			}
-			docs = append(docs, &doc)
-		case ".toml", ".yaml":
-			if isOlder(confMod, info.ModTime()) {
-				confMod = info.ModTime()
-			}
-		case ".html":
-			if proj.contentDir != proj.templateDir {
+		if !info.IsDir() {
+			switch filepath.Ext(f) {
+			case ".md", ".rmu":
+				doc := document{}
+				err = doc.parseFile(f, proj)
+				if err != nil {
+				}
+				if doc.draft && !proj.drafts {
+					proj.println("skip draft: " + f)
+					return nil
+				}
+				docs = append(docs, &doc)
+			case ".toml", ".yaml":
+				if isOlder(confMod, info.ModTime()) {
+					confMod = info.ModTime()
+				}
+			case ".html":
 				err = proj.copyStaticFile(f, proj.contentDir, proj.buildDir)
-			}
-		default:
-			if proj.contentDir != proj.templateDir {
+			default:
 				err = proj.copyStaticFile(f, proj.contentDir, proj.buildDir)
 			}
 		}

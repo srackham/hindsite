@@ -97,10 +97,6 @@ func (conf *config) String() (result string) {
 // `proj.confs`.
 func (proj *project) parseConfigs() error {
 	for _, d := range []string{proj.contentDir, proj.templateDir} {
-		if proj.contentDir == proj.templateDir && d == proj.templateDir {
-			break
-		}
-		// TODO: EXCLUDE BUILD DIRECTORY.
 		err := filepath.Walk(d, func(f string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
