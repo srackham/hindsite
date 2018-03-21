@@ -64,12 +64,6 @@ func (proj *project) parseArgs(args []string) error {
 				return fmt.Errorf("illegal command: %s", opt)
 			}
 			proj.command = opt
-		case i == 2:
-			if proj.command == "help" {
-				proj.topic = opt
-			} else {
-				proj.projectDir = opt
-			}
 		case opt == "-drafts":
 			proj.drafts = true
 		case opt == "-clean":
@@ -98,8 +92,17 @@ func (proj *project) parseArgs(args []string) error {
 				panic("illegal arugment: " + opt)
 			}
 			skip = true
+		case i == 2:
+			if opt[0] == '-' {
+				return fmt.Errorf("illegal option: %s", opt)
+			}
+			if proj.command == "help" {
+				proj.topic = opt
+			} else {
+				proj.projectDir = opt
+			}
 		default:
-			return fmt.Errorf("illegal argument: %s", opt)
+			return fmt.Errorf("illegal option: %s", opt)
 		}
 	}
 	// Clean and convert directories to absolute paths.
