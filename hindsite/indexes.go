@@ -19,7 +19,6 @@ type index struct {
 	docs        documents            // Parsed documents belonging to index.
 	tagdocs     map[string]documents // Partitions index documents by tag.
 	tagfiles    map[string]string    // Slugified tag file names.
-	pages       []page               // Paginated docs.
 }
 
 type indexes []index
@@ -182,12 +181,12 @@ func (idx index) build(proj *project, modified time.Time) error {
 		}
 	}
 	// Render document index pages.
-	idx.paginate()
 	tmpl := tmpls.name(idx.templateDir, "docs.html")
 	if !tmpls.contains(tmpl) {
 		return fmt.Errorf("missing docs template: %s", filepath.Join(idx.templateDir, "docs.html"))
 	}
-	for _, pg := range idx.pages {
+	pgs := idx.paginate(idx.docs, "docs-%d.html")
+	for _, pg := range pgs {
 		if rebuild(pg.file, modified, pg.docs...) {
 			fm := pg.docs.frontMatter()
 			fm["page"] = pg.frontMatter()
@@ -217,24 +216,24 @@ func (idx index) tagsData() templateData {
 }
 
 // Synthesize index pages.
-func (idx *index) paginate() {
+func (idx *index) paginate(docs documents, namefmt string) []page {
 	pgs := []page{}
 	pagesize := idx.conf.paginate
 	var pagecount int
 	if pagesize <= 0 {
 		pagecount = 1
 	} else {
-		pagecount = (len(idx.docs)-1)/pagesize + 1 // Total number of pages.
+		pagecount = (len(docs)-1)/pagesize + 1 // Total number of pages.
 	}
 	for pageno := 1; pageno <= pagecount; pageno++ {
 		pg := page{number: pageno}
 		i := (pageno - 1) * pagesize
 		if pageno == pagecount {
-			pg.docs = idx.docs[i:]
+			pg.docs = docs[i:]
 		} else {
-			pg.docs = idx.docs[i : i+pagesize]
+			pg.docs = docs[i : i+pagesize]
 		}
-		f := fmt.Sprintf("docs-%d.html", pg.number)
+		f := fmt.Sprintf(namefmt, pg.number)
 		pg.file = filepath.Join(idx.indexDir, f)
 		pg.url = path.Join(idx.url, f)
 		pgs = append(pgs, pg)
@@ -247,7 +246,7 @@ func (idx *index) paginate() {
 			pgs[i].next = &pgs[i+1]
 		}
 	}
-	idx.pages = pgs
+	return pgs
 }
 
 func (pg page) frontMatter() (data templateData) {
