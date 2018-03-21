@@ -25,10 +25,12 @@ type index struct {
 type indexes []index
 
 type page struct {
-	url  string
-	next string // URL.
-	prev string // URL.
-	docs documents
+	number int    // 1...
+	file   string // File name.
+	url    string
+	next   *page
+	prev   *page
+	docs   documents
 }
 
 func newIndex() index {
@@ -108,7 +110,10 @@ func (idxs indexes) addDocument(doc *document) {
 func (idxs indexes) build(proj *project, modified time.Time) error {
 	// Sort index documents then assign previous and next documents according to
 	// the primary index ordering.
-	// NOTE: Document prev/next corresponds to the primary index.
+	// NOTE:
+	// - Document prev/next corresponds to the primary index.
+	// - Index document ordering ensures subsequent derived document tag indexes
+	//   are also ordered.
 	for _, idx1 := range idxs {
 		primary := true
 		for _, idx2 := range idxs {
@@ -131,6 +136,10 @@ func (idxs indexes) build(proj *project, modified time.Time) error {
 }
 
 func (idx index) build(proj *project, modified time.Time) error {
+	// TODO: Verify that zero pages generates a single blank documents index.
+	// if len(idx.docs) == 0 {
+	// 	return nil
+	// }
 	tmpls := &proj.tmpls // Lexical shortcut.
 	tagsTemplate := tmpls.name(idx.templateDir, "tags.html")
 	tagTemplate := tmpls.name(idx.templateDir, "tag.html")
@@ -177,28 +186,15 @@ func (idx index) build(proj *project, modified time.Time) error {
 			}
 		}
 	}
-	// Render all index.
+	// Render document index pages.
+	idx.paginate()
 	tmpl := tmpls.name(idx.templateDir, "all.html")
-	var outfile string
-	if tmpls.contains(tmpl) {
-		outfile = filepath.Join(idx.indexDir, "all.html")
-		docs := idx.docs
-		if rebuild(outfile, modified, docs...) {
-			err := tmpls.render(tmpl, docs.frontMatter(), outfile)
-			proj.println("write index: " + outfile)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	// Render recent index.
-	tmpl = tmpls.name(idx.templateDir, "recent.html")
-	if tmpls.contains(tmpl) {
-		outfile = filepath.Join(idx.indexDir, "recent.html")
-		docs := idx.docs.first(idx.conf.recent)
-		if rebuild(outfile, modified, docs...) {
-			err := tmpls.render(tmpl, docs.frontMatter(), outfile)
-			proj.println("write index: " + outfile)
+	for _, pg := range idx.pages {
+		if rebuild(pg.file, modified, pg.docs...) {
+			fm := pg.docs.frontMatter()
+			fm["page"] = pg.frontMatter()
+			err := tmpls.render(tmpl, fm, pg.file)
+			proj.println("write index: " + pg.file)
 			if err != nil {
 				return err
 			}
@@ -220,4 +216,55 @@ func (idx index) tagsData() templateData {
 		return strings.ToLower(tags[i]["tag"]) < strings.ToLower(tags[j]["tag"])
 	})
 	return templateData{"tags": tags}
+}
+
+// Synthesize index pages.
+func (idx *index) paginate() {
+	pgs := []page{}
+	pagesize := idx.conf.paginate
+	if idx.conf.paginate <= 0 {
+		pagesize = len(idx.docs)
+	}
+	pagecount := (len(idx.docs)-1)/pagesize + 1 // Total number of pages.
+	for pageno := 1; pageno <= pagecount; pageno++ {
+		pg := page{number: pageno}
+		i := (pageno - 1) * pagesize
+		if pageno == pagecount {
+			pg.docs = idx.docs[i:]
+		} else {
+			pg.docs = idx.docs[i : i+pagesize]
+		}
+		f := fmt.Sprintf("all-%d.html", pg.number)
+		pg.file = filepath.Join(idx.indexDir, f)
+		pg.url = path.Join(idx.url, f)
+		pgs = append(pgs, pg)
+	}
+	for i := range pgs {
+		if i != 0 {
+			pgs[i].prev = &pgs[i-1]
+		}
+		if i < len(pgs)-1 {
+			pgs[i].next = &pgs[i+1]
+		}
+	}
+	idx.pages = pgs
+}
+
+func (pg page) frontMatter() (data templateData) {
+	data = templateData{}
+	data["number"] = pg.number
+	data["url"] = pg.url
+	prev := templateData{}
+	if pg.prev != nil {
+		prev["number"] = pg.prev.number
+		prev["url"] = pg.prev.url
+	}
+	data["prev"] = prev
+	next := templateData{}
+	if pg.next != nil {
+		next["number"] = pg.next.number
+		next["url"] = pg.next.url
+	}
+	data["next"] = next
+	return data
 }

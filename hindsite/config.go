@@ -18,6 +18,7 @@ type config struct {
 	// Configuration parameters.
 	author    string // Default document author.
 	homepage  string // Use this file (relative to the build directory) for /index.html.
+	paginate  int    // Number of documents per index page. No pagination if zero or less.
 	recent    int    // Maximum number of recent index entries.
 	urlprefix string // For document and index page URLs.
 }
@@ -34,6 +35,7 @@ func (conf *config) parseFile(proj *project, f string) error {
 		Author    string
 		Homepage  string
 		URLPrefix string
+		Paginate  int
 		Recent    int
 	}{}
 	switch filepath.Ext(f) {
@@ -63,6 +65,9 @@ func (conf *config) parseFile(proj *project, f string) error {
 		}
 		conf.homepage = value
 	}
+	if cf.Paginate != 0 {
+		conf.paginate = cf.Paginate
+	}
 	if cf.Recent != 0 {
 		conf.recent = cf.Recent
 	}
@@ -82,6 +87,7 @@ func (conf *config) data() (data templateData) {
 	data = templateData{}
 	data["author"] = conf.author
 	data["homepage"] = conf.homepage
+	data["paginate"] = conf.paginate
 	data["recent"] = conf.recent
 	data["urlprefix"] = conf.urlprefix
 	return data
@@ -148,6 +154,9 @@ func (conf *config) merge(from config) {
 	if from.homepage != "" {
 		conf.homepage = from.homepage
 	}
+	if from.paginate != 0 {
+		conf.paginate = from.paginate
+	}
 	if from.recent != 0 {
 		conf.recent = from.recent
 	}
@@ -163,7 +172,7 @@ func (conf *config) merge(from config) {
 // configuration `origin` in ascending order to ensure the directory heirarchy
 // precedence.
 func (proj *project) configFor(contentDir, templateDir string) config {
-	result := config{recent: 5, urlprefix: "/"} // Set default configuration.
+	result := config{paginate: 5, recent: 5, urlprefix: "/"} // Set default configuration.
 	for _, conf := range proj.confs {
 		if templateDir == conf.origin || pathIsInDir(templateDir, conf.origin) {
 			result.merge(conf)

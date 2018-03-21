@@ -270,7 +270,7 @@ func (doc *document) render() (html string) {
 }
 
 // Assign previous and next according to the current sort order.
-func (docs documents) setPrevNext() documents {
+func (docs documents) setPrevNext() {
 	for i, doc := range docs {
 		if i == 0 {
 			doc.prev = nil
@@ -283,7 +283,6 @@ func (docs documents) setPrevNext() documents {
 			doc.next = docs[i+1]
 		}
 	}
-	return docs
 }
 
 // Return documents slice sorted by date descending.
