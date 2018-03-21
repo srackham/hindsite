@@ -366,7 +366,9 @@ func (proj *project) build() error {
 		return err
 	}
 	idxs := indexes{}
-	idxs.init(proj)
+	if err := idxs.init(proj); err != nil {
+		return err
+	}
 	for _, doc := range docs {
 		idxs.addDocument(doc)
 	}
