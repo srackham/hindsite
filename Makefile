@@ -16,12 +16,15 @@ install: test
 	go install $(GOFLAGS) ./...
 
 .PHONY: build
-build: bindata
+build: build-linux64 build-win32
+
+.PHONY: build-linux64
+build-linux64: bindata
 	mkdir -p ./bin
-	go build $(GOFLAGS) -o ./bin/hindsite ./...
+	GOOS=linux GOARCH=amd64 go build $(GOFLAGS) -o ./bin/hindsite ./...
 
 .PHONY: build-win32
-build-win: bindata
+build-win32: bindata
 	mkdir -p ./bin
 	GOOS=windows GOARCH=386 go build $(GOFLAGS) -o ./bin/hindsite.exe ./...
 
