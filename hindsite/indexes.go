@@ -42,8 +42,7 @@ func newIndex() index {
 
 func isIndexFile(filename string) bool {
 	return stringlist{
-		"all.html",
-		"recent.html",
+		"docs.html",
 		"tags.html",
 		"tag.html",
 	}.Contains(filepath.Base(filename))
@@ -141,10 +140,10 @@ func (idx index) build(proj *project, modified time.Time) error {
 	tagTemplate := tmpls.name(idx.templateDir, "tag.html")
 	if tmpls.contains(tagsTemplate) || tmpls.contains(tagTemplate) {
 		if !tmpls.contains(tagsTemplate) {
-			return fmt.Errorf("missing tags template: %s", tagsTemplate)
+			return fmt.Errorf("missing tags template: %s", filepath.Join(idx.templateDir, "tags.html"))
 		}
 		if !tmpls.contains(tagTemplate) {
-			return fmt.Errorf("missing tag template: %s", tagTemplate)
+			return fmt.Errorf("missing tag template: %s", filepath.Join(idx.templateDir, "tag.html"))
 		}
 		outfile := filepath.Join(idx.indexDir, "tags.html")
 		if rebuild(outfile, modified, idx.docs...) {
@@ -184,7 +183,10 @@ func (idx index) build(proj *project, modified time.Time) error {
 	}
 	// Render document index pages.
 	idx.paginate()
-	tmpl := tmpls.name(idx.templateDir, "all.html")
+	tmpl := tmpls.name(idx.templateDir, "docs.html")
+	if !tmpls.contains(tmpl) {
+		return fmt.Errorf("missing docs template: %s", filepath.Join(idx.templateDir, "docs.html"))
+	}
 	for _, pg := range idx.pages {
 		if rebuild(pg.file, modified, pg.docs...) {
 			fm := pg.docs.frontMatter()
@@ -232,7 +234,7 @@ func (idx *index) paginate() {
 		} else {
 			pg.docs = idx.docs[i : i+pagesize]
 		}
-		f := fmt.Sprintf("all-%d.html", pg.number)
+		f := fmt.Sprintf("docs-%d.html", pg.number)
 		pg.file = filepath.Join(idx.indexDir, f)
 		pg.url = path.Join(idx.url, f)
 		pgs = append(pgs, pg)

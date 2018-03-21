@@ -85,8 +85,6 @@ TODO
   Blog?](https://www.wpsitecare.com/wordpress-categories-vs-tags/).
 - No explicit slugs or permalinks.
 - Minimal explicit meta-data.
-- No pagination, just complete _recent_, _all_, _tag_ and _tags_ indexes.
-  Pagination is an unnecessary complexity -- you can page indexes up and down and search them it in the browser.
 - No [shortcodes](https://gohugo.io/content-management/shortcodes/) -- use Rimu macros.
 - No template functions just a set of template variables, see:
   * https://jekyllrb.com/docs/variables/,
@@ -199,7 +197,12 @@ templates root directory.
 
 **index templates**: Index templates are used to render document index web pages.
 
-**document index**: A generated HTML Webpage containing a list of content documents.
+**index**: A generated HTML Webpage containing a list of content documents.
+
+**primary index**: An index that is not nested. A document can only belong to
+one primary index.
+
+**secondary index**: An index that is nested.
 
 **tag**: A keyword or phrase used to categorize a content document.
 
@@ -253,15 +256,13 @@ template/
         layout.html
     blog/
         layout.html
-        all.html
-        recent.html
+        docs.html
         tags.html
         tag.html
         example.md
     newsletters/
         layout.html
-        all.html
-        recent.html
+        docs.html
         example.md
     static/
         main.css
@@ -285,13 +286,13 @@ build/
     indexes/
         blog/
             all.html
-            recent.html
+            docs-1.html
+            docs-2.html
             tags.html
             tags/
                 kotlin.html
         newsletters/
-            all.html
-            recent.html
+            docs-1.html
 ```
 
 - Template files are preprocessed by the
@@ -348,7 +349,7 @@ address?](https://stackoverflow.com/questions/6534904/how-to-remove-file-extensi
 
 
 ## Document Indexes
-- Recent, All and Tags document indexes are created by the build command.
+- Documents and tags indexes are created by the build command.
 - The project can contain any number of indexed content directories.
 - Any content directory can be indexed by placing one or more index
   templates in the corresponding template directory.
@@ -364,7 +365,7 @@ address?](https://stackoverflow.com/questions/6534904/how-to-remove-file-extensi
 TODO
 
 - There are two types of indexes: date indexes and tags indexes.
-- They are named `{all,recent,tag,tags}.html`.
+- They are named `{docs,tag,tags}.html`.
 
 
 **indexed document**: A content document residing in an indexed directory. Indexed
@@ -377,21 +378,12 @@ template directory contains one or more index templates.
 **indexes directory**: A directory in the build directory containing generated
 index pages.
 
-**date indexes**: Date index pages ordered by document
-publication date using `all.html` and `recent.html` index templates. `all.html`
-generates a list of all documents; `recent.html` generates a list of the most
-recent documents.
-
-
-hindsite generates tag index pages using tag meta-data and
-`tags.html` and `tag.html` templates.
 ## Document indexes
 - The indexes directory contains a directory for each indexed document directory.
 - The indexes directory is TODO
 - Each individual index directory may contain:
 
-  * `recent.html`: a list of the most recent posts.
-  * `all.html`: a list of the all posts.
+  * `docs.html`: a paginated list of the all posts.
   * `tags.html`: a list of post tags linked to files named like
     `tags/SLUGIFIED_TAG_NAME.html` (one per tag) each containing a list of
     related posts. The `TAG_NAME` is slugified.
@@ -429,11 +421,10 @@ urlprefix = "/blog"
 
 # Build uses this to copy a file to /index.html (assuming you need it and it do not have it).
 # The value is a file path (relative to the build directory).
-homepage = "indexes/blog/recent.html"
+homepage = "indexes/blog/all-1.html"
 
-# Maximum number of all and recent index entries.
-??? all = 1000
-recent =k10
+# Paginate sets the number of documents per document index page (1..). Set to -1 to include all documents in a single page.
+paginate = 5
 
 # A `|` separated list of file and directory names that should not be processed (wildcards allowed).
 exclude = "config.rmu"
@@ -598,9 +589,9 @@ The options are:
     -build    BUILD_DIR
     -index    INDEX_DIR
     -port     PORT
+    -builtin  NAME
     -clean
     -drafts
-    -builtin
     -v
 
 Use "hindsite help [command]" for more information about a command.
