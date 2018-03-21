@@ -240,7 +240,7 @@ func (doc *document) frontMatter() (data templateData) {
 	for _, tag := range doc.tags {
 		url := ""
 		if doc.rootIndex != nil {
-			url = path.Join(doc.rootIndex.url, "tags", doc.rootIndex.tagfiles[tag])
+			url = path.Join(doc.rootIndex.url, "tags", doc.rootIndex.slugs[tag]+"-1.html")
 		}
 		tags = append(tags, map[string]string{
 			"tag": tag,

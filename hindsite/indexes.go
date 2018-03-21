@@ -18,7 +18,7 @@ type index struct {
 	url         string               // URL of index directory.
 	docs        documents            // Parsed documents belonging to index.
 	tagdocs     map[string]documents // Partitions index documents by tag.
-	tagfiles    map[string]string    // Slugified tag file names.
+	slugs       map[string]string    // Slugified tags.
 }
 
 type indexes []index
@@ -35,7 +35,7 @@ type page struct {
 func newIndex() index {
 	idx := index{}
 	idx.tagdocs = map[string]documents{}
-	idx.tagfiles = map[string]string{}
+	idx.slugs = map[string]string{}
 	return idx
 }
 
@@ -135,6 +135,20 @@ func (idxs indexes) build(proj *project, modified time.Time) error {
 
 func (idx index) build(proj *project, modified time.Time) error {
 	tmpls := &proj.tmpls // Lexical shortcut.
+	renderPages := func(pgs []page, tmpl string, modified time.Time) error {
+		for _, pg := range pgs {
+			if rebuild(pg.file, modified, pg.docs...) {
+				fm := pg.docs.frontMatter()
+				fm["page"] = pg.frontMatter()
+				err := tmpls.render(tmpl, fm, pg.file)
+				proj.println("write index: " + pg.file)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}
 	tagsTemplate := tmpls.name(idx.templateDir, "tags.html")
 	tagTemplate := tmpls.name(idx.templateDir, "tag.html")
 	if tmpls.contains(tagsTemplate) || tmpls.contains(tagTemplate) {
@@ -152,12 +166,12 @@ func (idx index) build(proj *project, modified time.Time) error {
 					idx.tagdocs[tag] = append(idx.tagdocs[tag], doc)
 				}
 			}
-			// Build idx.tagfiles[].
+			// Build index tag slugs.
 			slugs := []string{}
 			for tag := range idx.tagdocs {
 				slug := slugify(tag, slugs)
 				slugs = append(slugs, slug)
-				idx.tagfiles[tag] = slug + ".html"
+				idx.slugs[tag] = slug
 			}
 			// Render tags index.
 			err := tmpls.render(tagsTemplate, idx.tagsData(), outfile)
@@ -167,15 +181,9 @@ func (idx index) build(proj *project, modified time.Time) error {
 			}
 			// Render per-tag indexes.
 			for tag := range idx.tagdocs {
-				outfile := filepath.Join(idx.indexDir, "tags", idx.tagfiles[tag])
-				if rebuild(outfile, modified, idx.tagdocs[tag]...) {
-					data := idx.tagdocs[tag].frontMatter()
-					data["tag"] = tag
-					err := tmpls.render(tagTemplate, data, outfile)
-					proj.println("write index: " + outfile)
-					if err != nil {
-						return err
-					}
+				pgs := idx.paginate(idx.tagdocs[tag], filepath.Join("tags", idx.slugs[tag]+"-%d.html"))
+				if err := renderPages(pgs, tagTemplate, modified); err != nil {
+					return err
 				}
 			}
 		}
@@ -186,18 +194,7 @@ func (idx index) build(proj *project, modified time.Time) error {
 		return fmt.Errorf("missing docs template: %s", filepath.Join(idx.templateDir, "docs.html"))
 	}
 	pgs := idx.paginate(idx.docs, "docs-%d.html")
-	for _, pg := range pgs {
-		if rebuild(pg.file, modified, pg.docs...) {
-			fm := pg.docs.frontMatter()
-			fm["page"] = pg.frontMatter()
-			err := tmpls.render(tmpl, fm, pg.file)
-			proj.println("write index: " + pg.file)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
+	return renderPages(pgs, tmpl, modified)
 }
 
 func (idx index) tagsData() templateData {
@@ -205,7 +202,7 @@ func (idx index) tagsData() templateData {
 	for tag := range idx.tagdocs {
 		data := map[string]string{
 			"tag": tag,
-			"url": path.Join(idx.url, "tags", idx.tagfiles[tag]),
+			"url": path.Join(idx.url, "tags", idx.slugs[tag]+"-1.html"),
 		}
 		tags = append(tags, data)
 	}
@@ -216,7 +213,7 @@ func (idx index) tagsData() templateData {
 }
 
 // Synthesize index pages.
-func (idx *index) paginate(docs documents, namefmt string) []page {
+func (idx *index) paginate(docs documents, filename string) []page {
 	pgs := []page{}
 	pagesize := idx.conf.paginate
 	var pagecount int
@@ -233,9 +230,9 @@ func (idx *index) paginate(docs documents, namefmt string) []page {
 		} else {
 			pg.docs = docs[i : i+pagesize]
 		}
-		f := fmt.Sprintf(namefmt, pg.number)
+		f := fmt.Sprintf(filename, pg.number)
 		pg.file = filepath.Join(idx.indexDir, f)
-		pg.url = path.Join(idx.url, f)
+		pg.url = path.Join(idx.url, filepath.ToSlash(f))
 		pgs = append(pgs, pg)
 	}
 	for i := range pgs {
