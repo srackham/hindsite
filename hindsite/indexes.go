@@ -136,10 +136,6 @@ func (idxs indexes) build(proj *project, modified time.Time) error {
 }
 
 func (idx index) build(proj *project, modified time.Time) error {
-	// TODO: Verify that zero pages generates a single blank documents index.
-	// if len(idx.docs) == 0 {
-	// 	return nil
-	// }
 	tmpls := &proj.tmpls // Lexical shortcut.
 	tagsTemplate := tmpls.name(idx.templateDir, "tags.html")
 	tagTemplate := tmpls.name(idx.templateDir, "tag.html")
@@ -222,10 +218,12 @@ func (idx index) tagsData() templateData {
 func (idx *index) paginate() {
 	pgs := []page{}
 	pagesize := idx.conf.paginate
-	if idx.conf.paginate <= 0 {
-		pagesize = len(idx.docs)
+	var pagecount int
+	if pagesize <= 0 {
+		pagecount = 1
+	} else {
+		pagecount = (len(idx.docs)-1)/pagesize + 1 // Total number of pages.
 	}
-	pagecount := (len(idx.docs)-1)/pagesize + 1 // Total number of pages.
 	for pageno := 1; pageno <= pagecount; pageno++ {
 		pg := page{number: pageno}
 		i := (pageno - 1) * pagesize
