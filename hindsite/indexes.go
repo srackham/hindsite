@@ -30,6 +30,8 @@ type page struct {
 	url    string
 	next   *page
 	prev   *page
+	first  *page
+	last   *page
 	docs   documents
 }
 
@@ -244,25 +246,25 @@ func (idx *index) paginate(docs documents, filename string) []page {
 		if i < len(pgs)-1 {
 			pgs[i].next = &pgs[i+1]
 		}
+		pgs[i].first = &pgs[0]
+		pgs[i].last = &pgs[len(pgs)-1]
 	}
 	return pgs
 }
 
-func (pg page) frontMatter() (data templateData) {
-	data = templateData{}
-	data["number"] = pg.number
-	data["url"] = pg.url
-	prev := templateData{}
-	if pg.prev != nil {
-		prev["number"] = pg.prev.number
-		prev["url"] = pg.prev.url
+func (pg page) frontMatter() templateData {
+	dataFor := func(pg *page) templateData {
+		data := templateData{}
+		if pg != nil {
+			data["number"] = pg.number
+			data["url"] = pg.url
+		}
+		return data
 	}
-	data["prev"] = prev
-	next := templateData{}
-	if pg.next != nil {
-		next["number"] = pg.next.number
-		next["url"] = pg.next.url
-	}
-	data["next"] = next
+	data := dataFor(&pg)
+	data["prev"] = dataFor(pg.prev)
+	data["next"] = dataFor(pg.next)
+	data["first"] = dataFor(pg.first)
+	data["last"] = dataFor(pg.last)
 	return data
 }
