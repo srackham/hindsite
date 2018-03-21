@@ -6,6 +6,7 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -199,10 +200,11 @@ func (idx index) build(proj *project, modified time.Time) error {
 
 func (idx index) tagsData() templateData {
 	tags := []map[string]string{} // An array of "tag", "url" key value maps.
-	for tag := range idx.tagdocs {
+	for tag, docs := range idx.tagdocs {
 		data := map[string]string{
-			"tag": tag,
-			"url": path.Join(idx.url, "tags", idx.slugs[tag]+"-1.html"),
+			"tag":   tag,
+			"url":   path.Join(idx.url, "tags", idx.slugs[tag]+"-1.html"),
+			"count": strconv.Itoa(len(docs)),
 		}
 		tags = append(tags, data)
 	}
