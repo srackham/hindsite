@@ -410,8 +410,8 @@ func (proj *project) build() error {
 	return nil
 }
 
-// Return true if the target file is newer than modified time or newer than any
-// document.
+// Return true if the target file does not exist or is newer than modified time
+// or newer than any document.
 func rebuild(target string, modified time.Time, docs ...*document) bool {
 	info, err := os.Stat(target)
 	if err != nil {

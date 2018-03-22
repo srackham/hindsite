@@ -168,6 +168,10 @@ func (idx index) build(proj *project, modified time.Time) error {
 		}
 		outfile := filepath.Join(idx.indexDir, "tags.html")
 		if rebuild(outfile, modified, idx.docs...) {
+			// If any document in the index is modified the index must be
+			// completely rebuild since we are forced to assume document front
+			// matter (which contributes to the index) has been modified.
+
 			// Build idx.tagdocs[].
 			for _, doc := range idx.docs {
 				for _, tag := range doc.tags {
@@ -187,10 +191,10 @@ func (idx index) build(proj *project, modified time.Time) error {
 			if err != nil {
 				return err
 			}
-			// Render per-tag indexes.
+			// Render per-tag document index pages.
 			for tag := range idx.tagdocs {
 				pgs := idx.paginate(idx.tagdocs[tag], filepath.Join("tags", idx.slugs[tag]+"-%d.html"))
-				if err := renderPages(pgs, tagTemplate, modified); err != nil {
+				if err := renderPages(pgs, tagTemplate, time.Now()); err != nil {
 					return err
 				}
 			}
