@@ -73,7 +73,7 @@ func (tmpls templates) render(name string, data templateData, outfile string) er
 }
 
 // Merge in data from another data map.
-func (data templateData) add(from templateData) {
+func (data templateData) merge(from templateData) {
 	for k, v := range from {
 		data[k] = v
 	}

@@ -18,7 +18,7 @@ type index struct {
 	indexDir    string               // The build directory that the index pages are written to.
 	url         string               // URL of index directory.
 	docs        documents            // Parsed documents belonging to index.
-	tagdocs     map[string]documents // Partitions index documents by tag.
+	tagdocs     map[string]documents // Partitions indexed documents by tag.
 	slugs       map[string]string    // Slugified tags.
 }
 
@@ -139,9 +139,14 @@ func (idxs indexes) build(proj *project, modified time.Time) error {
 func (idx index) build(proj *project, modified time.Time) error {
 	tmpls := &proj.tmpls // Lexical shortcut.
 	renderPages := func(pgs []page, tmpl string, modified time.Time) error {
+		count := 0
+		for _, pg := range pgs {
+			count += len(pg.docs)
+		}
 		for _, pg := range pgs {
 			if rebuild(pg.file, modified, pg.docs...) {
 				fm := pg.docs.frontMatter()
+				fm["count"] = strconv.Itoa(count)
 				fm["page"] = pg.frontMatter()
 				err := tmpls.render(tmpl, fm, pg.file)
 				proj.println("write index: " + pg.file)

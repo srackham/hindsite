@@ -383,7 +383,7 @@ func (proj *project) build() error {
 		}
 		proj.println("render: " + doc.contentpath)
 		data := templateData{}
-		data.add(doc.frontMatter())
+		data.merge(doc.frontMatter())
 		data["body"] = template.HTML(doc.render())
 		err = proj.tmpls.render(doc.layout, data, doc.buildpath)
 		if err != nil {
