@@ -142,9 +142,15 @@ func (conf *config) String() (result string) {
 	return string(d)
 }
 
-// Parse all config files from project content and templates directory into
-// `proj.confs`.
+// parseConfig parses all config files from project content and templates
+// directory into `proj.confs`.
 func (proj *project) parseConfigs() error {
+	if !dirExists(proj.contentDir) {
+		return fmt.Errorf("missing content directory: " + proj.contentDir)
+	}
+	if !dirExists(proj.templateDir) {
+		return fmt.Errorf("missing template directory: " + proj.templateDir)
+	}
 	for _, d := range []string{proj.contentDir, proj.templateDir} {
 		err := filepath.Walk(d, func(f string, info os.FileInfo, err error) error {
 			if err != nil {

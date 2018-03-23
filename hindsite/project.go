@@ -35,13 +35,14 @@ func newProject() project {
 	return project{}
 }
 
-// Print message if `-v` verbose option set.
+// printlin prints a message if `-v` verbose option set.
 func (proj *project) println(message string) {
 	if proj.verbose {
 		fmt.Println(message)
 	}
 }
 
+// parseArgs parses the hindsite command-line arguments.
 func (proj *project) parseArgs(args []string) error {
 	proj.port = "1212"
 	skip := false
@@ -184,6 +185,7 @@ func (proj *project) execute() error {
 	return err
 }
 
+// init implements the init command.
 func (proj *project) init() error {
 	if dirExists(proj.contentDir) {
 		files, err := ioutil.ReadDir(proj.contentDir)
@@ -249,6 +251,7 @@ func (proj *project) init() error {
 	return err
 }
 
+// help implements the help command.
 func (proj *project) help() {
 	println(`Hindsite is a static website generator.
 
@@ -280,8 +283,9 @@ The options are:
 `)
 }
 
+// build implements the build command.
 func (proj *project) build() error {
-	if err := proj.loadConfig(); err != nil {
+	if err := proj.parseConfigs(); err != nil {
 		return err
 	}
 	if !dirExists(proj.buildDir) {
@@ -417,8 +421,8 @@ func (proj *project) build() error {
 	return nil
 }
 
-// Return true if the target file does not exist or is newer than modified time
-// or newer than any document.
+// rebuild returns true if the target file does not exist or is newer than
+// modified time or newer than any document.
 func rebuild(target string, modified time.Time, docs ...*document) bool {
 	info, err := os.Stat(target)
 	if err != nil {
@@ -436,8 +440,8 @@ func rebuild(target string, modified time.Time, docs ...*document) bool {
 	return false
 }
 
-// Return false target file is newer than the prerequisite file or if target
-// does not exist.
+// upToDate returns false target file is newer than the prerequisite file or if
+// target does not exist.
 func upToDate(target, prerequisite string) bool {
 	result, err := fileIsOlder(prerequisite, target)
 	if err != nil {
@@ -446,8 +450,8 @@ func upToDate(target, prerequisite string) bool {
 	return result
 }
 
-// Copy srcFile to corresponding path in dstRoot.
-// Skip if the destination file is up to date.
+// copyStaticFile copies srcFile to corresponding path in dstRoot.
+// Skips if the destination file is up to date.
 // Creates missing destination directories.
 func (proj *project) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
 	dstFile, err := pathTranslate(srcFile, srcRoot, dstRoot)
@@ -470,16 +474,7 @@ func (proj *project) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
 	return nil
 }
 
-func (proj *project) loadConfig() error {
-	if !dirExists(proj.contentDir) {
-		return fmt.Errorf("missing content directory: " + proj.contentDir)
-	}
-	if !dirExists(proj.templateDir) {
-		return fmt.Errorf("missing template directory: " + proj.templateDir)
-	}
-	return proj.parseConfigs()
-}
-
+// exclude returns true if a file should be excluded from processing.
 func (proj *project) exclude(info os.FileInfo) bool {
 	for _, pat := range proj.rootConf.exclude {
 		if info.IsDir() && strings.HasSuffix(pat, "/") {
@@ -493,8 +488,9 @@ func (proj *project) exclude(info os.FileInfo) bool {
 	return false
 }
 
+// serve implements the serve comand.
 func (proj *project) serve() error {
-	if err := proj.loadConfig(); err != nil {
+	if err := proj.parseConfigs(); err != nil {
 		return err
 	}
 	if !dirExists(proj.buildDir) {
