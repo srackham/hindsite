@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	yaml "gopkg.in/yaml.v2"
@@ -16,11 +17,12 @@ import (
 type config struct {
 	origin string // Configuration file directory.
 	// Configuration parameters.
-	author    string // Default document author.
-	homepage  string // Use this file (relative to the build directory) for /index.html.
-	paginate  int    // Number of documents per index page. No pagination if zero or less.
-	urlprefix string // For document and index page URLs.
-	// Date and time formats for variables: date, time, datetime, shortdate, mediumdate, ...
+	author    string         // Default document author.
+	homepage  string         // Use this file (relative to the build directory) for /index.html.
+	paginate  int            // Number of documents per index page. No pagination if zero or less.
+	urlprefix string         // For document and index page URLs.
+	timezone  *time.Location // Set the time zone for site generation.
+	// Date formats for template variables: date, shortdate, mediumdate, longdate.
 	shortdate  string
 	mediumdate string
 	longdate   string
@@ -30,13 +32,15 @@ type configs []config
 
 // Return default configuration.
 func newConfig() config {
-	return config{
+	conf := config{
 		paginate:   5,
 		urlprefix:  "/",
 		shortdate:  "2006-01-02",
 		mediumdate: "2-Jan-2006",
 		longdate:   "Mon Jan 2, 2006",
 	}
+	conf.timezone, _ = time.LoadLocation("Local")
+	return conf
 }
 
 // Parse config file.
@@ -50,6 +54,7 @@ func (conf *config) parseFile(proj *project, f string) error {
 		Homepage   string
 		URLPrefix  string
 		Paginate   int
+		Timezone   string
 		ShortDate  string
 		MediumDate string
 		LongDate   string
@@ -92,6 +97,13 @@ func (conf *config) parseFile(proj *project, f string) error {
 		}
 		conf.urlprefix = strings.TrimSuffix(value, "/")
 	}
+	if cf.Timezone != "" {
+		tz, err := time.LoadLocation(cf.Timezone)
+		if err != nil {
+			return err
+		}
+		conf.timezone = tz
+	}
 	if cf.ShortDate != "" {
 		conf.shortdate = cf.ShortDate
 	}
@@ -111,6 +123,7 @@ func (conf *config) data() (data templateData) {
 	data["homepage"] = conf.homepage
 	data["paginate"] = conf.paginate
 	data["urlprefix"] = conf.urlprefix
+	data["timezone"] = conf.timezone.String()
 	data["shortdate"] = conf.shortdate
 	data["mediumdate"] = conf.mediumdate
 	data["longdate"] = conf.longdate
@@ -183,6 +196,9 @@ func (conf *config) merge(from config) {
 	}
 	if from.urlprefix != "" {
 		conf.urlprefix = from.urlprefix
+	}
+	if from.timezone != nil {
+		conf.timezone = from.timezone
 	}
 	if from.shortdate != "" {
 		conf.shortdate = from.shortdate

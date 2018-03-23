@@ -218,10 +218,10 @@ func (doc *document) extractFrontMatter() error {
 func (doc *document) frontMatter() (data templateData) {
 	data = templateData{}
 	data["title"] = doc.title
-	data["date"] = doc.date.Format(doc.conf.mediumdate)
-	data["shortdate"] = doc.date.Format(doc.conf.shortdate)
-	data["mediumdate"] = doc.date.Format(doc.conf.mediumdate)
-	data["longdate"] = doc.date.Format(doc.conf.longdate)
+	data["shortdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.shortdate)
+	data["mediumdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.mediumdate)
+	data["longdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.longdate)
+	data["date"] = data["mediumdate"] // Alias.
 	data["author"] = doc.author
 	data["synopsis"] = doc.synopsis
 	data["addendum"] = doc.addendum
