@@ -21,6 +21,7 @@ type config struct {
 	homepage  string         // Use this file (relative to the build directory) for /index.html.
 	paginate  int            // Number of documents per index page. No pagination if zero or less.
 	urlprefix string         // For document and index page URLs.
+	exclude   []string       // List of content directory file and directory names.
 	timezone  *time.Location // Set the time zone for site generation.
 	// Date formats for template variables: date, shortdate, mediumdate, longdate.
 	shortdate  string
@@ -55,6 +56,7 @@ func (conf *config) parseFile(proj *project, f string) error {
 		URLPrefix  string
 		Paginate   int
 		Timezone   string
+		Exclude    string
 		ShortDate  string
 		MediumDate string
 		LongDate   string
@@ -97,6 +99,9 @@ func (conf *config) parseFile(proj *project, f string) error {
 		}
 		conf.urlprefix = strings.TrimSuffix(value, "/")
 	}
+	if cf.Exclude != "" {
+		conf.exclude = strings.Split(cf.Exclude, "|")
+	}
 	if cf.Timezone != "" {
 		tz, err := time.LoadLocation(cf.Timezone)
 		if err != nil {
@@ -123,6 +128,7 @@ func (conf *config) data() (data templateData) {
 	data["homepage"] = conf.homepage
 	data["paginate"] = conf.paginate
 	data["urlprefix"] = conf.urlprefix
+	data["exclude"] = strings.Join(conf.exclude, "|")
 	data["timezone"] = conf.timezone.String()
 	data["shortdate"] = conf.shortdate
 	data["mediumdate"] = conf.mediumdate
@@ -196,6 +202,9 @@ func (conf *config) merge(from config) {
 	}
 	if from.urlprefix != "" {
 		conf.urlprefix = from.urlprefix
+	}
+	if len(from.exclude) != 0 {
+		conf.exclude = from.exclude
 	}
 	if from.timezone != nil {
 		conf.timezone = from.timezone

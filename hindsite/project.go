@@ -336,6 +336,13 @@ func (proj *project) build() error {
 		if err != nil {
 			return err
 		}
+		if proj.exclude(info) {
+			proj.println("exclude: " + f)
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
 		if !info.IsDir() {
 			switch filepath.Ext(f) {
 			case ".md", ".rmu":
@@ -471,6 +478,19 @@ func (proj *project) loadConfig() error {
 		return fmt.Errorf("missing template directory: " + proj.templateDir)
 	}
 	return proj.parseConfigs()
+}
+
+func (proj *project) exclude(info os.FileInfo) bool {
+	for _, pat := range proj.rootConf.exclude {
+		if info.IsDir() && strings.HasSuffix(pat, "/") {
+			pat = strings.TrimSuffix(pat, "/")
+		}
+		result, _ := filepath.Match(pat, info.Name())
+		if result {
+			return true
+		}
+	}
+	return false
 }
 
 func (proj *project) serve() error {
