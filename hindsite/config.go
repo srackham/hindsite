@@ -20,9 +20,24 @@ type config struct {
 	homepage  string // Use this file (relative to the build directory) for /index.html.
 	paginate  int    // Number of documents per index page. No pagination if zero or less.
 	urlprefix string // For document and index page URLs.
+	// Date and time formats for variables: date, time, datetime, shortdate, mediumdate, ...
+	shortdate  string
+	mediumdate string
+	longdate   string
 }
 
 type configs []config
+
+// Return default configuration.
+func newConfig() config {
+	return config{
+		paginate:   5,
+		urlprefix:  "/",
+		shortdate:  "2006-01-02",
+		mediumdate: "2-Jan-2006",
+		longdate:   "Mon Jan 2, 2006",
+	}
+}
 
 // Parse config file.
 func (conf *config) parseFile(proj *project, f string) error {
@@ -31,10 +46,13 @@ func (conf *config) parseFile(proj *project, f string) error {
 		return err
 	}
 	cf := struct {
-		Author    string
-		Homepage  string
-		URLPrefix string
-		Paginate  int
+		Author     string
+		Homepage   string
+		URLPrefix  string
+		Paginate   int
+		ShortDate  string
+		MediumDate string
+		LongDate   string
 	}{}
 	switch filepath.Ext(f) {
 	case ".toml":
@@ -74,6 +92,15 @@ func (conf *config) parseFile(proj *project, f string) error {
 		}
 		conf.urlprefix = strings.TrimSuffix(value, "/")
 	}
+	if cf.ShortDate != "" {
+		conf.shortdate = cf.ShortDate
+	}
+	if cf.MediumDate != "" {
+		conf.mediumdate = cf.MediumDate
+	}
+	if cf.LongDate != "" {
+		conf.longdate = cf.LongDate
+	}
 	return nil
 }
 
@@ -84,6 +111,9 @@ func (conf *config) data() (data templateData) {
 	data["homepage"] = conf.homepage
 	data["paginate"] = conf.paginate
 	data["urlprefix"] = conf.urlprefix
+	data["shortdate"] = conf.shortdate
+	data["mediumdate"] = conf.mediumdate
+	data["longdate"] = conf.longdate
 	return data
 }
 
@@ -154,6 +184,15 @@ func (conf *config) merge(from config) {
 	if from.urlprefix != "" {
 		conf.urlprefix = from.urlprefix
 	}
+	if from.shortdate != "" {
+		conf.shortdate = from.shortdate
+	}
+	if from.mediumdate != "" {
+		conf.mediumdate = from.mediumdate
+	}
+	if from.longdate != "" {
+		conf.longdate = from.longdate
+	}
 }
 
 // Merge configuration files that lie in the contentDir and templateDir
@@ -163,7 +202,7 @@ func (conf *config) merge(from config) {
 // configuration `origin` in ascending order to ensure the directory heirarchy
 // precedence.
 func (proj *project) configFor(contentDir, templateDir string) config {
-	result := config{paginate: 5, urlprefix: "/"} // Set default configuration.
+	result := newConfig()
 	for _, conf := range proj.confs {
 		if templateDir == conf.origin || pathIsInDir(templateDir, conf.origin) {
 			result.merge(conf)

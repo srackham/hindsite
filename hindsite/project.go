@@ -441,7 +441,7 @@ func upToDate(target, prerequisite string) bool {
 
 // Copy srcFile to corresponding path in dstRoot.
 // Skip if the destination file is up to date.
-// Creates any missing destination directories.
+// Creates missing destination directories.
 func (proj *project) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
 	dstFile, err := pathTranslate(srcFile, srcRoot, dstRoot)
 	if err != nil {

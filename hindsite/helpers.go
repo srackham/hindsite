@@ -193,10 +193,18 @@ func fileIsOlder(oldfile, newfile string) (bool, error) {
 /*
 Date/time functions.
 */
+// Parse date text. If timezone is not specified Local is assumed.
 func parseDate(text string, loc *time.Location) (time.Time, error) {
 	if loc == nil {
 		loc, _ = time.LoadLocation("Local")
 	}
-	// TODO handle other formats to capture time.
-	return time.ParseInLocation(time.RFC3339, text[0:10]+"T00:00:00+00:00", loc)
+	d, err := time.Parse(time.RFC3339, text)
+	if err != nil {
+		if d, err = time.Parse("2006-01-02 15:04:05-07:00", text); err != nil {
+			if d, err = time.ParseInLocation("2006-01-02 15:04:05", text, loc); err != nil {
+				d, err = time.ParseInLocation("2006-01-02", text, loc)
+			}
+		}
+	}
+	return d, err
 }
