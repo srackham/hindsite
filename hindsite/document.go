@@ -165,22 +165,6 @@ func (doc *document) extractFrontMatter() error {
 	} else {
 		doc.content = synopsis
 	}
-	if doc.synopsis == "" {
-		// Synopsis is first 70 words of content.
-		synopsis := ""
-		scanner := bufio.NewScanner(strings.NewReader(doc.content))
-		scanner.Split(bufio.ScanWords)
-		for i := 0; i < 70; i++ {
-			if !scanner.Scan() {
-				break
-			}
-			synopsis += " " + scanner.Text()
-		}
-		if err := scanner.Err(); err != nil {
-			return err
-		}
-		doc.synopsis = strings.TrimSpace(synopsis) + "..."
-	}
 	fm := struct {
 		Title       string
 		Date        string
