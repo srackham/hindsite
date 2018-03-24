@@ -42,52 +42,31 @@ func newIndex() index {
 	return idx
 }
 
-func isIndexFile(filename string) bool {
-	return stringlist{
-		"docs.html",
-		"tags.html",
-		"tag.html",
-	}.Contains(filepath.Base(filename))
-}
-
 // Search templateDir directory for indexed directories and add them to indexes.
 func (idxs *indexes) init(proj *project) error {
 	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() {
-			files, err := filepath.Glob(filepath.Join(f, "*.html"))
+		if info.IsDir() && fileExists(filepath.Join(f, "docs.html")) {
+			idx := newIndex()
+			idx.templateDir = f
+			p, err := filepath.Rel(proj.templateDir, f)
 			if err != nil {
 				return err
 			}
-			found := false
-			for _, fn := range files {
-				if isIndexFile(fn) {
-					found = true
-					break
-				}
+			idx.contentDir = filepath.Join(proj.contentDir, p)
+			if !dirExists(idx.contentDir) {
+				return fmt.Errorf("missing indexed content directory: %s", idx.contentDir)
 			}
-			if found {
-				idx := newIndex()
-				idx.templateDir = f
-				p, err := filepath.Rel(proj.templateDir, f)
-				if err != nil {
-					return err
-				}
-				idx.contentDir = filepath.Join(proj.contentDir, p)
-				if !dirExists(idx.contentDir) {
-					return fmt.Errorf("missing indexed content directory: %s", idx.contentDir)
-				}
-				idx.indexDir = filepath.Join(proj.indexDir, p)
-				p, err = filepath.Rel(proj.buildDir, idx.indexDir)
-				if err != nil {
-					return err
-				}
-				idx.conf = proj.configFor(idx.contentDir, idx.templateDir)
-				idx.url = path.Join(idx.conf.urlprefix, filepath.ToSlash(p))
-				*idxs = append(*idxs, idx)
+			idx.indexDir = filepath.Join(proj.indexDir, p)
+			p, err = filepath.Rel(proj.buildDir, idx.indexDir)
+			if err != nil {
+				return err
 			}
+			idx.conf = proj.configFor(idx.contentDir, idx.templateDir)
+			idx.url = path.Join(idx.conf.urlprefix, filepath.ToSlash(p))
+			*idxs = append(*idxs, idx)
 		}
 		return nil
 	})
@@ -206,7 +185,7 @@ func (idx index) build(proj *project, modified time.Time) error {
 	// Render document index pages.
 	tmpl := tmpls.name(idx.templateDir, "docs.html")
 	if !tmpls.contains(tmpl) {
-		return fmt.Errorf("missing docs template: %s", filepath.Join(idx.templateDir, "docs.html"))
+		panic("missing docs template: " + filepath.Join(idx.templateDir, "docs.html"))
 	}
 	pgs := idx.paginate(idx.docs, "docs-%d.html")
 	return renderPages(pgs, tmpl, modified)
