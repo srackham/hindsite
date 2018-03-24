@@ -37,7 +37,7 @@ Small static websites with optional indexed documents (blogs posts, newsletters,
 - Easy to get up and running with built-in layouts: install ->
   init -> build -> serve.
 - Supports multiple categories of indexed documents each with separate tag and
-  date indexes e.g. blog posts and newsletters.
+  document indexes e.g. blog posts and newsletters.
 
 
 ## Hello hindsite
@@ -49,7 +49,6 @@ content/
 template/
     layout.html
 build/
-    index.html
 ```
 Build command: `hindsite build`
 
@@ -356,24 +355,23 @@ address?](https://stackoverflow.com/questions/6534904/how-to-remove-file-extensi
 - An index contains documents from the index directory and all subdirectories.
 - Indexes can be nested. This allows categorized document subdirectories to have
   separate indexes along with aggregated parent directory indexes.
-- By default all built index pages are written to a directory named `indexes`
-  located at the root of the build directory.
-- The location of the built index pages can be changed to anywhere inside the
-  build directory using the build command `-index INDEX_DIR` option.
+- Built index pages are written to a directory named `indexes` located at the
+  root of the build directory.
 
 
 TODO
 
-- There are two types of indexes: date indexes and tags indexes.
+- There are two types of indexes: document indexes and tags indexes.
 - They are named `{docs,tag,tags}.html`.
 
 
 **indexed document**: A content document residing in an indexed directory. Indexed
 documents must have a title and a publication date. Tags are optional.
 
-**indexed directory**: A directory in the content directory that generates document indexes.
-whose corresponding
-template directory contains one or more index templates.
+**indexed directory**: A directory in the content directory that generates a
+document index and optional tag indexes. The corresponding template directory
+contains a `docs.html` template and optional `{tag,tags}.html` templates. The
+presence of these templates flags the directory as indexed.
 
 **indexes directory**: A directory in the build directory containing generated
 index pages.
@@ -391,14 +389,62 @@ index pages.
 
 
 ## Template variables
-Template variables contain content, content meta-data, configuration data along
-with context-specific data.
+Template variables are used in templates. They allow context specific content to be rendered in the output documents.
+Variables are specific to the layout, tag and tags templates.
 
-Variable contexts:
+### Document template variables
+These variables relate to a single document. They are rendered by the
+corresponding `layout.html` template.
 
-- Layout (content document) templates.
-- Document index templates.
-- Tag index templates.
+```
+title
+date (alias for mediumdate)
+shortdate
+mediumdate
+longdate
+author
+synopsis
+addendum
+slug
+url
+body                rendered content HTML
+prev.title          title of previous document
+prev.url            URL of previous document
+next.title          title of previous document
+next.url            URL of previous document
+```
+
+### Document index pages template variables
+These variables relate to the collection of documents belonging to a document
+index page. They are rendered by the corresponding `docs.html` template. Alony
+with document variables there are variables for the previous, next, first and
+last document index page.
+
+```
+docs                an iterable list, one per document, containing document variables
+count               the total number of documents in this index
+page.prev.number    previous document index page number
+page.prev.url       URL of previous document index page
+page.next.number    next document index page number
+page.next.url       URL of next document index page
+page.first.number   first document index page number (1)
+page.first.url      URL of first document index page
+```
+
+### Tags index page template variables
+These variables relate to the collection of tags belonging to a document
+index. Thay are rendered by the corresponding `tags.html` template.
+
+```
+tags     an iterable list, one per tag.
+
+Each item in the tags list contains:
+
+tag      the tag
+url      URL of of the tag's document index
+count    the number of documents with this tag
+```
+
 
 ## Configuration and front matter variables
 Additional build information is sourced from configuration files and document front matter.
@@ -416,34 +462,32 @@ TODO: Should multiple configuration files in the document path be aggregated
 Example `config.toml` file:
 
 ```
-# prepended to synthesised root-relative URLs.
-urlprefix = "/blog"
+# Prepended to synthesised root-relative URLs.
+#urlprefix = "/blog"
 
-# Build uses this to copy a file to /index.html (assuming you need it and it do not have it).
-# The value is a file path (relative to the build directory).
-homepage = "indexes/blog/all-1.html"
+# Copy this file to `/index.html`.
+# The file path relative to the build directory.
+#homepage = "indexes/blog/all-1.html"
 
-# Paginate sets the number of documents per document index page (1..). Set to -1 to include all documents in a single page.
-paginate = 5
+# Paginate sets the number of documents per document index page (1..).
+# Set to -1 to to include all documents in a single page.
+#paginate = 5
 
-# A `|` separated list of file and directory names that should not be processed (wildcards allowed).
-exclude = "config.rmu"
+# A `|` separated list of content directory file and directory names that
+# should not be processed (wildcards allowed). Directory names end in a slash.
+#exclude = "config.rmu|main/"
 
 # Default document author.
-author = "Joe Bloggs"
+#author = "Joe Bloggs"
 
-# date/time.
-timezone = "Local"
-# Date and time formats for variables: date, time, datetime, shortdate, mediumdate, ...
-shortdate= ""
-mediumdate= ""
-longdate= ""
-shorttime = ""
-mediumtime = ""
-longtime = ""
-shortdatetime = ""
-mediumdatetime = ""
-longdatetime = ""
+# Sets the time zone for site generation. Set to "Local" or a TZ name from IANA Timezone Database.
+#timezone = "Local"
+
+# Date formats for template variables.
+#shortdate =  "2006-01-02",
+#mediumdate = "2-Jan-2006",
+#longdate =   "Mon Jan 2, 2006",
+
 ```
 
 ## Front matter
@@ -504,7 +548,7 @@ Implicit values (if the document does not contain a front matter header):
 - `author` defaults to the configuration file value, failing that, blank.
 - `synopsis` defaults to blank. NOTE: decided not to extract the first paragraph
   as that necessitates rendering the page first.
-- `addendum` defaults to blank.
+- `addendum` (a general purpose content field) defaults to blank.
 - `draft` is true if the first letter of the content file name is a tilda (this
   overrides the front matter `drafts` variable).
 
@@ -587,7 +631,6 @@ The options are:
     -content  CONTENT_DIR
     -template TEMPLATE_DIR
     -build    BUILD_DIR
-    -index    INDEX_DIR
     -port     PORT
     -builtin  NAME
     -clean
@@ -614,7 +657,7 @@ Usage:
 
 
 hindsite init [-builtin] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
-hindsite build [-clean] [-drafts] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR] -index [INDEX_DIR]
+hindsite build [-clean] [-drafts] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR]
 hindsite serve [-port PORT] [-project PROJECT_DIR] [-build BUILD_DIR]
 hindsite -h | --help | help
 
@@ -623,7 +666,6 @@ hindsite -h | --help | help
 - `CONTENT_DIR` defaults to `content`
 - `BUILD_DIR` defaults to `build`
 - `TEMPLATE_DIR` defaults to `template`
-- `INDEX_DIR` defaults to `BUILD_DIR/indexes`
 - All commands support the `-v` (verbose) option).
 
 ### Init command
@@ -699,14 +741,12 @@ the _serve_ command opens a development server on the `BUILD_DIR` directory.
 - Internally all directory and file paths are absolute and platform specific (manipulated by the `path/filepath` package).
 
 ### Dates
-- Template variables:
-**shortDate, mediumDate, longDate**:
-Publication date in the config file shortDateFormat, mediumDateFormat and longDateFormat formats.
+#### Input
+- Front matter document date is assumed to be in UTC if timezone is not specified.
 
 The RFC 3339 format is recognised. The following relaxations are permitted:
 
-- If the time zone offet is omitted then the `timezone` configuration value is used;
-  if `timezone` is not specified or set to `"Local"` then local time offset is used.
+- If the time zone offet is omitted then UTC is assumed.
 - If the time is omitted then the time `00:00:00` is used.
 - A space character separator (instead of the letter `T`) between the date and the time is allowed.
 
@@ -717,17 +757,9 @@ e.g. with `timezone = "+13:00"`:
     1979-05-27 07:32:00         # 1979-05-27T07:32:00+13:00
     1979-05-27                  # 1979-05-27T00:00:00+13:00
 
-Parser:
-
-``` go
-date := "2018-02-27T14:45:00"
-if timezone == nil || timezone == "Local" {
-    loc, _ := time.LoadLocation("Local")
-    t, err := time.ParseInLocation(time.RFC3339, date, loc)
-} else {
-    t, err := time.Parse(time.RFC3339, date+timezone)
-}
-```
+#### Output
+- Docment template publication date variables: shortdate, mediumdate (alias date), longdate
+- If `timezone` config parameter is not specified the local time offset is used.
 
 See:
 

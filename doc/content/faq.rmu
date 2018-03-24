@@ -1,5 +1,31 @@
 # Hindsite FAQ
 
+
+## Tag links dicotomy
+Why do tag links take you to tagged documents in the current index when clicked
+on the tags index but take you to the tagged documents in the primary index when
+clicked on a document.
+
+This is because there is only one copy of the rendered document.
+
+
+### I want a single (non-paginated document index
+Set the `paginate` configuration parameter to `-1`.
+
+
+### I want a single document index in addition to a paginated document index 
+Create a parent index with the `paginate` configuration parameter set to `-1`.
+
+```
+templates/
+    docs.toml       # For single-page document index.
+    config.toml     # paginate = -1
+    paginated/
+        docs.toml   # For paginated document index.
+        config.toml # paginate = 5
+```
+
+
 ### I don't like file name extensions in URLs how can I remove them
 Web servers can be configured to do this, see
 https://stackoverflow.com/questions/5730092/how-to-remove-html-from-url
