@@ -122,8 +122,8 @@ func (conf *config) parseFile(proj *project, f string) error {
 }
 
 // Return configuration as YAML formatted string.
-func (conf *config) data() (data templateData) {
-	data = templateData{}
+func (conf *config) data() templateData {
+	data := templateData{}
 	data["author"] = conf.author
 	data["homepage"] = conf.homepage
 	data["paginate"] = conf.paginate

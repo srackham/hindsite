@@ -148,6 +148,7 @@ func (idx index) build(proj *project, modified time.Time) error {
 				fm := pg.docs.frontMatter()
 				fm["count"] = strconv.Itoa(count)
 				fm["page"] = pg.frontMatter()
+				fm.merge(proj.data())
 				err := tmpls.render(tmpl, fm, pg.file)
 				proj.println("write index: " + pg.file)
 				if err != nil {
@@ -186,7 +187,9 @@ func (idx index) build(proj *project, modified time.Time) error {
 				idx.slugs[tag] = slug
 			}
 			// Render tags index.
-			err := tmpls.render(tagsTemplate, idx.tagsData(), outfile)
+			data := idx.tagsData()
+			data.merge(proj.data())
+			err := tmpls.render(tagsTemplate, data, outfile)
 			proj.println("write index: " + outfile)
 			if err != nil {
 				return err

@@ -395,6 +395,7 @@ func (proj *project) build() error {
 		proj.println("render: " + doc.contentpath)
 		data := templateData{}
 		data.merge(doc.frontMatter())
+		data.merge(proj.data())
 		data["body"] = template.HTML(doc.render())
 		err = proj.tmpls.render(doc.layout, data, doc.buildpath)
 		if err != nil {
@@ -486,6 +487,13 @@ func (proj *project) exclude(info os.FileInfo) bool {
 		}
 	}
 	return false
+}
+
+// data returns project global template variables.
+func (proj *project) data() templateData {
+	return templateData{"site": templateData{
+		"urlprefix": proj.rootConf.urlprefix,
+	}}
 }
 
 // serve implements the serve comand.
