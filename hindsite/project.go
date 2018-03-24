@@ -73,7 +73,7 @@ func (proj *project) parseArgs(args []string) error {
 			proj.builtin = true
 		case opt == "-v":
 			proj.verbose = true
-		case stringlist{"-content", "-template", "-build", "-index", "-port"}.Contains(opt):
+		case stringlist{"-content", "-template", "-build", "-port"}.Contains(opt):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
 			}
@@ -85,8 +85,6 @@ func (proj *project) parseArgs(args []string) error {
 				proj.templateDir = arg
 			case "-build":
 				proj.buildDir = arg
-			case "-index":
-				proj.indexDir = arg
 			case "-port":
 				proj.port = arg
 			default:
@@ -274,7 +272,6 @@ The options are:
     -content  CONTENT_DIR
     -template TEMPLATE_DIR
     -build    BUILD_DIR
-    -index    INDEX_DIR
     -port     PORT
     -builtin  TEMPLATE
     -clean
