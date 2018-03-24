@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"html/template"
 	"os"
 	"path"
 	"path/filepath"
@@ -110,8 +111,21 @@ func (doc *document) parseFile(contentfile string, proj *project) error {
 	return nil
 }
 
-// Extract and parse front matter from the start of the document.
+// extractFrontMatter extracts and parses front matter and synopsis from the
+// start of the document. The front matter is stripped from the content.
 func (doc *document) extractFrontMatter() error {
+	readTo := func(end string, scanner *bufio.Scanner) (text string, eof bool, err error) {
+		for scanner.Scan() {
+			if end != "" && scanner.Text() == end {
+				return text, false, nil
+			}
+			text += scanner.Text() + "\n"
+		}
+		if err := scanner.Err(); err != nil {
+			return "", false, err
+		}
+		return text, true, nil
+	}
 	scanner := bufio.NewScanner(strings.NewReader(doc.content))
 	if !scanner.Scan() {
 		return scanner.Err()
@@ -130,21 +144,43 @@ func (doc *document) extractFrontMatter() error {
 	default:
 		return nil
 	}
-	fmText := ""
-	for scanner.Scan() {
-		if scanner.Text() == end {
-			break
-		}
-		fmText += scanner.Text() + "\n"
-	}
-	content := ""
-	for scanner.Scan() {
-		content += scanner.Text() + "\n"
-	}
-	if err := scanner.Err(); err != nil {
+	fmText, eof, err := readTo(end, scanner)
+	if err != nil {
 		return err
 	}
-	doc.content = content
+	if eof {
+		return fmt.Errorf("missing front matter delimiter: %s: %s", end, doc.contentpath)
+	}
+	synopsis, eof, err := readTo("<!--more-->", scanner)
+	if err != nil {
+		return err
+	}
+	if !eof {
+		doc.synopsis = synopsis
+		content, _, err := readTo("", scanner)
+		if err != nil {
+			return err
+		}
+		doc.content = synopsis + content
+	} else {
+		doc.content = synopsis
+	}
+	if doc.synopsis == "" {
+		// Synopsis is first 70 words of content.
+		synopsis := ""
+		scanner := bufio.NewScanner(strings.NewReader(doc.content))
+		scanner.Split(bufio.ScanWords)
+		for i := 0; i < 70; i++ {
+			if !scanner.Scan() {
+				break
+			}
+			synopsis += " " + scanner.Text()
+		}
+		if err := scanner.Err(); err != nil {
+			return err
+		}
+		doc.synopsis = strings.TrimSpace(synopsis) + "..."
+	}
 	fm := struct {
 		Title       string
 		Date        string
@@ -223,7 +259,7 @@ func (doc *document) frontMatter() (data templateData) {
 	data["longdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.longdate)
 	data["date"] = data["mediumdate"] // Alias.
 	data["author"] = doc.author
-	data["synopsis"] = doc.synopsis
+	data["synopsis"] = template.HTML(doc.render(doc.synopsis))
 	data["addendum"] = doc.addendum
 	data["slug"] = doc.slug
 	data["url"] = doc.url
@@ -261,13 +297,13 @@ func (doc *document) String() (result string) {
 }
 
 // Render document markup to HTML.
-func (doc *document) render() (html string) {
+func (doc *document) render(text string) (html string) {
 	// Render document.
 	switch filepath.Ext(doc.contentpath) {
 	case ".md":
-		html = string(blackfriday.Run([]byte(doc.content)))
+		html = string(blackfriday.Run([]byte(text)))
 	case ".rmu":
-		html = rimu.Render(doc.content, rimu.RenderOptions{})
+		html = rimu.Render(text, rimu.RenderOptions{})
 	}
 	return html
 }
