@@ -244,7 +244,7 @@ func (doc *document) frontMatter() (data templateData) {
 	data["date"] = data["mediumdate"] // Alias.
 	data["author"] = doc.author
 	data["synopsis"] = template.HTML(doc.render(doc.synopsis))
-	data["addendum"] = doc.addendum
+	data["addendum"] = template.HTML(doc.render(doc.addendum))
 	data["slug"] = doc.slug
 	data["url"] = doc.url
 	prev := templateData{}
