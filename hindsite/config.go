@@ -20,7 +20,7 @@ type config struct {
 	author    string         // Default document author.
 	homepage  string         // Use this file (relative to the build directory) for /index.html.
 	paginate  int            // Number of documents per index page. No pagination if zero or less.
-	urlprefix string         // For document and index page URLs.
+	urlprefix string         // Prefix for synthesised document and index page URLs.
 	exclude   []string       // List of content directory file and directory names.
 	timezone  *time.Location // Set the time zone for site generation.
 	// Date formats for template variables: date, shortdate, mediumdate, longdate.
@@ -35,7 +35,6 @@ type configs []config
 func newConfig() config {
 	conf := config{
 		paginate:   5,
-		urlprefix:  "/",
 		shortdate:  "2006-01-02",
 		mediumdate: "2-Jan-2006",
 		longdate:   "Mon Jan 2, 2006",

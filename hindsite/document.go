@@ -35,7 +35,7 @@ type document struct {
 	author   string
 	synopsis string
 	addendum string
-	url      string // Absolute or root-relative URL.
+	url      string // Synthesised absolute or root-relative document URL.
 	tags     []string
 	draft    bool
 	slug     string
@@ -70,7 +70,7 @@ func (doc *document) parseFile(contentfile string, proj *project) error {
 	doc.buildpath = filepath.Join(proj.buildDir, p)
 	doc.templatepath = filepath.Join(proj.templateDir, p)
 	doc.conf = proj.configFor(filepath.Dir(doc.contentpath), filepath.Dir(doc.templatepath))
-	doc.url = path.Join(doc.conf.urlprefix, filepath.ToSlash(p))
+	doc.url = path.Join("/", doc.conf.urlprefix, filepath.ToSlash(p))
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		d, err := parseDate(doc.title[0:10], nil)
 		if err != nil {

@@ -16,7 +16,7 @@ type index struct {
 	contentDir  string               // The directory that contains the indexed documents.
 	templateDir string               // The directory that contains the index templates.
 	indexDir    string               // The build directory that the index pages are written to.
-	url         string               // URL of index directory.
+	url         string               // Synthesised absolute or root-relative index directory URL.
 	docs        documents            // Parsed documents belonging to index.
 	tagdocs     map[string]documents // Partitions indexed documents by tag.
 	slugs       map[string]string    // Slugified tags.
@@ -65,7 +65,7 @@ func (idxs *indexes) init(proj *project) error {
 				return err
 			}
 			idx.conf = proj.configFor(idx.contentDir, idx.templateDir)
-			idx.url = path.Join(idx.conf.urlprefix, filepath.ToSlash(p))
+			idx.url = path.Join("/", idx.conf.urlprefix, filepath.ToSlash(p))
 			*idxs = append(*idxs, idx)
 		}
 		return nil
