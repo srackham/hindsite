@@ -47,7 +47,7 @@ serve: doc
 
 .PHONY: blog
 blog: install
-	hindsite build ./examples/blog -v
+	hindsite build ./examples/blog -v -clean
 	hindsite serve ./examples/blog -v
 
 .PHONY: push
@@ -55,7 +55,7 @@ push:
 	git push -u --tags origin master
 
 ./hindsite/bindata.go: ./examples/builtin/*
-	cd ./hindsite && go-bindata -prefix ../examples/builtin/template/ ../examples/builtin/template/...
+	cd ./hindsite && go-bindata -prefix ../examples/builtin/ -ignore '/(build|content)/' ../examples/builtin/...
 
 .PHONY: bindata
 bindata: ./hindsite/bindata.go

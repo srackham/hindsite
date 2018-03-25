@@ -206,7 +206,8 @@ one primary index.
 **tag**: A keyword or phrase used to categorize a content document.
 
 **tag index**: Indexed document tags can be used to generate a tag index along
-with per tag document indexes.
+with per tag document indexes. I usually makes sense to confine tag indexes to
+primary indexes.
 
 
 **static file**: A [static file](#static-files.html) is a file in the content or
@@ -347,22 +348,21 @@ server, see [How to remove file extension from website
 address?](https://stackoverflow.com/questions/6534904/how-to-remove-file-extension-from-website-address).
 
 
-## Document Indexes
-- Documents and tags indexes are created by the build command.
-- The project can contain any number of indexed content directories.
-- Any content directory can be indexed by placing one or more index
-  templates in the corresponding template directory.
-- An index contains documents from the index directory and all subdirectories.
+## Indexes
+- Documents and tag indexes are created by the build command.
+- A project can contain any number of indexed content directories.
+- Any content directory is indexed when the corresponding template directory
+  contains a `docs.html` template.
+- Documents from the indexed directory and all subdirectories belong to the index.
 - Indexes can be nested. This allows categorized document subdirectories to have
   separate indexes along with aggregated parent directory indexes.
-- Built index pages are written to a directory named `indexes` located at the
+- Generated index pages are written to a directory named `indexes` located at the
   root of the build directory.
 
 
 TODO
 
 - There are two types of indexes: document indexes and tags indexes.
-- They are named `{docs,tag,tags}.html`.
 
 
 **indexed document**: A content document residing in an indexed directory. Indexed
@@ -371,7 +371,7 @@ documents must have a title and a publication date. Tags are optional.
 **indexed directory**: A directory in the content directory that generates a
 document index and optional tag indexes. The corresponding template directory
 contains a `docs.html` template and optional `{tag,tags}.html` templates. The
-presence of these templates flags the directory as indexed.
+presence of the `docs.html` template flags the directory as indexed.
 
 **indexes directory**: A directory in the build directory containing generated
 index pages.
@@ -381,54 +381,62 @@ index pages.
 - The indexes directory is TODO
 - Each individual index directory may contain:
 
-  * `docs.html`: a paginated list of the all posts.
-  * `tags.html`: a list of post tags linked to files named like
+  * `docs.html`: a paginated list of the all documents.
+  * `tags.html`: a list of document tags linked to files named like
     `tags/SLUGIFIED_TAG_NAME.html` (one per tag) each containing a list of
     related posts. The `TAG_NAME` is slugified.
 
 
 
 ## Template variables
-Template variables are used in templates. They allow context specific content to be rendered in the output documents.
-Variables are specific to the layout, tag and tags templates.
+Template variables are used in templates. They allow context specific content to
+be rendered in the output documents. Variables are specific to the document, tag
+and tags templates.
+
+### Site variables
+All templates have access to site variables.
+
+```
+.site.urlprefix        root configuration urlprefix
+```
 
 ### Document template variables
 These variables relate to a single document. They are rendered by the
 corresponding `layout.html` template.
 
 ```
-title
-date (alias for mediumdate)
-shortdate
-mediumdate
-longdate
-author
-synopsis
-addendum
-slug
-url
-body                rendered content HTML
-prev.title          title of previous document
-prev.url            URL of previous document
-next.title          title of previous document
-next.url            URL of previous document
+.title
+.date (alias for mediumdate)
+.shortdate
+.mediumdate
+.longdate
+.author
+.synopsis            rendered synopsis HTML
+.addendum            rendered addendum HTML
+.slug
+.url
+.body                rendered content HTML
+.prev.title          title of previous document
+.prev.url            URL of previous document
+.next.title          title of previous document
+.next.url            URL of previous document
 ```
 
 ### Document index pages template variables
 These variables relate to the collection of documents belonging to a document
-index page. They are rendered by the corresponding `docs.html` template. Alony
-with document variables there are variables for the previous, next, first and
-last document index page.
+index page. They are rendered by the corresponding `docs.html` template. In
+addition to document variables there are variables for the previous, next, first
+and last document index page.
 
 ```
-docs                an iterable list, one per document, containing document variables
-count               the total number of documents in this index
-page.prev.number    previous document index page number
-page.prev.url       URL of previous document index page
-page.next.number    next document index page number
-page.next.url       URL of next document index page
-page.first.number   first document index page number (1)
-page.first.url      URL of first document index page
+.docs                an iterable list, one per document, containing document variables
+.count               the total number of documents in this index
+.page.prev.number    previous document index page number
+.page.prev.url       URL of previous document index page
+.page.next.number    next document index page number
+.page.next.url       URL of next document index page
+.page.first.number   first document index page number (1)
+.page.first.url      URL of first document index page
 ```
 
 ### Tags index page template variables
@@ -436,13 +444,13 @@ These variables relate to the collection of tags belonging to a document
 index. Thay are rendered by the corresponding `tags.html` template.
 
 ```
-tags     an iterable list, one per tag.
+.tags     an iterable list, one per tag.
 
 Each item in the tags list contains:
 
-tag      the tag
-url      URL of of the tag's document index
-count    the number of documents with this tag
+.tag      the tag
+.url      URL of of the tag's document index
+.count    the number of documents with this tag
 ```
 
 
@@ -510,7 +518,7 @@ draft:    true
 ```
 - `tags` are a comma-separated string. Tags can also be encoded as a YAML list
   or a TOML array called `categories` c.f. Hugo.
-- The variable name `description` can be used instead of `synopsis`.
+- The variable name `description` is an alias for `synopsis`.
 - The HTML comment delimiters are preferable because:
   * They ignored if the document is rendered by other applications.
   * The front matter is retained by the generated HTML web page.
@@ -546,9 +554,9 @@ Implicit values (if the document does not contain a front matter header):
 - `date` defaults to file name `YYYY-MM-DD-` date prefix e.g.
   `2018-02-14-newsletter.md`.
 - `author` defaults to the configuration file value, failing that, blank.
-- `synopsis` defaults to blank. NOTE: decided not to extract the first paragraph
-  as that necessitates rendering the page first.
-- `addendum` (a general purpose content field) defaults to blank.
+- `synopsis` defaults to the content up to the `<!--more-->` tag or blank if
+  there is no tag. Processed as markup.
+- `addendum` (a general purpose content field) defaults to blank. Processed as markup.
 - `draft` is true if the first letter of the content file name is a tilda (this
   overrides the front matter `drafts` variable).
 
@@ -656,7 +664,7 @@ Usage:
 
 
 
-hindsite init [-builtin] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
+hindsite init [-builtin NAME] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
 hindsite build [-clean] [-drafts] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR]
 hindsite serve [-port PORT] [-project PROJECT_DIR] [-build BUILD_DIR]
 hindsite -h | --help | help
@@ -671,8 +679,8 @@ hindsite -h | --help | help
 ### Init command
 Creates new project content directory from an existing template directory.
 
-- If the `-builtin` option is specified the template directory will be
-  initialized with the built-in example project.
+- If the `-builtin NAME` option is specified the named builtin template will be
+  installed in the project templte directory.
 - Clones the `TEMPLATE_DIR` directory structure to `CONTENT_DIR`.
 - Copies example content documents to `CONTENT_DIR`.
 - If the `CONTENT_DIR` contains existing files hindsite will refuse to continue.

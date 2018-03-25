@@ -24,7 +24,7 @@ type project struct {
 	topic       string
 	port        string
 	clean       bool
-	builtin     bool
+	builtin     string
 	verbose     bool
 	rootConf    config
 	confs       configs
@@ -69,11 +69,9 @@ func (proj *project) parseArgs(args []string) error {
 			proj.drafts = true
 		case opt == "-clean":
 			proj.clean = true
-		case opt == "-builtin":
-			proj.builtin = true
 		case opt == "-v":
 			proj.verbose = true
-		case stringlist{"-content", "-template", "-build", "-port"}.Contains(opt):
+		case stringlist{"-content", "-template", "-build", "-builtin", "-port"}.Contains(opt):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
 			}
@@ -85,6 +83,8 @@ func (proj *project) parseArgs(args []string) error {
 				proj.templateDir = arg
 			case "-build":
 				proj.buildDir = arg
+			case "-builtin":
+				proj.builtin = arg
 			case "-port":
 				proj.port = arg
 			default:
@@ -194,7 +194,7 @@ func (proj *project) init() error {
 			return fmt.Errorf("non-empty content directory: " + proj.contentDir)
 		}
 	}
-	if proj.builtin {
+	if proj.builtin != "" {
 		// Load template directory from the built-in project.
 		if dirExists(proj.templateDir) {
 			files, err := ioutil.ReadDir(proj.templateDir)
@@ -205,8 +205,19 @@ func (proj *project) init() error {
 				return fmt.Errorf("non-empty template directory: " + proj.templateDir)
 			}
 		}
-		proj.println("installing builtin template")
-		if err := RestoreAssets(proj.templateDir, ""); err != nil {
+		proj.println("installing builtin template: " + proj.builtin)
+		if err := RestoreAssets(proj.templateDir, proj.builtin+"/template"); err != nil {
+			return err
+		}
+		// Hoist the restored template files up into the root of the project template directory.
+		files, _ := filepath.Glob(filepath.Join(proj.templateDir, proj.builtin, "template", "*"))
+		for _, f := range files {
+			if err := os.Rename(f, filepath.Join(proj.templateDir, filepath.Base(f))); err != nil {
+				return err
+			}
+		}
+		// Remove empty restored path.
+		if err := os.RemoveAll(filepath.Join(proj.templateDir, proj.builtin)); err != nil {
 			return err
 		}
 	} else {
@@ -273,7 +284,7 @@ The options are:
     -template TEMPLATE_DIR
     -build    BUILD_DIR
     -port     PORT
-    -builtin  TEMPLATE
+    -builtin  NAME
     -clean
     -drafts
     -v

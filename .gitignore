@@ -7,5 +7,7 @@ bin/
 build/
 doc/index.md
 .vscode/
+examples/builtin/minimal/content/
+examples/builtin/minimal/build/
 examples/blog/
 examples/benchmark.zip
