@@ -1,0 +1,63 @@
+{{define "header"}}
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{.title}}</title>
+<meta name="viewport" content="width=device-width"/>
+<link type="text/css" rel="stylesheet" href="{{.site.urlprefix}}/main.css">
+</head>
+<body>
+<div class="banner">
+    <p>srackham | blog</p>
+</div>
+<ul class="menu no-print">
+  <li><a href="{{.site.urlprefix}}/indexes/posts/docs-1.html">Posts</a></li>
+  <li><a href="{{.site.urlprefix}}/indexes/posts/tags.html">Tags</a></li>
+  <li><a href="{{.site.urlprefix}}/about.html">About</a></li>
+</ul>
+<div id="main">
+    <div id="article">
+{{end}}
+
+{{define "footer"}}
+    </div>
+    </div>
+</body>
+</html>
+{{end}}
+
+{{define "doctags"}}
+    {{range .}}
+    ・ <a href="{{.url}}">{{.tag}}</a>
+    {{end}}
+{{end}}
+
+{{define "docbody"}}
+    <p>
+        <strong>Published:</strong> {{.longdate}}<br>
+        <strong>Tags:</strong> {{template "doctags" .tags}}<br>
+        <strong>Author:</strong> {{.author}}<br>
+        <strong>Prev:</strong> <a href="{{.prev.url}}">{{.prev.title}}</a><br>
+        <strong>Next:</strong> <a href="{{.next.url}}">{{.next.title}}</a>
+    </p>
+    {{.body}}
+{{end}}
+
+{{define "doclist"}}
+    <ul>
+        {{range .}}
+        <li>
+            <strong>Title:</strong> <a href="{{.url}}">{{.title}}</a><br>
+            <strong>Date:</strong> {{.longdate}}<br>
+            <strong>Tags:</strong> {{template "doctags" .tags}}<br>
+            <!-- <strong>Synopsis:</strong> {{.synopsis}}<br> -->
+            <br>
+        </li>
+        {{end}}
+{{end}}
+
+{{define "pagefooter"}}
+    <strong>Page:</strong> {{.number}} of {{.last.number}}<br>
+    <strong>Prev:</strong> <a href="{{.prev.url}}">{{.prev.number}}</a><br>
+    <strong>Next:</strong> <a href="{{.next.url}}">{{.next.number}}</a><br>
+{{end}}

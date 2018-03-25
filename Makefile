@@ -11,6 +11,14 @@ SHELL := bash
 
 GOFLAGS ?=
 
+BINDATA_FILES = $(shell find ./examples/builtin/minimal/template) $(shell find ./examples/builtin/blog/template)
+
+./hindsite/bindata.go: $(BINDATA_FILES)
+	cd ./hindsite && go-bindata -prefix ../examples/builtin/ -ignore '/(build|content)/' ../examples/builtin/...
+
+.PHONY: bindata
+bindata: ./hindsite/bindata.go
+
 .PHONY: install
 install: test
 	go install $(GOFLAGS) ./...
@@ -37,25 +45,28 @@ clean:
 	go clean $(GOFLAGS) -i ./...
 
 .PHONY: doc
-doc: install
-	cp -p README.md doc/content/index.md
-	hindsite build doc -v
+doc: build-doc serve-doc
 
-.PHONY: serve
-serve: doc
+.PHONY: build-doc
+build-doc: install
+	cp -p README.md doc/content/index.md
+	hindsite build doc -v -clean
+
+.PHONY: serve-doc
+serve-doc: build-doc
 	hindsite serve doc
 
 .PHONY: blog
-blog: install
-	hindsite build ./examples/blog -v -clean
-	hindsite serve ./examples/blog -v
+blog: build-blog serve-blog
+
+.PHONY: build-blog
+build-blog: install
+	hindsite build examples/builtin/blog -v -clean
+
+.PHONY: serve-blog
+serve-blog: build-blog
+	hindsite serve examples/builtin/blog -v
 
 .PHONY: push
 push:
 	git push -u --tags origin master
-
-./hindsite/bindata.go: ./examples/builtin/*
-	cd ./hindsite && go-bindata -prefix ../examples/builtin/ -ignore '/(build|content)/' ../examples/builtin/...
-
-.PHONY: bindata
-bindata: ./hindsite/bindata.go

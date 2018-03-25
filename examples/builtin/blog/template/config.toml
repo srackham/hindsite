@@ -1,0 +1,9 @@
+# prepended to synthesised root-relative URLs.
+#urlprefix = "/blog"
+
+#exclude = "config.rmu|main/"
+
+#timezone = "America/New_York"
+#shortdate = "2/1/2006"
+
+homepage = "indexes/posts/docs-1.html"
