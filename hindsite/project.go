@@ -391,7 +391,7 @@ func (proj *project) build() error {
 	for _, doc := range docs {
 		idxs.addDocument(doc)
 	}
-	err = idxs.build(proj, confMod)
+	err = idxs.build(confMod)
 	if err != nil {
 		return err
 	}

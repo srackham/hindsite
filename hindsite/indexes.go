@@ -12,6 +12,7 @@ import (
 )
 
 type index struct {
+	proj        *project             // Context.
 	conf        config               // Merged configuration for this index.
 	contentDir  string               // The directory that contains the indexed documents.
 	templateDir string               // The directory that contains the index templates.
@@ -35,8 +36,9 @@ type page struct {
 	docs   documents
 }
 
-func newIndex() index {
+func newIndex(proj *project) index {
 	idx := index{}
+	idx.proj = proj
 	idx.tagdocs = map[string]documents{}
 	idx.slugs = map[string]string{}
 	return idx
@@ -50,7 +52,7 @@ func newIndexes(proj *project) (indexes, error) {
 			return err
 		}
 		if info.IsDir() && fileExists(filepath.Join(f, "docs.html")) {
-			idx := newIndex()
+			idx := newIndex(proj)
 			idx.templateDir = f
 			p, err := filepath.Rel(proj.templateDir, f)
 			if err != nil {
@@ -88,7 +90,7 @@ func (idxs indexes) addDocument(doc *document) {
 
 // Build all indexes. modified is the date of the most recently modified
 // configuration or template file.
-func (idxs indexes) build(proj *project, modified time.Time) error {
+func (idxs indexes) build(modified time.Time) error {
 	// Sort index documents then assign previous and next documents according to
 	// the primary index ordering.
 	// NOTE:
@@ -109,15 +111,15 @@ func (idxs indexes) build(proj *project, modified time.Time) error {
 	}
 	// Build all indexes.
 	for _, idx := range idxs {
-		if err := idx.build(proj, modified); err != nil {
+		if err := idx.build(modified); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (idx index) build(proj *project, modified time.Time) error {
-	tmpls := &proj.tmpls // Lexical shortcut.
+func (idx index) build(modified time.Time) error {
+	tmpls := &idx.proj.tmpls // Lexical shortcut.
 	renderPages := func(pgs []page, tmpl string, modified time.Time) error {
 		count := 0
 		for _, pg := range pgs {
@@ -128,9 +130,9 @@ func (idx index) build(proj *project, modified time.Time) error {
 				fm := pg.docs.frontMatter()
 				fm["count"] = strconv.Itoa(count)
 				fm["page"] = pg.frontMatter()
-				fm.merge(proj.data())
+				fm.merge(idx.proj.data())
 				err := tmpls.render(tmpl, fm, pg.file)
-				proj.println("write index: " + pg.file)
+				idx.proj.println("write index: " + pg.file)
 				if err != nil {
 					return err
 				}
@@ -168,9 +170,9 @@ func (idx index) build(proj *project, modified time.Time) error {
 			}
 			// Render tags index.
 			data := idx.tagsData()
-			data.merge(proj.data())
+			data.merge(idx.proj.data())
 			err := tmpls.render(tagsTemplate, data, outfile)
-			proj.println("write index: " + outfile)
+			idx.proj.println("write index: " + outfile)
 			if err != nil {
 				return err
 			}
