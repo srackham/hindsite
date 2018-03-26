@@ -20,7 +20,8 @@ import (
 
 // document TODO
 type document struct {
-	conf         config // Merged configuration for this index.
+	proj         *project // Context.
+	conf         config   // Merged configuration for this document.
 	contentpath  string
 	buildpath    string
 	templatepath string    // Virtual path used to find document related templates.
@@ -47,6 +48,7 @@ type documents []*document
 // Parse document content and front matter.
 func newDocument(contentfile string, proj *project) (document, error) {
 	doc := document{}
+	doc.proj = proj
 	if !fileExists(contentfile) {
 		return doc, fmt.Errorf("missing document: %s", contentfile)
 	}
@@ -292,6 +294,10 @@ func (doc *document) render(text string) (html string) {
 	case ".md":
 		html = string(blackfriday.Run([]byte(text)))
 	case ".rmu":
+		conf, err := readFile(filepath.Join(doc.proj.contentDir, "config.rmu"))
+		if err == nil {
+			text = conf + "\n\n" + text
+		}
 		html = rimu.Render(text, rimu.RenderOptions{})
 	}
 	return html
