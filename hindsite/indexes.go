@@ -43,7 +43,8 @@ func newIndex() index {
 }
 
 // Search templateDir directory for indexed directories and add them to indexes.
-func (idxs *indexes) init(proj *project) error {
+func newIndexes(proj *project) (indexes, error) {
+	idxs := indexes{}
 	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -66,11 +67,11 @@ func (idxs *indexes) init(proj *project) error {
 			}
 			idx.conf = proj.configFor(idx.contentDir, idx.templateDir)
 			idx.url = path.Join("/", idx.conf.urlprefix, filepath.ToSlash(p))
-			*idxs = append(*idxs, idx)
+			idxs = append(idxs, idx)
 		}
 		return nil
 	})
-	return err
+	return idxs, err
 }
 
 // Add document to all indexes that it belongs to.

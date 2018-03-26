@@ -384,8 +384,8 @@ func (proj *project) build() error {
 	if err != nil {
 		return err
 	}
-	idxs := indexes{}
-	if err := idxs.init(proj); err != nil {
+	idxs, err := newIndexes(proj)
+	if err != nil {
 		return err
 	}
 	for _, doc := range docs {
