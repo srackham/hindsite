@@ -45,13 +45,14 @@ type document struct {
 type documents []*document
 
 // Parse document content and front matter.
-func (doc *document) parseFile(contentfile string, proj *project) error {
+func newDocument(contentfile string, proj *project) (document, error) {
+	doc := document{}
 	if !fileExists(contentfile) {
-		return fmt.Errorf("missing document: %s", contentfile)
+		return doc, fmt.Errorf("missing document: %s", contentfile)
 	}
 	info, err := os.Stat(contentfile)
 	if err != nil {
-		return err
+		return doc, err
 	}
 	doc.modified = info.ModTime()
 	doc.contentpath = contentfile
@@ -63,7 +64,7 @@ func (doc *document) parseFile(contentfile string, proj *project) error {
 	}
 	p, err := filepath.Rel(proj.contentDir, doc.contentpath)
 	if err != nil {
-		return err
+		return doc, err
 	}
 	p = filepath.Dir(p)
 	p = filepath.Join(p, doc.title+".html")
@@ -74,7 +75,7 @@ func (doc *document) parseFile(contentfile string, proj *project) error {
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		d, err := parseDate(doc.title[0:10], nil)
 		if err != nil {
-			return err
+			return doc, err
 		}
 		doc.date = d
 		doc.title = doc.title[11:]
@@ -84,11 +85,11 @@ func (doc *document) parseFile(contentfile string, proj *project) error {
 	doc.author = doc.conf.author // Default author.
 	doc.content, err = readFile(doc.contentpath)
 	if err != nil {
-		return err
+		return doc, err
 	}
 	err = doc.extractFrontMatter()
 	if err != nil {
-		return err
+		return doc, err
 	}
 	// If necessary change output file names to match document slug variable.
 	if doc.slug != "" {
@@ -104,11 +105,11 @@ func (doc *document) parseFile(contentfile string, proj *project) error {
 			}
 		}
 		if layout == "" {
-			return fmt.Errorf("missing layout.html template for: %s", doc.contentpath)
+			return doc, fmt.Errorf("missing layout.html template for: %s", doc.contentpath)
 		}
 		doc.layout = proj.tmpls.name(layout)
 	}
-	return nil
+	return doc, nil
 }
 
 // extractFrontMatter extracts and parses front matter and synopsis from the

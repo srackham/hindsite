@@ -359,8 +359,7 @@ func (proj *project) build() error {
 			switch filepath.Ext(f) {
 			case ".md", ".rmu":
 				// Parse document.
-				doc := document{}
-				err = doc.parseFile(f, proj)
+				doc, err := newDocument(f, proj)
 				if err != nil {
 				}
 				if doc.draft && !proj.drafts {
