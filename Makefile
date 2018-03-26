@@ -56,16 +56,22 @@ build-doc: install
 serve-doc: build-doc
 	hindsite serve doc
 
+BLOG_DIR = ./examples/builtin/blog
+
 .PHONY: blog
 blog: build-blog serve-blog
 
 .PHONY: build-blog
 build-blog: install
-	hindsite build examples/builtin/blog -v -clean
+	hindsite build $(BLOG_DIR) -v -clean
 
 .PHONY: serve-blog
 serve-blog: build-blog
-	hindsite serve examples/builtin/blog -v
+	hindsite serve $(BLOG_DIR) -v
+
+.PHONY: watch-blog
+watch-blog:
+	(find $(BLOG_DIR)/content && find $(BLOG_DIR)/template) | entr hindsite build $(BLOG_DIR)
 
 .PHONY: push
 push:
