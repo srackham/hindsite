@@ -403,6 +403,7 @@ func (proj *project) build() error {
 		proj.println("render: " + doc.contentpath)
 		data := templateData{}
 		data.merge(doc.frontMatter())
+		data.merge(doc.prevNext())
 		data.merge(proj.data())
 		data["body"] = template.HTML(doc.render(doc.content))
 		err = proj.tmpls.render(doc.layout, data, doc.buildpath)

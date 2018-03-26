@@ -235,8 +235,8 @@ func (doc *document) extractFrontMatter() error {
 	return nil
 }
 
-func (doc *document) frontMatter() (data templateData) {
-	data = templateData{}
+func (doc *document) frontMatter() templateData {
+	data := templateData{}
 	data["title"] = doc.title
 	data["shortdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.shortdate)
 	data["mediumdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.mediumdate)
@@ -247,18 +247,6 @@ func (doc *document) frontMatter() (data templateData) {
 	data["addendum"] = template.HTML(doc.render(doc.addendum))
 	data["slug"] = doc.slug
 	data["url"] = doc.url
-	prev := templateData{}
-	if doc.prev != nil {
-		prev["title"] = doc.prev.title
-		prev["url"] = doc.prev.url
-	}
-	data["prev"] = prev
-	next := templateData{}
-	if doc.next != nil {
-		next["title"] = doc.next.title
-		next["url"] = doc.next.url
-	}
-	data["next"] = next
 	tags := []map[string]string{}
 	for _, tag := range doc.tags {
 		url := ""
@@ -272,6 +260,22 @@ func (doc *document) frontMatter() (data templateData) {
 	}
 	data["tags"] = tags
 	return data
+}
+
+// prevNext returns document prev and next template variables.
+func (doc *document) prevNext() templateData {
+	prev := templateData{}
+	if doc.prev != nil {
+		prev = doc.prev.frontMatter()
+	}
+	next := templateData{}
+	if doc.next != nil {
+		next = doc.next.frontMatter()
+	}
+	return templateData{
+		"prev": prev,
+		"next": next,
+	}
 }
 
 // Return front matter as YAML formatted string.
