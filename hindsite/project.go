@@ -361,6 +361,7 @@ func (proj *project) build() error {
 				// Parse document.
 				doc, err := newDocument(f, proj)
 				if err != nil {
+					return err
 				}
 				if doc.draft && !proj.drafts {
 					proj.println("skip draft: " + f)
