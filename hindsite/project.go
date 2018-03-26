@@ -124,24 +124,27 @@ func (proj *project) parseArgs(args []string) error {
 	if err != nil {
 		return err
 	}
+	proj.println("content directory: " + proj.contentDir)
 	proj.templateDir, err = getPath(proj.templateDir, filepath.Join(proj.projectDir, "template"))
 	if err != nil {
 		return err
 	}
+	proj.println("template directory: " + proj.templateDir)
 	proj.buildDir, err = getPath(proj.buildDir, filepath.Join(proj.projectDir, "build"))
 	if err != nil {
 		return err
 	}
+	proj.println("build directory: " + proj.buildDir)
 	proj.indexDir, err = getPath(proj.indexDir, filepath.Join(proj.buildDir, "indexes"))
 	if err != nil {
 		return err
 	}
 	// Content, template and build directories cannot be nested.
 	checkOverlap := func(name1, dir1, name2, dir2 string) error {
-		if len(strings.TrimPrefix(dir1, dir2)) < len(dir1) {
+		if pathIsInDir(dir1, dir2) {
 			return fmt.Errorf("%s directory cannot reside inside %s directory", name1, name2)
 		}
-		if len(strings.TrimPrefix(dir2, dir1)) < len(dir2) {
+		if pathIsInDir(dir2, dir1) {
 			return fmt.Errorf("%s directory cannot reside inside %s directory", name2, name1)
 		}
 		return nil
