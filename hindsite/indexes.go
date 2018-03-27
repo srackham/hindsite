@@ -120,7 +120,7 @@ func (idxs indexes) build(modified time.Time) error {
 
 func (idx index) build(modified time.Time) error {
 	tmpls := &idx.proj.tmpls // Lexical shortcut.
-	renderPages := func(pgs []page, tmpl string, modified time.Time) error {
+	renderPages := func(pgs []page, tmpl string, data templateData, modified time.Time) error {
 		count := 0
 		for _, pg := range pgs {
 			count += len(pg.docs)
@@ -130,6 +130,7 @@ func (idx index) build(modified time.Time) error {
 				fm := pg.docs.frontMatter()
 				fm["count"] = strconv.Itoa(count)
 				fm["page"] = pg.frontMatter()
+				fm.merge(data)
 				fm.merge(idx.proj.data())
 				err := tmpls.render(tmpl, fm, pg.file)
 				idx.proj.println("write index: " + pg.file)
@@ -179,7 +180,7 @@ func (idx index) build(modified time.Time) error {
 			// Render per-tag document index pages.
 			for tag := range idx.tagdocs {
 				pgs := idx.paginate(idx.tagdocs[tag], filepath.Join("tags", idx.slugs[tag]+"-%d.html"))
-				if err := renderPages(pgs, tagTemplate, time.Now()); err != nil {
+				if err := renderPages(pgs, tagTemplate, templateData{"tag": tag}, time.Now()); err != nil {
 					return err
 				}
 			}
@@ -191,7 +192,7 @@ func (idx index) build(modified time.Time) error {
 		panic("missing docs template: " + filepath.Join(idx.templateDir, "docs.html"))
 	}
 	pgs := idx.paginate(idx.docs, "docs-%d.html")
-	return renderPages(pgs, tmpl, modified)
+	return renderPages(pgs, tmpl, templateData{}, modified)
 }
 
 func (idx index) tagsData() templateData {
