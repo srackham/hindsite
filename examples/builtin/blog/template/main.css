@@ -1,3 +1,19 @@
+:root {
+    --primary-color: #ac4142;
+    --lighter-primary: #af5254;
+    --text-color: #333333;
+    --link-color: #428bca;
+    --primary-background: white;
+    --serif-font: "PT Serif", Georgia, "Times New Roman", serif;
+    --sans-font: "PT Sans", Helvetica, Arial, sans-serif;
+    --mono-font: Consolas, "Andale Mono", Monaco, monospace;
+    --mono-size: 80%;
+    --border: 1px solid #dddddd;
+    --border-radius:0;
+    --code-background: #f8f8f8;
+    --sidebar-background: #ffffee;
+    --max-text-width: 55rem;
+}
 * {
     margin: 0;
     padding: 0;
@@ -6,14 +22,15 @@
 }
 body {
     font-size: 20px;
-    color: #333333;
-    background-color: white;
-    font-family: "PT Serif", Georgia, "Times New Roman", serif;
+    color: var(--text-color);
+    background-color: var(--primary-background);
+    font-family: var(--serif-font);
 }
 h1, h2, h3, h4, h5, h6 {
+    font-weight: 500;
     margin: 10px 0;
-    color: #ac4142;
-    font-family: "PT Sans", Helvetica, Arial, sans-serif;
+    color: var(--primary-color);
+    font-family: var(--sans-font);
 }
 h1 { font-size: 2.2rem; }
 h2 { font-size: 1.5rem; }
@@ -27,7 +44,7 @@ h2, h3, h4, h5, h6 {
 }
 h2 {
     margin-top: 1.5rem;
-    border-bottom: 1px solid #dddddd;
+    border-bottom: var(--border);
 }
 img {
     max-width: 100%;
@@ -43,10 +60,10 @@ td, th {
 }
 table.bordered > tbody > tr > th,
 table.bordered > tbody > tr > td {
-    border: 1px solid #dddddd;
+    border: var(--border);
 }
 a, a:hover {
-    color: #428bca;
+    color: var(--link-color);
 }
 a {
     text-decoration: none;
@@ -87,23 +104,21 @@ blockquote {
     content: "\2014 \2009";
 }
 code {
-    font-family: PragmataPro, Menlo, Monaco, "Andale Mono", "Lucida Console", "Courier New", monospace;
-    /* font-family: Consolas, "Andale Mono", Monaco, monospace; */
-    background-color: #f8f8f8;
+    font-family: var(--mono-font);
+    background-color: var(--code-background);
 }
 pre {
-    font-family: PragmataPro, Menlo, Monaco, "Andale Mono", "Lucida Console", "Courier New", monospace;
-    /* font-family: Consolas, "Andale Mono", Monaco, monospace; */
-    font-size: 90%;
+    font-family: var(--mono-font);
+    font-size: var(--mono-size);
     /* line-height: normal; */
     white-space: pre-wrap;
-    background-color: #f8f8f8;
-    border: 1px solid #dddddd;
-    border-radius: 0;
+    background-color: var(--code-background);
+    border: var(--border);
+    border-radius: var(--border-radius);
     padding: 6px;
 }
 .light-background {
-    background-color: #f8f8f8;
+    background-color: var(--code-background);
     border: none;
     white-space: pre;
 }
@@ -130,9 +145,9 @@ div.verse p, p.verse {
     margin-bottom: 0.75rem;
 }
 .sidebar {
-    border: 1px solid #dddddd;
-    border-radius: 0;
-    background: #ffffee;
+    border: var(--border);
+    border-radius: var(--border-radius);
+    background: var(--sidebar-background);
     padding: 10px;
     margin: 1.5em 0;
 }
@@ -223,7 +238,7 @@ ul > li {
 #main {
     z-index: 1;
     min-height: 100%;
-    max-width: 55rem;
+    max-width: var(--max-text-width);
     margin-left: 0;
     padding-left: 40px;
     padding-right: 40px;
@@ -236,7 +251,7 @@ ul > li {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background-color: #ac4142;
+    background-color: var(--primary-color);
 }
 .menu li {
     float: left;
@@ -248,26 +263,41 @@ ul > li {
 }
 .menu li a {
     display: block;
-    color: white;
+    color: var(--primary-background);
     text-align: center;
     padding: 0px 15px;
     text-decoration: none;
 }
 .menu li a:hover {
-    background-color: #af5254;
+    background-color: var(--lighter-primary);
 }
 .banner {
-    margin: 0;
-    color: #ac4142;
+    margin-bottom: 2px;
+    color: var(--primary-color);
     padding: 5px 40px;
     font-size: 24px;
-    font-weight: bold;
-}
-.banner p {
-    margin: 0;
+    /* font-weight: bold; */
 }
 .banner, .menu {
-    font-family: "PT Sans", Helvetica, Arial, sans-serif;
+    font-family: var(--sans-font);
+}
+.index h2 {
+    border: 0;
+}
+.index a {
+    color: var(--primary-color);
+}
+.tags a {
+    color: var(--link-color);
+}
+.clear {
+    clear: both;
+}
+.left {
+    float: left;
+}
+.right {
+    float: right;
 }
 @media screen and (min-width: 1px) and (max-width: 800px) {
     body {

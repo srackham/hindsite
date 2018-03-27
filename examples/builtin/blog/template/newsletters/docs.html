@@ -1,0 +1,14 @@
+{{template "header" .}}
+<h1>Newsletters</h1>
+    <ul class="index">
+        {{range .docs}}
+        <li>
+            <h2><a href="{{.url}}">{{.title}}</a></h2>
+            <span>{{.longdate}}</span>
+            <span>{{template "doctags" .tags}}</span>
+            <br>
+        </li>
+        {{end}}
+    </ul>
+{{template "pagefooter" .page}}
+{{template "footer" .}}

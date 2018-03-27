@@ -7,12 +7,13 @@
 <link type="text/css" rel="stylesheet" href="{{.site.urlprefix}}/main.css">
 </head>
 <body>
-<div class="banner">
-    <p>srackham | blog</p>
+<div class="banner index">
+  <a href="{{.site.urlprefix}}/index.html">srackham | blog</a>
 </div>
 <ul class="menu no-print">
   <li><a href="{{.site.urlprefix}}/indexes/posts/docs-1.html">Posts</a></li>
   <li><a href="{{.site.urlprefix}}/indexes/posts/tags.html">Tags</a></li>
+  <li><a href="{{.site.urlprefix}}/indexes/newsletters/docs-1.html">News</a></li>
   <li><a href="{{.site.urlprefix}}/about.html">About</a></li>
 </ul>
 <div id="main">
@@ -27,9 +28,11 @@
 {{end}}
 
 {{define "doctags"}}
+<span class="tags">
     {{range .}}
     ・ <a href="{{.url}}">{{.tag}}</a>
     {{end}}
+</span>
 {{end}}
 
 {{define "docbody"}}
@@ -54,6 +57,7 @@
             <br>
         </li>
         {{end}}
+    </ul>
 {{end}}
 
 {{define "pagefooter"}}

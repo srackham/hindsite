@@ -1,0 +1,17 @@
+{{template "header" .}}
+<!-- <h1>{{.title}}</h1> -->
+<h2>{{.longdate}}</h2>
+{{.body}}
+<div class="index">
+    <span class="left">
+        «
+        <!-- <em>Newer:</em> -->
+        <a href="{{.prev.url}}">{{.prev.date}}</a>
+    </span>
+    <span class="right">
+        <!-- <em>Older:</em> -->
+        <a href="{{.next.url}}">{{.next.date}}</a>
+        »
+    </span>
+</div>
+{{template "footer" .}}
