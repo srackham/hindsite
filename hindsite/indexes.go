@@ -120,6 +120,9 @@ func (idxs indexes) build(modified time.Time) error {
 
 func (idx index) build(modified time.Time) error {
 	tmpls := &idx.proj.tmpls // Lexical shortcut.
+	// renderPages renders paginated document pages with named template.
+	// Additional template data is included. Pages are only rebuilt if
+	// necessary.
 	renderPages := func(pgs []page, tmpl string, data templateData, modified time.Time) error {
 		count := 0
 		for _, pg := range pgs {
@@ -141,15 +144,9 @@ func (idx index) build(modified time.Time) error {
 		}
 		return nil
 	}
+	docsTemplate := tmpls.name(idx.templateDir, "docs.html")
 	tagsTemplate := tmpls.name(idx.templateDir, "tags.html")
-	tagTemplate := tmpls.name(idx.templateDir, "tag.html")
-	if tmpls.contains(tagsTemplate) || tmpls.contains(tagTemplate) {
-		if !tmpls.contains(tagsTemplate) {
-			return fmt.Errorf("missing tags template: %s", filepath.Join(idx.templateDir, "tags.html"))
-		}
-		if !tmpls.contains(tagTemplate) {
-			return fmt.Errorf("missing tag template: %s", filepath.Join(idx.templateDir, "tag.html"))
-		}
+	if tmpls.contains(tagsTemplate) {
 		outfile := filepath.Join(idx.indexDir, "tags.html")
 		if rebuild(outfile, modified, idx.docs...) {
 			// If any document in the index is modified the index must be
@@ -180,19 +177,15 @@ func (idx index) build(modified time.Time) error {
 			// Render per-tag document index pages.
 			for tag := range idx.tagdocs {
 				pgs := idx.paginate(idx.tagdocs[tag], filepath.Join("tags", idx.slugs[tag]+"-%d.html"))
-				if err := renderPages(pgs, tagTemplate, templateData{"tag": tag}, time.Now()); err != nil {
+				if err := renderPages(pgs, docsTemplate, templateData{"tag": tag}, time.Now()); err != nil {
 					return err
 				}
 			}
 		}
 	}
 	// Render document index pages.
-	tmpl := tmpls.name(idx.templateDir, "docs.html")
-	if !tmpls.contains(tmpl) {
-		panic("missing docs template: " + filepath.Join(idx.templateDir, "docs.html"))
-	}
 	pgs := idx.paginate(idx.docs, "docs-%d.html")
-	return renderPages(pgs, tmpl, templateData{}, modified)
+	return renderPages(pgs, docsTemplate, templateData{}, modified)
 }
 
 func (idx index) tagsData() templateData {
