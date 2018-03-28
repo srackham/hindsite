@@ -9,21 +9,22 @@ clicked on a document.
 This is because there is only one copy of the rendered document.
 
 
-### I want a single (non-paginated document index
+### I want a single page document index
 Set the `paginate` configuration parameter to `-1`.
 
 
-### I want a single document index in addition to a paginated document index 
+### I want a single page document index plus a paginated document index 
 Create a parent index with the `paginate` configuration parameter set to `-1`.
 
 ```
 templates/
-    docs.toml       # For single-page document index.
+    docs.html       # Single-page document index template.
     config.toml     # paginate = -1
     paginated/
-        docs.toml   # For paginated document index.
-        config.toml # paginate = 5
+        docs.html   # Paginated document index template.
 ```
+Each index has it's own page template. This technique could be extended to
+create multiple additional indexes over the on document set.
 
 
 ### I don't like file name extensions in URLs how can I remove them
