@@ -428,7 +428,7 @@ func (proj *project) build() error {
 		if !fileExists(src) {
 			return fmt.Errorf("homepage file missing: %s", src)
 		}
-		if !upToDate(dst, src) {
+		if !fileExists(dst) || upToDate(src, dst) {
 			proj.verbose2("copy homepage: " + src)
 			proj.verbose("write homepage: " + dst)
 			if err := copyFile(src, dst); err != nil {
