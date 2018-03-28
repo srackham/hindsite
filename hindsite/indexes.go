@@ -102,49 +102,50 @@ func (idxs indexes) addDocument(doc *document) {
 // Build all indexes. modified is the date of the most recently modified
 // configuration or template file.
 func (idxs indexes) build(modified time.Time) error {
-	// Sort index documents then assign previous and next documents according to
+	// Sort index documents then assign document prev/next according to
 	// the primary index ordering.
-	// NOTE:
-	// - Document prev/next corresponds to the primary index.
-	// - Index document ordering ensures subsequent derived document tag indexes
-	//   are also ordered.
+	// Index document ordering ensures subsequent derived document tag indexes
+	// are also ordered.
 	for _, idx := range idxs {
 		idx.docs.sortByDate()
 		if idx.primary {
 			idx.docs.setPrevNext()
 		}
 	}
-	// Build all indexes.
+	// If any document in the index has been modified since the index was last
+	// built then the index must be completely rebuild since we are forced to
+	// assume document front matter (which contributes to the index) has been
+	// modified.
 	for _, idx := range idxs {
-		if err := idx.build(modified); err != nil {
-			return err
+		target := filepath.Join(idx.indexDir, "docs-1.html")
+		if rebuild(target, modified, idx.docs...) {
+			if err := idx.build(); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
 }
 
-func (idx index) build(modified time.Time) error {
+func (idx index) build() error {
 	tmpls := &idx.proj.tmpls // Lexical shortcut.
 	// renderPages renders paginated document pages with named template.
-	// Additional template data is included. Pages are only rebuilt if
-	// necessary.
-	renderPages := func(pgs []page, tmpl string, data templateData, modified time.Time) error {
+	// Additional template data is included.
+	renderPages := func(pgs []page, tmpl string, data templateData) error {
 		count := 0
 		for _, pg := range pgs {
 			count += len(pg.docs)
 		}
 		for _, pg := range pgs {
-			if rebuild(pg.file, modified, pg.docs...) {
-				fm := pg.docs.frontMatter()
-				fm["count"] = strconv.Itoa(count)
-				fm["page"] = pg.frontMatter()
-				fm.merge(data)
-				fm.merge(idx.proj.data())
-				err := tmpls.render(tmpl, fm, pg.file)
-				idx.proj.println("write index: " + pg.file)
-				if err != nil {
-					return err
-				}
+			fm := pg.docs.frontMatter()
+			fm["count"] = strconv.Itoa(count)
+			fm["page"] = pg.frontMatter()
+			fm.merge(data)
+			fm.merge(idx.proj.data())
+			err := tmpls.render(tmpl, fm, pg.file)
+			idx.proj.println("write index: " + pg.file)
+			if err != nil {
+				return err
 			}
 		}
 		return nil
@@ -152,45 +153,39 @@ func (idx index) build(modified time.Time) error {
 	docsTemplate := tmpls.name(idx.templateDir, "docs.html")
 	tagsTemplate := tmpls.name(idx.templateDir, "tags.html")
 	if tmpls.contains(tagsTemplate) {
+		// Build idx.tagdocs[].
+		for _, doc := range idx.docs {
+			for _, tag := range doc.tags {
+				idx.tagdocs[tag] = append(idx.tagdocs[tag], doc)
+			}
+		}
+		// Build index tag slugs.
+		slugs := []string{}
+		for tag := range idx.tagdocs {
+			slug := slugify(tag, slugs)
+			slugs = append(slugs, slug)
+			idx.slugs[tag] = slug
+		}
+		// Render tags index.
+		data := idx.tagsData()
+		data.merge(idx.proj.data())
 		outfile := filepath.Join(idx.indexDir, "tags.html")
-		if rebuild(outfile, modified, idx.docs...) {
-			// If any document in the index is modified the index must be
-			// completely rebuild since we are forced to assume document front
-			// matter (which contributes to the index) has been modified.
-
-			// Build idx.tagdocs[].
-			for _, doc := range idx.docs {
-				for _, tag := range doc.tags {
-					idx.tagdocs[tag] = append(idx.tagdocs[tag], doc)
-				}
-			}
-			// Build index tag slugs.
-			slugs := []string{}
-			for tag := range idx.tagdocs {
-				slug := slugify(tag, slugs)
-				slugs = append(slugs, slug)
-				idx.slugs[tag] = slug
-			}
-			// Render tags index.
-			data := idx.tagsData()
-			data.merge(idx.proj.data())
-			err := tmpls.render(tagsTemplate, data, outfile)
-			idx.proj.println("write index: " + outfile)
-			if err != nil {
+		err := tmpls.render(tagsTemplate, data, outfile)
+		idx.proj.println("write index: " + outfile)
+		if err != nil {
+			return err
+		}
+		// Render per-tag document index pages.
+		for tag := range idx.tagdocs {
+			pgs := idx.paginate(idx.tagdocs[tag], filepath.Join("tags", idx.slugs[tag]+"-%d.html"))
+			if err := renderPages(pgs, docsTemplate, templateData{"tag": tag}); err != nil {
 				return err
-			}
-			// Render per-tag document index pages.
-			for tag := range idx.tagdocs {
-				pgs := idx.paginate(idx.tagdocs[tag], filepath.Join("tags", idx.slugs[tag]+"-%d.html"))
-				if err := renderPages(pgs, docsTemplate, templateData{"tag": tag}, time.Now()); err != nil {
-					return err
-				}
 			}
 		}
 	}
 	// Render document index pages.
 	pgs := idx.paginate(idx.docs, "docs-%d.html")
-	return renderPages(pgs, docsTemplate, templateData{}, modified)
+	return renderPages(pgs, docsTemplate, templateData{})
 }
 
 func (idx index) tagsData() templateData {
@@ -249,7 +244,7 @@ func (pg page) frontMatter() templateData {
 	dataFor := func(pg *page) templateData {
 		data := templateData{}
 		if pg != nil {
-			data["number"] = pg.number
+			data["number"] = strconv.Itoa(pg.number)
 			data["url"] = pg.url
 		}
 		return data

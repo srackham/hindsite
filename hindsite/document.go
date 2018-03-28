@@ -262,6 +262,7 @@ func (doc *document) frontMatter() templateData {
 		})
 	}
 	data["tags"] = tags
+	// prev/next were assigned when the indexes were built.
 	if doc.prev != nil {
 		data["prev"] = templateData{"url": doc.prev.url}
 	}
