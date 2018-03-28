@@ -35,25 +35,40 @@
 </span>
 {{end}}
 
-{{define "docsfooter"}}
+{{define "docfooter"}}
 <div class="docsfooter">
     <span class="left">
-        « <a href="{{.first.url}}">First</a>
-        &nbsp;&nbsp;
         {{if .prev.url}}
-        « <a href="{{.prev.url}}">Newer</a>
+        « <a href="{{.prev.url}}">Previous</a>
         {{else}}
-        <span class="disabled">« Newer</span>
+        <span class="disabled">« Previous</span>
         {{end}}
     </span>
     <span class="right">
         {{if .next.url}}
-        <a href="{{.next.url}}">Older</a> »
+        <a href="{{.next.url}}">Next</a> »
         {{else}}
-        <span class="disabled">Older »</span>
+        <span class="disabled">Next »</span>
         {{end}}
-        &nbsp;&nbsp;
-        <a href="{{.last.url}}">Last</a> »
+    </span>
+</div>
+{{end}}
+
+{{define "docsfooter"}}
+<div class="docsfooter">
+    <span class="left">
+        {{if .prev.url}}
+        « <a href="{{.first.url}}">First</a> &nbsp;&nbsp; « <a href="{{.prev.url}}">Newer</a>
+        {{else}}
+        <span class="disabled">« First &nbsp;&nbsp; « Newer</span>
+        {{end}}
+    </span>
+    <span class="right">
+        {{if .next.url}}
+        <a href="{{.next.url}}">Older</a> » &nbsp;&nbsp; <a href="{{.last.url}}">Last</a> »
+        {{else}}
+        <span class="disabled">Older » &nbsp;&nbsp; Last »</span>
+        {{end}}
     </span>
 </div>
 {{end}}

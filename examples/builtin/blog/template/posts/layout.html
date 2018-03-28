@@ -1,6 +1,8 @@
 {{template "header" .}}
 <h1>{{.title}}</h1>
-<h4>{{.longdate}}</h4>
+<div style="margin-bottom: 1rem;">
+<span class="sans-font">{{.longdate}}</span> {{template "doctags" .tags}}
+</div>
 {{.body}}
-{{template "docsfooter" .}}
+{{template "docfooter" .}}
 {{template "footer" .}}
