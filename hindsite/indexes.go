@@ -108,16 +108,10 @@ func (idxs indexes) build(modified time.Time) error {
 	// - Document prev/next corresponds to the primary index.
 	// - Index document ordering ensures subsequent derived document tag indexes
 	//   are also ordered.
-	for _, idx1 := range idxs {
-		primary := true
-		for _, idx2 := range idxs {
-			if pathIsInDir(idx1.templateDir, idx2.templateDir) {
-				primary = false
-			}
-		}
-		idx1.docs.sortByDate()
-		if primary {
-			idx1.docs.setPrevNext()
+	for _, idx := range idxs {
+		idx.docs.sortByDate()
+		if idx.primary {
+			idx.docs.setPrevNext()
 		}
 	}
 	// Build all indexes.

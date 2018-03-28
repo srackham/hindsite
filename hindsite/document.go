@@ -262,23 +262,13 @@ func (doc *document) frontMatter() templateData {
 		})
 	}
 	data["tags"] = tags
-	return data
-}
-
-// prevNext returns document prev and next template variables.
-func (doc *document) prevNext() templateData {
-	prev := templateData{}
 	if doc.prev != nil {
-		prev = doc.prev.frontMatter()
+		data["prev"] = templateData{"url": doc.prev.url}
 	}
-	next := templateData{}
 	if doc.next != nil {
-		next = doc.next.frontMatter()
+		data["next"] = templateData{"url": doc.next.url}
 	}
-	return templateData{
-		"prev": prev,
-		"next": next,
-	}
+	return data
 }
 
 // Return front matter as YAML formatted string.
