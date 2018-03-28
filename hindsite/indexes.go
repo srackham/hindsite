@@ -143,7 +143,7 @@ func (idx index) build() error {
 			fm.merge(data)
 			fm.merge(idx.proj.data())
 			err := tmpls.render(tmpl, fm, pg.file)
-			idx.proj.println("write index: " + pg.file)
+			idx.proj.verbose("write index: " + pg.file)
 			if err != nil {
 				return err
 			}
@@ -171,7 +171,7 @@ func (idx index) build() error {
 		data.merge(idx.proj.data())
 		outfile := filepath.Join(idx.indexDir, "tags.html")
 		err := tmpls.render(tagsTemplate, data, outfile)
-		idx.proj.println("write index: " + outfile)
+		idx.proj.verbose("write index: " + outfile)
 		if err != nil {
 			return err
 		}

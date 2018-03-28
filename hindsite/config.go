@@ -165,7 +165,7 @@ func (proj *project) parseConfigs() error {
 				cf := filepath.Join(f, v)
 				if fileExists(cf) {
 					found = true
-					proj.println("read config: " + cf)
+					proj.verbose("read config: " + cf)
 					if err := conf.parseFile(proj, cf); err != nil {
 						return err
 					}
@@ -173,7 +173,7 @@ func (proj *project) parseConfigs() error {
 			}
 			if found {
 				proj.confs = append(proj.confs, conf)
-				proj.println(conf.String())
+				proj.verbose2(conf.String())
 			}
 			return nil
 		})
@@ -187,7 +187,7 @@ func (proj *project) parseConfigs() error {
 		return proj.confs[i].origin < proj.confs[j].origin
 	})
 	proj.rootConf = proj.configFor(proj.contentDir, proj.templateDir)
-	proj.println("root config: \n" + proj.rootConf.String())
+	proj.verbose2("root config: \n" + proj.rootConf.String())
 	return nil
 }
 

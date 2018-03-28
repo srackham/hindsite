@@ -25,7 +25,7 @@ type project struct {
 	port        string
 	clean       bool
 	builtin     string
-	verbose     bool
+	verbosity   int
 	rootConf    config
 	confs       configs
 	tmpls       templates
@@ -35,9 +35,16 @@ func newProject() project {
 	return project{}
 }
 
-// printlin prints a message if `-v` verbose option set.
-func (proj *project) println(message string) {
-	if proj.verbose {
+// verbose prints a message if `-v` verbose option was specified.
+func (proj *project) verbose(message string) {
+	if proj.verbosity >= 1 {
+		fmt.Println(message)
+	}
+}
+
+// verbose2 prints a message if the `-v` verbose option was specified more than one.
+func (proj *project) verbose2(message string) {
+	if proj.verbosity >= 2 {
 		fmt.Println(message)
 	}
 }
@@ -70,7 +77,7 @@ func (proj *project) parseArgs(args []string) error {
 		case opt == "-clean":
 			proj.clean = true
 		case opt == "-v":
-			proj.verbose = true
+			proj.verbosity++
 		case stringlist{"-content", "-template", "-build", "-builtin", "-port"}.Contains(opt):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
@@ -124,17 +131,17 @@ func (proj *project) parseArgs(args []string) error {
 	if err != nil {
 		return err
 	}
-	proj.println("content directory: " + proj.contentDir)
+	proj.verbose2("content directory: " + proj.contentDir)
 	proj.templateDir, err = getPath(proj.templateDir, filepath.Join(proj.projectDir, "template"))
 	if err != nil {
 		return err
 	}
-	proj.println("template directory: " + proj.templateDir)
+	proj.verbose2("template directory: " + proj.templateDir)
 	proj.buildDir, err = getPath(proj.buildDir, filepath.Join(proj.projectDir, "build"))
 	if err != nil {
 		return err
 	}
-	proj.println("build directory: " + proj.buildDir)
+	proj.verbose2("build directory: " + proj.buildDir)
 	proj.indexDir, err = getPath(proj.indexDir, filepath.Join(proj.buildDir, "indexes"))
 	if err != nil {
 		return err
@@ -208,7 +215,7 @@ func (proj *project) init() error {
 				return fmt.Errorf("non-empty template directory: " + proj.templateDir)
 			}
 		}
-		proj.println("installing builtin template: " + proj.builtin)
+		proj.verbose("installing builtin template: " + proj.builtin)
 		if err := RestoreAssets(proj.templateDir, proj.builtin+"/template"); err != nil {
 			return err
 		}
@@ -244,18 +251,18 @@ func (proj *project) init() error {
 			return err
 		}
 		if info.IsDir() {
-			proj.println("make directory:   " + dst)
+			proj.verbose("make directory:   " + dst)
 			err = mkMissingDir(dst)
 		} else {
 			// Copy example documents to content directory.
 			switch filepath.Ext(f) {
 			case ".md", ".rmu":
-				proj.println("copy example: " + f)
+				proj.verbose("copy example: " + f)
 				err = copyFile(f, dst)
 				if err != nil {
 					return err
 				}
-				proj.println("write:        " + dst)
+				proj.verbose("write:        " + dst)
 			}
 		}
 		return err
@@ -334,7 +341,7 @@ func (proj *project) build() error {
 				if isOlder(confMod, info.ModTime()) {
 					confMod = info.ModTime()
 				}
-				proj.println("parse template: " + f)
+				proj.verbose("parse template: " + f)
 				err = proj.tmpls.add(f)
 			default:
 				err = proj.copyStaticFile(f, proj.templateDir, proj.buildDir)
@@ -352,7 +359,7 @@ func (proj *project) build() error {
 			return err
 		}
 		if proj.exclude(info) {
-			proj.println("exclude: " + f)
+			proj.verbose("exclude: " + f)
 			if info.IsDir() {
 				return filepath.SkipDir
 			}
@@ -367,7 +374,7 @@ func (proj *project) build() error {
 					return err
 				}
 				if doc.draft && !proj.drafts {
-					proj.println("skip draft: " + f)
+					proj.verbose("skip draft: " + f)
 					return nil
 				}
 				docs = append(docs, &doc)
@@ -403,7 +410,7 @@ func (proj *project) build() error {
 		if !rebuild(doc.buildpath, confMod, doc) {
 			continue
 		}
-		proj.println("render: " + doc.contentpath)
+		proj.verbose2("render document: " + doc.contentpath)
 		data := doc.frontMatter()
 		data.merge(proj.data())
 		data["body"] = template.HTML(doc.render(doc.content))
@@ -411,8 +418,8 @@ func (proj *project) build() error {
 		if err != nil {
 			return err
 		}
-		proj.println("write:  " + doc.buildpath)
-		proj.println(doc.String())
+		proj.verbose("write document: " + doc.buildpath)
+		proj.verbose2(doc.String())
 	}
 	if proj.rootConf.homepage != "" {
 		// Install home page.
@@ -422,11 +429,11 @@ func (proj *project) build() error {
 			return fmt.Errorf("homepage file missing: %s", src)
 		}
 		if !upToDate(dst, src) {
-			proj.println("copy homepage: " + src)
+			proj.verbose2("copy homepage: " + src)
+			proj.verbose("write homepage: " + dst)
 			if err := copyFile(src, dst); err != nil {
 				return err
 			}
-			proj.println("write:         " + dst)
 		}
 	}
 	return nil
@@ -472,7 +479,7 @@ func (proj *project) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
 	if upToDate(dstFile, srcFile) {
 		return nil
 	}
-	proj.println("copy static: " + srcFile)
+	proj.verbose2("copy static:  " + srcFile)
 	err = mkMissingDir(filepath.Dir(dstFile))
 	if err != nil {
 		return err
@@ -481,7 +488,7 @@ func (proj *project) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
 	if err != nil {
 		return err
 	}
-	proj.println("write:       " + dstFile)
+	proj.verbose("write static: " + dstFile)
 	return nil
 }
 
@@ -519,7 +526,7 @@ func (proj *project) serve() error {
 	// with prefix serve unmodified URL.
 	stripPrefix := func(prefix string, h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			proj.println("request: " + r.URL.Path)
+			proj.verbose("request: " + r.URL.Path)
 			if p := strings.TrimPrefix(r.URL.Path, prefix); len(p) < len(r.URL.Path) {
 				r2 := new(http.Request)
 				*r2 = *r
