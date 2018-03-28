@@ -169,13 +169,15 @@ func filesInPath(base, root string, patterns []string, n int) (files []string, e
 	return files, nil
 }
 
-// Return true if oldtime is older than newtime by rounded to nearest second.
+// isOlder returns true if oldtime is older than newtime by at least 0.5s.
 func isOlder(oldtime, newtime time.Time) bool {
+	delta := time.Second / 2
 	diff := newtime.Sub(oldtime)
-	return diff > 0 && diff.Truncate(1*time.Second) != 0
+	return diff > 0 && diff > delta
 }
 
-// Returns true if oldfile's modification time is older than newfile's.
+// fileIsOlder returns true if oldfile's modification time is older than
+// newfile's by at least 0.5s. Returns error is one or both files do not exist.
 func fileIsOlder(oldfile, newfile string) (bool, error) {
 	info, err := os.Stat(newfile)
 	if err != nil {
