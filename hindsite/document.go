@@ -26,7 +26,7 @@ type document struct {
 	buildpath    string
 	templatepath string    // Virtual path used to find document related templates.
 	content      string    // Markup text (without front matter header).
-	rootIndex    *index    // Top-level document index (nil if document is not indexed).
+	primaryIndex *index    // Top-level document index (nil if document is not indexed).
 	modified     time.Time // Document source file modified timestamp.
 	prev         *document // Previous document in primary index.
 	next         *document // Next document in primary index.
@@ -253,8 +253,8 @@ func (doc *document) frontMatter() templateData {
 	tags := []map[string]string{}
 	for _, tag := range doc.tags {
 		url := ""
-		if doc.rootIndex != nil {
-			url = path.Join(doc.rootIndex.url, "tags", doc.rootIndex.slugs[tag]+"-1.html")
+		if doc.primaryIndex != nil {
+			url = path.Join(doc.primaryIndex.url, "tags", doc.primaryIndex.slugs[tag]+"-1.html")
 		}
 		tags = append(tags, map[string]string{
 			"tag": tag,

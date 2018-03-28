@@ -21,6 +21,7 @@ type index struct {
 	docs        documents            // Parsed documents belonging to index.
 	tagdocs     map[string]documents // Partitions indexed documents by tag.
 	slugs       map[string]string    // Slugified tags.
+	primary     bool                 // True if this is a primary index.
 }
 
 type indexes []index
@@ -73,16 +74,26 @@ func newIndexes(proj *project) (indexes, error) {
 		}
 		return nil
 	})
+	// Assign primary indexes.
+	for i, idx1 := range idxs {
+		idxs[i].primary = true
+		for _, idx2 := range idxs {
+			if pathIsInDir(idx1.templateDir, idx2.templateDir) {
+				idxs[i].primary = false
+			}
+		}
+	}
 	return idxs, err
 }
 
-// Add document to all indexes that it belongs to.
+// Add document to all indexes that it belongs to. Assign the document's primary
+// index.
 func (idxs indexes) addDocument(doc *document) {
 	for i, idx := range idxs {
 		if pathIsInDir(doc.templatepath, idx.templateDir) {
 			idxs[i].docs = append(idx.docs, doc)
-			if doc.rootIndex == nil {
-				doc.rootIndex = &idxs[i]
+			if idx.primary {
+				doc.primaryIndex = &idxs[i]
 			}
 		}
 	}
