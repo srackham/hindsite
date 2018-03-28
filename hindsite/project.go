@@ -35,18 +35,23 @@ func newProject() project {
 	return project{}
 }
 
-// verbose prints a message if `-v` verbose option was specified.
-func (proj *project) verbose(message string) {
-	if proj.verbosity >= 1 {
+// verbose prints a message if `-v` option verbosity is equal to or greater than
+// verbosity.
+func (proj *project) println(verbosity int, message string) {
+	if proj.verbosity >= verbosity {
+		message = strings.Replace(message, proj.projectDir+string(filepath.Separator), "", -1)
 		fmt.Println(message)
 	}
 }
 
+// verbose prints a message if `-v` verbose option was specified.
+func (proj *project) verbose(message string) {
+	proj.println(1, message)
+}
+
 // verbose2 prints a message if the `-v` verbose option was specified more than one.
 func (proj *project) verbose2(message string) {
-	if proj.verbosity >= 2 {
-		fmt.Println(message)
-	}
+	proj.println(2, message)
 }
 
 // parseArgs parses the hindsite command-line arguments.
