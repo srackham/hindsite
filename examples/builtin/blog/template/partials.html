@@ -7,7 +7,7 @@
 <link type="text/css" rel="stylesheet" href="{{.site.urlprefix}}/main.css">
 </head>
 <body>
-<div class="banner index">
+<div class="banner no-print">
   <a href="{{.site.urlprefix}}/index.html">srackham | blog</a>
 </div>
 <ul class="menu no-print">
@@ -22,46 +22,38 @@
 
 {{define "footer"}}
     </div>
-    </div>
+</div>
 </body>
 </html>
 {{end}}
 
 {{define "doctags"}}
-<span class="tags">
+<span class="doctags">
     {{range .}}
     ・ <a href="{{.url}}">{{.tag}}</a>
     {{end}}
 </span>
 {{end}}
 
-{{define "docbody"}}
-    <p>
-        <strong>Published:</strong> {{.longdate}}<br>
-        <strong>Tags:</strong> {{template "doctags" .tags}}<br>
-        <strong>Author:</strong> {{.author}}<br>
-        <strong>Prev:</strong> <a href="{{.prev.url}}">{{.prev.title}}</a><br>
-        <strong>Next:</strong> <a href="{{.next.url}}">{{.next.title}}</a>
-    </p>
-    {{.body}}
-{{end}}
-
-{{define "doclist"}}
-    <ul>
-        {{range .}}
-        <li>
-            <strong>Title:</strong> <a href="{{.url}}">{{.title}}</a><br>
-            <strong>Date:</strong> {{.longdate}}<br>
-            <strong>Tags:</strong> {{template "doctags" .tags}}<br>
-            <!-- <strong>Synopsis:</strong> {{.synopsis}}<br> -->
-            <br>
-        </li>
+{{define "docsfooter"}}
+<div class="docsfooter">
+    <span class="left">
+        « <a href="{{.first.url}}">First</a>
+        &nbsp;&nbsp;
+        {{if .prev.url}}
+        « <a href="{{.prev.url}}">Newer</a>
+        {{else}}
+        <span class="disabled">« Newer</span>
         {{end}}
-    </ul>
-{{end}}
-
-{{define "pagefooter"}}
-    <strong>Page:</strong> {{.number}} of {{.last.number}}<br>
-    <strong>Prev:</strong> <a href="{{.prev.url}}">{{.prev.number}}</a><br>
-    <strong>Next:</strong> <a href="{{.next.url}}">{{.next.number}}</a><br>
+    </span>
+    <span class="right">
+        {{if .next.url}}
+        <a href="{{.next.url}}">Older</a> »
+        {{else}}
+        <span class="disabled">Older »</span>
+        {{end}}
+        &nbsp;&nbsp;
+        <a href="{{.last.url}}">Last</a> »
+    </span>
+</div>
 {{end}}

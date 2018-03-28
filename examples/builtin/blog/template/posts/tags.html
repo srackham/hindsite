@@ -1,6 +1,8 @@
 {{template "header" .}}
 <h1>Tags</h1>
-{{range .tags}}
-・ <a href="{{.url}}">{{.tag}} ({{.count}})</a>
-{{end}}
+<span class="tagslist">
+    {{range .tags}}
+    ・ <a href="{{.url}}">{{.tag}} ({{.count}})</a>
+    {{end}}
+</span>
 {{template "footer" .}}

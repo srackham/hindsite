@@ -1,4 +1,6 @@
 {{template "header" .}}
 <h1>{{.title}}</h1>
-{{template "docbody" .}}
+<h4>{{.longdate}}</h4>
+{{.body}}
+{{template "docsfooter" .}}
 {{template "footer" .}}

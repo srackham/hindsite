@@ -1,9 +1,10 @@
 :root {
     --primary-color: #ac4142;
+    --primary-background: white;
     --lighter-primary: #af5254;
     --text-color: #333333;
     --link-color: #428bca;
-    --primary-background: white;
+    --disabled-color: gray;
     --serif-font: "PT Serif", Georgia, "Times New Roman", serif;
     --sans-font: "PT Sans", Helvetica, Arial, sans-serif;
     --mono-font: Consolas, "Andale Mono", Monaco, monospace;
@@ -246,7 +247,9 @@ ul > li {
 #article {
     padding-top: 1px;
 }
+
 .menu {
+    font-family: var(--sans-font);
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -271,24 +274,38 @@ ul > li {
 .menu li a:hover {
     background-color: var(--lighter-primary);
 }
+
 .banner {
+    font-family: var(--sans-font);
     margin-bottom: 2px;
-    color: var(--primary-color);
     padding: 5px 40px;
     font-size: 24px;
-    /* font-weight: bold; */
 }
-.banner, .menu {
-    font-family: var(--sans-font);
-}
-.index h2 {
-    border: 0;
-}
-.index a {
+.banner a {
     color: var(--primary-color);
 }
-.tags a {
-    color: var(--link-color);
+
+.docslist h2 {
+    border: 0;
+}
+.docslist h2 a {
+    color: var(--primary-color);
+}
+
+.docsfooter {
+    border-top: var(--border);
+    padding: 3px;
+}
+.docsfooter a {
+    color: var(--primary-color);
+}
+
+.tagslist a:visited {
+    color: var(--primary-color);
+}
+
+.disabled {
+    color: var(--disabled-color);
 }
 .clear {
     clear: both;
