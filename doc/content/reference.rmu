@@ -206,7 +206,7 @@ one primary index.
 **tag**: A keyword or phrase used to categorize a content document.
 
 **tag index**: Indexed document tags can be used to generate a tag index along
-with per tag document indexes. I usually makes sense to confine tag indexes to
+with per tag document indexes. It usually makes sense to confine tag indexes to
 primary indexes.
 
 
@@ -399,6 +399,37 @@ All templates have access to site variables.
 .site.urlprefix        root configuration urlprefix
 ```
 
+### User variables
+All templates have access to user defined configuration file variables.
+
+For example, these `config.toml` configuration file entries:
+
+```
+[user]
+banner = "News & Views"
+byline = "Ac eros etiam enim pellentesque proin"
+
+```
+
+Or these `config.yaml` file entries:
+
+```
+user:
+  banner: News & Views
+  byline: Ac eros etiam enim pellentesque proin, tincidunt augue
+```
+
+Are available as these template variables:
+
+```
+.user.banner
+.user.byline
+
+```
+
+User template variables are subject to all the normal configuration file precedence and merging
+rules.
+
 ### Document template variables
 These variables relate to a single document. They are rendered by the
 corresponding `layout.html` template.
@@ -414,10 +445,12 @@ corresponding `layout.html` template.
 .addendum            rendered addendum HTML
 .slug
 .url
+.tags                an iterable list of per-tag .tag and .url variables
 .body                rendered content HTML
-.prev                document template variable for previous document
-.next                document template variable for next document
+.next                contains .url of next document (1)
+.prev                contains .url of previous document (1)
 ```
+(1) Indexed documents only.
 
 ### Document index template variables
 These variables relate to the collection of documents belonging to a document
@@ -431,10 +464,10 @@ and last document index page.
 .tag                 tag name (tag index pages only)
 .page.number         current page number
 .page.url            current page URL
-.page.prev           .number an .url of previous document
-.page.next           .number an .url of next document
-.page.first          .number an .url of first document
-.page.last           .number an .url of last document
+.page.prev           .number and .url of previous document
+.page.next           .number and .url of next document
+.page.first          .number and .url of first document
+.page.last           .number and .url of last document
 ```
 
 ### Tags index page template variables
@@ -675,7 +708,7 @@ hindsite -h | --help | help
 - `CONTENT_DIR` defaults to `content`
 - `BUILD_DIR` defaults to `build`
 - `TEMPLATE_DIR` defaults to `template`
-- All commands support the `-v` (verbose) option).
+- The `-v` (verbose) increases the verbosity. Specify it twice for even more information.
 
 ### Init command
 Creates new project content directory from an existing template directory.
