@@ -49,7 +49,8 @@ func (proj *project) verbose(message string) {
 	proj.println(1, message)
 }
 
-// verbose2 prints a message if the `-v` verbose option was specified more than one.
+// verbose2 prints a message if the `-v` verbose option was specified more than
+// once.
 func (proj *project) verbose2(message string) {
 	proj.println(2, message)
 }
@@ -326,26 +327,32 @@ func (proj *project) build() error {
 		}
 	}
 	proj.tmpls = newTemplates(proj.templateDir)
-	var confMod time.Time // The most recent date a change was made to a configuration file or a template file.
+	// confMod records the most recent date a change was made to a configuration file or a template file.
+	var confMod time.Time
+	updateConfMod := func(info os.FileInfo) {
+		if isOlder(confMod, info.ModTime()) {
+			confMod = info.ModTime()
+		}
+	}
 	// Copy static files from template directory to build directory and parse all template files.
 	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
+			return err
+		}
+		if exclude, err := proj.exclude(info); exclude {
+			proj.verbose("exclude: " + f)
 			return err
 		}
 		if !info.IsDir() {
 			switch filepath.Ext(f) {
 			case ".toml", ".yaml":
 				// Skip configuration file.
-				if isOlder(confMod, info.ModTime()) {
-					confMod = info.ModTime()
-				}
+				updateConfMod(info)
 			case ".md", ".rmu":
 				// Skip example.
 			case ".html":
 				// Compile template.
-				if isOlder(confMod, info.ModTime()) {
-					confMod = info.ModTime()
-				}
+				updateConfMod(info)
 				proj.verbose("parse template: " + f)
 				err = proj.tmpls.add(f)
 			default:
@@ -357,18 +364,15 @@ func (proj *project) build() error {
 	if err != nil {
 		return err
 	}
-	// Parse content documents and copy static files to the build directory.
+	// Parse content directory documents and copy static files to the build directory.
 	docs := documents{}
 	err = filepath.Walk(proj.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if proj.exclude(info) {
+		if exclude, err := proj.exclude(info); exclude {
 			proj.verbose("exclude: " + f)
-			if info.IsDir() {
-				return filepath.SkipDir
-			}
-			return nil
+			return err
 		}
 		if !info.IsDir() {
 			switch filepath.Ext(f) {
@@ -385,11 +389,7 @@ func (proj *project) build() error {
 				docs = append(docs, &doc)
 			case ".toml", ".yaml":
 				// Skip configuration file.
-				if isOlder(confMod, info.ModTime()) {
-					confMod = info.ModTime()
-				}
-			case ".html":
-				err = proj.copyStaticFile(f, proj.contentDir, proj.buildDir)
+				updateConfMod(info)
 			default:
 				err = proj.copyStaticFile(f, proj.contentDir, proj.buildDir)
 			}
@@ -426,8 +426,8 @@ func (proj *project) build() error {
 		proj.verbose("write document: " + doc.buildpath)
 		proj.verbose2(doc.String())
 	}
+	// Install home page.
 	if proj.rootConf.homepage != "" {
-		// Install home page.
 		src := proj.rootConf.homepage
 		dst := filepath.Join(proj.buildDir, "index.html")
 		if !fileExists(src) {
@@ -498,17 +498,20 @@ func (proj *project) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
 }
 
 // exclude returns true if a file should be excluded from processing.
-func (proj *project) exclude(info os.FileInfo) bool {
+// The error is either nil or filepath.SkipDir.
+func (proj *project) exclude(info os.FileInfo) (bool, error) {
 	for _, pat := range proj.rootConf.exclude {
 		if info.IsDir() && strings.HasSuffix(pat, "/") {
 			pat = strings.TrimSuffix(pat, "/")
 		}
-		result, _ := filepath.Match(pat, info.Name())
-		if result {
-			return true
+		if match, _ := filepath.Match(pat, info.Name()); match {
+			if info.IsDir() {
+				return true, filepath.SkipDir
+			}
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
 }
 
 // data returns project global template variables.
@@ -546,6 +549,6 @@ func (proj *project) serve() error {
 		})
 	}
 	http.Handle("/", stripPrefix(proj.rootConf.urlprefix, http.FileServer(http.Dir(proj.buildDir))))
-	fmt.Printf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port)
+	proj.println(0, fmt.Sprintf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port))
 	return http.ListenAndServe(":"+proj.port, nil)
 }
