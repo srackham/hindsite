@@ -77,7 +77,16 @@ func (proj *project) parseArgs(args []string) error {
 			if !isCommand(opt) {
 				return fmt.Errorf("illegal command: %s", opt)
 			}
+			if len(args) == 2 && opt != "help" {
+				return fmt.Errorf("project directory not specifed")
+			}
 			proj.command = opt
+		case i == 2:
+			if proj.command == "help" {
+				proj.topic = opt
+			} else {
+				proj.projectDir = opt
+			}
 		case opt == "-drafts":
 			proj.drafts = true
 		case opt == "-clean":
@@ -104,15 +113,6 @@ func (proj *project) parseArgs(args []string) error {
 				panic("illegal arugment: " + opt)
 			}
 			skip = true
-		case i == 2:
-			if opt[0] == '-' {
-				return fmt.Errorf("illegal option: %s", opt)
-			}
-			if proj.command == "help" {
-				proj.topic = opt
-			} else {
-				proj.projectDir = opt
-			}
 		default:
 			return fmt.Errorf("illegal option: %s", opt)
 		}
@@ -282,9 +282,9 @@ func (proj *project) help() {
 
 Usage:
 
-    hindsite init  [PROJECT_DIR] [OPTIONS]
-    hindsite build [PROJECT_DIR] [OPTIONS]
-    hindsite serve [PROJECT_DIR] [OPTIONS]
+    hindsite init  PROJECT_DIR [OPTIONS]
+    hindsite build PROJECT_DIR [OPTIONS]
+    hindsite serve PROJECT_DIR [OPTIONS]
     hindsite help  [TOPIC]
 
 The commands are:
