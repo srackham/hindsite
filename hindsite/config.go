@@ -27,6 +27,7 @@ type config struct {
 	shortdate  string
 	mediumdate string
 	longdate   string
+	user       map[string]string // User defined configuration key/values.
 }
 
 type configs []config
@@ -38,6 +39,7 @@ func newConfig() config {
 		shortdate:  "2006-01-02",
 		mediumdate: "2-Jan-2006",
 		longdate:   "Mon Jan 2, 2006",
+		user:       map[string]string{},
 	}
 	conf.timezone, _ = time.LoadLocation("Local")
 	return conf
@@ -59,6 +61,7 @@ func (conf *config) parseFile(proj *project, f string) error {
 		ShortDate  string
 		MediumDate string
 		LongDate   string
+		User       map[string]string
 	}{}
 	switch filepath.Ext(f) {
 	case ".toml":
@@ -117,6 +120,9 @@ func (conf *config) parseFile(proj *project, f string) error {
 	if cf.LongDate != "" {
 		conf.longdate = cf.LongDate
 	}
+	if cf.User != nil {
+		conf.user = cf.User
+	}
 	return nil
 }
 
@@ -132,6 +138,7 @@ func (conf *config) data() templateData {
 	data["shortdate"] = conf.shortdate
 	data["mediumdate"] = conf.mediumdate
 	data["longdate"] = conf.longdate
+	data["user"] = conf.user
 	return data
 }
 
@@ -222,6 +229,9 @@ func (conf *config) merge(from config) {
 	}
 	if from.longdate != "" {
 		conf.longdate = from.longdate
+	}
+	for k, v := range from.user {
+		conf.user[k] = v
 	}
 }
 

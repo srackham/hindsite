@@ -513,9 +513,10 @@ func (proj *project) exclude(info os.FileInfo) bool {
 
 // data returns project global template variables.
 func (proj *project) data() templateData {
-	return templateData{"site": templateData{
-		"urlprefix": proj.rootConf.urlprefix,
-	}}
+	return templateData{
+		"site": templateData{"urlprefix": proj.rootConf.urlprefix},
+		"user": proj.rootConf.user,
+	}
 }
 
 // serve implements the serve comand.
