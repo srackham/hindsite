@@ -436,7 +436,7 @@ corresponding `layout.html` template.
 
 ```
 .title
-.date (alias for mediumdate)
+.date                alias for mediumdate
 .shortdate
 .mediumdate
 .longdate
@@ -512,8 +512,7 @@ Example `config.toml` file:
 # Set to -1 to to include all documents in a single page.
 #paginate = 5
 
-# A `|` separated list of content directory file and directory names that
-# should not be processed (wildcards allowed). Directory names end in a slash.
+# A `|` separated list of paths in the content directory that should not be processed (wildcards allowed).
 #exclude = "config.rmu|main/"
 
 # Default document author.
@@ -623,17 +622,20 @@ images) are copied verbatim to the corresponding location in the build directory
 by the build command. The content directory is processed after the template
 directory.
 
-### Static file exclusion
+### File exclusion
 The `config.{toml,yaml}` configuration file `exclude` value is a `|` separated
-list of file names to be excluded (wildcards allowed). Static files that match
-these files names are not copied to the build directory. The `exclude` file
-names can contain wildcards conforming to the Go [filepath.Match()
-function](https://golang.org/pkg/path/filepath/#Match). To exclude entire
-directories specify a directory path relative to the content or templates
-directories ending with a slash character.
+string of path directory names (wildcards allowed). Matching file and directory
+paths in the content directory are excluded from all processing.
 
-NOTE: I think we should extend `exclude` to all files, it's more general and
-simpler to understand.
+- The path names are relative to the content directory.
+- The `exclude` path names can contain wildcards conforming to the Go
+  [filepath.Match() function](https://golang.org/pkg/path/filepath/#Match).
+  Note: the `*` wildcard character _does not_ match path separators e.g.
+  `*.out` matches all `.out` files in the content root, not subdirectories.
+
+TOML example:
+
+    exclude = "config.rmu|docs"
 
 
 ## Content document markup
@@ -656,9 +658,9 @@ Hindsite is a static website generator.
 
 Usage:
 
-    hindsite init  [PROJECT_DIR] [OPTIONS]
-    hindsite build [PROJECT_DIR] [OPTIONS]
-    hindsite serve [PROJECT_DIR] [OPTIONS]
+    hindsite init  PROJECT_DIR [OPTIONS]
+    hindsite build PROJECT_DIR [OPTIONS]
+    hindsite serve PROJECT_DIR [OPTIONS]
     hindsite help  [TOPIC]
 
 The commands are:
@@ -698,10 +700,6 @@ Usage:
 
 
 
-hindsite init [-builtin NAME] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR]
-hindsite build [-clean] [-drafts] [-project PROJECT_DIR] [-template TEMPLATE_DIR] [-content CONTENT_DIR] [-build BUILD_DIR]
-hindsite serve [-port PORT] [-project PROJECT_DIR] [-build BUILD_DIR]
-hindsite -h | --help | help
 
 ```
 - `PROJECT_DIR` defaults to `.`
@@ -721,50 +719,33 @@ Creates new project content directory from an existing template directory.
 
 
 ### Build command
-Build static website from content and template directories.
+Build a static website from content and template directories.
 
 - Include draft pages if the `-drafts` option is specified.
 - If the `-clean` option is specified the the entire contents of the build
-  directory is deleted, forcing all files to be rebuilt. By default, only new
-  and updated documents or documents whose layout template has been modified are
-  processed.
-
-Build sequence:
-
-- Check for pathalogical content, template and build directories overlap.
-- Check that all directory paths and content document file names are slugified.
-- Check configuration file validity.
-- Delete contents of build directory (`-clean` build option).
-- Copy static files from template to build directory.
-  files).
-- Copy static files from content to build directory (content directory files
-  take precedence).
-- Process all content documents.
-- Process each indexed directory generating index web pages.
-
-Corner-case examples:
-
-```
-# Template and content in ./docs output to ./build
-hindsite build -content docs -template docs
-
-# Template and content in current directory, output to ./build
-hindsite build -content . -template .
-
-```
+  directory is deleted, forcing all files to be rebuilt.
+- By default an incremental build is performed.
 
 #### Incremental build
-Hindsite only rebuilds those documents and indexes that require updating.
-Incremental builds are faster and they also facilitate incremental deployment.
-Use the `-clean` build command option if you want to force a complete rebuild.
+An incremental build only rebuilds those documents and indexes that require
+updating. Incremental builds are faster and they also facilitate incremental
+deployment. An incremental rebuild is performed by default. The incremental
+rebuild rules are:
 
-A document is rebuilt if it has been modified since it was last built or if any
-project configuration or template file has been modified since it was last
-built.
+1. Rebuild everything if a configuration file or a template file has changed.
+2. Rebuild indexes that contain one or more new or modified documents.
+3. Rebuild documents if they have been modifed since they were last rendered.
 
-An index file is rebuilt if any contributing documents been modified since it
-was last built or if any project configuration or template file has been
-modified since it was last built.
+Incremental rebuild anomolies:
+
+1. Files in the build directory that are no longer used are not automatically
+   deleted.
+2. If an indexed document is deleted from the content directory it will remain
+   in the generated indexes until they are next rebuilt.
+3. Any changes  that influence document generation that are not monitored by the
+   incremental build rules will not trigger an incremental rebuld.
+
+Incremental build anomolies can be rectified with a clean build.
 
 ### Serve command
 the _serve_ command opens a development server on the `BUILD_DIR` directory.
@@ -798,24 +779,6 @@ See:
 
 - https://www.ietf.org/rfc/rfc3339.txt
 - https://golang.org/pkg/time/
-
-
-## Automatic rebuild and browser reload
-Use a file watcher program (e.g. [entr(1)](http://entrproject.org/)) in
-conjunction with a browser reload application (e.g. the Chrome
-[LivePage](https://chrome.google.com/webstore/detail/livepage/pilnojpmdoofaelbinaeodfpjheijkbh)
-extension). 
-
-The following example starts the hindsite development server then uses
-[entr(1)](http://entrproject.org/)) to watch all files in the content and
-template directories:
-
-    $ hindsite serve &
-    $ (find content && find template) | entr hindsite build
-
-**NOTE**: When navigating back to another page it does not appear updated
-despite the fact that the server is receiving LivePage requests and you have to
-manually refreshing the browser.
 
 
 

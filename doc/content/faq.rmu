@@ -1,32 +1,48 @@
 # Hindsite FAQ
 
 
-## Tag links dicotomy
-Why do tag links take you to tagged documents in the current index when clicked
-on the tags index but take you to the tagged documents in the primary index when
-clicked on a document.
-
-This is because there is only one copy of the rendered document.
+### I want a non-paginated document index
+Set the `paginate` configuration parameter to `-1` and all indexed documents
+will appear on the first page.
 
 
-### I want a single page document index
-Set the `paginate` configuration parameter to `-1`.
-
-
-### I want a single page document index plus a paginated document index 
+### I want both paginated and non-pagninated document indexes
 Create a parent index with the `paginate` configuration parameter set to `-1`.
+For example:
 
 ```
 templates/
-    docs.html       # Single-page document index template.
+    docs.html       # Non-paginated (single-page) document index template.
     config.toml     # paginate = -1
     paginated/
         docs.html   # Paginated document index template.
 ```
-Each index has it's own page template. This technique could be extended to
-create multiple additional indexes over the on document set.
+Each index has it's own page template. This technique can be extended to create
+multiple additional indexes over a the same indexed document set.
 
 
 ### I don't like file name extensions in URLs how can I remove them
 Web servers can be configured to do this, see
 https://stackoverflow.com/questions/5730092/how-to-remove-html-from-url
+
+
+## Automatic rebuild and browser reload
+When editing document source files it's nice to have the output update
+automatically in your Web browser.
+
+Use a file watcher program (e.g. [entr(1)](http://entrproject.org/)) in
+conjunction with a browser reload application (e.g. the Chrome
+[LivePage](https://chrome.google.com/webstore/detail/livepage/pilnojpmdoofaelbinaeodfpjheijkbh)
+extension). 
+
+The following example starts the hindsite development server then uses
+[entr(1)](http://entrproject.org/)) to watch all files in the content and
+template directories:
+
+    $ hindsite serve &
+    $ (find content && find template) | entr hindsite build
+
+**NOTE**: When navigating back to another page it does not appear updated
+despite the fact that the server is receiving LivePage requests and you have to
+manually refreshing the browser.
+
