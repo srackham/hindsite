@@ -339,10 +339,6 @@ func (proj *project) build() error {
 		if err != nil {
 			return err
 		}
-		if exclude, err := proj.exclude(info); exclude {
-			proj.verbose("exclude: " + f)
-			return err
-		}
 		if !info.IsDir() {
 			switch filepath.Ext(f) {
 			case ".toml", ".yaml":
@@ -370,9 +366,13 @@ func (proj *project) build() error {
 		if err != nil {
 			return err
 		}
-		if exclude, err := proj.exclude(info); exclude {
+		rel, _ := filepath.Rel(proj.contentDir, f)
+		if proj.exclude(rel) {
 			proj.verbose("exclude: " + f)
-			return err
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
 		}
 		if !info.IsDir() {
 			switch filepath.Ext(f) {
@@ -497,21 +497,14 @@ func (proj *project) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
 	return nil
 }
 
-// exclude returns true if a file should be excluded from processing.
-// The error is either nil or filepath.SkipDir.
-func (proj *project) exclude(info os.FileInfo) (bool, error) {
+// exclude returns true if path name f matches a configuration exclude path.
+func (proj *project) exclude(f string) bool {
 	for _, pat := range proj.rootConf.exclude {
-		if info.IsDir() && strings.HasSuffix(pat, "/") {
-			pat = strings.TrimSuffix(pat, "/")
-		}
-		if match, _ := filepath.Match(pat, info.Name()); match {
-			if info.IsDir() {
-				return true, filepath.SkipDir
-			}
-			return true, nil
+		if matched, _ := filepath.Match(pat, f); matched {
+			return true
 		}
 	}
-	return false, nil
+	return false
 }
 
 // data returns project global template variables.
