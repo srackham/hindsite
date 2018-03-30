@@ -311,6 +311,7 @@ The options are:
 
 // build implements the build command.
 func (proj *project) build() error {
+	startTime := time.Now()
 	if err := proj.parseConfigs(); err != nil {
 		return err
 	}
@@ -359,6 +360,8 @@ func (proj *project) build() error {
 		return err
 	}
 	// Parse content directory documents and copy static files to the build directory.
+	draftsCount := 0
+	docsCount := 0
 	docs := documents{}
 	err = filepath.Walk(proj.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -375,12 +378,14 @@ func (proj *project) build() error {
 		if !info.IsDir() {
 			switch filepath.Ext(f) {
 			case ".md", ".rmu":
+				docsCount++
 				// Parse document.
 				doc, err := newDocument(f, proj)
 				if err != nil {
 					return err
 				}
 				if doc.draft && !proj.drafts {
+					draftsCount++
 					proj.verbose("skip draft: " + f)
 					return nil
 				}
@@ -397,6 +402,7 @@ func (proj *project) build() error {
 	if err != nil {
 		return err
 	}
+	// Build indexes.
 	idxs, err := newIndexes(proj)
 	if err != nil {
 		return err
@@ -439,6 +445,10 @@ func (proj *project) build() error {
 			}
 		}
 	}
+	// Print summary.
+	fmt.Printf("\ndocuments: %d\n", docsCount)
+	fmt.Printf("drafts: %d\n", draftsCount)
+	fmt.Printf("time: %.2fs\n", time.Now().Sub(startTime).Seconds())
 	return nil
 }
 
