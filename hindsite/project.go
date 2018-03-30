@@ -257,18 +257,20 @@ func (proj *project) init() error {
 			return err
 		}
 		if info.IsDir() {
-			proj.verbose("make directory:   " + dst)
+			proj.verbose("make directory: " + dst)
 			err = mkMissingDir(dst)
 		} else {
-			// Copy example documents to content directory.
+			// Copy static files and example documents to content directory.
 			switch filepath.Ext(f) {
-			case ".md", ".rmu":
-				proj.verbose("copy example: " + f)
+			case ".html", ".toml", ".yaml":
+				// Skip templates and configuration files.
+			default:
+				proj.verbose2("copy content: " + f)
 				err = copyFile(f, dst)
 				if err != nil {
 					return err
 				}
-				proj.verbose("write:        " + dst)
+				proj.verbose("write: " + dst)
 			}
 		}
 		return err
@@ -334,7 +336,7 @@ func (proj *project) build() error {
 			confMod = info.ModTime()
 		}
 	}
-	// Copy static files from template directory to build directory and parse all template files.
+	// Parse all template files.
 	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -344,15 +346,11 @@ func (proj *project) build() error {
 			case ".toml", ".yaml":
 				// Skip configuration file.
 				updateConfMod(info)
-			case ".md", ".rmu":
-				// Skip example.
 			case ".html":
 				// Compile template.
 				updateConfMod(info)
 				proj.verbose("parse template: " + f)
 				err = proj.tmpls.add(f)
-			default:
-				err = proj.copyStaticFile(f, proj.templateDir, proj.buildDir)
 			}
 		}
 		return err

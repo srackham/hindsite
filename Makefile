@@ -14,7 +14,11 @@ GOFLAGS ?=
 BINDATA_FILES = $(shell find ./examples/builtin/minimal/template) $(shell find ./examples/builtin/blog/template)
 
 ./hindsite/bindata.go: $(BINDATA_FILES)
-	cd ./hindsite && go-bindata -prefix ../examples/builtin/ -ignore '/(build|content)/' ../examples/builtin/...
+	cd examples/builtin/blog
+	cp content/main.css template/
+	cd -
+	cd ./hindsite
+	go-bindata -prefix ../examples/builtin/ -ignore '/(build|content)/' ../examples/builtin/...
 
 .PHONY: bindata
 bindata: ./hindsite/bindata.go
