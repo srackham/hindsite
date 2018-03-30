@@ -47,33 +47,28 @@ type documents []*document
 
 // Parse document content and front matter.
 func newDocument(contentfile string, proj *project) (document, error) {
+	if !pathIsInDir(contentfile, proj.contentDir) {
+		panic("document is outside content directory: " + contentfile)
+	}
+	if !fileExists(contentfile) {
+		panic("missing document: " + contentfile)
+	}
 	doc := document{}
 	doc.proj = proj
-	if !fileExists(contentfile) {
-		return doc, fmt.Errorf("missing document: %s", contentfile)
-	}
 	info, err := os.Stat(contentfile)
 	if err != nil {
 		return doc, err
 	}
 	doc.modified = info.ModTime()
 	doc.contentpath = contentfile
-	// Synthesis title, url, draft front matter from content document file name.
-	doc.title = fileName(contentfile)
-	if doc.title[0] == '~' {
-		doc.draft = true
-		doc.title = doc.title[1:]
-	}
-	p, err := filepath.Rel(proj.contentDir, doc.contentpath)
-	if err != nil {
-		return doc, err
-	}
-	p = filepath.Dir(p)
-	p = filepath.Join(p, doc.title+".html")
+	p, _ := filepath.Rel(proj.contentDir, doc.contentpath)
+	p = replaceExt(p, ".html")
 	doc.buildpath = filepath.Join(proj.buildDir, p)
 	doc.templatepath = filepath.Join(proj.templateDir, p)
 	doc.conf = proj.configFor(filepath.Dir(doc.contentpath), filepath.Dir(doc.templatepath))
 	doc.url = path.Join("/", doc.conf.urlprefix, filepath.ToSlash(p))
+	// Extract title and date from file name.
+	doc.title = fileName(contentfile)
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		d, err := parseDate(doc.title[0:10], nil)
 		if err != nil {
@@ -89,17 +84,16 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	if err != nil {
 		return doc, err
 	}
-	err = doc.extractFrontMatter()
-	if err != nil {
+	if err := doc.extractFrontMatter(); err != nil {
 		return doc, err
 	}
-	// If necessary change output file names to match document slug variable.
 	if doc.slug != "" {
+		// Change output file names to match document slug variable.
 		doc.buildpath = filepath.Join(filepath.Dir(doc.buildpath), doc.slug+".html")
 		doc.url = path.Join(path.Dir(doc.url), doc.slug+".html")
 	}
 	if doc.layout == "" {
-		// Find nearest document layout template.
+		// Find nearest document layout template file.
 		layout := ""
 		for _, tmpl := range proj.tmpls.layouts {
 			if len(tmpl) > len(layout) && pathIsInDir(doc.templatepath, filepath.Dir(tmpl)) {

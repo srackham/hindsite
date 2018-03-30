@@ -236,8 +236,8 @@ func (conf *config) merge(from config) {
 }
 
 // Merge configuration files that lie in the contentDir and templateDir
-// directory paths. Process files in the templateDir (working from top (lowest
-// precedence) to bottom) then process files in the contentDir (working top to
+// directory paths. Merge files in the templateDir (working from top (lowest
+// precedence) to bottom) then Merge files in the contentDir (working top to
 // bottom (highest precedence)). The `proj.confs` have been sorted by
 // configuration `origin` in ascending order to ensure the directory heirarchy
 // precedence.
