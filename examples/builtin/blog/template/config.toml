@@ -1,6 +1,5 @@
 homepage = "indexes/posts/docs-1.html"
 longdate = "Jan 2, 2006"
-exclude = "README"
 
 [user]
 banner = "hindsite | blog"
