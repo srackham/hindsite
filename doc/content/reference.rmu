@@ -2,42 +2,150 @@
 
 Notes for yet another static website generator build with Go.
 
-**Q**: Why?
-
-**A**: I decided to start blogging again after a 3 year hiatus. I had been using
-Hugo but my old blog would not build with the latest version of Hugo. Time to
-debug! At first things when well, after renaming couple of template variable
-identifiers my site compiled without errors, but I soon discovered that the
-posts and categories indexes were missing. I dug deeper and all the while was
-nagged by the thought that for a simple blog the Hugo edifice was just way to
-complex. Armed with typical programmer hubris I fancied I could build my own
-generator, one that would be a doodle for mere mortals to learn and to use (and
-reuse). Good luck with that!
+## Overview
+Hindsite is a static website generator. It's easy to learn an use and very fast.
+It builds static websites with optional document and tag indexes (e.g. blogs
+posts, newsletters, articles) from Markdown source documents, templates and
+static resources.
 
 
-# Names
-hindsite (backup name hiatus).
-Github name `hindsite`.
+## Quick Start
+1. Download the Hindsite executable for your platform.
+
+2. Create a new Hindsite project directory and install the builtin blog
+   template:
+
+    mkdir myproj
+    cd myproj
+    hindsite init . -builtin blog
+
+3. Build the website:
+
+    hindsite build .
+
+4. Start the hindsite web server:
+
+    hindsite serve .
+
+5. Open your Web browser at http://localhost:1212
+
+To customise the website edit the project's Markdown documents (`.md` files in
+the `content` directory), templates (`.html` files in the `template` directory)
+and configuration files (`config.{toml,yaml}`).
+  
+If you are familar with Jekyll or Hugo you'll be right a home (hindsite can read
+Jekyll and Hugo Markdown documents).
 
 
-## Inspiration and resources
-- [Writing a Static Blog Generator in Go](https://zupzup.org/static-blog-generator-go/).
-- [How to code a markdown blogging system in Go](http://www.will3942.com/creating-blog-go).
-- [Jekyll](https://jekyllrb.com).
-- [Hugo](https://gohugo.io/).
-- [Introduction to Hugo templating](https://gohugo.io/templates/introduction/)
-- [Disqus comments](https://gohugo.io/content-management/comments/).
+## Design goals
+The overarching goal is a minimal cognative footprint i.e. easy to understand.
+This is achived by keeping the number of features and concepts to a minimum, in
+particular:
+
+- Structural transparency -- content, template and build directory trees
+  mirror each other as do source and built document locations.
+- Themes are not separate, every template directory is a theme.
+- One template language (Go templates).
+- Use TOML or YAML markup interchangably for configuration and front matter.
 
 
-## Domain
-Small static websites with optional indexed documents (blogs posts, newsletters, articles).
+## Projects
+## Documents
+### Front matter
+## Indexes
+## Common command options
+- `PROJECT_DIR`: the hindsite project directory.
+- `-content CONTENT_DIR`: the project content directory (defaults to `PROJECT_DIR/content`).
+- `-build BUILD_DIR`: the project build directory (defaults to `PROJECT_DIR/build`).
+- `-template TEMPLATE_DIR`: the project template directory (defaults to `PROJECT_DIR/template`).
+- `-v`: Increase verbosity.
 
+## help command
+Syntax:
 
-## Features
-- Easy to get up and running with built-in layouts: install ->
-  init -> build -> serve.
-- Supports multiple categories of indexed documents each with separate tag and
-  document indexes e.g. blog posts and newsletters.
+    hindsite help [TOPIC]
+
+- `TOPIC` is a hindsite command name.
+- `hindsite`, `hindsite -h` and `hindsite --help` are all aliases for `hindsite help`.
+
+## init command
+Syntax:
+
+    hindsite init  PROJECT_DIR [OPTIONS]
+
+Applicable options:
+
+    -content  CONTENT_DIR
+    -template TEMPLATE_DIR
+    -builtin  NAME
+    -v
+
+- `NAME` is a builtin template name viz. `blog` or `minimal`.
+
+## build command
+Build a static website from content and template directories. By default an
+incremental build is performed.
+
+Syntax:
+
+    hindsite build PROJECT_DIR [OPTIONS]
+
+Applicable options:
+
+    -content  CONTENT_DIR
+    -template TEMPLATE_DIR
+    -build    BUILD_DIR
+    -clean
+    -drafts
+    -v
+
+- Specify `-drafts` to include draft documents.
+- If the `-clean` option is specified the the entire contents of the build
+  directory is deleted, forcing all files to be rebuilt.
+
+#### Incremental build
+An incremental build only rebuilds those documents and indexes that require
+updating. Incremental builds are faster and they also facilitate incremental
+deployment. An incremental rebuild is performed by default. The incremental
+rebuild rules are:
+
+1. Rebuild everything if a configuration file or a template file has changed.
+2. Rebuild indexes that contain one or more new or modified documents since the
+   index was last built.
+3. Rebuild documents if they have been modified since they were last rendered.
+
+These rules are a compromise between performance and build integrity. If you are
+just adding and editing files (documents, templates, configuration and static
+files) incremental build integrity is assured, but there a few anomalies to be
+aware of:
+
+1. Files in the build directory that are no longer used are not automatically
+   deleted.
+2. If an indexed document is deleted from the content directory it will remain
+   in the generated indexes until the indexes are next rebuilt.
+3. Any changes that influence document generation and are not monitored by the
+   incremental build rules will not trigger an incremental rebuild.
+
+Incremental build anomalies are rectified by a clean build.
+
+## serve command
+Syntax:
+
+    hindsite build PROJECT_DIR [OPTIONS]
+
+Applicable options:
+
+    -build    BUILD_DIR
+    -port     PORT
+    -v
+
+- `PORT` is the server port number (defaults to 1212).
+
+## Templates
+## Template variables
+## Configuration files
+### Merging and precedence
+### Configuration parameters
 
 
 ## Hello hindsite
@@ -63,33 +171,6 @@ Hello *World*!
 <head><title>{{.title}}</title></head>
 <body>{{.body}}</body>
 ```
-
-## Design
-The overarching goal is a minimal cognative footprint i.e. easy to understand.
-This is especially important for casual users who may go months between website updates.
-
-A hindsite project consists of three directories:
-TODO
-
-- Hindsite textual content (Markdown files) is rendered with templates to
-  generate a static website.
-- Structural transparency: The content, template and build directory structures
-  match -- content and static resouces reside in the same relative locations.
-  Same directory model for content, template and build directories.
-- Structural flexibility: There are few restrictions on directory structure and
-  file locations.
-
-- Just tags: no taxonomies, no categories see [WordPress Categories vs Tags: How
-  Do I Use Them on My
-  Blog?](https://www.wpsitecare.com/wordpress-categories-vs-tags/).
-- No explicit slugs or permalinks.
-- Minimal explicit meta-data.
-- No [shortcodes](https://gohugo.io/content-management/shortcodes/) -- use Rimu macros.
-- No template functions just a set of template variables, see:
-  * https://jekyllrb.com/docs/variables/,
-  * https://gohugo.io/variables/).
-- No RSS -- hardly anyone even knows what it is anymore!
-
 
 ## Templates
 TODO
@@ -164,37 +245,36 @@ the template and content directories to generate a website which it writes to
 the build directory.
 
 **content directory**: A directory (default name `content`) containing content
-documents along with optional document meta-data (front matter) and optional
-static resources (e.g. images). The content directory structure mirrors that of
-the template directory.
+documents along with optional configuration files and optioinal static website
+files (e.g. images, CSS).
 
 **template directory**: A directory (default name `template`) containing webpage
-templates along with optional configuration files and static resources to build
-a website. The template directory is a blueprint, it contains everything needed
-to build a Website minus the textual content.
+templates plus optional configuration files and static website files. The
+template directory is a blueprint, it contains everything needed to build a
+Website. The template directory structure mirrors that of the content directory.
 
 **build directory**: A directory (default name `build`) into which the generated
 Website is written.
 
-**content document**: A readable-text markup file (`.{md,rmu}`) that generates the
-textual content of a corresponding HTML web page.
+**content document**: A readable-text markup file (`.{md,rmu}`) used to generate
+a corresponding HTML web page.
 
 **configuration file**: Optional TOML or YAML files `config.{toml,yaml}`
-containing configuration parameters located in the content
-template directories.
+containing configuration parameters located in the content and template
+directories.
 
-**template**: A Go HTML template file (`.html`). Templates reside in the template
-directory. Templates are combined with document content and meta-data to
-generate HTML document and index pages.
+**template file**: A Go HTML template file (`.html`). Templates reside in the
+template directory. A template file contains one or more named templates.
+Templates are combined with document content and meta-data to generate HTML
+document and index pages.
 
-**document templates**: Document templates (also called layout templates) are used to render content documents.
-TODO: Can be specified explicity by template name or ...
-Each content document has a template named `layout.html` in the corresponding
-template directory. If there is no `layout.html` in the corresponding template
-directory then the parent template directories are searched right up to the
-templates root directory.
+**document templates**: Each content document has a template named `layout.html`
+in the corresponding template directory. If there is no `layout.html` in the
+corresponding template directory then the parent template directories are
+searched right up to the templates root directory.
 
-**index templates**: Index templates are used to render document index web pages.
+**index templates**: Index templates (`{docs,tags}.html`) are used to render
+document index and tag index web pages.
 
 **index**: A generated HTML Webpage containing a list of content documents.
 
@@ -212,12 +292,9 @@ primary indexes.
 
 **static file**: A [static file](#static-files.html) is a file in the content or
 template directories that is not a document or a template or a configuration
-file.
-
-**example document**: A text markup document residing in the template directory.
-Example documents are are copied to the content directory when the project is
-initialized. This provides a mechanism for sharing your website design complete
-with example documents: just share your website template directory.
+file. Static files in the content directory are copied to the built website.
+Static file in the template directory are used by the `init` command to
+initialise a new content directory.
 
 **front matter**: Meta-data embedded at the start of content documents.
 
@@ -230,12 +307,14 @@ with example documents: just share your website template directory.
   paths. This lightens the congative load especially when it comes to authoring
   cross-page URLs.
 
-Website with blog and newsletters:
+Example website with blog and newsletters:
 
 ```
 content/
     config.toml
     config.rmu
+    CNAME
+    favicon.ico
     pages/
         index.md
         about.md
@@ -294,16 +373,8 @@ build/
             docs-1.html
 ```
 
-- Template files are preprocessed by the
-  Go template engine.
-
-/*
-  If a same-named `.toml` is present it will be injected into the template.
-  A `.toml` file with the same name as a directory is injected into all templates in the
-  directory e.g. `blog.toml` will be injected into all documents in the `blog` directory.
-*/
-
-## File and directory names
+## Best practices
+### File and directory names
 Content file and directory names should only contain lower case alpha numeric
 and hyphen characters. This is is mandatory and:
 
@@ -311,8 +382,7 @@ and hyphen characters. This is is mandatory and:
   characters.
 * Allows file names to map to reasonable document titles.
 
-
-## URLs
+### URLs
 Hindsite synthesizes document URLs for index page links. By default synthesized
 URLs are root-relative to the content directory. For example:
 
@@ -578,17 +648,14 @@ See:
 
 Implicit values (if the document does not contain a front matter header):
 
-- `title` defaults the document file name (sans drafts and date prefixes with
-  hyphens replaced by spaces). NOTE: decided not to extract first `h1` title as
-  that necessitates rendering the page first.
-- `date` defaults to file name `YYYY-MM-DD-` date prefix e.g.
-  `2018-02-14-newsletter.md`.
+- `date` is extracted from the file name `YYYY-MM-DD-` date prefix.
+- `title` defaults the document file name with date prefix removed,
+  hyphens replaced by spaces and converted to title case.
 - `author` defaults to the configuration file value, failing that, blank.
-- `synopsis` defaults to the content up to the `<!--more-->` tag or blank if
+- `synopsis` defaults to the content up to the first `<!--more-->` tag or blank if
   there is no tag. Processed as markup.
 - `addendum` (a general purpose content field) defaults to blank. Processed as markup.
-- `draft` is true if the first letter of the content file name is a tilda (this
-  overrides the front matter `drafts` variable).
+- `draft` defaults to false.
 
 
 ## Projects
@@ -624,8 +691,8 @@ directory.
 
 ### File exclusion
 The `config.{toml,yaml}` configuration file `exclude` value is a `|` separated
-string of path directory names (wildcards allowed). Matching file and directory
-paths in the content directory are excluded from all processing.
+string of content directory path directory names that are excluded from all
+processing.
 
 - The path names are relative to the content directory.
 - The `exclude` path names can contain wildcards conforming to the Go
@@ -719,34 +786,6 @@ Creates new project content directory from an existing template directory.
 
 
 ### Build command
-Build a static website from content and template directories.
-
-- Include draft pages if the `-drafts` option is specified.
-- If the `-clean` option is specified the the entire contents of the build
-  directory is deleted, forcing all files to be rebuilt.
-- By default an incremental build is performed.
-
-#### Incremental build
-An incremental build only rebuilds those documents and indexes that require
-updating. Incremental builds are faster and they also facilitate incremental
-deployment. An incremental rebuild is performed by default. The incremental
-rebuild rules are:
-
-1. Rebuild everything if a configuration file or a template file has changed.
-2. Rebuild indexes that contain one or more new or modified documents.
-3. Rebuild documents if they have been modifed since they were last rendered.
-
-Incremental rebuild anomolies:
-
-1. Files in the build directory that are no longer used are not automatically
-   deleted.
-2. If an indexed document is deleted from the content directory it will remain
-   in the generated indexes until they are next rebuilt.
-3. Any changes  that influence document generation that are not monitored by the
-   incremental build rules will not trigger an incremental rebuld.
-
-Incremental build anomolies can be rectified with a clean build.
-
 ### Serve command
 the _serve_ command opens a development server on the `BUILD_DIR` directory.
 

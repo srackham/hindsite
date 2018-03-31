@@ -1,6 +1,20 @@
 # Hindsite FAQ
 
 
+### Why another website generator
+Long story short, 
+I resumed updating my blog after a 3 year hiatus, after resolving
+
+but my old Hugo 0.13 blog would not build with the latest version of Hugo. Time to
+debug! At first things when well, after renaming couple of template variable
+identifiers my site compiled without errors, but I soon discovered that the
+posts and categories indexes were missing. I dug deeper and all the while was
+nagged by the thought that for a simple blog the Hugo edifice was just way to
+complex. Armed with typical programmer hubris I fancied I could build my own
+generator, one that would be a doodle for mere mortals to learn and to use (and
+reuse). Good luck with that!
+
+
 ### I want a non-paginated document index
 Set the `paginate` configuration parameter to `-1` and all indexed documents
 will appear on the first page.
