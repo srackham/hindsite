@@ -17,17 +17,17 @@ import (
 type config struct {
 	origin string // Configuration file directory.
 	// Configuration parameters.
-	author    string         // Default document author.
-	homepage  string         // Use this file (relative to the build directory) for /index.html.
-	paginate  int            // Number of documents per index page. No pagination if zero or less.
-	urlprefix string         // Prefix for synthesised document and index page URLs.
-	exclude   []string       // List of content directory file and directory names.
-	timezone  *time.Location // Set the time zone for site generation.
+	author    string            // Default document author.
+	homepage  string            // Use this file (relative to the build directory) for /index.html.
+	paginate  int               // Number of documents per index page. No pagination if zero or less.
+	urlprefix string            // Prefix for synthesised document and index page URLs.
+	exclude   []string          // List of excluded content directory paths.
+	timezone  *time.Location    // Time zone for site generation.
+	user      map[string]string // User defined configuration key/values.
 	// Date formats for template variables: date, shortdate, mediumdate, longdate.
 	shortdate  string
 	mediumdate string
 	longdate   string
-	user       map[string]string // User defined configuration key/values.
 }
 
 type configs []config
@@ -148,52 +148,47 @@ func (conf *config) String() (result string) {
 	return string(d)
 }
 
-// parseConfig parses all config files from project content and templates
-// directory into `proj.confs`.
+// parseConfig parses all configuration files from the project template
+// directory to project `confs`.
 func (proj *project) parseConfigs() error {
-	if !dirExists(proj.contentDir) {
-		return fmt.Errorf("missing content directory: " + proj.contentDir)
-	}
 	if !dirExists(proj.templateDir) {
 		return fmt.Errorf("missing template directory: " + proj.templateDir)
 	}
-	for _, d := range []string{proj.contentDir, proj.templateDir} {
-		err := filepath.Walk(d, func(f string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if !info.IsDir() {
-				return nil
-			}
-			conf := config{}
-			conf.origin = f
-			found := false
-			for _, v := range []string{"config.toml", "config.yaml"} {
-				cf := filepath.Join(f, v)
-				if fileExists(cf) {
-					found = true
-					proj.verbose("read config: " + cf)
-					if err := conf.parseFile(proj, cf); err != nil {
-						return err
-					}
-				}
-			}
-			if found {
-				proj.confs = append(proj.confs, conf)
-				proj.verbose2(conf.String())
-			}
-			return nil
-		})
+	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
+		if !info.IsDir() {
+			return nil
+		}
+		conf := config{}
+		conf.origin = f
+		found := false
+		for _, v := range []string{"config.toml", "config.yaml"} {
+			cf := filepath.Join(f, v)
+			if fileExists(cf) {
+				found = true
+				proj.verbose("read config: " + cf)
+				if err := conf.parseFile(proj, cf); err != nil {
+					return err
+				}
+			}
+		}
+		if found {
+			proj.confs = append(proj.confs, conf)
+			proj.verbose2(conf.String())
+		}
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 	// Sort configurations by ascending origin directory to ensure deeper
 	// configurations have precedence.
 	sort.Slice(proj.confs, func(i, j int) bool {
 		return proj.confs[i].origin < proj.confs[j].origin
 	})
-	proj.rootConf = proj.configFor(proj.contentDir, proj.templateDir)
+	proj.rootConf = proj.configFor(proj.templateDir)
 	proj.verbose2("root config: \n" + proj.rootConf.String())
 	return nil
 }
@@ -235,21 +230,20 @@ func (conf *config) merge(from config) {
 	}
 }
 
-// Merge configuration files that lie in the contentDir and templateDir
-// directory paths. Merge files in the templateDir (working from top (lowest
-// precedence) to bottom) then Merge files in the contentDir (working top to
-// bottom (highest precedence)). The `proj.confs` have been sorted by
-// configuration `origin` in ascending order to ensure the directory heirarchy
-// precedence.
-func (proj *project) configFor(contentDir, templateDir string) config {
+// configFor returns the merged configuration for the dir directory.
+// Configuration files that are in the dir path are merged working from top
+// (lowest precedence) to bottom.
+//
+// For example, if dir is `template/posts/james` then directories are searched
+// in the following order: `template`, `template/posts`, `template/posts/james`
+// with configuration entries from `template` having lowest precedence.
+//
+// The `proj.confs` have been sorted by configuration `origin` in ascending
+// order to ensure the directory precedence.
+func (proj *project) configFor(dir string) config {
 	result := newConfig()
 	for _, conf := range proj.confs {
-		if templateDir == conf.origin || pathIsInDir(templateDir, conf.origin) {
-			result.merge(conf)
-		}
-	}
-	for _, conf := range proj.confs {
-		if contentDir == conf.origin || pathIsInDir(contentDir, conf.origin) {
+		if dir == conf.origin || pathIsInDir(dir, conf.origin) {
 			result.merge(conf)
 		}
 	}

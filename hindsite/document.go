@@ -65,7 +65,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	p = replaceExt(p, ".html")
 	doc.buildpath = filepath.Join(proj.buildDir, p)
 	doc.templatepath = filepath.Join(proj.templateDir, p)
-	doc.conf = proj.configFor(filepath.Dir(doc.contentpath), filepath.Dir(doc.templatepath))
+	doc.conf = proj.configFor(filepath.Dir(doc.templatepath))
 	doc.url = path.Join("/", doc.conf.urlprefix, filepath.ToSlash(p))
 	// Extract title and date from file name.
 	doc.title = fileName(contentfile)

@@ -387,9 +387,6 @@ func (proj *project) build() error {
 					return nil
 				}
 				docs = append(docs, &doc)
-			case ".toml", ".yaml":
-				// Skip configuration file.
-				updateConfMod(info)
 			default:
 				err = proj.copyStaticFile(f, proj.contentDir, proj.buildDir)
 			}
