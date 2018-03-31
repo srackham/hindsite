@@ -93,6 +93,8 @@ func (proj *project) parseArgs(args []string) error {
 			proj.clean = true
 		case opt == "-v":
 			proj.verbosity++
+		case opt == "-vv":
+			proj.verbosity += 2
 		case stringlist{"-content", "-template", "-build", "-builtin", "-port"}.Contains(opt):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
