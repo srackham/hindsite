@@ -26,6 +26,7 @@ type index struct {
 
 type indexes []index
 
+// page represents a document index page.
 type page struct {
 	number int    // 1...
 	file   string // File name.
@@ -114,8 +115,8 @@ func (idxs indexes) build(modified time.Time) error {
 	}
 	// If any document in the index has been modified since the index was last
 	// built then the index must be completely rebuild since we are forced to
-	// assume document front matter (which contributes to the index) has been
-	// modified.
+	// assume document front matter (which contributes to both document and tag
+	// indexes) has been modified.
 	for _, idx := range idxs {
 		target := filepath.Join(idx.indexDir, "docs-1.html")
 		if rebuild(target, modified, idx.docs...) {

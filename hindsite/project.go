@@ -225,14 +225,16 @@ func (proj *project) init() error {
 		if err := RestoreAssets(proj.templateDir, proj.builtin+"/template"); err != nil {
 			return err
 		}
-		// Hoist the restored template files up into the root of the project template directory.
+		// Hoist the restored template files from the root of the restored
+		// builtin directery up one level into the root of the project template
+		// directory.
 		files, _ := filepath.Glob(filepath.Join(proj.templateDir, proj.builtin, "template", "*"))
 		for _, f := range files {
 			if err := os.Rename(f, filepath.Join(proj.templateDir, filepath.Base(f))); err != nil {
 				return err
 			}
 		}
-		// Remove empty restored path.
+		// Remove the now empty restored path.
 		if err := os.RemoveAll(filepath.Join(proj.templateDir, proj.builtin)); err != nil {
 			return err
 		}
@@ -241,18 +243,22 @@ func (proj *project) init() error {
 			return fmt.Errorf("missing template directory: " + proj.templateDir)
 		}
 	}
-	// Initialize content from template directory.
+	// Copy the contents of the optional template init directory to the content directory.
+	initDir := filepath.Join(proj.templateDir, "init")
+	if !dirExists(initDir) {
+		return fmt.Errorf("missing init directory: " + initDir)
+	}
 	if err := mkMissingDir(proj.contentDir); err != nil {
 		return err
 	}
-	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
+	err := filepath.Walk(initDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if f == proj.templateDir {
+		if f == initDir {
 			return nil
 		}
-		dst, err := pathTranslate(f, proj.templateDir, proj.contentDir)
+		dst, err := pathTranslate(f, initDir, proj.contentDir)
 		if err != nil {
 			return err
 		}
@@ -260,18 +266,9 @@ func (proj *project) init() error {
 			proj.verbose("make directory: " + dst)
 			err = mkMissingDir(dst)
 		} else {
-			// Copy static files and example documents to content directory.
-			switch filepath.Ext(f) {
-			case ".html", ".toml", ".yaml":
-				// Skip templates and configuration files.
-			default:
-				proj.verbose2("copy content: " + f)
-				err = copyFile(f, dst)
-				if err != nil {
-					return err
-				}
-				proj.verbose("write: " + dst)
-			}
+			proj.verbose2("copy init: " + f)
+			proj.verbose("write init: " + dst)
+			err = copyFile(f, dst)
 		}
 		return err
 	})
@@ -291,7 +288,7 @@ Usage:
 
 The commands are:
 
-    init    create a new project
+    init    initialize a new project
     build   generate the website
     serve   start development webserver
     help    display documentation
