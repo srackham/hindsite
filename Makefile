@@ -57,6 +57,13 @@ build-doc: install
 serve-doc: build-doc
 	hindsite serve doc
 
+.PHONY: push
+push:
+	git push -u --tags origin master
+
+#
+# Builtin blog development tasks.
+#
 BLOG_DIR = ./examples/builtin/blog
 
 .PHONY: blog
@@ -75,6 +82,6 @@ serve-blog: build-blog
 watch-blog:
 	find $(BLOG_DIR)/template | entr hindsite build $(BLOG_DIR)
 
-.PHONY: push
-push:
-	git push -u --tags origin master
+.PHONY: validate-blog
+validate-blog:
+	for f in $$(find $(BLOG_DIR)/build -name "*.html"); do echo $$f; html-validator --verbose --format=text --file=$$f; done
