@@ -62,9 +62,10 @@ BLOG_DIR = ./examples/builtin/blog
 .PHONY: blog
 blog: build-blog serve-blog
 
+# Built the builtin blog's init directory.
 .PHONY: build-blog
 build-blog: install
-	hindsite build $(BLOG_DIR) -v -clean
+	hindsite build $(BLOG_DIR) -content $(BLOG_DIR)/template/init -v -clean
 
 .PHONY: serve-blog
 serve-blog: build-blog
@@ -72,7 +73,7 @@ serve-blog: build-blog
 
 .PHONY: watch-blog
 watch-blog:
-	(find $(BLOG_DIR)/content && find $(BLOG_DIR)/template) | entr hindsite build $(BLOG_DIR)
+	find $(BLOG_DIR)/template | entr hindsite build $(BLOG_DIR)
 
 .PHONY: push
 push:
