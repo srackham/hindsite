@@ -47,9 +47,8 @@ h2 {
     margin-top: 1.5rem;
     border-bottom: var(--border);
 }
-img {
-    max-width: 100%;
-    width: 90%;
+#main img {
+    max-width: 90%;
     margin-top: 1rem;
     margin-bottom: 1rem;
     border-radius: 5px;
@@ -242,15 +241,10 @@ ul > li {
     }
 }
 #main {
-    z-index: 1;
-    min-height: 100%;
     max-width: var(--max-text-width);
     margin-left: 0;
     padding-left: 40px;
     padding-right: 40px;
-}
-#article {
-    padding-top: 1px;
 }
 
 .menu {
@@ -341,6 +335,9 @@ ul > li {
     }
     .banner {
         padding-left: 10px;
+    }
+    #main img {
+        max-width: 100%;
     }
 }
 @media print {
