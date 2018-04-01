@@ -1,8 +1,8 @@
 {{define "header"}}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>{{.title}}</title>
+<title>{{or .title "Title"}}</title>
 <meta name="viewport" content="width=device-width"/>
 <link type="text/css" rel="stylesheet" href="{{.site.urlprefix}}/main.css">
 </head>
