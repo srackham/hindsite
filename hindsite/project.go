@@ -168,7 +168,10 @@ func (proj *project) parseArgs(args []string) error {
 		return nil
 	}
 	if err := checkOverlap("content", proj.contentDir, "template", proj.templateDir); err != nil {
-		return err
+		// It's OK to build the init directory.
+		if proj.command != "build" || proj.contentDir != filepath.Join(proj.templateDir, "init") {
+			return err
+		}
 	}
 	if err := checkOverlap("build", proj.buildDir, "content", proj.contentDir); err != nil {
 		return err
@@ -343,6 +346,9 @@ func (proj *project) build() error {
 	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
+		}
+		if info.IsDir() && f == filepath.Join(proj.templateDir, "init") {
+			return filepath.SkipDir
 		}
 		if !info.IsDir() {
 			switch filepath.Ext(f) {
