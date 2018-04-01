@@ -85,6 +85,9 @@ func (proj *project) parseArgs(args []string) error {
 			if proj.command == "help" {
 				proj.topic = opt
 			} else {
+				if !dirExists(opt) && strings.HasPrefix(opt, "-") {
+					return fmt.Errorf("project directory not specifed")
+				}
 				proj.projectDir = opt
 			}
 		case opt == "-drafts":
