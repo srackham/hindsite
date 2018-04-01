@@ -159,6 +159,9 @@ func (proj *project) parseArgs(args []string) error {
 	}
 	// Content, template and build directories cannot be nested.
 	checkOverlap := func(name1, dir1, name2, dir2 string) error {
+		if dir1 == dir2 {
+			return fmt.Errorf("%s directory cannot be the same as %s directory", name1, name2)
+		}
 		if pathIsInDir(dir1, dir2) {
 			return fmt.Errorf("%s directory cannot reside inside %s directory", name1, name2)
 		}
