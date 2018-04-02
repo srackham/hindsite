@@ -4,6 +4,9 @@
 #
 # Usage: watch-hindsite [PROJECT_DIR]
 #
+# Performs incremental build if files are created or modified,
+# Performs full rebuild if files are deleted or renamed,
+#
 
 set -u  # No unbound variables.
 set -e  # Exit on error.
@@ -20,8 +23,9 @@ echo Press Ctrl+C to stop
 echo
 hindsite build $PROJECT_DIR
 echo
-inotifywait -q -m -r -e modify,create,delete,move --timefmt %T --format "%T %e %f" $WATCH_DIRS | while read EVENT
-do
+while true; do
+    EVENT=$(inotifywait -q -r -e modify,create,delete,move --format "%e: %f" $WATCH_DIRS)
+    sleep 0.2s  # Allow some time for all editor saves to complete.
     echo $EVENT
     case "$EVENT" in
     MODIFY*|CREATE*)
