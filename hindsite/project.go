@@ -172,7 +172,7 @@ func (proj *project) parseArgs(args []string) error {
 	}
 	if err := checkOverlap("content", proj.contentDir, "template", proj.templateDir); err != nil {
 		// It's OK to build the init directory.
-		if proj.command != "build" || proj.contentDir != filepath.Join(proj.templateDir, "init") {
+		if !(proj.command == "build" && proj.contentDir == filepath.Join(proj.templateDir, "init")) {
 			return err
 		}
 	}
@@ -254,35 +254,60 @@ func (proj *project) init() error {
 			return fmt.Errorf("missing template directory: " + proj.templateDir)
 		}
 	}
-	// Copy the contents of the optional template init directory to the content directory.
+	// Create the template directory structure in the content directory.
 	initDir := filepath.Join(proj.templateDir, "init")
-	if !dirExists(initDir) {
-		return fmt.Errorf("missing init directory: " + initDir)
-	}
 	if err := mkMissingDir(proj.contentDir); err != nil {
 		return err
 	}
-	err := filepath.Walk(initDir, func(f string, info os.FileInfo, err error) error {
+	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if f == initDir {
+		if f == proj.templateDir {
 			return nil
 		}
-		dst, err := pathTranslate(f, initDir, proj.contentDir)
-		if err != nil {
-			return err
+		if info.IsDir() && f == initDir {
+			return filepath.SkipDir
 		}
 		if info.IsDir() {
+			dst, err := pathTranslate(f, proj.templateDir, proj.contentDir)
+			if err != nil {
+				return err
+			}
 			proj.verbose("make directory: " + dst)
 			err = mkMissingDir(dst)
-		} else {
-			proj.verbose2("copy init: " + f)
-			proj.verbose("write init: " + dst)
-			err = copyFile(f, dst)
 		}
 		return err
 	})
+	if err != nil {
+		return err
+	}
+	// Copy the contents of the optional template init directory to the content directory.
+	if dirExists(initDir) {
+		err = filepath.Walk(initDir, func(f string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if f == initDir {
+				return nil
+			}
+			dst, err := pathTranslate(f, initDir, proj.contentDir)
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				if !dirExists(dst) {
+					proj.verbose("make directory: " + dst)
+					err = mkMissingDir(dst)
+				}
+			} else {
+				proj.verbose2("copy init: " + f)
+				proj.verbose("write init: " + dst)
+				err = copyFile(f, dst)
+			}
+			return err
+		})
+	}
 	return err
 }
 
