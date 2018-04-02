@@ -8,9 +8,8 @@ bin/hindsite.exe
 build/
 doc/index.md
 .vscode/
-examples/builtin/blog/content/
-examples/builtin/blog/build/
-examples/builtin/minimal/content/
-examples/builtin/minimal/build/
-examples/blog/
-examples/benchmark.zip
+builtin/blog/content/
+builtin/blog/build/
+builtin/minimal/content/
+builtin/minimal/build/
+benchmark.zip

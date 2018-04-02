@@ -5,8 +5,7 @@ Notes for yet another static website generator build with Go.
 ## Overview
 Hindsite is a static website generator. It's easy to learn an use and very fast.
 It builds static websites with optional document and tag indexes (e.g. blogs
-posts, newsletters, articles) from Markdown source documents, templates and
-static resources.
+posts, newsletters, articles) from Markdown source documents.
 
 
 ## Quick Start
@@ -16,22 +15,21 @@ static resources.
    template:
 
     mkdir myproj
-    cd myproj
-    hindsite init . -builtin blog
+    hindsite init myproj -builtin blog
 
 3. Build the website:
 
-    hindsite build .
+    hindsite build myproj
 
 4. Start the hindsite web server:
 
-    hindsite serve .
+    hindsite serve myproj
 
 5. Open your Web browser at http://localhost:1212
 
 To customise the website edit the project's Markdown documents (`.md` files in
-the `content` directory), templates (`.html` files in the `template` directory)
-and configuration files (`config.{toml,yaml}`).
+the project `content` directory), templates (`.html` files in the project
+`template` directory) and configuration files (`config.{toml,yaml}`).
   
 If you are familar with Jekyll or Hugo you'll be right a home (hindsite can read
 Jekyll and Hugo Markdown documents).
@@ -43,14 +41,63 @@ This is achived by keeping the number of features and concepts to a minimum, in
 particular:
 
 - Structural transparency -- content, template and build directory trees
-  mirror each other as do source and built document locations.
-- Themes are not separate, every template directory is a theme.
-- One template language (Go templates).
+  mirror each other along with the source and built document locations.
+- Themes are not separate, every project template directory is a theme.
+- One template language (native Go templates).
 - Use TOML or YAML markup interchangably for configuration and front matter.
 
 
 ## Projects
+A hindsite project consists of three separate directories:
+
+- A _content directory_ containing Markdown [source documents](#documents) and
+  static resource files.
+- A _template directory_ containing HTML [templates](#templates) and project
+  configuration files.
+- A _build directory_ containing the generated website.
+
+By default these directories reside in the project directory and are named
+`content`, `template` and `build`. For example, here's the builtin blog project
+structure:
+
+```
+├── build
+│   ├── indexes
+│   │   ├── newsletters
+│   │   └── posts
+│   │       └── tags
+│   ├── newsletters
+│   │   └── images
+│   └── posts
+│       └── images
+├── content
+│   ├── newsletters
+│   │   └── images
+│   └── posts
+│       └── images
+└── template
+    ├── init
+    │   ├── newsletters
+    │   │   └── images
+    │   └── posts
+    │       └── images
+    ├── newsletters
+    └── posts
+```
+
+Disregarding the special `build/indexes` and `template/init` directories, notice
+that all three directories share the same base directory structure.
+Specifically, all three contain the template directory structure and the build
+directory is simply a one-to-one reconstruction of the content directory.
+
+`build/indexes` contains the generated document and tag index pages; the
+`template/init` directory is used by the [init](#init) command to initialize new
+content directories.
+
 ## Documents
+Document pages are built by rendering content Markdown files with HTML
+templates. The generated HTML file is saved to the corresponding build location.
+
 ### Front matter
 ## Indexes
 ## Common command options
@@ -58,20 +105,28 @@ particular:
 - `-content CONTENT_DIR`: the project content directory (defaults to `PROJECT_DIR/content`).
 - `-build BUILD_DIR`: the project build directory (defaults to `PROJECT_DIR/build`).
 - `-template TEMPLATE_DIR`: the project template directory (defaults to `PROJECT_DIR/template`).
-- `-v`: Increase verbosity.
+- `-v`: Increase verbosity. `-vv` is an alias for `-v -v`.
 
 ## help command
-Syntax:
+Usage:
 
     hindsite help [TOPIC]
+
+Synopsis:
+
+    Prints command usage and documentation.
 
 - `TOPIC` is a hindsite command name.
 - `hindsite`, `hindsite -h` and `hindsite --help` are all aliases for `hindsite help`.
 
 ## init command
-Syntax:
+Usage:
 
     hindsite init  PROJECT_DIR [OPTIONS]
+
+Synopsis:
+
+    Initializes a project content directory from a project template.
 
 Applicable options:
 
@@ -81,52 +136,77 @@ Applicable options:
     -v
 
 - `NAME` is a builtin template name viz. `blog` or `minimal`.
+- The `CONTENT_DIR` must be empty.
+- If the `-builtin` option is specified the `TEMPLATE_DIR` must also be empty.
+
+The `init` command executes as follows:
+
+1. If the `-builtin` option is specified it copies the builtin template to
+   `TEMPLATE_DIR`.
+2. It recreates the template directory structure in the content directory
+   (skipping the `TEMPLATE_DIR/init` directory).
+3. If the `TEMPLATE_DIR/init` directory exists then its entire contents is
+   copied to the content directory. The optional template `init` directory
+   contains static resources and example documents -- it really is just a
+   content directory.
+
+The following example installs the builtin `blog` template to `./template` then
+copies the contents of the `./template/init` directory to the `./content`
+directory:
+
+    hindsite init . -builtin blog
+
 
 ## build command
-Build a static website from content and template directories. By default an
-incremental build is performed.
-
-Syntax:
+Usage:
 
     hindsite build PROJECT_DIR [OPTIONS]
+
+Synopsis:
+
+    Build a static website from project content and template directories
+    to a build directory.
 
 Applicable options:
 
     -content  CONTENT_DIR
     -template TEMPLATE_DIR
     -build    BUILD_DIR
-    -clean
+    -incremental
     -drafts
     -v
 
+- By default the entire contents of the build directory is deleted and the site
+  is completely rebuilt.
+- If the `-incremental` optioin is specified only new and updated files are
+  rebuilt.
 - Specify `-drafts` to include draft documents.
-- If the `-clean` option is specified the the entire contents of the build
-  directory is deleted, forcing all files to be rebuilt.
+- Project, build and template directories cannot overlap, with one exception:
+  the content directory can be set to `TEMPLATE_DIR/init`. This is handy for
+  testing templates.
 
-#### Incremental build
+### Incremental build
 An incremental build only rebuilds those documents and indexes that require
-updating. Incremental builds are faster and they also facilitate incremental
-deployment. An incremental rebuild is performed by default. The incremental
-rebuild rules are:
+updating. Incremental builds are faster and they facilitate incremental
+deployment. The incremental rebuild rules are:
 
 1. Rebuild everything if a configuration file or a template file has changed.
 2. Rebuild indexes that contain one or more new or modified documents since the
    index was last built.
-3. Rebuild documents if they have been modified since they were last rendered.
+3. Rebuild documents if they have been modified since they were last built.
 
 These rules are a compromise between performance and build integrity. If you are
 just adding and editing files (documents, templates, configuration and static
 files) incremental build integrity is assured, but there a few anomalies to be
 aware of:
 
-1. Files in the build directory that are no longer used are not automatically
-   deleted.
+1. Files in the build directory that are no longer used will not be
+   automatically deleted.
 2. If an indexed document is deleted from the content directory it will remain
-   in the generated indexes until the indexes are next rebuilt.
-3. Any changes that influence document generation and are not monitored by the
+   in the generated indexes until the dependent indexes are next rebuilt.
+3. Any changes that influence document generation and not monitored by the
    incremental build rules will not trigger an incremental rebuild.
 
-Incremental build anomalies are rectified by a clean build.
 
 ## serve command
 Syntax:
@@ -141,11 +221,90 @@ Applicable options:
 
 - `PORT` is the server port number (defaults to 1212).
 
+This command starts a development webserver on the project build directory.
+
+
 ## Templates
 ## Template variables
-## Configuration files
-### Merging and precedence
-### Configuration parameters
+## Configuration parameters
+Configuration parameters drive document and index generation. They are computed
+on a directory by directory basis by merging configuration files.
+
+Configuration files:
+
+- Reside in the template directory and are optional, though most projects will
+  have at least one at the root of the template directory.
+- Can be encoded in either TOML or YAML markup and are named `config.toml` and
+  `config.yaml` respectively.
+
+The configuration applied to each content directory is computed by merging
+configuration files that lie on the corresponding template directory path.
+Configuration files closer to the directory have higher precedence than those
+further up the directory path.
+
+The configuration parameters are:
+
+**author**: Specified the default document author. TOML example:
+
+    author = "Joe Bloggs"
+
+**exclude**: A `|` separated list of paths in the content directory that are
+excluded from `build` command processing. The paths are relative to the content
+directory and conform to patterns matched by the Go [filepath.Match()
+function](https://golang.org/pkg/path/filepath/#Match). Note that the `*`
+wildcard character _does not_ match path separators e.g. `*.out` matches all
+`.out` files in the content root, not subdirectories. TOML example:
+
+    exclude = "config.rmu|sass"
+
+**shortdate**, **mediumdate**, **longdate**: These are date formats for template
+`shortdate`, `mediumdate` and `longdate` variables respectively (the `date`
+variable is an alias for `mediumdate`). The values conform to the layouts
+supported by Go [time.Format
+function](https://golang.org/pkg/time/#Time.Format). The default values are:
+
+    shortdate =  "2006-01-02",
+    mediumdate = "2-Jan-2006",
+    longdate =   "Mon Jan 2, 2006",
+
+**homepage**: The `homepage` parameter is the name of a file, relative to the
+build directory, that is copied by the `build` command to the root of the build
+directory and named `index.html`. TOML example:
+
+    homepage = "indexes/posts/docs-1.html"
+
+**paginate**: This parameter sets the number of documnts per document index
+page. The default value is 5. Set to -1 to include all documents on a single
+document index page. TOML example:
+
+    paginate = 10
+
+**timezone**: Sets the time zone for site generation. Set to a TZ name from IANA
+Timezone Database or to `Local` (the system's local timezone). Defaults to
+`Local`. TOML example:
+
+    timezone = "Pacific/Auckland"
+
+**urlprefix**: This parameter is prepended to all synthesised document and index
+page URLs. Its default value is a blank string. TOML examples:
+
+    urlprefix = "/blog"
+    urlprefix = "https://www.example.com"
+
+## URLs
+Hindsite synthesizes root-relative document and index page URLs. URLs are
+relative to the build directory and are prefixed with the `urlprefix`
+configuration parameter.
+
+For example, if the build directory is `/myproj/build` and the rendered
+document is `/myproj/build/posts/post1.html` then the document URL will
+be `/posts/post1.html`. If the `urlprefix` is `/blog` then the URL will be
+`/blog/posts/post1.html`.
+
+
+
+
+
 
 
 ## Hello hindsite
@@ -558,46 +717,6 @@ Each item in the tags list contains:
 ## Configuration and front matter variables
 Additional build information is sourced from configuration files and document front matter.
 
-### Configuration files
-TODO: Should multiple configuration files in the document path be aggregated
-(template path then content path, top to bottom)?
-
-- Configuration files and front matter are optional.
-- Configuration files and front matter are encoded in TOML or YAML (take your pick).
-- Configuration files are named `config.{toml,yaml}` and are located and are
-  located at the roots of the contents and templates directories (values from
-  the latter take precedence).
-
-Example `config.toml` file:
-
-```
-# Prepended to synthesised root-relative URLs.
-#urlprefix = "/blog"
-
-# Copy this file to `/index.html`.
-# The file path relative to the build directory.
-#homepage = "indexes/blog/all-1.html"
-
-# Paginate sets the number of documents per document index page (1..).
-# Set to -1 to to include all documents in a single page.
-#paginate = 5
-
-# A `|` separated list of paths in the content directory that should not be processed (wildcards allowed).
-#exclude = "config.rmu|main/"
-
-# Default document author.
-#author = "Joe Bloggs"
-
-# Sets the time zone for site generation. Set to "Local" or a TZ name from IANA Timezone Database.
-#timezone = "Local"
-
-# Date formats for template variables.
-#shortdate =  "2006-01-02",
-#mediumdate = "2-Jan-2006",
-#longdate =   "Mon Jan 2, 2006",
-
-```
-
 ## Front matter
 Document front matter is embedded at the start of content files (c.f.
 https://www.npmjs.com/package/marked-metadata,
@@ -689,22 +808,6 @@ images) are copied verbatim to the corresponding location in the build directory
 by the build command. The content directory is processed after the template
 directory.
 
-### File exclusion
-The `config.{toml,yaml}` configuration file `exclude` value is a `|` separated
-string of content directory path directory names that are excluded from all
-processing.
-
-- The path names are relative to the content directory.
-- The `exclude` path names can contain wildcards conforming to the Go
-  [filepath.Match() function](https://golang.org/pkg/path/filepath/#Match).
-  Note: the `*` wildcard character _does not_ match path separators e.g.
-  `*.out` matches all `.out` files in the content root, not subdirectories.
-
-TOML example:
-
-    exclude = "config.rmu|docs"
-
-
 ## Content document markup
 Content documents can be written in Markdown or Rimu.
 
@@ -732,7 +835,7 @@ Usage:
 
 The commands are:
 
-    init    create a new project
+    init    initialize a new project
     build   generate the website
     serve   start development webserver
     help    display documentation
@@ -744,7 +847,7 @@ The options are:
     -build    BUILD_DIR
     -port     PORT
     -builtin  NAME
-    -clean
+    -incremental
     -drafts
     -v
 

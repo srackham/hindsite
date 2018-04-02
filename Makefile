@@ -11,11 +11,11 @@ SHELL := bash
 
 GOFLAGS ?=
 
-BINDATA_FILES = $(shell find ./examples/builtin/minimal/template) $(shell find ./examples/builtin/blog/template)
+BINDATA_FILES = $(shell find ./builtin/minimal/template) $(shell find ./builtin/blog/template)
 
 ./hindsite/bindata.go: $(BINDATA_FILES)
 	cd ./hindsite
-	go-bindata -prefix ../examples/builtin/ -ignore '/(build|content)/' ../examples/builtin/...
+	go-bindata -prefix ../builtin/ -ignore '/(build|content)/' ../builtin/...
 
 .PHONY: bindata
 bindata: ./hindsite/bindata.go
@@ -64,7 +64,7 @@ push:
 #
 # Builtin blog development tasks.
 #
-BLOG_DIR = ./examples/builtin/blog
+BLOG_DIR = ./builtin/blog
 
 .PHONY: blog
 blog: build-blog serve-blog
@@ -80,7 +80,7 @@ serve-blog: build-blog
 
 .PHONY: watch-blog
 watch-blog:
-	find $(BLOG_DIR)/template | entr hindsite build $(BLOG_DIR)
+	./bin/watch-hindsite.sh $(BLOG_DIR)
 
 .PHONY: validate-blog
 validate-blog:

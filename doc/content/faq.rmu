@@ -15,22 +15,37 @@ generator, one that would be a doodle for mere mortals to learn and to use (and
 reuse). Good luck with that!
 
 
+### How can I categorise my documents into separate indexes?
+TODO
+For example by author.
+
+
 ### I want a non-paginated document index
 Set the `paginate` configuration parameter to `-1` and all indexed documents
 will appear on the first page.
 
 
 ### I want both paginated and non-pagninated document indexes
-Create a parent index with the `paginate` configuration parameter set to `-1`.
-For example:
+This technique creates a second nested index:
 
+1. Create a child index with the `paginate` configuration parameter set to `-1`.
+   For example:
 ```
-templates/
-    docs.html       # Non-paginated (single-page) document index template.
-    config.toml     # paginate = -1
-    paginated/
-        docs.html   # Paginated document index template.
+template/
+    posts/
+        docs.html           # Paginated document index template.
+        all/
+            docs.html       # Non-paginated (single-page) document index template.
+            config.toml     # paginate = -1
 ```
+
+2. Create a corresponding content child directory and move the content documents into it:
+```
+content/
+    posts/
+        all/    # Move documents here from posts.
+```
+
 Each index has it's own page template. This technique can be extended to create
 multiple additional indexes over a the same indexed document set.
 
@@ -56,7 +71,9 @@ template directories:
     $ hindsite serve &
     $ (find content && find template) | entr hindsite build
 
+If you preprocess static content e.g. with SASS, LESS etc. you will also need to
+conditionally rebuild them e.g. using a built tool such as make(1).
+
 **NOTE**: When navigating back to another page it does not appear updated
 despite the fact that the server is receiving LivePage requests and you have to
 manually refreshing the browser.
-
