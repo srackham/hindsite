@@ -23,7 +23,7 @@ type project struct {
 	drafts      bool
 	topic       string
 	port        string
-	clean       bool
+	incremental bool
 	builtin     string
 	verbosity   int
 	rootConf    config
@@ -92,8 +92,8 @@ func (proj *project) parseArgs(args []string) error {
 			}
 		case opt == "-drafts":
 			proj.drafts = true
-		case opt == "-clean":
-			proj.clean = true
+		case opt == "-incremental":
+			proj.incremental = true
 		case opt == "-v":
 			proj.verbosity++
 		case opt == "-vv":
@@ -336,7 +336,7 @@ The options are:
     -build    BUILD_DIR
     -port     PORT
     -builtin  NAME
-    -clean
+    -incremental
     -drafts
     -v
 `)
@@ -353,8 +353,8 @@ func (proj *project) build() error {
 			return err
 		}
 	}
-	if proj.clean {
-		// Delete everything in the build directory.
+	if !proj.incremental {
+		// Delete everything in the build directory forcing a complete site rebuild.
 		files, _ := filepath.Glob(filepath.Join(proj.buildDir, "*"))
 		for _, f := range files {
 			if err := os.RemoveAll(f); err != nil {

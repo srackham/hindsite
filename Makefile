@@ -51,7 +51,7 @@ doc: build-doc serve-doc
 .PHONY: build-doc
 build-doc: install
 	cp -p README.md doc/content/index.md
-	hindsite build doc -v -clean
+	hindsite build doc -v
 
 .PHONY: serve-doc
 serve-doc: build-doc
@@ -72,7 +72,7 @@ blog: build-blog serve-blog
 # Built the builtin blog's init directory.
 .PHONY: build-blog
 build-blog: install
-	hindsite build $(BLOG_DIR) -content $(BLOG_DIR)/template/init -v -clean
+	hindsite build $(BLOG_DIR) -content $(BLOG_DIR)/template/init -v
 
 .PHONY: serve-blog
 serve-blog: build-blog
