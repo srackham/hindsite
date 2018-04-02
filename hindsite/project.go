@@ -479,7 +479,7 @@ func (proj *project) build() error {
 		}
 	}
 	// Print summary.
-	fmt.Printf("\ndocuments: %d\n", docsCount)
+	fmt.Printf("documents: %d\n", docsCount)
 	fmt.Printf("drafts: %d\n", draftsCount)
 	fmt.Printf("time: %.2fs\n", time.Now().Sub(startTime).Seconds())
 	return nil
