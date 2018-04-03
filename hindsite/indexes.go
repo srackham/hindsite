@@ -87,8 +87,8 @@ func newIndexes(proj *project) (indexes, error) {
 	return idxs, err
 }
 
-// Add document to all indexes that it belongs to. Assign the document's primary
-// index.
+// addDocument add a document to all indexes that it belongs to, it also assigns
+// the document its primary index.
 func (idxs indexes) addDocument(doc *document) {
 	for i, idx := range idxs {
 		if pathIsInDir(doc.templatepath, idx.templateDir) {
@@ -100,23 +100,11 @@ func (idxs indexes) addDocument(doc *document) {
 	}
 }
 
-// Build all indexes. modified is the date of the most recently modified
-// configuration or template file.
+// build builds all indexes. modified is the date of the most recently modified
+// configuration or template file. If any document in the index has been
+// modified since the index was last built then the index must be completely
+// rebuild.
 func (idxs indexes) build(modified time.Time) error {
-	// Sort index documents then assign document prev/next according to
-	// the primary index ordering.
-	// Index document ordering ensures subsequent derived document tag indexes
-	// are also ordered.
-	for _, idx := range idxs {
-		idx.docs.sortByDate()
-		if idx.primary {
-			idx.docs.setPrevNext()
-		}
-	}
-	// If any document in the index has been modified since the index was last
-	// built then the index must be completely rebuild since we are forced to
-	// assume document front matter (which contributes to both document and tag
-	// indexes) has been modified.
 	for _, idx := range idxs {
 		target := filepath.Join(idx.indexDir, "docs-1.html")
 		if rebuild(target, modified, idx.docs...) {
@@ -128,6 +116,7 @@ func (idxs indexes) build(modified time.Time) error {
 	return nil
 }
 
+// build builds document and tag index pages.
 func (idx index) build() error {
 	tmpls := &idx.proj.tmpls // Lexical shortcut.
 	// renderPages renders paginated document pages with named template.

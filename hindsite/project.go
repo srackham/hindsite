@@ -435,7 +435,7 @@ func (proj *project) build() error {
 	if err != nil {
 		return err
 	}
-	// Build indexes.
+	// Create indexes.
 	idxs, err := newIndexes(proj)
 	if err != nil {
 		return err
@@ -443,11 +443,17 @@ func (proj *project) build() error {
 	for _, doc := range docs {
 		idxs.addDocument(doc)
 	}
-	err = idxs.build(confMod)
-	if err != nil {
-		return err
+	// Sort index documents then assign document prev/next according to the
+	// primary index ordering. Index document ordering ensures subsequent
+	// derived document tag indexes are also ordered.
+	for _, idx := range idxs {
+		idx.docs.sortByDate()
+		if idx.primary {
+			idx.docs.setPrevNext()
+		}
 	}
-	// Render documents.
+	// Render documents. Documents are written before writing indexes so that
+	// they are available as soon as possible.
 	for _, doc := range docs {
 		if !rebuild(doc.buildpath, confMod, doc) {
 			continue
@@ -462,6 +468,13 @@ func (proj *project) build() error {
 		}
 		proj.verbose("write document: " + doc.buildpath)
 		proj.verbose2(doc.String())
+	}
+	fmt.Printf("documents: %d\n", docsCount)
+	fmt.Printf("drafts: %d\n", draftsCount)
+	// Build index pages.
+	err = idxs.build(confMod)
+	if err != nil {
+		return err
 	}
 	// Install home page.
 	if proj.rootConf.homepage != "" {
@@ -478,9 +491,6 @@ func (proj *project) build() error {
 			}
 		}
 	}
-	// Print summary.
-	fmt.Printf("documents: %d\n", docsCount)
-	fmt.Printf("drafts: %d\n", draftsCount)
 	fmt.Printf("time: %.2fs\n", time.Now().Sub(startTime).Seconds())
 	return nil
 }
