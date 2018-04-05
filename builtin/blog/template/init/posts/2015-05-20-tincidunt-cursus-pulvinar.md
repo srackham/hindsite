@@ -1,7 +1,6 @@
 ---
 title: Tincidunt Cursus Pulvinar
 date: 2015-05-20T12:15:23-00:00
-synopsis: Nisi ac lectus nisi penatibus.
 tags: a,lectus,in
 slug: tincidunt-cursus-pulvinar
 ---
@@ -9,6 +8,8 @@ slug: tincidunt-cursus-pulvinar
 Parturient porttitor parturient diam sed cursus diam Amet vel montes
 integer a a penatibus dolor pulvinar montes a natoque nisi et diam
 integer nisi Amet vel sed tincidunt montes a dis.
+
+<!--more-->
 
 ![image 2](./images/image-02.jpg)
 

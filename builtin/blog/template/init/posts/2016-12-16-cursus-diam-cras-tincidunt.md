@@ -1,7 +1,6 @@
 ---
 title: Cursus Diam Cras Tincidunt
 date: 2016-12-16T16:11:42-00:00
-synopsis: Cras hac purus porttitor integer.
 tags: cras,hac,sagittis,penatibus,dolor,integer
 slug: cursus-diam-cras-tincidunt
 ---
@@ -10,6 +9,8 @@ Sed montes lorem penatibus montes cursus dolor a a diam purus a
 parturient montes purus a dis cras sagittis sed parturient lorem in
 parturient nisi dolor a cras lorem cras in lectus ac sed diam purus
 dolor natoque integer integer mattis.
+
+<!--more-->
 
 ![image 2](./images/image-02.jpg)
 

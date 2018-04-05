@@ -1,7 +1,6 @@
 ---
 title: Pulvinar Cras Ac
 date: 2016-06-07T03:16:09-00:00
-synopsis: Sagittis penatibus ac a.
 tags: purus,ac,cras,lorem,dis
 slug: pulvinar-cras-ac
 ---
@@ -9,6 +8,8 @@ slug: pulvinar-cras-ac
 Penatibus pulvinar porttitor pulvinar natoque natoque nisi integer dis
 sed cras porttitor nisi placerat natoque vel natoque lorem purus
 placerat tincidunt integer ac natoque tincidunt nisi porttitor.
+
+<!--more-->
 
 ![image 2](./images/image-02.jpg)
 

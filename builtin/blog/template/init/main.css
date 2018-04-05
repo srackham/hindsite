@@ -302,6 +302,13 @@ ul > li {
     color: var(--primary-color);
 }
 
+.more {
+    margin-bottom: 2.0rem;
+}
+.more a {
+    color: var(--primary-color);
+}
+
 .disabled {
     color: var(--disabled-color);
 }

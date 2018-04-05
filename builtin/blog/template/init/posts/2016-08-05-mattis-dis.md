@@ -1,13 +1,14 @@
 ---
 title: Mattis Dis
 date: 2016-08-05T05:55:12-00:00
-synopsis: Dis placerat pulvinar penatibus.
 tags: arcu,placerat,lorem,cursus
 slug: mattis-dis
 ---
 
 Integer cras Amet parturient nisi arcu natoque lorem cras sed
 porttitor natoque vel dolor.
+
+<!--more-->
 
 ![image 1](./images/image-01.jpg)
 
