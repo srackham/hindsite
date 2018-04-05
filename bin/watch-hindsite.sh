@@ -2,7 +2,7 @@
 #
 # watch-hindsite - rebuild hindsite project when it changes
 #
-# Usage: watch-hindsite [PROJECT_DIR]
+# Usage: watch-hindsite PROJECT_DIR [OPTIONS]
 #
 # Performs incremental build if files are created or modified,
 # Performs full rebuild if files are deleted or renamed,
@@ -10,18 +10,15 @@
 
 set -u  # No unbound variables.
 set -e  # Exit on error.
-PROJECT_DIR=.
-if [[ $# > 0 ]]; then
-    PROJECT_DIR=$1
-else
-    echo Usage: watch-hindsite.sh [PROJECT_DIR]
+if [[ $# == 0 ]]; then
+    echo Usage: watch-hindsite.sh PROJECT_DIR [OPTIONS]
     exit 1
 fi
-WATCH_DIRS="$PROJECT_DIR/content $PROJECT_DIR/template"
+WATCH_DIRS="$1/content $1/template"
 echo Watching $WATCH_DIRS
 echo Press Ctrl+C to stop
 echo
-hindsite build $PROJECT_DIR
+hindsite build "$@"
 echo
 while true; do
     EVENT=$(inotifywait -q -r -e modify,create,delete,move --format "%e: %f" $WATCH_DIRS)
@@ -29,10 +26,10 @@ while true; do
     echo $EVENT
     case "$EVENT" in
     MODIFY*|CREATE*)
-        hindsite build $PROJECT_DIR -incremental
+        hindsite build "$@" -incremental
         ;;
     *)
-        hindsite build $PROJECT_DIR
+        hindsite build "$@"
         ;;
     esac
     echo
