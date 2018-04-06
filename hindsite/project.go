@@ -465,7 +465,13 @@ func (proj *project) build() error {
 		}
 		proj.verbose2("render document: " + doc.contentpath)
 		data := doc.frontMatter()
-		data["body"] = template.HTML(doc.render(doc.content))
+		// Render document markup as a text template.
+		markup, err := renderTextTemplate("documentMarkup", doc.content, data)
+		if err != nil {
+			return err
+		}
+		// Convert markup to HTML then render document layout to build directory.
+		data["body"] = template.HTML(doc.render(markup))
 		err = proj.tmpls.render(doc.layout, data, doc.buildpath)
 		if err != nil {
 			return err
