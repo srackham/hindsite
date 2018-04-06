@@ -40,7 +40,8 @@ type document struct {
 	tags     []string
 	draft    bool
 	slug     string
-	layout   string // Document template name.
+	layout   string            // Document template name.
+	user     map[string]string // User defined configuration key/values.
 }
 
 type documents []*document
@@ -174,6 +175,7 @@ func (doc *document) extractFrontMatter() error {
 		Draft       bool
 		Slug        string
 		Layout      string
+		User        map[string]string
 	}{}
 	switch format {
 	case "toml":
@@ -229,9 +231,13 @@ func (doc *document) extractFrontMatter() error {
 	if fm.Layout != "" {
 		doc.layout = fm.Layout
 	}
+	if fm.User != nil {
+		doc.user = fm.User
+	}
 	return nil
 }
 
+// frontMatter returns docment template data including merged configuration variables.
 func (doc *document) frontMatter() templateData {
 	data := templateData{}
 	data["title"] = doc.title
@@ -263,6 +269,16 @@ func (doc *document) frontMatter() templateData {
 	if doc.next != nil {
 		data["next"] = templateData{"url": doc.next.url}
 	}
+	// Merge applicable (lower precedence) configuration variables.
+	if doc.author == "" {
+		data["author"] = doc.conf.author
+	}
+	data["urlprefix"] = doc.conf.urlprefix
+	user := doc.conf.user
+	for k, v := range doc.user {
+		user[k] = v
+	}
+	data["user"] = user
 	return data
 }
 

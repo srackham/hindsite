@@ -131,7 +131,9 @@ func (idx index) build() error {
 			fm["count"] = strconv.Itoa(count)
 			fm["page"] = pg.frontMatter()
 			fm.merge(data)
-			fm.merge(idx.proj.data())
+			// Merge applicable (lower precedence) configuration variables.
+			data["urlprefix"] = idx.conf.urlprefix
+			data["user"] = idx.conf.user
 			err := tmpls.render(tmpl, fm, pg.file)
 			idx.proj.verbose("write index: " + pg.file)
 			if err != nil {
@@ -158,7 +160,9 @@ func (idx index) build() error {
 		}
 		// Render tags index.
 		data := idx.tagsData()
-		data.merge(idx.proj.data())
+		// Merge applicable configuration variables.
+		data["urlprefix"] = idx.conf.urlprefix
+		data["user"] = idx.conf.user
 		outfile := filepath.Join(idx.indexDir, "tags.html")
 		err := tmpls.render(tagsTemplate, data, outfile)
 		idx.proj.verbose("write index: " + outfile)

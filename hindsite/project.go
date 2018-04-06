@@ -460,7 +460,6 @@ func (proj *project) build() error {
 		}
 		proj.verbose2("render document: " + doc.contentpath)
 		data := doc.frontMatter()
-		data.merge(proj.data())
 		data["body"] = template.HTML(doc.render(doc.content))
 		err = proj.tmpls.render(doc.layout, data, doc.buildpath)
 		if err != nil {
@@ -556,14 +555,6 @@ func (proj *project) exclude(f string) bool {
 		}
 	}
 	return false
-}
-
-// data returns project global template variables.
-func (proj *project) data() templateData {
-	return templateData{
-		"site": templateData{"urlprefix": proj.rootConf.urlprefix},
-		"user": proj.rootConf.user,
-	}
 }
 
 // serve implements the serve comand.

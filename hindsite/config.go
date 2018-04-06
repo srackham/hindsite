@@ -126,8 +126,8 @@ func (conf *config) parseFile(proj *project, f string) error {
 	return nil
 }
 
-// Return configuration as YAML formatted string.
-func (conf *config) data() templateData {
+// String returns configuration as YAML formatted string.
+func (conf *config) String() (result string) {
 	data := templateData{}
 	data["author"] = conf.author
 	data["homepage"] = conf.homepage
@@ -139,12 +139,7 @@ func (conf *config) data() templateData {
 	data["mediumdate"] = conf.mediumdate
 	data["longdate"] = conf.longdate
 	data["user"] = conf.user
-	return data
-}
-
-// Return configuration as YAML formatted string.
-func (conf *config) String() (result string) {
-	d, _ := yaml.Marshal(conf.data())
+	d, _ := yaml.Marshal(data)
 	return string(d)
 }
 
