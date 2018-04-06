@@ -426,8 +426,10 @@ func (proj *project) build() error {
 					return nil
 				}
 				docs = append(docs, &doc)
+			case ".css", ".html":
+				err = proj.renderStaticFile(f, confMod)
 			default:
-				err = proj.copyStaticFile(f, proj.contentDir, proj.buildDir)
+				err = proj.copyStaticFile(f)
 			}
 		}
 		return err
@@ -529,11 +531,14 @@ func upToDate(target, prerequisite string) bool {
 	return result
 }
 
-// copyStaticFile copies srcFile to corresponding path in dstRoot.
-// Skips if the destination file is up to date.
-// Creates missing destination directories.
-func (proj *project) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
-	dstFile, err := pathTranslate(srcFile, srcRoot, dstRoot)
+// copyStaticFile copies the content directory srcFile to corresponding build
+// directory path. Skips if the destination file is up to date. Creates missing
+// destination directories.
+func (proj *project) copyStaticFile(srcFile string) error {
+	if !pathIsInDir(srcFile, proj.contentDir) {
+		panic("static file is outside content directory: " + srcFile)
+	}
+	dstFile, err := pathTranslate(srcFile, proj.contentDir, proj.buildDir)
 	if err != nil {
 		return err
 	}
@@ -550,6 +555,57 @@ func (proj *project) copyStaticFile(srcFile, srcRoot, dstRoot string) error {
 		return err
 	}
 	proj.verbose("write static: " + dstFile)
+	return nil
+}
+
+// renderStaticFile renders the content directory srcFile as a text template to
+// the corresponding build directory path. Skips if the destination file is
+// newer than the srcFile and is newer than the modified time. Creates missing
+// destination directories.
+func (proj *project) renderStaticFile(srcFile string, modified time.Time) error {
+	if !pathIsInDir(srcFile, proj.contentDir) {
+		panic("static file is outside content directory: " + srcFile)
+	}
+	dstFile, err := pathTranslate(srcFile, proj.contentDir, proj.buildDir)
+	if err != nil {
+		return err
+	}
+	if upToDate(dstFile, srcFile) {
+		info, err := os.Stat(dstFile)
+		if err != nil {
+			return err
+		}
+		dstMod := info.ModTime()
+		if isOlder(modified, dstMod) {
+			return nil
+		}
+	}
+	proj.verbose2("render static:  " + srcFile)
+	err = mkMissingDir(filepath.Dir(dstFile))
+	if err != nil {
+		return err
+	}
+	// Render file contents as a text template using corresponding configuration data.
+	f, err := pathTranslate(srcFile, proj.contentDir, proj.templateDir)
+	if err != nil {
+		return err
+	}
+	templateDir := filepath.Dir(f)
+	conf := proj.configFor(templateDir)
+	data := conf.data()
+	text, err := readFile(srcFile)
+	if err != nil {
+		return err
+	}
+	text, err = renderTextTemplate("staticFile", text, data)
+	if err != nil {
+		return err
+	}
+	err = writeFile(dstFile, text)
+	if err != nil {
+		return err
+	}
+	proj.verbose("render static: " + dstFile)
 	return nil
 }
 
