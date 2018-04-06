@@ -246,8 +246,6 @@ func (doc *document) frontMatter() templateData {
 	data["longdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.longdate)
 	data["date"] = data["mediumdate"] // Alias.
 	data["author"] = doc.author
-	data["synopsis"] = template.HTML(doc.render(doc.synopsis))
-	data["addendum"] = template.HTML(doc.render(doc.addendum))
 	data["slug"] = doc.slug
 	data["url"] = doc.url
 	tags := []map[string]string{}
@@ -279,6 +277,11 @@ func (doc *document) frontMatter() templateData {
 		user[k] = v
 	}
 	data["user"] = user
+	// Render addendum and synopsis as a text templates.
+	addendum, _ := renderTextTemplate("documentAddendum", doc.addendum, data)
+	data["addendum"] = template.HTML(doc.render(addendum))
+	synopsis, _ := renderTextTemplate("documentSynopsis", doc.synopsis, data)
+	data["synopsis"] = template.HTML(doc.render(synopsis))
 	return data
 }
 
