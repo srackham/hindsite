@@ -452,6 +452,11 @@ func (proj *project) build() error {
 			idx.docs.setPrevNext()
 		}
 	}
+	// Build index pages.
+	err = idxs.build(confMod)
+	if err != nil {
+		return err
+	}
 	// Render documents. Documents are written before writing indexes so that
 	// they are available as soon as possible.
 	for _, doc := range docs {
@@ -470,11 +475,6 @@ func (proj *project) build() error {
 	}
 	fmt.Printf("documents: %d\n", docsCount)
 	fmt.Printf("drafts: %d\n", draftsCount)
-	// Build index pages.
-	err = idxs.build(confMod)
-	if err != nil {
-		return err
-	}
 	// Install home page.
 	if proj.rootConf.homepage != "" {
 		src := proj.rootConf.homepage
