@@ -131,9 +131,9 @@ func (idx index) build() error {
 			fm["count"] = strconv.Itoa(count)
 			fm["page"] = pg.frontMatter()
 			fm.merge(data)
-			// Merge applicable (lower precedence) configuration variables.
-			data["urlprefix"] = idx.conf.urlprefix
-			data["user"] = idx.conf.user
+			// Merge applicable configuration variables.
+			fm["urlprefix"] = idx.conf.urlprefix
+			fm["user"] = idx.conf.user
 			err := tmpls.render(tmpl, fm, pg.file)
 			idx.proj.verbose("write index: " + pg.file)
 			if err != nil {
