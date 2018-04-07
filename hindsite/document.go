@@ -277,7 +277,7 @@ func (doc *document) frontMatter() templateData {
 		user[k] = v
 	}
 	data["user"] = user
-	// Render addendum and synopsis as a text templates.
+	// Process addendum and synopsis as a text templates before rendering to HTML.
 	addendum, _ := renderTextTemplate("documentAddendum", doc.addendum, data)
 	data["addendum"] = template.HTML(doc.render(addendum))
 	synopsis, _ := renderTextTemplate("documentSynopsis", doc.synopsis, data)

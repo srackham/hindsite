@@ -532,7 +532,7 @@ func upToDate(target, prerequisite string) bool {
 }
 
 // copyStaticFile copies the content directory srcFile to corresponding build
-// directory path. Skips if the destination file is up to date. Creates missing
+// directory. Skips if the destination file is up to date. Creates missing
 // destination directories.
 func (proj *project) copyStaticFile(srcFile string) error {
 	if !pathIsInDir(srcFile, proj.contentDir) {
@@ -545,7 +545,7 @@ func (proj *project) copyStaticFile(srcFile string) error {
 	if upToDate(dstFile, srcFile) {
 		return nil
 	}
-	proj.verbose2("copy static:  " + srcFile)
+	proj.verbose("copy static:  " + srcFile)
 	err = mkMissingDir(filepath.Dir(dstFile))
 	if err != nil {
 		return err
@@ -554,13 +554,13 @@ func (proj *project) copyStaticFile(srcFile string) error {
 	if err != nil {
 		return err
 	}
-	proj.verbose("write static: " + dstFile)
+	proj.verbose2("write static: " + dstFile)
 	return nil
 }
 
 // renderStaticFile renders the content directory srcFile as a text template to
-// the corresponding build directory path. Skips if the destination file is
-// newer than the srcFile and is newer than the modified time. Creates missing
+// the corresponding build directory. Skips if the destination file is newer
+// than the srcFile and is newer than the modified time. Creates missing
 // destination directories.
 func (proj *project) renderStaticFile(srcFile string, modified time.Time) error {
 	if !pathIsInDir(srcFile, proj.contentDir) {
@@ -580,7 +580,7 @@ func (proj *project) renderStaticFile(srcFile string, modified time.Time) error 
 			return nil
 		}
 	}
-	proj.verbose2("render static:  " + srcFile)
+	proj.verbose("render static:  " + srcFile)
 	err = mkMissingDir(filepath.Dir(dstFile))
 	if err != nil {
 		return err
@@ -605,7 +605,7 @@ func (proj *project) renderStaticFile(srcFile string, modified time.Time) error 
 	if err != nil {
 		return err
 	}
-	proj.verbose("render static: " + dstFile)
+	proj.verbose2("write static: " + dstFile)
 	return nil
 }
 
