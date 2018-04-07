@@ -1,6 +1,4 @@
-# Hindsite Static Website Generator
-
-Notes for yet another static website generator build with Go.
+# Hindsite Reference
 
 ## Overview
 Hindsite is a static website generator. It's easy to learn an use and very fast.
@@ -27,24 +25,15 @@ posts, newsletters, articles) from Markdown source documents.
 
 5. Open your Web browser at http://localhost:1212
 
-To customise the website edit the project's Markdown documents (`.md` files in
-the project `content` directory), templates (`.html` files in the project
-`template` directory) and configuration files (`config.{toml,yaml}`).
+To customise the website edit the project's:
+
+- Markdown documents (`.md` files in the project `content` directory).
+- Templates (`.html` files in the project `template` directory).
+- Configuration files (`config.{toml,yaml}` in the project `template`
+  directory).
   
 If you are familar with Jekyll or Hugo you'll be right a home (hindsite can read
 Jekyll and Hugo Markdown documents).
-
-
-## Design goals
-The overarching goal is a minimal cognative footprint i.e. easy to understand.
-This is achived by keeping the number of features and concepts to a minimum, in
-particular:
-
-- Structural transparency -- content, template and build directory trees
-  mirror each other along with the source and built document locations.
-- Themes are not separate, every project template directory is a theme.
-- One template language (native Go templates).
-- Use TOML or YAML markup interchangably for configuration and front matter.
 
 
 ## Projects
@@ -85,27 +74,65 @@ structure:
     └── posts
 ```
 
-Disregarding the special `build/indexes` and `template/init` directories, notice
-that all three directories share the same base directory structure.
+Notice that, if we disregard the `build/indexes` and `template/init`
+directories, all three directories share the same base directory structure.
 Specifically, all three contain the template directory structure and the build
-directory is simply a one-to-one reconstruction of the content directory.
+directory is a one-to-one reconstruction of the content directory.
 
-`build/indexes` contains the generated document and tag index pages; the
-`template/init` directory is used by the [init](#init) command to initialize new
-content directories.
+The `build/indexes` directory contains the generated document and tag index
+pages; the `template/init` directory is used by the [init](#init) command to
+initialize new project content directories.
 
-## Documents
-Document pages are built by rendering content Markdown files with HTML
-templates. The generated HTML file is saved to the corresponding build location.
 
-### Front matter
-## Indexes
-## Common command options
-- `PROJECT_DIR`: the hindsite project directory.
-- `-content CONTENT_DIR`: the project content directory (defaults to `PROJECT_DIR/content`).
-- `-build BUILD_DIR`: the project build directory (defaults to `PROJECT_DIR/build`).
-- `-template TEMPLATE_DIR`: the project template directory (defaults to `PROJECT_DIR/template`).
-- `-v`: Increase verbosity. `-vv` is an alias for `-v -v`.
+## Design goals
+The overarching goal is a minimal cognative footprint i.e. easy to understand.
+This is achived by keeping the number of features and concepts to a minimum, in
+particular:
+
+- Structural transparency -- content, template and build directory trees
+  mirror each other.
+- Themes are not separate, every project template directory is a theme.
+- One template language (native Go templates) for templates and content
+  files.
+- Use of TOML or YAML markup interchangably for configuration and front matter.
+
+
+## hindsite CLI
+Usage:
+
+    hindsite init  PROJECT_DIR [OPTIONS]
+    hindsite build PROJECT_DIR [OPTIONS]
+    hindsite serve PROJECT_DIR [OPTIONS]
+    hindsite help  [TOPIC]
+
+Commands:
+
+    init    initialize a new project
+    build   generate the website
+    serve   start development webserver
+    help    display documentation
+
+Common command options:
+
+`PROJECT_DIR`:: the hindsite project directory.
+`-content CONTENT_DIR`:: the project content directory (defaults to `PROJECT_DIR/content`).
+`-build BUILD_DIR`:: the project build directory (defaults to `PROJECT_DIR/build`).
+`-template TEMPLATE_DIR`:: the project template directory (defaults to `PROJECT_DIR/template`).
+`-v`:: Increase verbosity. `-vv` is an alias for `-v -v`.
+
+/*
+```
+PROJECT_DIR               hindsite project directory.
+-content CONTENT_DIR      Project content directory.
+                          Defaults to PROJECT_DIR/content.
+-build BUILD_DIR          Project build directory.
+                          Defaults to PROJECT_DIR/build.
+-template TEMPLATE_DIR    Project template directory.
+                          Defaults to PROJECT_DIR/template.
+-v                        Increase verbosity.
+                          -vv is an alias for -v -v.
+```
+*/
 
 ## help command
 Usage:
@@ -130,16 +157,16 @@ Synopsis:
 
 Applicable options:
 
-    -content  CONTENT_DIR
+    -content CONTENT_DIR
     -template TEMPLATE_DIR
-    -builtin  NAME
+    -builtin NAME
     -v
 
 - `NAME` is a builtin template name viz. `blog` or `minimal`.
 - The `CONTENT_DIR` must be empty.
 - If the `-builtin` option is specified the `TEMPLATE_DIR` must also be empty.
 
-The `init` command executes as follows:
+Execution:
 
 1. If the `-builtin` option is specified it copies the builtin template to
    `TEMPLATE_DIR`.
@@ -164,28 +191,31 @@ Usage:
 
 Synopsis:
 
-    Build a static website from project content and template directories
-    to a build directory.
+    Build a static website.
 
 Applicable options:
 
-    -content  CONTENT_DIR
+    -content CONTENT_DIR
     -template TEMPLATE_DIR
-    -build    BUILD_DIR
+    -build BUILD_DIR
     -incremental
     -drafts
     -v
 
-- By default the entire contents of the build directory is deleted and the site
-  is completely rebuilt.
-- If the `-incremental` optioin is specified only new and updated files are
-  rebuilt.
+- If the `-incremental` option is specified only new and updated files are
+  rebuilt (by default the entire contents of the build directory is deleted and the site
+  is completely rebuilt).
 - Specify `-drafts` to include draft documents.
 - Project, build and template directories cannot overlap, with one exception:
   the content directory can be set to `TEMPLATE_DIR/init`. This is handy for
   testing templates.
 
-### Incremental build
+Execution:
+
+TODO
+
+
+## Incremental build
 An incremental build only rebuilds those documents and indexes that require
 updating. Incremental builds are faster and they facilitate incremental
 deployment. The incremental rebuild rules are:
@@ -209,23 +239,32 @@ aware of:
 
 
 ## serve command
-Syntax:
+Usage:
 
     hindsite build PROJECT_DIR [OPTIONS]
 
+Synopsis:
+
+    Starts a development webserver on the project build directory.
+
 Applicable options:
 
-    -build    BUILD_DIR
-    -port     PORT
+    -build BUILD_DIR
+    -port PORT
     -v
 
 - `PORT` is the server port number (defaults to 1212).
 
-This command starts a development webserver on the project build directory.
 
+## Documents
+Document pages are built by rendering content Markdown files with HTML
+templates. The generated HTML file is saved to the corresponding build location.
 
+### Front matter
+## Indexes
 ## Templates
 ## Template variables
+## Content variables
 ## Configuration parameters
 Configuration parameters drive document and index generation. They are computed
 on a directory by directory basis by merging configuration files.
@@ -335,6 +374,10 @@ Hello *World*!
 TODO
 - Templates don't have to be one per file, you can define multiple in a single file.
 - Layout templates can be specified in the front matter and can be any defined template.
+- All templates are aggregated, see https://stackoverflow.com/questions/17206467/go-how-to-render-multiple-templates-in-golang
+
+> Layouts are fixed patterns in web page design that can be re-used for multiple pages. Web applications often use layouts, as pages in a web application need to look the same for a consistent user interface. -- https://www.htmlgoodies.com/beyond/reference/nesting-templates-with-go-web-programming.html
+
 
 ### Template variables
 Template variables are injected into template files during webpage generation.

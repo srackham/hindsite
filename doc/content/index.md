@@ -1,24 +1,33 @@
-# Hindsite
+## Overview
+Hindsite is a static website generator. It's easy to learn an use and very fast.
+It builds static websites with optional document and tag indexes (e.g. blogs
+posts, newsletters, articles) from Markdown source documents.
 
-Hindsite is a simple static site generator for personal, project and blog websites.
 
-The overriding design criteria are simplicity and transparency.
+## Quick Start
+1. Download the Hindsite executable for your platform.
 
-1. Install hindsite:
+2. Create a new Hindsite project directory and install the builtin blog
+   template:
 
-    TODO
+        mkdir myproj
+        hindsite init myproj -builtin blog
 
-2. Create and generate a website:
+3. Build the website:
 
-    mkdir website
-    cd website
-    hindsite init
-    hindsite build
+        hindsite build myproj
 
-3. View the website in your browser:
+4. Start the hindsite web server:
 
-    hindsite serve
+        hindsite serve myproj
 
-Hindsite is written in Go and it's very fast, give it a go.
+5. Open your Web browser at http://localhost:1212
 
-See the [Hindsite Reference](reference.html).
+To customise the website edit the project's Markdown documents (`.md` files in
+the project `content` directory), templates (`.html` files in the project
+`template` directory) and configuration files (`config.{toml,yaml}` in the
+project `template` directory).
+  
+If you are familar with Jekyll or Hugo you'll be right a home (hindsite can read
+Jekyll and Hugo Markdown documents).
+

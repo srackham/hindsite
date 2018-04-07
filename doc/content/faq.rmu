@@ -2,7 +2,7 @@
 
 
 ### Why another website generator
-Long story short, 
+Long story short, I wanted a fast, light 
 I resumed updating my blog after a 3 year hiatus, after resolving
 
 but my old Hugo 0.13 blog would not build with the latest version of Hugo. Time to
@@ -15,17 +15,18 @@ generator, one that would be a doodle for mere mortals to learn and to use (and
 reuse). Good luck with that!
 
 
-### How can I categorise my documents into separate indexes?
-TODO
-For example by author.
+### How can I partition documents into separate categories
+Put them in separate indexes. Indexes are similar to [Wordpress
+categories](https://en.support.wordpress.com/posts/categories-vs-tags/) but they
+are file system based so you do not have to assign them explicitly. Documents
+belong to their own and parent indexes (not to arbitrary indexes).
 
-
-### I want a non-paginated document index
+### I want a single page document index
 Set the `paginate` configuration parameter to `-1` and all indexed documents
 will appear on the first page.
 
 
-### I want both paginated and non-pagninated document indexes
+### I want both paginated and single page document indexes
 This technique creates a second nested index:
 
 1. Create a child index with the `paginate` configuration parameter set to `-1`.
@@ -57,23 +58,14 @@ https://stackoverflow.com/questions/5730092/how-to-remove-html-from-url
 
 ## Automatic rebuild and browser reload
 When editing document source files it's nice to have the output update
-automatically in your Web browser.
+automatically in your Web browser when files are saved. This can be achieved
+using a file watcher program to auto rebuild the website in conjunction with a
+browser auto reload extension.
 
-Use a file watcher program (e.g. [entr(1)](http://entrproject.org/)) in
-conjunction with a browser reload application (e.g. the Chrome
-[LivePage](https://chrome.google.com/webstore/detail/livepage/pilnojpmdoofaelbinaeodfpjheijkbh)
-extension). 
-
-The following example starts the hindsite development server then uses
-[entr(1)](http://entrproject.org/)) to watch all files in the content and
-template directories:
-
-    $ hindsite serve &
-    $ (find content && find template) | entr hindsite build
+For example, hindsite includes an auto rebuild script called
+[watch-hindsite.sh](TODO), it runs on Linux and uses the inotify-tool
+inotifywait(1) command to detect project changes and then automatically run the
+hindsite `build` command.
 
 If you preprocess static content e.g. with SASS, LESS etc. you will also need to
-conditionally rebuild them e.g. using a built tool such as make(1).
-
-**NOTE**: When navigating back to another page it does not appear updated
-despite the fact that the server is receiving LivePage requests and you have to
-manually refreshing the browser.
+conditionally rebuild them.
