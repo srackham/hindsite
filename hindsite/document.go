@@ -22,9 +22,9 @@ import (
 type document struct {
 	proj         *project // Context.
 	conf         config   // Merged configuration for this document.
-	contentpath  string
-	buildpath    string
-	templatepath string    // Virtual path used to find document related templates.
+	contentPath  string
+	buildPath    string
+	templatePath string    // Virtual path used to find document related templates.
 	content      string    // Markup text (without front matter header).
 	primaryIndex *index    // Top-level document index (nil if document is not indexed).
 	modified     time.Time // Document source file modified timestamp.
@@ -61,12 +61,12 @@ func newDocument(contentfile string, proj *project) (document, error) {
 		return doc, err
 	}
 	doc.modified = info.ModTime()
-	doc.contentpath = contentfile
-	p, _ := filepath.Rel(proj.contentDir, doc.contentpath)
+	doc.contentPath = contentfile
+	p, _ := filepath.Rel(proj.contentDir, doc.contentPath)
 	p = replaceExt(p, ".html")
-	doc.buildpath = filepath.Join(proj.buildDir, p)
-	doc.templatepath = filepath.Join(proj.templateDir, p)
-	doc.conf = proj.configFor(filepath.Dir(doc.templatepath))
+	doc.buildPath = filepath.Join(proj.buildDir, p)
+	doc.templatePath = filepath.Join(proj.templateDir, p)
+	doc.conf = proj.configFor(filepath.Dir(doc.templatePath))
 	doc.url = path.Join("/", doc.conf.urlprefix, filepath.ToSlash(p))
 	// Extract title and date from file name.
 	doc.title = fileName(contentfile)
@@ -81,7 +81,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	doc.title = strings.Title(strings.Replace(doc.title, "-", " ", -1))
 	// Parse embedded front matter.
 	doc.author = doc.conf.author // Default author.
-	doc.content, err = readFile(doc.contentpath)
+	doc.content, err = readFile(doc.contentPath)
 	if err != nil {
 		return doc, err
 	}
@@ -90,19 +90,19 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	}
 	if doc.slug != "" {
 		// Change output file names to match document slug variable.
-		doc.buildpath = filepath.Join(filepath.Dir(doc.buildpath), doc.slug+".html")
+		doc.buildPath = filepath.Join(filepath.Dir(doc.buildPath), doc.slug+".html")
 		doc.url = path.Join(path.Dir(doc.url), doc.slug+".html")
 	}
 	if doc.layout == "" {
 		// Find nearest document layout template file.
 		layout := ""
-		for _, tmpl := range proj.tmpls.layouts {
-			if len(tmpl) > len(layout) && pathIsInDir(doc.templatepath, filepath.Dir(tmpl)) {
-				layout = tmpl
+		for _, l := range proj.tmpls.layouts {
+			if len(l) > len(layout) && pathIsInDir(doc.templatePath, filepath.Dir(l)) {
+				layout = l
 			}
 		}
 		if layout == "" {
-			return doc, fmt.Errorf("missing layout.html template for: %s", doc.contentpath)
+			return doc, fmt.Errorf("missing layout.html template for: %s", doc.contentPath)
 		}
 		doc.layout = proj.tmpls.name(layout)
 	}
@@ -147,7 +147,7 @@ func (doc *document) extractFrontMatter() error {
 		return err
 	}
 	if eof {
-		return fmt.Errorf("missing front matter delimiter: %s: %s", end, doc.contentpath)
+		return fmt.Errorf("missing front matter delimiter: %s: %s", end, doc.contentPath)
 	}
 	synopsis, eof, err := readTo("<!--more-->", scanner)
 	if err != nil {
@@ -294,7 +294,7 @@ func (doc *document) String() (result string) {
 // Render document markup to HTML.
 func (doc *document) render(text string) (html string) {
 	// Render document.
-	switch filepath.Ext(doc.contentpath) {
+	switch filepath.Ext(doc.contentPath) {
 	case ".md":
 		html = string(blackfriday.Run([]byte(text)))
 	case ".rmu":

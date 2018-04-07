@@ -19,7 +19,7 @@ type index struct {
 	indexDir    string               // The build directory that the index pages are written to.
 	url         string               // Synthesised absolute or root-relative index directory URL.
 	docs        documents            // Parsed documents belonging to index.
-	tagdocs     map[string]documents // Partitions indexed documents by tag.
+	tagDocs     map[string]documents // Partitions indexed documents by tag.
 	slugs       map[string]string    // Slugified tags.
 	primary     bool                 // True if this is a primary index.
 }
@@ -41,7 +41,7 @@ type page struct {
 func newIndex(proj *project) index {
 	idx := index{}
 	idx.proj = proj
-	idx.tagdocs = map[string]documents{}
+	idx.tagDocs = map[string]documents{}
 	idx.slugs = map[string]string{}
 	return idx
 }
@@ -91,7 +91,7 @@ func newIndexes(proj *project) (indexes, error) {
 // the document its primary index.
 func (idxs indexes) addDocument(doc *document) {
 	for i, idx := range idxs {
-		if pathIsInDir(doc.templatepath, idx.templateDir) {
+		if pathIsInDir(doc.templatePath, idx.templateDir) {
 			idxs[i].docs = append(idx.docs, doc)
 			if idx.primary {
 				doc.primaryIndex = &idxs[i]
@@ -148,12 +148,12 @@ func (idx index) build() error {
 		// Build idx.tagdocs[].
 		for _, doc := range idx.docs {
 			for _, tag := range doc.tags {
-				idx.tagdocs[tag] = append(idx.tagdocs[tag], doc)
+				idx.tagDocs[tag] = append(idx.tagDocs[tag], doc)
 			}
 		}
 		// Build index tag slugs.
 		slugs := []string{}
-		for tag := range idx.tagdocs {
+		for tag := range idx.tagDocs {
 			slug := slugify(tag, slugs)
 			slugs = append(slugs, slug)
 			idx.slugs[tag] = slug
@@ -170,8 +170,8 @@ func (idx index) build() error {
 			return err
 		}
 		// Render per-tag document index pages.
-		for tag := range idx.tagdocs {
-			pgs := idx.paginate(idx.tagdocs[tag], filepath.Join("tags", idx.slugs[tag]+"-%d.html"))
+		for tag := range idx.tagDocs {
+			pgs := idx.paginate(idx.tagDocs[tag], filepath.Join("tags", idx.slugs[tag]+"-%d.html"))
 			if err := renderPages(pgs, docsTemplate, templateData{"tag": tag}); err != nil {
 				return err
 			}
@@ -184,7 +184,7 @@ func (idx index) build() error {
 
 func (idx index) tagsData() templateData {
 	tags := []map[string]string{} // An array of "tag", "url" key value maps.
-	for tag, docs := range idx.tagdocs {
+	for tag, docs := range idx.tagDocs {
 		data := map[string]string{
 			"tag":   tag,
 			"url":   path.Join(idx.url, "tags", idx.slugs[tag]+"-1.html"),

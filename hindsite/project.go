@@ -462,10 +462,10 @@ func (proj *project) build() error {
 	// Render documents. Documents are written before writing indexes so that
 	// they are available as soon as possible.
 	for _, doc := range docs {
-		if !rebuild(doc.buildpath, confMod, doc) {
+		if !rebuild(doc.buildPath, confMod, doc) {
 			continue
 		}
-		proj.verbose2("render document: " + doc.contentpath)
+		proj.verbose2("render document: " + doc.contentPath)
 		data := doc.frontMatter()
 		// Render document markup as a text template.
 		markup, err := renderTextTemplate("documentMarkup", doc.content, data)
@@ -474,11 +474,11 @@ func (proj *project) build() error {
 		}
 		// Convert markup to HTML then render document layout to build directory.
 		data["body"] = template.HTML(doc.render(markup))
-		err = proj.tmpls.render(doc.layout, data, doc.buildpath)
+		err = proj.tmpls.render(doc.layout, data, doc.buildPath)
 		if err != nil {
 			return err
 		}
-		proj.verbose("write document: " + doc.buildpath)
+		proj.verbose("write document: " + doc.buildPath)
 		proj.verbose2(doc.String())
 	}
 	fmt.Printf("documents: %d\n", docsCount)
