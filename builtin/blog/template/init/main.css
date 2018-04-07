@@ -21,7 +21,7 @@
     white-space: inherit;
     box-sizing: border-box;
 }
-body {
+html {
     font-size: 20px;
     color: var(--text-color);
     background-color: var(--primary-background);
