@@ -17,7 +17,7 @@ type index struct {
 	contentDir  string               // The directory that contains the indexed documents.
 	templateDir string               // The directory that contains the index templates.
 	indexDir    string               // The build directory that the index pages are written to.
-	url         string               // Synthesised absolute or root-relative index directory URL.
+	url         string               // Synthesised index directory URL.
 	docs        documents            // Parsed documents belonging to index.
 	tagDocs     map[string]documents // Partitions indexed documents by tag.
 	slugs       map[string]string    // Slugified tags.
@@ -145,7 +145,7 @@ func (idx index) build() error {
 	docsTemplate := tmpls.name(idx.templateDir, "docs.html")
 	tagsTemplate := tmpls.name(idx.templateDir, "tags.html")
 	if tmpls.contains(tagsTemplate) {
-		// Build idx.tagdocs[].
+		// Build idx.tagDocs[].
 		for _, doc := range idx.docs {
 			for _, tag := range doc.tags {
 				idx.tagDocs[tag] = append(idx.tagDocs[tag], doc)

@@ -36,7 +36,7 @@ type document struct {
 	author   string
 	synopsis string
 	addendum string
-	url      string // Synthesised absolute or root-relative document URL.
+	url      string // Synthesised document URL.
 	tags     []string
 	draft    bool
 	slug     string

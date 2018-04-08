@@ -362,7 +362,6 @@ func (proj *project) build() error {
 			}
 		}
 	}
-	proj.tmpls = newTemplates(proj.templateDir)
 	// confMod records the most recent date a change was made to a configuration file or a template file.
 	var confMod time.Time
 	updateConfMod := func(info os.FileInfo) {
@@ -371,6 +370,7 @@ func (proj *project) build() error {
 		}
 	}
 	// Parse all template files.
+	proj.tmpls = newTemplates(proj.templateDir)
 	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -486,10 +486,10 @@ func (proj *project) build() error {
 	// Install home page.
 	if proj.rootConf.homepage != "" {
 		src := proj.rootConf.homepage
-		dst := filepath.Join(proj.buildDir, "index.html")
 		if !fileExists(src) {
 			return fmt.Errorf("homepage file missing: %s", src)
 		}
+		dst := filepath.Join(proj.buildDir, "index.html")
 		if !fileExists(dst) || upToDate(src, dst) {
 			proj.verbose2("copy homepage: " + src)
 			proj.verbose("write homepage: " + dst)
