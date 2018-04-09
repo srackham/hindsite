@@ -17,7 +17,8 @@ import (
 type config struct {
 	origin string // Configuration file directory.
 	// Configuration parameters.
-	author    string            // Default document author.
+	author    *string           // Default document author (nil if undefined).
+	templates *string           // Comma separated list of content file name extensions to undergo text template expansion (nil if undefined).
 	homepage  string            // Use this file (relative to the build directory) for /index.html.
 	paginate  int               // Number of documents per index page. No pagination if zero or less.
 	urlprefix string            // Prefix for synthesised document and index page URLs.
@@ -45,19 +46,20 @@ func newConfig() config {
 	return conf
 }
 
-// Parse config file.
+// parseFile parses a configuration file.
 func (conf *config) parseFile(proj *project, f string) error {
 	text, err := ioutil.ReadFile(f)
 	if err != nil {
 		return err
 	}
 	cf := struct {
-		Author     string
+		Author     *string // nil if undefined.
+		Templates  *string // nil if undefined.
+		Exclude    *string // nil if undefined.
 		Homepage   string
 		URLPrefix  string
 		Paginate   int
 		Timezone   string
-		Exclude    string
 		ShortDate  string
 		MediumDate string
 		LongDate   string
@@ -78,8 +80,11 @@ func (conf *config) parseFile(proj *project, f string) error {
 		panic("illegal configuration file extension")
 	}
 	// Validate and merge parsed configuration.
-	if cf.Author != "" {
+	if cf.Author != nil {
 		conf.author = cf.Author
+	}
+	if cf.Templates != nil {
+		conf.templates = cf.Templates
 	}
 	if cf.Homepage != "" {
 		value := cf.Homepage
@@ -101,8 +106,8 @@ func (conf *config) parseFile(proj *project, f string) error {
 		}
 		conf.urlprefix = strings.TrimSuffix(value, "/")
 	}
-	if cf.Exclude != "" {
-		conf.exclude = strings.Split(cf.Exclude, "|")
+	if cf.Exclude != nil {
+		conf.exclude = strings.Split(*cf.Exclude, "|")
 	}
 	if cf.Timezone != "" {
 		tz, err := time.LoadLocation(cf.Timezone)
@@ -129,7 +134,8 @@ func (conf *config) parseFile(proj *project, f string) error {
 // Return configuration as YAML formatted string.
 func (conf *config) data() templateData {
 	data := templateData{}
-	data["author"] = conf.author
+	data["author"] = nz(conf.author)
+	data["templates"] = nz(conf.templates)
 	data["homepage"] = conf.homepage
 	data["paginate"] = conf.paginate
 	data["urlprefix"] = conf.urlprefix
@@ -191,30 +197,26 @@ func (proj *project) parseConfigs() error {
 	sort.Slice(proj.confs, func(i, j int) bool {
 		return proj.confs[i].origin < proj.confs[j].origin
 	})
-	proj.rootConf = proj.configFor(proj.templateDir)
+	proj.rootConf = proj.configFor(proj.contentDir)
 	proj.verbose2("root config: \n" + proj.rootConf.String())
 	return nil
 }
 
-// Merge non-"zero" configuration fields into configuration.
+// merge merges non-"zero" configuration parameters into configuration.
+// homepage, templates and urlprefix parameters are global (root configuration)
+// parameters and are not merged.
 func (conf *config) merge(from config) {
 	if from.origin != "" {
 		conf.origin = from.origin
 	}
-	if from.author != "" {
+	if from.author != nil {
 		conf.author = from.author
 	}
-	if from.homepage != "" {
-		conf.homepage = from.homepage
+	if from.templates != nil {
+		conf.templates = from.templates
 	}
 	if from.paginate != 0 {
 		conf.paginate = from.paginate
-	}
-	if from.urlprefix != "" {
-		conf.urlprefix = from.urlprefix
-	}
-	if len(from.exclude) != 0 {
-		conf.exclude = from.exclude
 	}
 	if from.timezone != nil {
 		conf.timezone = from.timezone
@@ -231,24 +233,4 @@ func (conf *config) merge(from config) {
 	for k, v := range from.user {
 		conf.user[k] = v
 	}
-}
-
-// configFor returns the merged configuration for the dir directory.
-// Configuration files that are in the dir path are merged working from top
-// (lowest precedence) to bottom.
-//
-// For example, if dir is `template/posts/james` then directories are searched
-// in the following order: `template`, `template/posts`, `template/posts/james`
-// with configuration entries from `template` having lowest precedence.
-//
-// The `proj.confs` have been sorted by configuration `origin` in ascending
-// order to ensure the directory precedence.
-func (proj *project) configFor(dir string) config {
-	result := newConfig()
-	for _, conf := range proj.confs {
-		if dir == conf.origin || pathIsInDir(dir, conf.origin) {
-			result.merge(conf)
-		}
-	}
-	return result
 }

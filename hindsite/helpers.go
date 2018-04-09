@@ -22,6 +22,14 @@ func die(message string) {
 	os.Exit(1)
 }
 
+// nz returns the string pointed to by s or "" if s is nil.
+func nz(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
 // Transform text into a slug (lowercase alpha-numeric + hyphens).
 func slugify(text string, exclude stringlist) string {
 	slug := text
@@ -134,7 +142,7 @@ func pathIsInDir(p, dir string) bool {
 
 // Translate srcPath to corresponding path in dstRoot.
 func pathTranslate(srcPath, srcRoot, dstRoot string) (string, error) {
-	if !pathIsInDir(srcPath, srcRoot) {
+	if !(srcPath == srcRoot || pathIsInDir(srcPath, srcRoot)) {
 		panic("pathTranslate: srcPath not in srcRoot")
 	}
 	dstPath, err := filepath.Rel(srcRoot, srcPath)

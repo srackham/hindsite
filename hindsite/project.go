@@ -426,10 +426,13 @@ func (proj *project) build() error {
 					return nil
 				}
 				docs = append(docs, &doc)
-			case ".css", ".html":
-				err = proj.renderStaticFile(f, confMod)
 			default:
-				err = proj.copyStaticFile(f)
+				conf := proj.configFor(f)
+				if isTemplate(f, nz(conf.templates)) {
+					err = proj.renderStaticFile(f, confMod)
+				} else {
+					err = proj.copyStaticFile(f)
+				}
 			}
 		}
 		return err
@@ -465,13 +468,17 @@ func (proj *project) build() error {
 		if !rebuild(doc.buildPath, confMod, doc) {
 			continue
 		}
-		proj.verbose2("render document: " + doc.contentPath)
 		data := doc.frontMatter()
+		markup := doc.content
 		// Render document markup as a text template.
-		markup, err := renderTextTemplate("documentMarkup", doc.content, data)
-		if err != nil {
-			return err
+		if isTemplate(doc.contentPath, nz(doc.templates)) {
+			proj.verbose2("render template: " + doc.contentPath)
+			markup, err = renderTextTemplate("documentMarkup", markup, data)
+			if err != nil {
+				return err
+			}
 		}
+		proj.verbose2("render document: " + doc.contentPath)
 		// Convert markup to HTML then render document layout to build directory.
 		data["body"] = template.HTML(doc.render(markup))
 		err = proj.tmpls.render(doc.layout, data, doc.buildPath)
@@ -500,6 +507,42 @@ func (proj *project) build() error {
 	}
 	fmt.Printf("time: %.2fs\n", time.Now().Sub(startTime).Seconds())
 	return nil
+}
+
+// serve implements the serve comand.
+func (proj *project) serve() error {
+	if err := proj.parseConfigs(); err != nil {
+		return err
+	}
+	if !dirExists(proj.buildDir) {
+		return fmt.Errorf("missing build directory: " + proj.buildDir)
+	}
+	// Tweaked http.StripPrefix() handler
+	// (https://golang.org/pkg/net/http/#StripPrefix). If URL does not start
+	// with prefix serve unmodified URL.
+	stripPrefix := func(prefix string, h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			proj.verbose("request: " + r.URL.Path)
+			if p := strings.TrimPrefix(r.URL.Path, prefix); len(p) < len(r.URL.Path) {
+				r2 := new(http.Request)
+				*r2 = *r
+				r2.URL = new(url.URL)
+				*r2.URL = *r.URL
+				r2.URL.Path = p
+				h.ServeHTTP(w, r2)
+			} else {
+				h.ServeHTTP(w, r)
+			}
+		})
+	}
+	http.Handle("/", stripPrefix(proj.rootConf.urlprefix, http.FileServer(http.Dir(proj.buildDir))))
+	proj.println(0, fmt.Sprintf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port))
+	return http.ListenAndServe(":"+proj.port, nil)
+}
+
+// isTemplate returns true if the file path f is in the templates configuration value.
+func isTemplate(f, templates string) bool {
+	return strings.Contains(","+templates+",", ","+filepath.Ext(f)+",")
 }
 
 // rebuild returns true if the target file does not exist or is newer than
@@ -586,12 +629,7 @@ func (proj *project) renderStaticFile(srcFile string, modified time.Time) error 
 		return err
 	}
 	// Render file contents as a text template using corresponding configuration data.
-	f, err := pathTranslate(srcFile, proj.contentDir, proj.templateDir)
-	if err != nil {
-		return err
-	}
-	templateDir := filepath.Dir(f)
-	conf := proj.configFor(templateDir)
+	conf := proj.configFor(srcFile)
 	data := conf.data()
 	text, err := readFile(srcFile)
 	if err != nil {
@@ -619,33 +657,39 @@ func (proj *project) exclude(f string) bool {
 	return false
 }
 
-// serve implements the serve comand.
-func (proj *project) serve() error {
-	if err := proj.parseConfigs(); err != nil {
-		return err
+// configFor returns the merged configuration for content directory path p.
+// Configuration files that are in the corresponding template directory path are
+// merged working from top (lowest precedence) to bottom.
+//
+// For example, if th path is `template/posts/james` then directories are
+// searched in the following order: `template`, `template/posts`,
+// `template/posts/james` with configuration entries from `template` having
+// lowest precedence.
+//
+// The `proj.confs` have been sorted by configuration `origin` in ascending
+// order to ensure the directory precedence.
+func (proj *project) configFor(p string) config {
+	if !(p == proj.contentDir || pathIsInDir(p, proj.contentDir)) {
+		panic("configFor path outside content directory: " + p)
 	}
-	if !dirExists(proj.buildDir) {
-		return fmt.Errorf("missing build directory: " + proj.buildDir)
+	dir, err := pathTranslate(p, proj.contentDir, proj.templateDir)
+	if err != nil {
+		panic("untranslatable configFor path: " + p)
 	}
-	// Tweaked http.StripPrefix() handler
-	// (https://golang.org/pkg/net/http/#StripPrefix). If URL does not start
-	// with prefix serve unmodified URL.
-	stripPrefix := func(prefix string, h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			proj.verbose("request: " + r.URL.Path)
-			if p := strings.TrimPrefix(r.URL.Path, prefix); len(p) < len(r.URL.Path) {
-				r2 := new(http.Request)
-				*r2 = *r
-				r2.URL = new(url.URL)
-				*r2.URL = *r.URL
-				r2.URL.Path = p
-				h.ServeHTTP(w, r2)
-			} else {
-				h.ServeHTTP(w, r)
-			}
-		})
+	if fileExists(p) {
+		dir = filepath.Dir(dir)
 	}
-	http.Handle("/", stripPrefix(proj.rootConf.urlprefix, http.FileServer(http.Dir(proj.buildDir))))
-	proj.println(0, fmt.Sprintf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port))
-	return http.ListenAndServe(":"+proj.port, nil)
+	result := newConfig()
+	for i, conf := range proj.confs {
+		if dir == conf.origin || pathIsInDir(dir, conf.origin) {
+			result.merge(conf)
+		}
+		if i == 0 {
+			// Assign global root configuration values.
+			result.exclude = conf.exclude
+			result.homepage = conf.homepage
+			result.urlprefix = conf.urlprefix
+		}
+	}
+	return result
 }

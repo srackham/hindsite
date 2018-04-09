@@ -31,17 +31,18 @@ type document struct {
 	prev         *document // Previous document in primary index.
 	next         *document // Next document in primary index.
 	// Front matter.
-	title    string
-	date     time.Time
-	author   string
-	synopsis string
-	addendum string
-	url      string // Synthesised document URL.
-	tags     []string
-	draft    bool
-	slug     string
-	layout   string            // Document template name.
-	user     map[string]string // User defined configuration key/values.
+	title     string
+	date      time.Time
+	author    *string
+	templates *string
+	synopsis  string
+	addendum  string
+	url       string // Synthesised document URL.
+	tags      []string
+	draft     bool
+	slug      string
+	layout    string            // Document template name.
+	user      map[string]string // User defined configuration key/values.
 }
 
 type documents []*document
@@ -66,7 +67,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	p = replaceExt(p, ".html")
 	doc.buildPath = filepath.Join(proj.buildDir, p)
 	doc.templatePath = filepath.Join(proj.templateDir, p)
-	doc.conf = proj.configFor(filepath.Dir(doc.templatePath))
+	doc.conf = proj.configFor(doc.contentPath)
 	doc.url = path.Join("/", doc.conf.urlprefix, filepath.ToSlash(p))
 	// Extract title and date from file name.
 	doc.title = fileName(contentfile)
@@ -80,7 +81,8 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	}
 	doc.title = strings.Title(strings.Replace(doc.title, "-", " ", -1))
 	// Parse embedded front matter.
-	doc.author = doc.conf.author // Default author.
+	doc.author = doc.conf.author       // Default author.
+	doc.templates = doc.conf.templates // Default templates.
 	doc.content, err = readFile(doc.contentPath)
 	if err != nil {
 		return doc, err
@@ -167,7 +169,8 @@ func (doc *document) extractFrontMatter() error {
 		Title       string
 		Date        string
 		Synopsis    string
-		Author      string
+		Author      *string
+		Templates   *string
 		Description string
 		Addendum    string
 		Tags        string   // Comma-separated tags.
@@ -194,15 +197,17 @@ func (doc *document) extractFrontMatter() error {
 		doc.title = fm.Title
 	}
 	if fm.Date != "" {
-		// TODO parse
 		d, err := parseDate(fm.Date, nil)
 		if err != nil {
 			return err
 		}
 		doc.date = d
 	}
-	if fm.Author != "" {
+	if fm.Author != nil {
 		doc.author = fm.Author
+	}
+	if fm.Templates != nil {
+		doc.templates = fm.Templates
 	}
 	if fm.Synopsis != "" {
 		doc.synopsis = fm.Synopsis
@@ -241,11 +246,12 @@ func (doc *document) extractFrontMatter() error {
 func (doc *document) frontMatter() templateData {
 	data := templateData{}
 	data["title"] = doc.title
+	data["author"] = nz(doc.author)
+	data["templates"] = nz(doc.templates)
 	data["shortdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.shortdate)
 	data["mediumdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.mediumdate)
 	data["longdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.longdate)
 	data["date"] = data["mediumdate"] // Alias.
-	data["author"] = doc.author
 	data["slug"] = doc.slug
 	data["url"] = doc.url
 	tags := []map[string]string{}
@@ -267,10 +273,6 @@ func (doc *document) frontMatter() templateData {
 	if doc.next != nil {
 		data["next"] = templateData{"url": doc.next.url}
 	}
-	// Merge applicable (lower precedence) configuration variables.
-	if doc.author == "" {
-		data["author"] = doc.conf.author
-	}
 	data["urlprefix"] = doc.conf.urlprefix
 	user := doc.conf.user
 	for k, v := range doc.user {
@@ -278,9 +280,13 @@ func (doc *document) frontMatter() templateData {
 	}
 	data["user"] = user
 	// Process addendum and synopsis as a text templates before rendering to HTML.
-	addendum, _ := renderTextTemplate("documentAddendum", doc.addendum, data)
+	addendum := doc.addendum
+	synopsis := doc.synopsis
+	if isTemplate(doc.contentPath, nz(doc.templates)) {
+		addendum, _ = renderTextTemplate("documentAddendum", addendum, data)
+		synopsis, _ = renderTextTemplate("documentSynopsis", synopsis, data)
+	}
 	data["addendum"] = template.HTML(doc.render(addendum))
-	synopsis, _ := renderTextTemplate("documentSynopsis", doc.synopsis, data)
 	data["synopsis"] = template.HTML(doc.render(synopsis))
 	return data
 }
