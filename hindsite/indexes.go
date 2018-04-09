@@ -79,8 +79,8 @@ func newIndexes(proj *project) (indexes, error) {
 	for i, idx1 := range idxs {
 		idxs[i].primary = true
 		for _, idx2 := range idxs {
-			// TODO: and not equal
-			if pathIsInDir(idx1.templateDir, idx2.templateDir) {
+			if pathIsInDir(idx1.templateDir, idx2.templateDir) && idx1.templateDir != idx2.templateDir {
+				// idx1 is child of idx2.
 				idxs[i].primary = false
 			}
 		}

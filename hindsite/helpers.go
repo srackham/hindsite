@@ -136,20 +136,21 @@ func mkMissingDir(dir string) error {
 	return nil
 }
 
+// pathIsInDir returns true if path p is in directory dir or if p equals dir.
 func pathIsInDir(p, dir string) bool {
-	return strings.HasPrefix(p, dir+string(filepath.Separator))
+	return p == dir || strings.HasPrefix(p, dir+string(filepath.Separator))
 }
 
 // Translate srcPath to corresponding path in dstRoot.
-func pathTranslate(srcPath, srcRoot, dstRoot string) (string, error) {
-	if !(srcPath == srcRoot || pathIsInDir(srcPath, srcRoot)) {
+func pathTranslate(srcPath, srcRoot, dstRoot string) string {
+	if !pathIsInDir(srcPath, srcRoot) {
 		panic("pathTranslate: srcPath not in srcRoot")
 	}
 	dstPath, err := filepath.Rel(srcRoot, srcPath)
 	if err != nil {
-		return "", err
+		panic("pathTranslate: " + err.Error())
 	}
-	return filepath.Join(dstRoot, dstPath), nil
+	return filepath.Join(dstRoot, dstPath)
 }
 
 // TODO: UNUSED
@@ -166,7 +167,7 @@ func filesInPath(base, root string, patterns []string, n int) (files []string, e
 		return files, fmt.Errorf("root path is not absolute: %s", root)
 	}
 	if base != root && !pathIsInDir(base, root) {
-		return files, fmt.Errorf("root is not an ancestor of base: %s: %s", root, base)
+		return files, fmt.Errorf("base is not a child of root of base: %s: %s", base, root)
 	}
 	p := base
 	count := 0

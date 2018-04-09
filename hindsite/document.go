@@ -50,10 +50,10 @@ type documents []*document
 // Parse document content and front matter.
 func newDocument(contentfile string, proj *project) (document, error) {
 	if !pathIsInDir(contentfile, proj.contentDir) {
-		panic("document is outside content directory: " + contentfile)
+		panic("newDocument: document is outside content directory: " + contentfile)
 	}
 	if !fileExists(contentfile) {
-		panic("missing document: " + contentfile)
+		panic("newDocument: missing document: " + contentfile)
 	}
 	doc := document{}
 	doc.proj = proj

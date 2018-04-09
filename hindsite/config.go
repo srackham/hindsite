@@ -77,7 +77,7 @@ func (conf *config) parseFile(proj *project, f string) error {
 			return err
 		}
 	default:
-		panic("illegal configuration file extension")
+		panic("parseFile: illegal configuration file extension: " + f)
 	}
 	// Validate and merge parsed configuration.
 	if cf.Author != nil {
@@ -87,13 +87,19 @@ func (conf *config) parseFile(proj *project, f string) error {
 		conf.templates = cf.Templates
 	}
 	if cf.Homepage != "" {
-		value := cf.Homepage
-		if !filepath.IsAbs(value) {
-			value = filepath.Join(proj.buildDir, value)
-		} else if !pathIsInDir(value, proj.buildDir) {
+		home := cf.Homepage
+		if !filepath.IsAbs(home) {
+			home = filepath.Join(proj.buildDir, home)
+		} else {
+			return fmt.Errorf("homepage must be relative to the build directory: %s", proj.buildDir)
+		}
+		if !pathIsInDir(home, proj.buildDir) {
 			return fmt.Errorf("homepage must reside in build directory: %s", proj.buildDir)
 		}
-		conf.homepage = value
+		if dirExists(home) {
+			return fmt.Errorf("homepage cannot be a directory: %s", home)
+		}
+		conf.homepage = home
 	}
 	if cf.Paginate != 0 {
 		conf.paginate = cf.Paginate

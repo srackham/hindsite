@@ -115,7 +115,7 @@ func (proj *project) parseArgs(args []string) error {
 			case "-port":
 				proj.port = arg
 			default:
-				panic("illegal arugment: " + opt)
+				panic("parseArgs: illegal arugment: " + opt)
 			}
 			skip = true
 		default:
@@ -182,7 +182,7 @@ func (proj *project) parseArgs(args []string) error {
 	if err := checkOverlap("build", proj.buildDir, "template", proj.templateDir); err != nil {
 		return err
 	}
-	if !(pathIsInDir(proj.indexDir, proj.buildDir) || proj.indexDir == proj.buildDir) {
+	if !pathIsInDir(proj.indexDir, proj.buildDir) {
 		return fmt.Errorf("index directory must reside in build directory: %s", proj.buildDir)
 	}
 	return nil
@@ -205,7 +205,7 @@ func (proj *project) execute() error {
 	case "serve":
 		err = proj.serve()
 	default:
-		panic("illegal command: " + proj.command)
+		panic("execute: illegal command: " + proj.command)
 	}
 	return err
 }
@@ -270,10 +270,7 @@ func (proj *project) init() error {
 			return filepath.SkipDir
 		}
 		if info.IsDir() {
-			dst, err := pathTranslate(f, proj.templateDir, proj.contentDir)
-			if err != nil {
-				return err
-			}
+			dst := pathTranslate(f, proj.templateDir, proj.contentDir)
 			proj.verbose("make directory: " + dst)
 			err = mkMissingDir(dst)
 		}
@@ -291,10 +288,7 @@ func (proj *project) init() error {
 			if f == initDir {
 				return nil
 			}
-			dst, err := pathTranslate(f, initDir, proj.contentDir)
-			if err != nil {
-				return err
-			}
+			dst := pathTranslate(f, initDir, proj.contentDir)
 			if info.IsDir() {
 				if !dirExists(dst) {
 					proj.verbose("make directory: " + dst)
@@ -579,17 +573,14 @@ func upToDate(target, prerequisite string) bool {
 // destination directories.
 func (proj *project) copyStaticFile(srcFile string) error {
 	if !pathIsInDir(srcFile, proj.contentDir) {
-		panic("static file is outside content directory: " + srcFile)
+		panic("copyStaticFile: static file is outside content directory: " + srcFile)
 	}
-	dstFile, err := pathTranslate(srcFile, proj.contentDir, proj.buildDir)
-	if err != nil {
-		return err
-	}
+	dstFile := pathTranslate(srcFile, proj.contentDir, proj.buildDir)
 	if upToDate(dstFile, srcFile) {
 		return nil
 	}
 	proj.verbose("copy static:  " + srcFile)
-	err = mkMissingDir(filepath.Dir(dstFile))
+	err := mkMissingDir(filepath.Dir(dstFile))
 	if err != nil {
 		return err
 	}
@@ -607,12 +598,9 @@ func (proj *project) copyStaticFile(srcFile string) error {
 // destination directories.
 func (proj *project) renderStaticFile(srcFile string, modified time.Time) error {
 	if !pathIsInDir(srcFile, proj.contentDir) {
-		panic("static file is outside content directory: " + srcFile)
+		panic("renderStaticFile: static file is outside content directory: " + srcFile)
 	}
-	dstFile, err := pathTranslate(srcFile, proj.contentDir, proj.buildDir)
-	if err != nil {
-		return err
-	}
+	dstFile := pathTranslate(srcFile, proj.contentDir, proj.buildDir)
 	if upToDate(dstFile, srcFile) {
 		info, err := os.Stat(dstFile)
 		if err != nil {
@@ -624,7 +612,7 @@ func (proj *project) renderStaticFile(srcFile string, modified time.Time) error 
 		}
 	}
 	proj.verbose("render static:  " + srcFile)
-	err = mkMissingDir(filepath.Dir(dstFile))
+	err := mkMissingDir(filepath.Dir(dstFile))
 	if err != nil {
 		return err
 	}
@@ -669,19 +657,16 @@ func (proj *project) exclude(f string) bool {
 // The `proj.confs` have been sorted by configuration `origin` in ascending
 // order to ensure the directory precedence.
 func (proj *project) configFor(p string) config {
-	if !(p == proj.contentDir || pathIsInDir(p, proj.contentDir)) {
-		panic("configFor path outside content directory: " + p)
+	if !pathIsInDir(p, proj.contentDir) {
+		panic("configFor: path outside content directory: " + p)
 	}
-	dir, err := pathTranslate(p, proj.contentDir, proj.templateDir)
-	if err != nil {
-		panic("untranslatable configFor path: " + p)
-	}
+	dir := pathTranslate(p, proj.contentDir, proj.templateDir)
 	if fileExists(p) {
 		dir = filepath.Dir(dir)
 	}
 	result := newConfig()
 	for i, conf := range proj.confs {
-		if dir == conf.origin || pathIsInDir(dir, conf.origin) {
+		if pathIsInDir(dir, conf.origin) {
 			result.merge(conf)
 		}
 		if i == 0 {
