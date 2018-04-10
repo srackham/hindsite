@@ -64,7 +64,10 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	doc.modified = info.ModTime()
 	doc.contentPath = contentfile
 	p, _ := filepath.Rel(proj.contentDir, doc.contentPath)
-	p = replaceExt(p, ".html")
+	switch filepath.Ext(p) {
+	case ".md", ".rmu":
+		p = replaceExt(p, ".html")
+	}
 	doc.buildPath = filepath.Join(proj.buildDir, p)
 	doc.templatePath = filepath.Join(proj.templateDir, p)
 	doc.conf = proj.configFor(doc.contentPath)

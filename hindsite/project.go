@@ -389,7 +389,7 @@ func (proj *project) build() error {
 	if err != nil {
 		return err
 	}
-	// Parse content directory documents and copy static files to the build directory.
+	// Parse content directory documents and copy/render static files to the build directory.
 	draftsCount := 0
 	docsCount := 0
 	docs := documents{}
@@ -592,47 +592,36 @@ func (proj *project) copyStaticFile(srcFile string) error {
 	return nil
 }
 
-// renderStaticFile renders the content directory srcFile as a text template to
-// the corresponding build directory. Skips if the destination file is newer
-// than the srcFile and is newer than the modified time. Creates missing
+// renderStaticFile renders file f from the content directory as a text template
+// and writes it to the corresponding build directory. Skips if the destination
+// file is newer than f and is newer than the modified time. Creates missing
 // destination directories.
-func (proj *project) renderStaticFile(srcFile string, modified time.Time) error {
-	if !pathIsInDir(srcFile, proj.contentDir) {
-		panic("renderStaticFile: static file is outside content directory: " + srcFile)
+func (proj *project) renderStaticFile(f string, modified time.Time) error {
+	// Parse document.
+	doc, err := newDocument(f, proj)
+	if err != nil {
+		return err
 	}
-	dstFile := pathTranslate(srcFile, proj.contentDir, proj.buildDir)
-	if upToDate(dstFile, srcFile) {
-		info, err := os.Stat(dstFile)
+	if !rebuild(doc.buildPath, modified, &doc) {
+		return nil
+	}
+	// Render document markup as a text template.
+	proj.verbose2("render static: " + doc.contentPath)
+	proj.verbose2(doc.String())
+	markup := doc.content
+	if isTemplate(doc.contentPath, nz(doc.templates)) {
+		data := doc.frontMatter()
+		markup, err = renderTextTemplate("staticFile", markup, data)
 		if err != nil {
 			return err
 		}
-		dstMod := info.ModTime()
-		if isOlder(modified, dstMod) {
-			return nil
-		}
 	}
-	proj.verbose("render static:  " + srcFile)
-	err := mkMissingDir(filepath.Dir(dstFile))
+	proj.verbose("write static: " + doc.buildPath)
+	err = mkMissingDir(filepath.Dir(doc.buildPath))
 	if err != nil {
 		return err
 	}
-	// Render file contents as a text template using corresponding configuration data.
-	conf := proj.configFor(srcFile)
-	data := conf.data()
-	text, err := readFile(srcFile)
-	if err != nil {
-		return err
-	}
-	text, err = renderTextTemplate("staticFile", text, data)
-	if err != nil {
-		return err
-	}
-	err = writeFile(dstFile, text)
-	if err != nil {
-		return err
-	}
-	proj.verbose2("write static: " + dstFile)
-	return nil
+	return writeFile(doc.buildPath, markup)
 }
 
 // exclude returns true if path name f matches a configuration exclude path.
