@@ -95,8 +95,9 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	}
 	if doc.slug != "" {
 		// Change output file names to match document slug variable.
-		doc.buildPath = filepath.Join(filepath.Dir(doc.buildPath), doc.slug+".html")
-		doc.url = path.Join(path.Dir(doc.url), doc.slug+".html")
+		f := doc.slug + filepath.Ext(doc.buildPath)
+		doc.buildPath = filepath.Join(filepath.Dir(doc.buildPath), f)
+		doc.url = path.Join(path.Dir(doc.url), f)
 	}
 	if doc.layout == "" {
 		// Find nearest document layout template file.
