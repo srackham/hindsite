@@ -12,22 +12,22 @@ import (
 )
 
 type project struct {
-	command     string
-	executable  string
-	projectDir  string
-	contentDir  string
-	templateDir string
-	buildDir    string
-	indexDir    string
-	drafts      bool
-	topic       string
-	port        string
-	incremental bool
-	builtin     string
-	verbosity   int
-	rootConf    config
-	confs       configs
-	tmpls       templates
+	command       string
+	executable    string
+	projectDir    string
+	contentDir    string
+	templateDir   string
+	buildDir      string
+	indexDir      string
+	drafts        bool
+	topic         string
+	port          string
+	incremental   bool
+	builtin       string
+	verbosity     int
+	rootConf      config
+	confs         configs
+	htmlTemplates htmlTemplates
 }
 
 func newProject() project {
@@ -363,7 +363,7 @@ func (proj *project) build() error {
 		}
 	}
 	// Parse all template files.
-	proj.tmpls = newTemplates(proj.templateDir)
+	proj.htmlTemplates = newHtmlTemplates(proj.templateDir)
 	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -380,7 +380,7 @@ func (proj *project) build() error {
 				// Compile template.
 				updateConfMod(info)
 				proj.verbose("parse template: " + f)
-				err = proj.tmpls.add(f)
+				err = proj.htmlTemplates.add(f)
 			}
 		}
 		return err
@@ -474,7 +474,7 @@ func (proj *project) build() error {
 		proj.verbose2("render document: " + doc.contentPath)
 		// Convert markup to HTML then render document layout to build directory.
 		data["body"] = doc.render(markup)
-		err = proj.tmpls.render(doc.layout, data, doc.buildPath)
+		err = proj.htmlTemplates.render(doc.layout, data, doc.buildPath)
 		if err != nil {
 			return err
 		}

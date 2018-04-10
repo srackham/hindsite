@@ -102,7 +102,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	if doc.layout == "" {
 		// Find nearest document layout template file.
 		layout := ""
-		for _, l := range proj.tmpls.layouts {
+		for _, l := range proj.htmlTemplates.layouts {
 			if len(l) > len(layout) && pathIsInDir(doc.templatePath, filepath.Dir(l)) {
 				layout = l
 			}
@@ -110,7 +110,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 		if layout == "" {
 			return doc, fmt.Errorf("missing layout.html template for: %s", doc.contentPath)
 		}
-		doc.layout = proj.tmpls.name(layout)
+		doc.layout = proj.htmlTemplates.name(layout)
 	}
 	return doc, nil
 }

@@ -119,7 +119,7 @@ func (idxs indexes) build(modified time.Time) error {
 
 // build builds document and tag index pages.
 func (idx index) build() error {
-	tmpls := &idx.proj.tmpls // Lexical shortcut.
+	tmpls := &idx.proj.htmlTemplates // Lexical shortcut.
 	// renderPages renders paginated document pages with named template.
 	// Additional template data is included.
 	renderPages := func(pgs []page, tmpl string, data templateData) error {
