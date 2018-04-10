@@ -289,8 +289,8 @@ func (doc *document) frontMatter() templateData {
 		addendum, _ = renderTextTemplate("documentAddendum", addendum, data)
 		synopsis, _ = renderTextTemplate("documentSynopsis", synopsis, data)
 	}
-	data["addendum"] = template.HTML(doc.render(addendum))
-	data["synopsis"] = template.HTML(doc.render(synopsis))
+	data["addendum"] = doc.render(addendum)
+	data["synopsis"] = doc.render(synopsis)
 	return data
 }
 
@@ -301,8 +301,9 @@ func (doc *document) String() (result string) {
 }
 
 // Render document markup to HTML.
-func (doc *document) render(text string) (html string) {
+func (doc *document) render(text string) template.HTML {
 	// Render document.
+	var html string
 	switch filepath.Ext(doc.contentPath) {
 	case ".md":
 		html = string(blackfriday.Run([]byte(text)))
@@ -313,7 +314,7 @@ func (doc *document) render(text string) (html string) {
 		}
 		html = rimu.Render(text, rimu.RenderOptions{})
 	}
-	return html
+	return template.HTML(html)
 }
 
 // Assign previous and next according to the current sort order.

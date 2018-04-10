@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -474,7 +473,7 @@ func (proj *project) build() error {
 		}
 		proj.verbose2("render document: " + doc.contentPath)
 		// Convert markup to HTML then render document layout to build directory.
-		data["body"] = template.HTML(doc.render(markup))
+		data["body"] = doc.render(markup)
 		err = proj.tmpls.render(doc.layout, data, doc.buildPath)
 		if err != nil {
 			return err
