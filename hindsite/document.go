@@ -136,15 +136,18 @@ func (doc *document) extractFrontMatter() error {
 	}
 	var end, format string
 	switch scanner.Text() {
-	case "<!--":
-		format = "yaml"
-		end = "-->"
 	case "---":
 		format = "yaml"
 		end = "---"
 	case "+++":
 		format = "toml"
 		end = "+++"
+	case "<!--":
+		format = "yaml"
+		end = "-->"
+	case "/***":
+		format = "yaml"
+		end = "***/"
 	default:
 		return nil
 	}
