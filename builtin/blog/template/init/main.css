@@ -1,7 +1,9 @@
 :root {
-    --primary-color: #ac4142;
+    --primary-color: #527bbd;
+    /* --primary-color: #ac4142; */
     --primary-background: white;
-    --lighter-primary: #af5254;
+    --lighter-primary: #70a4f8;
+    /* --lighter-primary: #e25e62; */
     --text-color: #333333;
     --link-color: #428bca;
     --disabled-color: gray;
@@ -14,6 +16,12 @@
     --code-background: #f8f8f8;
     --sidebar-background: #ffffee;
     --max-text-width: 55rem;
+    --tag-visited-color: var(--primary-color);
+
+    font-size: 20px;
+    color: var(--text-color);
+    background-color: var(--primary-background);
+    font-family: var(--serif-font);
 }
 * {
     margin: 0;
@@ -21,30 +29,22 @@
     white-space: inherit;
     box-sizing: border-box;
 }
-html {
-    font-size: 20px;
-    color: var(--text-color);
-    background-color: var(--primary-background);
-    font-family: var(--serif-font);
-}
 h1, h2, h3, h4, h5, h6 {
     font-weight: 500;
-    margin: 10px 0;
     color: var(--primary-color);
     font-family: var(--sans-font);
 }
-h1 { font-size: 2.2rem; }
-h2 { font-size: 1.5rem; }
+h1 { font-size: 1.8rem; }
+h2 { font-size: 1.4rem; }
 h3 { font-size: 1.2rem; }
 h4 { font-size: 1.1rem; }
 h5 { font-size: 1.0rem; }
 h6 { font-size: 0.9rem; }
-h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6 {
     margin-top: 1.0rem;
     margin-bottom: 0.2rem;
 }
 h2 {
-    margin-top: 1.5rem;
     border-bottom: var(--border);
 }
 #main img {
@@ -87,10 +87,9 @@ ul, ol {
 }
 dt {
     margin-bottom: 0;
-    font-style: italic;
 }
 dd {
-    margin-left: 1.0rem;
+    margin-left: 3.0rem;
     margin-top: 0;
 }
 blockquote {
@@ -256,8 +255,8 @@ ul > li {
 }
 .menu li {
     float: left;
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 .menu li:first-child {
     margin-left: 25px;
@@ -266,7 +265,7 @@ ul > li {
     display: block;
     color: var(--primary-background);
     text-align: center;
-    padding: 0px 15px;
+    padding: 3px 15px;
     text-decoration: none;
 }
 .menu li a:hover {
@@ -299,7 +298,7 @@ ul > li {
 }
 
 .tagslist a:visited {
-    color: var(--primary-color);
+    color: var(--tag-visited-color);
 }
 
 .more {
