@@ -3,8 +3,7 @@ debug
 *.out
 gitignore
 examples/minimal/index.html
-bin/hindsite
-bin/hindsite.exe
+bin/hindsite*
 build/
 doc/index.md
 .vscode/
