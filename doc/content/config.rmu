@@ -1,0 +1,43 @@
+/*
+  Rimu Markup definitions.
+*/
+
+/*
+  Hindsite documentation.
+*/
+{--header-ids} = 'yes'
+{github} = 'https://github.com/srackham/hindsite'
+
+
+/*
+  Replacements
+*/
+// Typographic replacements.
+/\\?--/ = '&mdash;'
+/\\?\.{3}/ = '&hellip;'
+/\\?->/ = '&rightarrow;'
+/\\?<-/ = '&leftarrow;'
+/\\?\([cC]\)/ = '&copy;'
+/\\?\((tm|TM)\)/ = '&trade;'
+/\\?\+-/ = '&plusmn;'
+
+// Admonishments.
+/\\?\bTODO\b/ = '<b style="color: red; background-color: yellow;">TODO</b>'
+/^\\?(NOTES?|IMPORTANT|WARNINGS?|TIPS?):/ = '<b class="sans-font">$1</b>:'
+
+
+/*
+  Quotes
+*/
+// Double-underline (overrides built-in strong quote).
+__ = '<u>|</u>'
+// Left and right double-quote characters.
+" = '&ldquo;|&rdquo;'
+
+
+/*
+  Highlight.js
+*/
+// Turn off auto-hightlighting.
+|code| = '<pre class="no-highlight"><code>|</code></pre>'
+|indented| = '<pre class="no-highlight"><code>|</code></pre>'
