@@ -428,7 +428,7 @@ func (proj *project) build() error {
 				docs = append(docs, &doc)
 			default:
 				conf := proj.configFor(f)
-				if isTemplate(f, nz(conf.templates)) {
+				if isTemplate(f, conf.templates) {
 					err = proj.renderStaticFile(f, confMod)
 				} else {
 					err = proj.copyStaticFile(f)
@@ -471,7 +471,7 @@ func (proj *project) build() error {
 		data := doc.frontMatter()
 		markup := doc.content
 		// Render document markup as a text template.
-		if isTemplate(doc.contentPath, nz(doc.templates)) {
+		if isTemplate(doc.contentPath, doc.templates) {
 			proj.verbose2("render template: " + doc.contentPath)
 			markup, err = proj.textTemplates.renderText("documentMarkup", markup, data)
 			if err != nil {
@@ -541,8 +541,8 @@ func (proj *project) serve() error {
 }
 
 // isTemplate returns true if the file path f is in the templates configuration value.
-func isTemplate(f, templates string) bool {
-	return strings.Contains(","+templates+",", ","+filepath.Ext(f)+",")
+func isTemplate(f string, templates *string) bool {
+	return strings.Contains(","+nz(templates)+",", ","+filepath.Ext(f)+",")
 }
 
 // rebuild returns true if the target file does not exist or is newer than
@@ -615,7 +615,7 @@ func (proj *project) renderStaticFile(f string, modified time.Time) error {
 	proj.verbose2("render static: " + doc.contentPath)
 	proj.verbose2(doc.String())
 	markup := doc.content
-	if isTemplate(doc.contentPath, nz(doc.templates)) {
+	if isTemplate(doc.contentPath, doc.templates) {
 		data := doc.frontMatter()
 		markup, err = proj.textTemplates.renderText("staticFile", markup, data)
 		if err != nil {

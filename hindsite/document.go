@@ -289,7 +289,7 @@ func (doc *document) frontMatter() templateData {
 	// Process addendum and synopsis as a text templates before rendering to HTML.
 	addendum := doc.addendum
 	synopsis := doc.synopsis
-	if isTemplate(doc.contentPath, nz(doc.templates)) {
+	if isTemplate(doc.contentPath, doc.templates) {
 		addendum, _ = doc.proj.textTemplates.renderText("documentAddendum", addendum, data)
 		synopsis, _ = doc.proj.textTemplates.renderText("documentSynopsis", synopsis, data)
 	}
