@@ -27,10 +27,27 @@ install: test
 .PHONY: build
 build:
 	mkdir -p ./bin
-	GOOS=linux GOARCH=amd64 go build -o ./bin/hindsite-linux-amd64 ./...
-	GOOS=darwin GOARCH=amd64 go build -o ./bin/hindsite-darwin-amd64 ./...
-	GOOS=windows GOARCH=amd64 go build -o ./bin/hindsite-windows-amd64.exe ./...
-	GOOS=windows GOARCH=386 go build -o ./bin/hindsite-windows-386.exe ./...
+	export VERS=$$(git describe --tags --abbrev=0)
+
+	export GOOS=linux
+	export GOARCH=amd64
+	LDFLAGS="-X main.VERS=$$VERS -X main.OS=$$GOOS/$$GOARCH"
+	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-linux-amd64 ./...
+
+	export GOOS=darwin
+	export GOARCH=amd64
+	LDFLAGS="-X main.VERS=$$VERS -X main.OS=$$GOOS/$$GOARCH"
+	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-darwin-amd64 ./...
+
+	export GOOS=windows
+	export GOARCH=amd64
+	LDFLAGS="-X main.VERS=$$VERS -X main.OS=$$GOOS/$$GOARCH"
+	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-windows-amd64.exe ./...
+
+	export GOOS=windows
+	export GOARCH=386
+	LDFLAGS="-X main.VERS=$$VERS -X main.OS=$$GOOS/$$GOARCH"
+	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-windows-386.exe ./...
 
 .PHONY: test
 test: bindata

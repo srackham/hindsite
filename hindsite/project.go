@@ -11,6 +11,12 @@ import (
 	"time"
 )
 
+// VERS is the latest hindsite version tag. Set by linker -ldflags "-X main.VERS=..."
+var VERS = "-"
+
+// OS is the target operating system and architecture. Set by linker -ldflags "-X main.OS=..."
+var OS = "-"
+
 type project struct {
 	command       string
 	executable    string
@@ -307,7 +313,7 @@ func (proj *project) init() error {
 
 // help implements the help command.
 func (proj *project) help() {
-	println(`Hindsite is a static website generator.
+	fmt.Println(`Hindsite is a static website generator.
 
 Usage:
 
@@ -321,7 +327,7 @@ The commands are:
     init    initialize a new project
     build   generate the website
     serve   start development webserver
-    help    display documentation
+    help    display usage summary
 
 The options are:
 
@@ -333,7 +339,10 @@ The options are:
     -incremental
     -drafts
     -v
-`)
+
+Documentation: https://srackham.github.io/hindsite
+
+Version: ` + VERS + " (" + OS + ")")
 }
 
 // build implements the build command.
