@@ -28,6 +28,7 @@ type project struct {
 	rootConf      config
 	confs         configs
 	htmlTemplates htmlTemplates
+	textTemplates textTemplates
 }
 
 func newProject() project {
@@ -364,6 +365,7 @@ func (proj *project) build() error {
 	}
 	// Parse all template files.
 	proj.htmlTemplates = newHtmlTemplates(proj.templateDir)
+	proj.textTemplates = newTextTemplates(proj.templateDir)
 	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -377,10 +379,15 @@ func (proj *project) build() error {
 				// Skip configuration file.
 				updateConfMod(info)
 			case ".html":
-				// Compile template.
+				// Compile HTML template.
 				updateConfMod(info)
 				proj.verbose("parse template: " + f)
 				err = proj.htmlTemplates.add(f)
+			case ".txt":
+				// Compile text template.
+				updateConfMod(info)
+				proj.verbose("parse template: " + f)
+				err = proj.textTemplates.add(f)
 			}
 		}
 		return err
@@ -466,7 +473,7 @@ func (proj *project) build() error {
 		// Render document markup as a text template.
 		if isTemplate(doc.contentPath, nz(doc.templates)) {
 			proj.verbose2("render template: " + doc.contentPath)
-			markup, err = renderTextTemplate("documentMarkup", markup, data)
+			markup, err = proj.textTemplates.renderText("documentMarkup", markup, data)
 			if err != nil {
 				return err
 			}
@@ -610,7 +617,7 @@ func (proj *project) renderStaticFile(f string, modified time.Time) error {
 	markup := doc.content
 	if isTemplate(doc.contentPath, nz(doc.templates)) {
 		data := doc.frontMatter()
-		markup, err = renderTextTemplate("staticFile", markup, data)
+		markup, err = proj.textTemplates.renderText("staticFile", markup, data)
 		if err != nil {
 			return err
 		}

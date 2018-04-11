@@ -1,14 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
-	"text/template"
 	"time"
 )
 
@@ -48,19 +46,6 @@ func slugify(text string, exclude stringlist) string {
 		slug += "-" + fmt.Sprint(i)
 	}
 	return slug
-}
-
-// renderTextTemplate renders template text with data and returns the result string.
-func renderTextTemplate(name, text string, data templateData) (string, error) {
-	tmpl, err := template.New(name).Parse(text)
-	if err != nil {
-		return "", err
-	}
-	var output bytes.Buffer
-	if err := tmpl.Execute(&output, data); err != nil {
-		return "", err
-	}
-	return output.String(), nil
 }
 
 /*

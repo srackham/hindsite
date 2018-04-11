@@ -290,8 +290,8 @@ func (doc *document) frontMatter() templateData {
 	addendum := doc.addendum
 	synopsis := doc.synopsis
 	if isTemplate(doc.contentPath, nz(doc.templates)) {
-		addendum, _ = renderTextTemplate("documentAddendum", addendum, data)
-		synopsis, _ = renderTextTemplate("documentSynopsis", synopsis, data)
+		addendum, _ = doc.proj.textTemplates.renderText("documentAddendum", addendum, data)
+		synopsis, _ = doc.proj.textTemplates.renderText("documentSynopsis", synopsis, data)
 	}
 	data["addendum"] = doc.render(addendum)
 	data["synopsis"] = doc.render(synopsis)
