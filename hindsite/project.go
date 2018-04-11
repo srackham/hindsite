@@ -398,6 +398,7 @@ func (proj *project) build() error {
 	// Parse content directory documents and copy/render static files to the build directory.
 	draftsCount := 0
 	docsCount := 0
+	staticCount := 0
 	docs := documents{}
 	err = filepath.Walk(proj.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -427,6 +428,7 @@ func (proj *project) build() error {
 				}
 				docs = append(docs, &doc)
 			default:
+				staticCount++
 				conf := proj.configFor(f)
 				if isTemplate(f, conf.templates) {
 					err = proj.renderStaticFile(f, confMod)
@@ -490,6 +492,7 @@ func (proj *project) build() error {
 	}
 	fmt.Printf("documents: %d\n", docsCount)
 	fmt.Printf("drafts: %d\n", draftsCount)
+	fmt.Printf("static: %d\n", staticCount)
 	// Install home page.
 	if proj.rootConf.homepage != "" {
 		src := proj.rootConf.homepage
@@ -644,7 +647,7 @@ func (proj *project) exclude(f string) bool {
 // Configuration files that are in the corresponding template directory path are
 // merged working from top (lowest precedence) to bottom.
 //
-// For example, if th path is `template/posts/james` then directories are
+// For example, if the path is `template/posts/james` then directories are
 // searched in the following order: `template`, `template/posts`,
 // `template/posts/james` with configuration entries from `template` having
 // lowest precedence.
