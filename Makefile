@@ -22,38 +22,23 @@ bindata: ./hindsite/bindata.go
 
 .PHONY: install
 install: test
-	go install $(GOFLAGS) ./...
+	go install ./...
 
 .PHONY: build
-build: build-linux64 build-linux32 build-win64 build-win32
-
-.PHONY: build-linux32
-build-linux32: bindata
+build:
 	mkdir -p ./bin
-	GOOS=linux GOARCH=386 go build $(GOFLAGS) -o ./bin/hindsite-386 ./...
-
-.PHONY: build-linux64
-build-linux64: bindata
-	mkdir -p ./bin
-	GOOS=linux GOARCH=amd64 go build $(GOFLAGS) -o ./bin/hindsite-amd64 ./...
-
-.PHONY: build-win32
-build-win32: bindata
-	mkdir -p ./bin
-	GOOS=windows GOARCH=386 go build $(GOFLAGS) -o ./bin/hindsite-386.exe ./...
-
-.PHONY: build-win64
-build-win64: bindata
-	mkdir -p ./bin
-	GOOS=windows GOARCH=amd64 go build $(GOFLAGS) -o ./bin/hindsite-amd64.exe ./...
+	GOOS=linux GOARCH=amd64 go build -o ./bin/hindsite-linux-amd64 ./...
+	GOOS=darwin GOARCH=amd64 go build -o ./bin/hindsite-darwin-amd64 ./...
+	GOOS=windows GOARCH=amd64 go build -o ./bin/hindsite-windows-amd64.exe ./...
+	GOOS=windows GOARCH=386 go build -o ./bin/hindsite-windows-386.exe ./...
 
 .PHONY: test
 test: bindata
-	go test $(GOFLAGS) ./...
+	go test ./...
 
 .PHONY: clean
 clean:
-	go clean $(GOFLAGS) -i ./...
+	go clean -i ./...
 
 .PHONY: doc
 doc: build-doc serve-doc
