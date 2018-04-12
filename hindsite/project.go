@@ -335,8 +335,8 @@ The options are:
     -drafts
     -v
 
-Documentation: https://srackham.github.io/hindsite
-
+Github:  https://github.com/srackham/hindsite
+Docs:    https://srackham.github.io/hindsite
 Version: ` + VERS + " (" + OS + ")")
 }
 
@@ -484,8 +484,8 @@ func (proj *project) build() error {
 				return err
 			}
 		}
-		proj.verbose2("render document: " + doc.contentPath)
 		// Convert markup to HTML then render document layout to build directory.
+		proj.verbose2("render document: " + doc.contentPath)
 		data["body"] = doc.render(markup)
 		err = proj.htmlTemplates.render(doc.layout, data, doc.buildPath)
 		if err != nil {
