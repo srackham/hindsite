@@ -27,7 +27,7 @@ install: test
 .PHONY: build
 build:
 	mkdir -p ./bin
-	export VERS=$$(git describe --tags --abbrev=0)
+	VERS=$$(git describe --tags --abbrev=0)
 
 	export GOOS=linux
 	export GOARCH=amd64
