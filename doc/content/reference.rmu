@@ -1,9 +1,24 @@
 # Hindsite Reference
 
 ## Overview
-Hindsite is a static website generator. It's easy to learn an use and very fast.
-It builds static websites with optional document and tag indexes (e.g. blogs
+hindsite is a static website generator. It's easy to learn an use and very fast.
+hindsite builds static websites with optional document and tag indexes (e.g. blogs
 posts, newsletters, articles) from Markdown source documents.
+
+The overarching goal is a minimal cognitive footprint that is easy to
+understand. This is archived by generalizing and keeping the number of features
+and concepts to a minimum, in particular:
+
+- Structural transparency -- content, template and build directory trees
+  mirror each other.
+- One template language (native Go templates) for both templates and content.
+- Unified front matter, configuration parameters and user defined template
+  variables can be applied to Markdown documents and static files.
+- Use of TOML or YAML markup for configuration and front matter.
+- Themes are not separate, every project template directory is a theme.
+- The directory hierarchy establishes the index hierarchy and the configuration
+  and template file precedence.
+- hindsite is lightweight (less than 2,000 lines of executable code).
 
 
 ## Quick Start
@@ -25,15 +40,12 @@ posts, newsletters, articles) from Markdown source documents.
 
 5. Open your Web browser at http://localhost:1212
 
-To customise the website edit the project's:
+The best way to start learning hindsite is to browse the blog [project
+directory](#projects).
 
-- Markdown documents (`.md` files in the project `content` directory).
-- Templates (`.html` files in the project `template` directory).
-- Configuration files (`config.{toml,yaml}` in the project `template`
-  directory).
-
-If you are familar with Jekyll or Hugo you'll be right a home (hindsite can read
-Jekyll and Hugo Markdown document front matter).
+Try editing content documents and templates and rebuilding. If you are familar
+with Jekyll or Hugo you'll be right a home (hindsite can read Jekyll and Hugo
+Markdown document front matter).
 
 
 ## Projects
@@ -84,23 +96,6 @@ pages; the `template/init` directory is used by the [init
 command](#init-command) to initialize new project content directories.
 
 
-### Design goals
-Templates all the way down!
-
-The overarching goal is a minimal cognative footprint that is easy to understand.
-This is achived by keeping the number of features and concepts to a minimum, in
-particular:
-
-- Structural transparency -- content, template and build directory trees
-  mirror each other.
-- Themes are not separate, every project template directory is a theme.
-- One template language (native Go templates) for templates and content
-  files.
-- Use of TOML or YAML markup interchangably for configuration and front matter.
-- Unified front matter, configuration parameters and user defined template
-  variables can be applied to Markdown documents and static files.
-
-
 ## hindsite CLI
 Usage:
 
@@ -127,13 +122,12 @@ Common command options:
 ## help command
 Usage:
 
-    hindsite help [TOPIC]
+    hindsite help
 
 Synopsis:
 
     Prints command usage and documentation.
 
-- `TOPIC` is a hindsite command name.
 - `hindsite`, `hindsite -h` and `hindsite --help` are all aliases for `hindsite help`.
 
 
@@ -159,14 +153,14 @@ Applicable options:
 
 Execution:
 
-1. If the `-builtin` option is specified it copies the builtin template to
-   `TEMPLATE_DIR`.
-2. It recreates the template directory structure in the content directory
-   (minus the `TEMPLATE_DIR/init` directory).
+1. If the `-builtin` option is specified then build copies the builtin template
+   to `TEMPLATE_DIR`.
+2. It then recreates the template directory structure in the content directory
+   (skipping the `TEMPLATE_DIR/init` directory).
 3. If the `TEMPLATE_DIR/init` directory exists then its entire contents is
-   copied to the content directory. The optional template `init` directory
-   contains static resources and example documents -- it really is just a
-   content directory.
+   copied to the content directory. The optional `init` directory contains
+   static resources and example documents -- it really is just a content
+   directory.
 
 The following example installs the builtin `blog` template to `./template` then
 copies the contents of the `./template/init` directory to the `./content`
@@ -194,23 +188,32 @@ Applicable options:
     -v
 
 - If the `-incremental` option is specified only new and updated files are
-  rebuilt (by default the entire contents of the build directory is deleted and the site
-  is completely rebuilt).
+  rebuilt (by default the entire contents of the build directory is deleted and
+  the site is completely rebuilt).
 - Specify `-drafts` to include draft documents.
 - Project, build and template directories cannot overlap, with one exception:
   the content directory can be set to `TEMPLATE_DIR/init`. This is handy for
-  testing templates.
+  testing template initialization content.
 
 Note that projects are not restricted to a single content, template and build
 directory. The `-content`, `-template` and `-build` options allow separate
-builds from combinations of different content and template directories.
+builds from differing combinations of content and template directories.
 
 Execution:
 
-TODO
+1. All configuration files in the template directories are parsed.
+2. All templates from templates directories are parsed.
+3. The content directories are scanned and:
+   * Markdown document front matter is parsed.
+   * Static files are processed and copied to the corresponding build
+     directories.
+4. Document indexes are built.
+5. Markdown document bodies are rendered with their corresponding layout
+   templates.
+6. Copy homepage file if specified.
 
 
-## Build summary
+### Build summary
 _documents_:: The total number of Markdown documents (including drafts).
 
 _static_:: The total number of static files.
@@ -223,7 +226,7 @@ _time_:: The execution time in seconds.
 The build summary does not include [excluded files](TODO).
 
 
-## Incremental build
+### Incremental builds
 An incremental build only rebuilds those documents and indexes that require
 updating. Incremental builds are faster and they facilitate incremental
 deployment. The incremental rebuild rules are:
@@ -245,6 +248,10 @@ aware of:
 3. Any changes that influence document generation and not monitored by the
    incremental build rules will not trigger an incremental rebuild.
 
+### Continuous builds
+Hindsite does not have a builtin file watcher, but this is easily implemented
+with a file watcher script, see the [FAQ](faq.html#auto-rebuild) for details.
+
 
 ## serve command
 Usage:
@@ -264,21 +271,11 @@ Applicable options:
 - `PORT` is the server port number (defaults to 1212).
 
 
-## Documents
-Document pages are built by rendering content Markdown files with HTML
-templates. The generated HTML file is saved to the corresponding build location.
-
-### Front matter
-## Static files
-## Indexes
-## Templates
-## Template variables
-## Content variables
-## Configuration files
-Configuration files contain parameters that drive document and index generation.
-They reside in the template directories and are optional, though most projects
-will have at least one at the root of the template directory. Configuration
-files are encoded in either TOML or YAML markup and are named `config.toml` and
+## Configuration files and parameters 
+Configuration files contain parameters that drive website generation. They
+reside in the template directories and are optional, though most projects will
+have at least one at the root of the template directory. Configuration files are
+encoded in either TOML or YAML markup and are named `config.toml` and
 `config.yaml` respectively.
 
 The configuration applied to each document or index is computed by merging the
@@ -290,8 +287,7 @@ The `exclude`, `homepage` and `urlprefix` configuration parameters are site-wide
 and are always taken from the template directory root configuration i.e. they
 are not subject to subdirectory configuration file parameter merging.
 
-## Configuration parameters
-Configuration parameters that drive document and index generation.
+Configuration parameters:
 
 **author**: Specified the default document author. TOML example:
 
@@ -340,6 +336,16 @@ page URLs. Its default value is a blank string. TOML examples:
     urlprefix = "/blog"
     urlprefix = "https://www.example.com"
 
+## Documents
+Document pages are built by rendering content Markdown files with HTML
+templates. The generated HTML file is saved to the corresponding build location.
+
+### Front matter
+## Static files
+## Indexes
+## Templates
+## Template variables
+## Content variables
 ## URLs
 Hindsite synthesizes root-relative document and index page URLs. URLs are
 relative to the build directory and are prefixed with the `urlprefix`
@@ -385,10 +391,6 @@ If you want to hide URL file name extensions you will need to configure your
 server, see [How to remove file extension from website
 address?](https://stackoverflow.com/questions/6534904/how-to-remove-file-extension-from-website-address).
 
-
-## Continuous builds
-Hindsite does not have a builtin file watcher, but this is easily implemented
-with a file watcher script, see the [FAQ](faq.html#auto-rebuild) for details.
 
 
 
