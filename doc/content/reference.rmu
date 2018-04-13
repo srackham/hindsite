@@ -152,11 +152,11 @@ Applicable options:
 
 Execution:
 
-1. If the `-builtin` option is specified then build copies the builtin template
-   to `TEMPLATE_DIR`.
-2. It then recreates the template directory structure in the content directory
-   (skipping the `TEMPLATE_DIR/init` directory).
-3. If the `TEMPLATE_DIR/init` directory exists then its entire contents is
+1. If the `-builtin` option is specified then copy the builtin template to
+   `TEMPLATE_DIR`.
+2. Recreate the template directory structure in the content directory (skipping
+   the `TEMPLATE_DIR/init` directory).
+3. If the `TEMPLATE_DIR/init` directory exists its contents is recursively
    copied to the content directory. The optional `init` directory contains
    static resources and example documents -- it really is just a content
    directory.
@@ -188,9 +188,9 @@ Applicable options:
   rebuilt (by default the entire contents of the build directory is deleted and
   the site is completely rebuilt).
 - Specify `-drafts` to include draft documents.
-- Project, build and template directories cannot overlap, with one exception:
-  the content directory can be set to `TEMPLATE_DIR/init`. This is handy for
-  testing template initialization content.
+- Content, build and template directories cannot overlap, with one exception:
+  the content directory can be `TEMPLATE_DIR/init`. This is handy for testing
+  template initialization content.
 
 Note that projects are not restricted to a single content, template and build
 directory. The `-content`, `-template` and `-build` options allow separate
@@ -200,17 +200,18 @@ Execution:
 
 1. All configuration files in the template directories are parsed.
 2. All templates from templates directories are parsed.
-3. The content directories are scanned and:
-   * Markdown document front matter is parsed.
+3. The content directory is recursively scanned and:
+   * Document front matter is parsed.
    * Static files are processed and copied to the corresponding build
      directories.
 4. Document indexes are built.
-5. Markdown document bodies are rendered with their corresponding layout
-   templates.
-6. Copy homepage file if specified.
+5. Document bodies are rendered with their corresponding layout templates.
+6. If the [homepage](#configuration) is specified it is copied to `index.html`.
 
 
 ### Build summary
+The printed build summary includes:
+
 _documents_:: The total number of Markdown documents (including drafts).
 
 _static_:: The total number of static files.
@@ -224,9 +225,9 @@ The build summary does not include [excluded files](TODO).
 
 
 ### Incremental builds
-An incremental build only rebuilds those documents and indexes that require
-updating. Incremental builds are faster and they facilitate incremental
-deployment. The incremental rebuild rules are:
+An incremental build only rebuilds those webpages that require updating.
+Incremental builds are faster and they facilitate incremental deployment. The
+incremental rebuild rules are:
 
 1. Rebuild everything if a configuration file or a template file has changed.
 2. Rebuild indexes that contain one or more new or modified documents since the
@@ -377,12 +378,12 @@ The _layout template_ is rendered and written to the corresponding _build
 directory_ path.
 
 NOTE: In addition to Markdown, _hindsite_ can also process [Rimu
-markup](http://rimumarkup.org/) but this is currently experimental. This
-documentation is written in Rimu.
+markup](http://rimumarkup.org/) but there are performance issues and it is
+currently experimental. This documentation is written in Rimu.
 
 ## Front matter
 Front matter is a document specific set of named values. These values are
-contained in a special front matter header at the beginning of the document
+specified in a special front matter header at the beginning of the document
 file.
 
 Front matter is optional unless the document is indexed, in which case the
@@ -405,7 +406,7 @@ title:    Foo Bar
 synopsis: An brief history of the origins of the foofoo valve.
 addendum: This article was updated March, 2018.
 date:     2018-02-16
-tags:     foo foo valve, qux, baz
+tags:     [foo foo valve, qux, baz]
 slug:     foofoo-valve-history
 draft:    true
 ---
@@ -417,11 +418,7 @@ Example TOML front matter:
 title = "Foo Bar"
 description = "An brief history of the origins of the foofoo valve."
 date = "2018-02-16"
-categories = [
-  "foo foo valve",
-  "qux",
-  "baz"
-]
+tags = ["foo foo valve", "qux", "baz"]
 slug = "foofoo-valve-history"
 draft = "true"
 +++
@@ -445,7 +442,7 @@ The date format is RFC 3339 with the following relaxations:
 - If the time is omitted then the time `00:00:00` is used.
 - A space character separator (instead of the letter `T`) between the date and the time is allowed.
 
-e.g. with `timezone = "+13:00"`:
+Examples with `timezone = "+13:00"`:
 
     1979-05-27T07:32:00+13:00   # follows the RFC 3339 spec
     1979-05-27T07:32:00         # 1979-05-27T07:32:00+13:00
@@ -453,8 +450,8 @@ e.g. with `timezone = "+13:00"`:
     1979-05-27                  # 1979-05-27T00:00:00+13:00
 ..
 
-`draft`:: If set to "true" then the document is not processed unless the build
-command `-drafts` was specified. Defaults to false.
+`draft`:: If set to "true" then the document is not processed unless the [build
+command](#build-command) `-drafts` was specified. Defaults to false.
 
 `slug`:: Replaces the document file name in the built HTML and in [synthesised
 document URLs](#urls).
@@ -464,9 +461,14 @@ document URLs](#urls).
 there is no tag. The variable name `description` is an alias for `synopsis` (for
 Hugo compatibility).
 
-`tags`:: A comma-separated list of tag keywords. Tags can also be encoded as a
-YAML list or a TOML array called `categories` (for Hugo and Jekyll
-compatibility).
+`tags`:: A list of tag keywords. Examples:
+```
+# TOML
+tags = ["foo foo valve", "qux", "baz"]
+
+# YAML
+tags:     [foo foo valve, qux, baz]
+```
 
 `templates`:: If specified it overrides the configuration
 [templates](#configuration) value. The only sensible values in this context are
