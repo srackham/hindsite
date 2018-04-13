@@ -180,8 +180,7 @@ func (doc *document) extractFrontMatter() error {
 		Templates   *string
 		Description string
 		Addendum    string
-		Tags        string   // Comma-separated tags.
-		Categories  []string // Tags slice.
+		Tags        []string
 		Draft       bool
 		Slug        string
 		Layout      string
@@ -225,16 +224,10 @@ func (doc *document) extractFrontMatter() error {
 	if fm.Addendum != "" {
 		doc.addendum = fm.Addendum
 	}
-	if fm.Tags != "" {
-		doc.tags = strings.Split(fm.Tags, ",")
-		for i, v := range doc.tags {
-			doc.tags[i] = strings.TrimSpace(v)
-		}
+	if fm.Tags != nil {
+		doc.tags = fm.Tags
 	}
-	if len(fm.Categories) > 0 {
-		doc.tags = fm.Categories
-	}
-	if !doc.draft { // File name tilda flag overrides embedded draft flag.
+	if !doc.draft {
 		doc.draft = fm.Draft
 	}
 	if fm.Slug != "" {
