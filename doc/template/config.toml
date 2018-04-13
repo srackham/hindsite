@@ -1,4 +1,4 @@
-longdate = "Jan 2, 2006"
+exclude = "config.rmu"
 
 [user]
 banner = "hindsite documentation"
