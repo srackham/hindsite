@@ -1,7 +1,7 @@
 ---
 title: Mattis Dis
 date: 2016-08-05T05:55:12-00:00
-tags: arcu,placerat,lorem,cursus
+tags: [arcu,placerat,lorem,cursus]
 slug: mattis-dis
 ---
 

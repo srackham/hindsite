@@ -1,7 +1,7 @@
 ---
 title: Pulvinar Cras Ac
 date: 2016-06-07T03:16:09-00:00
-tags: purus,ac,cras,lorem,dis
+tags: [purus,ac,cras,lorem,dis]
 slug: pulvinar-cras-ac
 ---
 

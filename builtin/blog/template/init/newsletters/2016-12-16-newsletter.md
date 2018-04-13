@@ -2,7 +2,6 @@
 title: Cras Est
 date: 2016-12-16T16:11:42-00:00
 synopsis: A pulvinar cras integer penatibus sed a vel.
-tags: montes,placerat,nisi,pulvinar
 slug: cras-est
 ---
 

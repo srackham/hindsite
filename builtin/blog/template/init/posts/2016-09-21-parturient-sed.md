@@ -2,7 +2,7 @@
 title: Parturient Sed
 date: 2016-09-21T09:45:14-00:00
 synopsis: Mattis mattis a natoque pulvinar placerat.
-tags: montes,arcu,lectus,pulvinar
+tags: [montes,arcu,lectus,pulvinar]
 slug: parturient-sed
 ---
 

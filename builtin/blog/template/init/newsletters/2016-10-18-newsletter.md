@@ -2,7 +2,6 @@
 title: Sed Ac Nisi Porttitor
 date: 2016-10-18T18:52:58-00:00
 synopsis: A integer est parturient.
-tags: natoque,placerat,parturient,pulvinar
 slug: sed-ac-nisi-porttitor
 ---
 
