@@ -21,8 +21,8 @@ echo
 hindsite build "$@"
 echo
 while true; do
-    EVENT=$(inotifywait -q -r -e modify,create,delete,move --format "%e: %f" $WATCH_DIRS)
-    sleep 0.2s  # Allow some time for all editor saves to complete.
+    EVENT=$(inotifywait -q -r -e modify,create,delete,move --format "%e: %w%f" $WATCH_DIRS)
+    sleep 0.1s  # Allow some time for all editor saves to complete.
     echo $EVENT
     set +e      # Do not exit if there are build errors.
     case "$EVENT" in
