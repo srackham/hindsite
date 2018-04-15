@@ -403,7 +403,7 @@ Example YAML front matter:
 ```
 ---
 title:    Foo Bar
-synopsis: An brief history of the origins of the foofoo valve.
+description: An brief history of the origins of the foofoo valve.
 addendum: This article was updated March, 2018.
 date:     2018-02-16
 tags:     [foo foo valve, qux, baz]
@@ -432,7 +432,7 @@ expansion.
 `author`:: The document author. If not specified it defaults to corresponding
 [author](#configuration) configuration parameter value.
 
-`addendum`:: `addendum` is a general purpose content field, it defaults to blank.
+`addendum`:: A general purpose content field, it defaults to blank.
 
 `date`:: The document publication date. If it is not specified it is extracted
 from the file name `YYYY-MM-DD-` date prefix, otherwise it is undefined.
@@ -440,7 +440,8 @@ The date format is RFC 3339 with the following relaxations:
 ..
 - If the time zone offet is omitted then UTC is assumed.
 - If the time is omitted then the time `00:00:00` is used.
-- A space character separator (instead of the letter `T`) between the date and the time is allowed.
+- A space character separator (instead of the letter `T`) between the date and
+  the time is allowed.
 
 Examples with `timezone = "+13:00"`:
 
@@ -450,16 +451,18 @@ Examples with `timezone = "+13:00"`:
     1979-05-27                  # 1979-05-27T00:00:00+13:00
 ..
 
+`description`:: A brief summary of the document contents. If not specified
+`description` defaults to the content up to the first `<!--more-->` tag or blank
+if there is no _more_ tag.
+
 `draft`:: If set to "true" then the document is not processed unless the [build
 command](#build-command) `-drafts` was specified. Defaults to false.
 
+`layout`:: The name of the template used to render the document. `layout`
+defaults to the closest `layout.html` [HTML template](#html-templates).
+
 `slug`:: Replaces the document file name in the built HTML and in [synthesised
 document URLs](#urls).
-
-`synopsis`:: A brief summary of the document contents. If not specified
-`synopsis` defaults to the content up to the first `<!--more-->` tag or blank if
-there is no tag. The variable name `description` is an alias for `synopsis` (for
-Hugo compatibility).
 
 `tags`:: A list of tag keywords. Examples:
 ```
@@ -503,12 +506,12 @@ must have a [title and a publication date](#front-matter), tags are optional.
 - The `indexes` directory structure mirrors that of the templates directory with
   each each built index located in its corresponding subdirectory.
 - The following HTML index files are built for each index:
-  * `docs-1.html`, `docs-2.html`... : Paginated document index files. The number
+  `docs-1.html`, `docs-2.html` ...:: Paginated document index files. The number
     of documents per index page is set by the [paginate](#configuration)
     configuration parameter.
-  * `tags.html`: A list of document tags linked to paginated per-tag document index files
+  `tags.html`:: A list of document tags linked to paginated per-tag document index files
     in the `tags` subdirectory.
-  * `tags/<tag>-1.html`, `tags/<tag>-2.html`...: Paginated per-tag document
+  `tags/<tag>-1.html`, `tags/<tag>-2.html` ...:: Paginated per-tag document
     index files.
 
 
@@ -539,9 +542,9 @@ The following template files have special significance:
 `layout.html`:: Templates named `layout.html` are used to generate content
 document webpages. A project can have one or more layout templates. The selected
 layout template is the one closest to the content document on the corresponding
-_template directory_ path (but this can be overridden using the document front
-matter _layout_ variable). These conventions allow document layouts to be
-assigned per directory and per document.
+_template directory_ path (but this can be overridden using the document ]front
+matter](#front-matter) _layout_ variable). These conventions allow document
+layouts to be assigned per directory and per document.
 
 `docs.html`:: These templates generate paginated document index pages. The
 presence of a `docs.html` template file specifies that the corresponding content
@@ -947,7 +950,7 @@ corresponding `layout.html` template.
 .mediumdate
 .longdate
 .author
-.synopsis            rendered synopsis HTML
+.description            rendered description HTML
 .addendum            rendered addendum HTML
 .slug
 .url
@@ -1004,7 +1007,7 @@ Embedded YAML with `<!--`, `-->` or `---` delimiters e.g.
 ```
 <!--
 title:    Foo Bar
-synopsis: An brief history of the origins of the foofoo valve.
+description: An brief history of the origins of the foofoo valve.
 addendum: This article was updated March, 2018.
 date:     2018-02-16
 tags:     foo foo valve, qux, baz
@@ -1014,7 +1017,7 @@ draft:    true
 ```
 - `tags` are a comma-separated string. Tags can also be encoded as a YAML list
   or a TOML array called `categories` c.f. Hugo.
-- The variable name `description` is an alias for `synopsis`.
+- The variable name `description` is an alias for `description`.
 - The HTML comment delimiters are preferable because:
   * They ignored if the document is rendered by other applications.
   * The front matter is retained by the generated HTML web page.
@@ -1048,7 +1051,7 @@ Implicit values (if the document does not contain a front matter header):
 - `title` defaults the document file name with date prefix removed,
   hyphens replaced by spaces and converted to title case.
 - `author` defaults to the configuration file value, failing that, blank.
-- `synopsis` defaults to the content up to the first `<!--more-->` tag or blank if
+- `description` defaults to the content up to the first `<!--more-->` tag or blank if
   there is no tag. Processed as markup.
 - `addendum` (a general purpose content field) defaults to blank. Processed as markup.
 - `draft` defaults to false.
