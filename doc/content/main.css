@@ -7,8 +7,9 @@
     --text-color: #333333;
     --link-color: #428bca;
     --disabled-color: gray;
-    --serif-font: "PT Serif", Georgia, "Times New Roman", serif;
-    --sans-font: system-ui, "PT Sans", Helvetica, Arial, sans-serif;
+    --system-ui-font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    --serif-font: Georgia, "Times New Roman", serif;
+    --sans-font: Helvetica, Arial, sans-serif;
     --mono-font: Consolas, "Andale Mono", Monaco, monospace;
     --mono-size: 80%;
     --border: 1px solid #dddddd;
@@ -18,7 +19,7 @@
     --max-text-width: 55rem;
     --tag-visited-color: var(--primary-color);
 
-    font-size: 20px;
+    font-size: 18px;
     color: var(--text-color);
     background-color: var(--primary-background);
     font-family: var(--serif-font);
@@ -32,7 +33,7 @@
 h1, h2, h3, h4, h5, h6 {
     font-weight: 400;
     color: var(--primary-color);
-    font-family: var(--sans-font);
+    font-family: var(--system-ui-font);
 }
 h1 { font-size: 1.8rem; }
 h2 { font-size: 1.4rem; }
