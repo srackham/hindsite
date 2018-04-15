@@ -1,26 +1,53 @@
 {{define "header"}}
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <title>{{or .title "Title"}}</title>
 <link type="text/css" rel="stylesheet" href="{{.urlprefix}}/main.css">
+<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
 </head>
 <body>
-<div class="banner no-print">
-  <a href="{{.urlprefix}}/index.html">{{.user.banner}}</a>
+<div id="nav" class="no-print">
+    <span id="toc-button">&#8801;</span>
 </div>
-<ul class="menu no-print">
-  <li><a href="{{.urlprefix}}/index.html">Home</a></li>
-  <li><a href="{{.urlprefix}}/reference.html">Reference</a></li>
-  <li><a href="{{.urlprefix}}/faq.html">FAQ</a></li>
-</ul>
+<div id="sidebar" class="no-print">
+</div>
 <div id="main">
+<div id="article">
+<div id="toc" class="no-print">
+  <h2>Links</h2>
+  <div class="h2"><a href="{{.urlprefix}}/index.html">Home</a></div>
+  <div class="h2"><a href="{{.urlprefix}}/reference.html">Reference</a></div>
+  <div class="h2"><a href="{{.urlprefix}}/faq.html">FAQ</a></div>
+  <div class="h2"><a href="https://github.com/srackham/hindsite">Github</a></div>
+  <div id="auto-toc"></div>
+</div>
 {{end}}
 
 {{define "footer"}}
 </div>
+</div>
+<script src="{{.urlprefix}}/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/go.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/kotlin.min.js"></script>
+<script>
+hljs.initHighlightingOnLoad();
+window.onload = function() {
+  document.getElementById('sidebar').appendChild(document.getElementById('toc')); // Ensure custom TOC is child of sidebar.
+  var headings = [].slice.call(document.body.querySelectorAll('#article > h1, #article > h2, #article > h3'));
+  headings.forEach(function(heading) {
+    setHeaderLink(heading);
+    appendTocEntry(heading);
+  });
+  if (isSmallScreen()) {
+    toggleToc();  // Hide TOC.
+  }
+}
+</script>
 </body>
 </html>
 {{end}}

@@ -6,6 +6,7 @@
   Hindsite documentation.
 */
 {--header-ids} = 'yes'
+{--header-links} = 'yes'
 {github} = 'https://github.com/srackham/hindsite'
 
 

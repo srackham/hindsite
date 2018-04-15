@@ -62,7 +62,7 @@ doc: build-doc serve-doc
 
 .PHONY: build-doc
 build-doc: install
-	cp -p README.md doc/content/index.md
+	cp -p README.md doc/content/index.rmu
 	hindsite build doc
 
 .PHONY: serve-doc
@@ -96,4 +96,4 @@ watch-blog:
 
 .PHONY: validate-blog
 validate-blog:
-	for f in $$(find $(BLOG_DIR)/build -name "*.html"); do echo $$f; html-validator --verbose --format=text --file=$$f; done
+	for f in $$(find $(BLOG_DIR)/build -name "*.html"); do echo $$f; html-validator --verbose --format text --file $$f; done
