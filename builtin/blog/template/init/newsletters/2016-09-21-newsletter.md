@@ -1,7 +1,7 @@
 ---
 title: Natoque Pulvinar Vel Porttitor Cras
 date: 2016-09-21T09:45:14-00:00
-synopsis: Sagittis porttitor sagittis in.
+description: Sagittis porttitor sagittis in.
 slug: natoque-pulvinar-vel-porttitor-cras
 ---
 
