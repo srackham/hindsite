@@ -31,18 +31,18 @@ type document struct {
 	prev         *document // Previous document in primary index.
 	next         *document // Next document in primary index.
 	// Front matter.
-	title     string
-	date      time.Time
-	author    *string
-	templates *string
-	synopsis  string
-	addendum  string
-	url       string // Synthesised document URL.
-	tags      []string
-	draft     bool
-	slug      string
-	layout    string            // Document template name.
-	user      map[string]string // User defined configuration key/values.
+	title       string
+	date        time.Time
+	author      *string
+	templates   *string
+	description string
+	addendum    string
+	url         string // Synthesised document URL.
+	tags        []string
+	draft       bool
+	slug        string
+	layout      string            // Document template name.
+	user        map[string]string // User defined configuration key/values.
 }
 
 type documents []*document
@@ -115,7 +115,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	return doc, nil
 }
 
-// extractFrontMatter extracts and parses front matter and synopsis from the
+// extractFrontMatter extracts and parses front matter and description from the
 // start of the document. The front matter is stripped from the content.
 func (doc *document) extractFrontMatter() error {
 	readTo := func(end string, scanner *bufio.Scanner) (text string, eof bool, err error) {
@@ -158,28 +158,27 @@ func (doc *document) extractFrontMatter() error {
 	if eof {
 		return fmt.Errorf("missing front matter delimiter: %s: %s", end, doc.contentPath)
 	}
-	synopsis, eof, err := readTo("<!--more-->", scanner)
+	description, eof, err := readTo("<!--more-->", scanner)
 	if err != nil {
 		return err
 	}
 	if !eof {
-		doc.synopsis = synopsis
+		doc.description = description
 		content, _, err := readTo("", scanner)
 		if err != nil {
 			return err
 		}
-		doc.content = synopsis + content
+		doc.content = description + content
 	} else {
-		doc.content = synopsis
+		doc.content = description
 	}
 	fm := struct {
 		Title       string
 		Date        string
-		Synopsis    string
-		Author      *string
-		Templates   *string
 		Description string
 		Addendum    string
+		Author      *string
+		Templates   *string
 		Tags        []string
 		Draft       bool
 		Slug        string
@@ -215,11 +214,8 @@ func (doc *document) extractFrontMatter() error {
 	if fm.Templates != nil {
 		doc.templates = fm.Templates
 	}
-	if fm.Synopsis != "" {
-		doc.synopsis = fm.Synopsis
-	}
 	if fm.Description != "" {
-		doc.synopsis = fm.Description
+		doc.description = fm.Description
 	}
 	if fm.Addendum != "" {
 		doc.addendum = fm.Addendum
@@ -279,15 +275,15 @@ func (doc *document) frontMatter() templateData {
 		user[k] = v
 	}
 	data["user"] = user
-	// Process addendum and synopsis as a text templates before rendering to HTML.
+	// Process addendum and description as a text templates before rendering to HTML.
 	addendum := doc.addendum
-	synopsis := doc.synopsis
+	description := doc.description
 	if isTemplate(doc.contentPath, doc.templates) {
 		addendum, _ = doc.proj.textTemplates.renderText("documentAddendum", addendum, data)
-		synopsis, _ = doc.proj.textTemplates.renderText("documentSynopsis", synopsis, data)
+		description, _ = doc.proj.textTemplates.renderText("documentDescription", description, data)
 	}
 	data["addendum"] = doc.render(addendum)
-	data["synopsis"] = doc.render(synopsis)
+	data["description"] = doc.render(description)
 	return data
 }
 
