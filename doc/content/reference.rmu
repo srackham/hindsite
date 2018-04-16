@@ -1,13 +1,15 @@
 # Hindsite Reference
 
 ## Overview
-hindsite is a static website generator. It's easy to learn an use and very fast.
-hindsite builds static websites with optional document and tag indexes from
-Markdown source documents (e.g. blogs posts, newsletters, articles).
+hindsite is a static website generator. It builds static websites with optional
+document and tag indexes from Markdown source documents (e.g. blogs posts,
+newsletters, articles).
 
-The overarching goal is an intuitive, minimalist application that is easy to use
-and understand. This is achieved by generalizing and keeping the number of
-features and concepts to a minimum, in particular:
+The goal is an intuitive, minimalist application that is easy to use and
+understand. The number of features and concepts have been kept to a minimum.
+
+/*
+Features:
 
 - Structural transparency -- content, template and build directory trees
   mirror each other.
@@ -19,6 +21,7 @@ features and concepts to a minimum, in particular:
   and template file precedence.
 - Themes are not separate, every project template directory is a theme.
 - hindsite is lightweight (less than 2,000 lines of executable code).
+*/
 
 
 ## Quick Start
@@ -212,7 +215,7 @@ Execution:
 ### Build summary
 The printed build summary includes:
 
-_documents_:: The total number of Markdown documents (including drafts).
+_documents_:: The total number of Markdown documents (including skipped drafts).
 
 _static_:: The total number of static files.
 
@@ -432,7 +435,8 @@ expansion.
 `author`:: The document author. If not specified it defaults to corresponding
 [author](#configuration) configuration parameter value.
 
-`addendum`:: A general purpose content field, it defaults to blank.
+`addendum`:: A general purpose content field, it defaults to blank. The addendum
+is rendered as Markdown.
 
 `date`:: The document publication date. If it is not specified it is extracted
 from the file name `YYYY-MM-DD-` date prefix, otherwise it is undefined.
@@ -453,7 +457,7 @@ Examples with `timezone = "+13:00"`:
 
 `description`:: A brief summary of the document contents. If not specified
 `description` defaults to the content up to the first `<!--more-->` tag or blank
-if there is no _more_ tag.
+if there is no _more_ tag. The description is rendered as Markdown.
 
 `draft`:: If set to "true" then the document is not processed unless the [build
 command](#build-command) `-drafts` was specified. Defaults to false.
@@ -516,8 +520,8 @@ must have a [title and a publication date](#front-matter), tags are optional.
 
 
 ## Templates
-_hindsite_ uses Go templates to build webpages. A project contains two sets
-of templates:
+_hindsite_ uses Go templates to build webpages. There are two types of
+templates:
 
 - [HTML templates](#html-templates) which are used to build index and content
   document HTML webpages.
@@ -526,25 +530,45 @@ of templates:
 
 Each template file contributes one or more named templates: the file itself plus
 any explicitly declared templates within the file. The implicit file template is
-named with its _template directory_ relative file name (this is just a
-convention and has no semantic significance).
+named after its _template directory_ relative file name (this is just a
+convention).
 
-Both sets of template share the common [Go template
+Both HTML and text templates share the common [Go template
 syntax](https://golang.org/pkg/text/template/).
 
 ### HTML templates
 HTML templates are used to build index and content document HTML webpages. All
 the `.html` files in the project _template directory_ (excluding the `init`
-directory) contribute to the set of named HTML templates.
+directory) contribute to the set of named HTML templates and share the same
+namespace.
 
 The following template files have special significance:
 
 `layout.html`:: Templates named `layout.html` are used to generate content
 document webpages. A project can have one or more layout templates. The selected
 layout template is the one closest to the content document on the corresponding
-_template directory_ path (but this can be overridden using the document ]front
+_template directory_ path (but this can be overridden using the document [front
 matter](#front-matter) _layout_ variable). These conventions allow document
 layouts to be assigned per directory and per document.
+..
+Layouts are rendered with the following template variables (see also [Front
+matter](#front-matter)):
+
+`.addendum`:: The HTML document addendum.
+`.author`:: Document author.
+`.body`:: The Markdown document body rendered as HTML.
+`.date`, `.shortdate`, `.mediumdate`, `.longdate`:: Document publication date rendered using the various [configuration](#configuration) date layouts.
+`.description`:: The HTML document description.
+`.next`, `.prev`:: The next and previous document URLs in primary index order.
+`.slug`: Front matter variable.
+`.url`: Synthesised document [URL](#urls).
+`.tags`:: An iterable list of tags. Each item contains the variables `.tag` (the tag) and `.url` (the tag index URL).
+`.templates`:: Front matter variable.
+`.title`:: Document title.
+`.urlprefix`:: The [configuration](#configuration) `urlprefix`.
+`.user`:: An iterable list of [front matter](#front-matter) `user` key/values.
+
+..
 
 `docs.html`:: These templates generate paginated document index pages. The
 presence of a `docs.html` template file specifies that the corresponding content
@@ -553,6 +577,30 @@ directory is indexed.
 `tags.html`:: This optional index template is used to build a `tags.html` tags
 index webpage. If it is not present the tags index files are not built.
 
+/*
+##### Layout template variables
+```
+.addendum     The HTML document addendum.
+.author       Document author.
+.body         The Markdown document body rendered as HTML.
+.date         Document publication date formatted with the date configuration parameter.
+.shortdate    Document publication date formatted with the shortdate configuration parameter.
+.mediumdate   Document publication date formatted with the mediumdate configuration parameter.
+.longdate     Document publication date formatted with the longdate configuration parameter.
+.description  The HTML document description.
+.next         The next document URL.
+.prev         The previous document URL.
+.slug         slug front matter variable.
+.url          Synthesised document URL.
+.tags         An iterable list of tags.
+              Each item contains the variables .tag (the tag) and .url (the tag index URL).
+.templates    Front matter variable.
+.title        Document title.
+.urlprefix    The configuration urlprefix.
+.user         An iterable list of front matter user key/values.
+```
+
+*/
 ### Text templates
 Text templates are used for content document and static file template expansion.
 By default there is no document or static file expansion, it is only enabled by

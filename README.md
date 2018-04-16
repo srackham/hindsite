@@ -1,34 +1,38 @@
 # Hindsite website generator
 
-Hindsite is a static website generator. It's easy to learn an use and very fast.
-It builds static websites with optional document and tag indexes (e.g. blogs
-posts, newsletters, articles) from Markdown source documents.
+hindsite is a static website generator. It builds static websites with optional
+document and tag indexes from Markdown source documents (e.g. blogs posts,
+newsletters, articles).
+
+The goal is an intuitive, minimalist application that is easy to use and
+understand. The number of features and concepts have been kept to a minimum.
 
 
 ## Quick Start
-1. Download the Hindsite executable for your platform.
+[Download hindsite](TODO) for your platform and create a fully functional blog and
+newsletter website with just two hindsite commands:
 
-2. Create a new Hindsite project directory and install the builtin blog
+1. Create a new Hindsite project directory and install the builtin blog
    template:
 
-        mkdir myproj
-        hindsite init myproj -builtin blog
+    mkdir myproj
+    hindsite init myproj -builtin blog
 
-3. Build the website:
+2. Build the website:
 
-        hindsite build myproj
+    hindsite build myproj
 
-4. Start the hindsite web server:
+To view the website in your browser:
 
-        hindsite serve myproj
+1. Start the hindsite web server:
 
-5. Open your Web browser at http://localhost:1212
+    hindsite serve myproj
 
-To customise the website edit the project's Markdown documents (`.md` files in
-the project `content` directory), templates (`.html` files in the project
-`template` directory) and configuration files (`config.{toml,yaml}` in the
-project `template` directory).
-  
-If you are familar with Jekyll or Hugo you'll be right a home (hindsite can read
-Jekyll and Hugo Markdown documents).
+2. Open your Web browser at http://localhost:1212
 
+The best way to start learning hindsite is to browse the blog [project
+directory](#projects).
+
+Try editing content documents and templates and rebuilding. If you are familar
+with Jekyll or Hugo you'll be right a home (hindsite can read Jekyll and Hugo
+Markdown document front matter).
