@@ -12,3 +12,4 @@ builtin/blog/build/
 builtin/minimal/content/
 builtin/minimal/build/
 benchmark.zip
+vendor/
