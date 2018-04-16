@@ -13,7 +13,7 @@
   }
   h1, h2, h3, h4, h5, h6 {
     margin: 10px 0;
-    color: #34495e;
+    color: #2362a1;
   }
   h1 { font-size: 2.2rem; line-height: 40px;}
   h2 { font-size: 1.5rem; }
@@ -249,7 +249,7 @@
     width: 100%;
   }
   #toc a, #toc a:hover {
-    color: #34495e;
+    color: #2362a1;
   }
   .header-link {
     text-decoration: none;
@@ -291,7 +291,7 @@
     left: 0;
     height: 100%;
     width: 40px;
-    background-color: #34495e;
+    background-color: #2b445e;
     color: white;
   }
   #sidebar {
