@@ -14,17 +14,16 @@
     <span id="toc-button">&#8801;</span>
 </div>
 <div id="sidebar" class="no-print">
-</div>
-<div id="main">
-<div id="article">
 <div id="toc" class="no-print">
   <h2>Links</h2>
-  <div class="h2"><a href="{{.urlprefix}}/index.html">Home</a></div>
   <div class="h2"><a href="{{.urlprefix}}/reference.html">Reference</a></div>
   <div class="h2"><a href="{{.urlprefix}}/faq.html">FAQ</a></div>
   <div class="h2"><a href="https://github.com/srackham/hindsite">Github</a></div>
   <div id="auto-toc"></div>
 </div>
+</div>
+<div id="main">
+<div id="article">
 {{end}}
 
 {{define "footer"}}
@@ -37,7 +36,6 @@
 <script>
 hljs.initHighlightingOnLoad();
 window.onload = function() {
-  document.getElementById('sidebar').appendChild(document.getElementById('toc')); // Ensure custom TOC is child of sidebar.
   var headings = [].slice.call(document.body.querySelectorAll('#article > h1, #article > h2, #article > h3'));
   headings.forEach(function(heading) {
     setHeaderLink(heading);
