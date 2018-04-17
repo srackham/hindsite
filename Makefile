@@ -62,7 +62,6 @@ doc: build-doc serve-doc
 
 .PHONY: build-doc
 build-doc: install
-	cp -p README.md doc/content/index.rmu
 	hindsite build doc
 
 .PHONY: serve-doc
