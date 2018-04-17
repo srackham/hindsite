@@ -549,7 +549,7 @@ func (proj *project) serve() error {
 
 // isTemplate returns true if the file path f is in the templates configuration value.
 func isTemplate(f string, templates *string) bool {
-	return strings.Contains(","+nz(templates)+",", ","+filepath.Ext(f)+",")
+	return strings.Contains("|"+nz(templates)+"|", "|"+filepath.Ext(f)+"|")
 }
 
 // rebuild returns true if the target file does not exist or is newer than
