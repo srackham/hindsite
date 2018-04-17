@@ -1,3 +1,4 @@
+homepage = "reference.html"
 exclude = "config.rmu"
 
 [user]
