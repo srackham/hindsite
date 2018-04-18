@@ -8,6 +8,9 @@ import (
 )
 
 func (proj *project) watch() error {
+	if err := proj.build(); err != nil {
+		return err
+	}
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return err
@@ -37,11 +40,18 @@ func (proj *project) watch() error {
 			select {
 			case event := <-watcher.Events:
 				f := event.Name
-				proj.verbose(event.Op.String() + ": " + f)
+				proj.println(0, event.Op.String()+": "+f)
+				if err := proj.build(); err != nil {
+					done <- err
+				}
+				proj.println(0, "")
 			case err := <-watcher.Errors:
 				done <- err
 			}
 		}
+	}()
+	go func() {
+		done <- proj.serve()
 	}()
 	return <-done
 }
