@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"sync"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -36,15 +38,39 @@ func (proj *project) watch() error {
 	}
 	done := make(chan error)
 	go func() {
+		mu := sync.Mutex{}
+		prevEvent := fsnotify.Event{}
+		var prevTime time.Time
+		isValid := func(evt fsnotify.Event) bool {
+			result := true
+			concurrent := time.Now().Sub(prevTime) < time.Millisecond*100
+			switch {
+			case evt.Op == fsnotify.Chmod:
+				proj.println(0, "SKIPPED\n")
+				result = false
+			case evt == prevEvent && concurrent:
+				proj.println(0, "CONCURRENT\n")
+				result = false
+			}
+			prevEvent = evt
+			prevTime = time.Now()
+			return result
+		}
 		for {
 			select {
-			case event := <-watcher.Events:
-				f := event.Name
-				proj.println(0, event.Op.String()+": "+f)
-				if err := proj.build(); err != nil {
-					done <- err
+			case evt := <-watcher.Events:
+				mu.Lock()
+				f := evt.Name
+				proj.println(0, evt.Op.String()+": "+f)
+				if isValid(evt) {
+					proj.println(0, "START BUILD")
+					if err := proj.build(); err != nil {
+						done <- err
+					}
+					proj.println(0, "END BUILD")
+					proj.println(0, "")
 				}
-				proj.println(0, "")
+				mu.Unlock()
 			case err := <-watcher.Errors:
 				done <- err
 			}
