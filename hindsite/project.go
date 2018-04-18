@@ -190,7 +190,7 @@ func (proj *project) parseArgs(args []string) error {
 }
 
 func isCommand(name string) bool {
-	return stringlist{"build", "help", "init", "serve"}.Contains(name)
+	return stringlist{"build", "help", "init", "serve", "watch"}.Contains(name)
 }
 
 func (proj *project) execute() error {
@@ -205,6 +205,8 @@ func (proj *project) execute() error {
 		err = proj.init()
 	case "serve":
 		err = proj.serve()
+	case "watch":
+		err = proj.watch()
 	default:
 		panic("execute: illegal command: " + proj.command)
 	}

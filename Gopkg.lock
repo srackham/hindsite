@@ -8,6 +8,12 @@
   version = "v0.3.0"
 
 [[projects]]
+  name = "github.com/fsnotify/fsnotify"
+  packages = ["."]
+  revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
+  version = "v1.4.7"
+
+[[projects]]
   branch = "master"
   name = "github.com/shurcooL/sanitized_anchor_name"
   packages = ["."]
@@ -37,6 +43,12 @@
   version = "v11.0.0"
 
 [[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  revision = "b126b21c05a91c856b027c16779c12e3bf236954"
+
+[[projects]]
   name = "gopkg.in/russross/blackfriday.v2"
   packages = ["."]
   revision = "cadec560ec52d93835bf2f15bd794700d3a2473b"
@@ -51,6 +63,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3eaadd774c53e5b66d2af1df7d8acbc6c1d3d0fc4a7e54bfd0ff5ab9938bd5dd"
+  inputs-digest = "991eafe1a1d8340d5494774ffc82f1424dbede543be8ec3d3b125847e0b6f6dd"
   solver-name = "gps-cdcl"
   solver-version = 1
