@@ -305,7 +305,7 @@ func (doc *document) render(text string) template.HTML {
 		if err == nil {
 			text = conf + "\n\n" + text
 		}
-		html = rimu.Render(text, rimu.RenderOptions{})
+		html = rimu.Render(text, rimu.RenderOptions{Reset: true})
 	}
 	return template.HTML(html)
 }
