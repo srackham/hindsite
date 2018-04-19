@@ -45,8 +45,11 @@ func (proj *project) watch() error {
 			result := true
 			concurrent := time.Now().Sub(prevTime) < time.Millisecond*100
 			switch {
+			case proj.exclude(evt.Name):
+				proj.println(0, "EXCLUDED\n")
+				result = false
 			case evt.Op == fsnotify.Chmod:
-				proj.println(0, "SKIPPED\n")
+				proj.println(0, "IGNORED\n")
 				result = false
 			case evt == prevEvent && concurrent:
 				proj.println(0, "CONCURRENT\n")
