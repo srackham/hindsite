@@ -229,7 +229,7 @@ A hindsite project consists of three separate directories:
 - A _content directory_ containing [Markdown documents](#documents) and
   [static resource files](#static-files).
 - A _template directory_ containing [HTML templates](#templates) and project
-  [configuration files](#configuration-files).
+  [configuration files](#configuration).
 - A _build directory_ containing the generated website.
 
 By default these directories reside in the project directory and are named
@@ -284,12 +284,11 @@ characters. This convention is not enforced but is recommended because it:
 
 
 .#configuration
-## Configuration files 
-Configuration files contain parameters that drive website generation. They
-reside in the template directories and are optional, though most projects will
-have at least one at the root of the template directory. Configuration files are
-encoded in either TOML or YAML markup and are named `config.toml` and
-`config.yaml` respectively.
+## Configuration parameters 
+Configuration parameters drive website generation. They are specified in TOML
+and YAML markup files in the project template directories named `config.toml`
+and `config.yaml` respectively. Configuration files are optional, though most
+projects will have at least one at the root of the template directory.
 
 The configuration applied to each document or index is computed by merging the
 configuration files that lie on the corresponding _template directory_ path.
@@ -303,21 +302,29 @@ The `exclude`, `homepage` and `urlprefix` configuration parameters are site-wide
 and are always taken from the template directory root configuration i.e. they
 are not subject to subdirectory configuration file parameter merging.
 
-Configuration parameters:
+Valid configuration parameters are:
 
 `author`:: Specifies the default document author and can be overridden by the
 document's _author_ [front matter](#front-matter) variable. TOML example:
 
     author = "Joe Bloggs"
 
-`exclude`:: A `|` separated list of paths in the content directory that are
-excluded from `build` command processing. The paths are relative to the content
-directory and conform to patterns matched by the Go [filepath.Match()
-function](https://golang.org/pkg/path/filepath/#Match). Note that the `*`
-wildcard character _does not_ match path separators e.g. `*.out` matches all
-`.out` files in the content root, not subdirectories. TOML example:
+`exclude`:: A `|` separated list of file and directory paths in the content and
+template directories that are excluded from processing.
 
-    exclude = "config.rmu|sass"
+- The paths are relative to the content or template directory and conform to
+  patterns matched by the Go [filepath.Match()
+  function](https://golang.org/pkg/path/filepath/#Match).
+- If the path contains no path separators then it is matched against file names
+  e.g. `*.swp` will match all files with the `.swp` file name extension.
+- If the path contains path separators then it is matched against file paths
+  e.g. `posts/*.md` will only match files in the `posts` directory.
+- To exclude a file in the content or template root directories prefix the file
+  name with a file separator e.g. `/config.rmu` will exclude `config.rmu` only
+  if it is in the top directory.
+- TOML example:
+
+    exclude = "config.rmu|*.swp|*~|4913"
 
 `shortdate`, `mediumdate`, `longdate`:: These are date formats for template
 `shortdate`, `mediumdate` and `longdate` variables respectively (the `date`
@@ -368,6 +375,7 @@ documents and document templates. Both keys and values are strings and the keys
 must be legal [Go identifier](https://golang.org/ref/spec#Identifiers). For
 example:
 ..
+
 ```
 # TOML
 [user]
@@ -416,6 +424,37 @@ location in the _build directory_.
 If a static file is classified as a template (see the
 [templates](#configuration) configuration parameter) then it is rendered as a
 [text template](#text-template) prior to being written to the _build directory_.
+
+
+## Indexes
+The hindsite build command generates paginated document and tag indexes.
+
+- A content directory is indexed when the corresponding template directory
+  contains a [docs.html](#html-templates) template.
+- Documents from the indexed content directory and all subdirectories contribute
+  to the index.
+- A project can contain any number of indexed content directories.
+- Indexes can be nested. This allows categorized document subdirectories to have
+  separate indexes along with aggregated parent directory indexes.
+- Generated index pages are written to a directory named `indexes` located at
+  the root of the _build directory_.
+- The `indexes` directory structure mirrors that of the templates directory with
+  indexes located in their corresponding subdirectory.
+- The following HTML index files are built for each index:
+
+  `docs-1.html`, `docs-2.html` ...:: Paginated document index files. The number
+  of documents per index page is set by the [paginate](#configuration)
+  configuration parameter. Rendered with the corresponding
+  [docs.html](#html-template) template.
+
+  `tags.html`:: A list of document tags linked to paginated per-tag document
+  index files in the `tags` subdirectory. Rendered with the corresponding
+  [tags.html](#html-template) template.
+
+  `tags/<tag>-1.html`, `tags/<tag>-2.html` ...:: Paginated per-tag document
+  index files. The number of documents per index page is set by the
+  [paginate](#configuration) configuration parameter. Rendered with the
+  corresponding [docs.html](#html-template) template.
 
 
 ## Front matter
@@ -549,32 +588,6 @@ templates and in [text templates](#text-templates).
 `.user`:: The map of [front matter](#front-matter) `user` key/values.
 
 
-## Indexes
-The hindsite build command generates paginated document and tag indexes.
-
-- A project can contain any number of indexed content directories.
-- A content directory is indexed when the corresponding template directory
-  contains a [docs.html](#html-templates) template.
-- Tag indexes are optional, they are generated when the corresponding template
-  directory contains a [tags.html](TODO) template.
-- Documents from the indexed content directory and all subdirectories contribute
-  to the index.
-- Indexes can be nested. This allows categorized document subdirectories to have
-  separate indexes along with aggregated parent directory indexes.
-- Generated index pages are written to a directory named `indexes` located at
-  the root of the _build directory_.
-- The `indexes` directory structure mirrors that of the templates directory with
-  each each built index located in its corresponding subdirectory.
-- The following HTML index files are built for each index:
-  `docs-1.html`, `docs-2.html` ...:: Paginated document index files. The number
-    of documents per index page is set by the [paginate](#configuration)
-    configuration parameter.
-  `tags.html`:: A list of document tags linked to paginated per-tag document index files
-    in the `tags` subdirectory.
-  `tags/<tag>-1.html`, `tags/<tag>-2.html` ...:: Paginated per-tag document
-    index files.
-
-
 ## Templates
 _hindsite_ uses Go templates to build webpages. There are two types of
 templates:
@@ -672,7 +685,8 @@ To synthesize absolute URLs include the URL domain in `urlprefix`.
 Website is written.
 
 **document**: A Markdown (`.md`) in the project _content directory_. Each
-document is generates a wepage e.g. a blog post, a newsletter or an article.
+document generates a corresponding wepage e.g. a blog post, a newsletter or an
+article.
 
 **configuration file**: Optional TOML (`config.toml`) or YAML (`config.yaml`)
 files containing configuration parameters located in the project's _template
@@ -684,8 +698,8 @@ directory_.
 **front matter**: Meta-data embedded at the start of [documents](#documents) and
 [static files](#static-files).
 
-**primary index**: An index that is not nested (has not parent index). A
-document can only belong to one primary index.
+**primary index**: An [index](#indexes) that is not nested (has no parent
+index). A document can only belong to one primary index.
 
 **project**: A hindsite [project](#projects) consists of a _content directory_,
 a _template directory_ and a _build directory_. Hindsite uses the contents of
@@ -693,19 +707,19 @@ the template and content directories to generate a website which it writes to
 the build directory.
 
 **indexed directory**: A directory in the content directory that generates a
-document index and optional tag indexes. The corresponding template directory
-contains a `docs.html` template and an optional `tags.html` template. The
-presence of the `docs.html` template flags the directory as indexed.
+document [index](#indexes) and optional tag indexes. The corresponding template
+directory contains a [docs.html](#html-templates) template and an optional
+[tags.html](#html-templates) template. The presence of the `docs.html` template
+flags the directory as indexed.
 
 **indexed document**: A [document](#documents) residing in an indexed directory.
 
 **indexes directory**: The `indexes` directory at the root of the build
 directory containing generated index pages.
 
-**secondary index**: An index that is nested. A document can belong to multiple
-secondary indexes.
+**secondary index**: An index that is nested inside a parent index.
 
 **tag**: A keyword or phrase used to categorize a content document.
 
-**template directory**: A directory (default name `template`) containing webpage
-[templates](#html-templates) and [configuration files](#configuration).
+**template directory**: A directory (default name `template`) containing [HTML
+templates](#html-templates) and [configuration files](#configuration).
