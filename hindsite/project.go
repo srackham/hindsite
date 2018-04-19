@@ -43,22 +43,27 @@ func newProject() project {
 
 // verbose prints a message if `-v` option verbosity is equal to or greater than
 // verbosity.
-func (proj *project) println(verbosity int, message string) {
+func (proj *project) logconsole(verbosity int, message string) {
 	if proj.verbosity >= verbosity {
 		message = strings.Replace(message, proj.projectDir+string(filepath.Separator), "", -1)
 		fmt.Println(message)
 	}
 }
 
+// println unconditionally prints a message.
+func (proj *project) println(message string) {
+	proj.logconsole(0, message)
+}
+
 // verbose prints a message if `-v` verbose option was specified.
 func (proj *project) verbose(message string) {
-	proj.println(1, message)
+	proj.logconsole(1, message)
 }
 
 // verbose2 prints a message if the `-v` verbose option was specified more than
 // once.
 func (proj *project) verbose2(message string) {
-	proj.println(2, message)
+	proj.logconsole(2, message)
 }
 
 // parseArgs parses the hindsite command-line arguments.
@@ -552,7 +557,7 @@ func (proj *project) serve() error {
 		})
 	}
 	http.Handle("/", stripPrefix(proj.rootConf.urlprefix, http.FileServer(http.Dir(proj.buildDir))))
-	proj.println(0, fmt.Sprintf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port))
+	proj.println(fmt.Sprintf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port))
 	return http.ListenAndServe(":"+proj.port, nil)
 }
 

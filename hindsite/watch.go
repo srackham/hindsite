@@ -9,36 +9,33 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-// debounce filters and debounces fsnotify events.
-// If there have been no file system events on the in input channel for the time
-// interval then forward the most recent accepted file system notification event
-// to the output channel.
-func (proj *project) debounce(interval time.Duration, in chan fsnotify.Event, out chan fsnotify.Event) {
-	skip := func(evt fsnotify.Event) bool {
-		result := false
-		var msg string
-		switch {
-		case proj.exclude(evt.Name):
-			msg = "excluded"
-			result = true
-		case evt.Op == fsnotify.Chmod:
-			msg = "ignored"
-			result = true
-		default:
-			msg = "accepted"
-		}
-		proj.verbose("fsnotify: " + msg + ": " + evt.Op.String() + ": " + evt.Name)
-		return result
-	}
+// watcherFilter filters and debounces fsnotify events. When there has been a
+// lull in file system events arriving on the in input channel then forward the
+// most recent accepted file system notification event to the output channel.
+func (proj *project) watcherFilter(in chan fsnotify.Event, out chan fsnotify.Event) {
+	const lull time.Duration = 100 * time.Millisecond
 	var nextOut fsnotify.Event
-	timer := time.NewTimer(interval)
+	timer := time.NewTimer(lull)
 	timer.Stop()
 	for {
 		select {
 		case evt := <-in:
-			if !skip(evt) {
+			reject := false
+			var msg string
+			switch {
+			case proj.exclude(evt.Name):
+				msg = "excluded"
+				reject = true
+			case evt.Op == fsnotify.Chmod:
+				msg = "ignored"
+				reject = true
+			default:
+				msg = "accepted"
+			}
+			proj.verbose("fsnotify: " + msg + ": " + evt.Op.String() + ": " + evt.Name)
+			if !reject {
 				nextOut = evt
-				timer.Reset(interval)
+				timer.Reset(lull)
 			}
 		case <-timer.C:
 			out <- nextOut
@@ -81,18 +78,18 @@ func (proj *project) watch() error {
 	// Start thread to monitor file system notifications and rebuild website.
 	go func() {
 		out := make(chan fsnotify.Event)
-		go proj.debounce(100*time.Millisecond, watcher.Events, out)
+		go proj.watcherFilter(watcher.Events, out)
 		for {
 			mu := sync.Mutex{}
 			select {
 			case evt := <-out:
 				mu.Lock()
 				f := evt.Name
-				proj.println(0, evt.Op.String()+": "+f)
+				proj.println(time.Now().Format("15:04:05") + ": " + evt.Op.String() + ": " + f)
 				if err := proj.build(); err != nil {
 					done <- err
 				}
-				proj.println(0, "")
+				proj.println("")
 				mu.Unlock()
 			case err := <-watcher.Errors:
 				done <- err
