@@ -1,0 +1,256 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"time"
+)
+
+// build implements the build command.
+func (proj *project) build() error {
+	startTime := time.Now()
+	if err := proj.parseConfigs(); err != nil {
+		return err
+	}
+	if !dirExists(proj.buildDir) {
+		if err := os.Mkdir(proj.buildDir, 0775); err != nil {
+			return err
+		}
+	}
+	if !proj.incremental {
+		// Delete everything in the build directory forcing a complete site rebuild.
+		files, _ := filepath.Glob(filepath.Join(proj.buildDir, "*"))
+		for _, f := range files {
+			if err := os.RemoveAll(f); err != nil {
+				return err
+			}
+		}
+	}
+	// confMod records the most recent date a change was made to a configuration file or a template file.
+	var confMod time.Time
+	updateConfMod := func(info os.FileInfo) {
+		if isOlder(confMod, info.ModTime()) {
+			confMod = info.ModTime()
+		}
+	}
+	// Parse all template files.
+	proj.htmlTemplates = newHtmlTemplates(proj.templateDir)
+	proj.textTemplates = newTextTemplates(proj.templateDir)
+	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() && f == filepath.Join(proj.templateDir, "init") {
+			return filepath.SkipDir
+		}
+		if proj.exclude(f) {
+			proj.verbose("exclude: " + f)
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !info.IsDir() {
+			switch filepath.Ext(f) {
+			case ".toml", ".yaml":
+				// Skip configuration file.
+				updateConfMod(info)
+			case ".html":
+				// Compile HTML template.
+				updateConfMod(info)
+				proj.verbose("parse template: " + f)
+				err = proj.htmlTemplates.add(f)
+			case ".txt":
+				// Compile text template.
+				updateConfMod(info)
+				proj.verbose("parse template: " + f)
+				err = proj.textTemplates.add(f)
+			}
+		}
+		return err
+	})
+	if err != nil {
+		return err
+	}
+	// Parse content directory documents and copy/render static files to the build directory.
+	draftsCount := 0
+	docsCount := 0
+	staticCount := 0
+	docs := documents{}
+	err = filepath.Walk(proj.contentDir, func(f string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if proj.exclude(f) {
+			proj.verbose("exclude: " + f)
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !info.IsDir() {
+			switch filepath.Ext(f) {
+			case ".md", ".rmu":
+				docsCount++
+				// Parse document.
+				doc, err := newDocument(f, proj)
+				if err != nil {
+					return err
+				}
+				if doc.draft && !proj.drafts {
+					draftsCount++
+					proj.verbose("skip draft: " + f)
+					return nil
+				}
+				docs = append(docs, &doc)
+			default:
+				staticCount++
+				conf := proj.configFor(f)
+				if isTemplate(f, conf.templates) {
+					err = proj.renderStaticFile(f, confMod)
+				} else {
+					err = proj.copyStaticFile(f)
+				}
+			}
+		}
+		return err
+	})
+	if err != nil {
+		return err
+	}
+	// Create indexes.
+	idxs, err := newIndexes(proj)
+	if err != nil {
+		return err
+	}
+	for _, doc := range docs {
+		idxs.addDocument(doc)
+	}
+	// Sort index documents then assign document prev/next according to the
+	// primary index ordering. Index document ordering ensures subsequent
+	// derived document tag indexes are also ordered.
+	for _, idx := range idxs {
+		idx.docs.sortByDate()
+		if idx.primary {
+			idx.docs.setPrevNext()
+		}
+	}
+	// Build index pages.
+	err = idxs.build(confMod)
+	if err != nil {
+		return err
+	}
+	// Render documents. Documents are written before writing indexes so that
+	// they are available as soon as possible.
+	for _, doc := range docs {
+		if !rebuild(doc.buildPath, confMod, doc) {
+			continue
+		}
+		data := doc.frontMatter()
+		markup := doc.content
+		// Render document markup as a text template.
+		if isTemplate(doc.contentPath, doc.templates) {
+			proj.verbose2("render template: " + doc.contentPath)
+			markup, err = proj.textTemplates.renderText("documentMarkup", markup, data)
+			if err != nil {
+				return err
+			}
+		}
+		// Convert markup to HTML then render document layout to build directory.
+		proj.verbose2("render document: " + doc.contentPath)
+		data["body"] = doc.render(markup)
+		err = proj.htmlTemplates.render(doc.layout, data, doc.buildPath)
+		if err != nil {
+			return err
+		}
+		proj.verbose("write document: " + doc.buildPath)
+		proj.verbose2(doc.String())
+	}
+	fmt.Printf("documents: %d\n", docsCount)
+	fmt.Printf("drafts: %d\n", draftsCount)
+	fmt.Printf("static: %d\n", staticCount)
+	// Install home page.
+	if proj.rootConf.homepage != "" {
+		src := proj.rootConf.homepage
+		if !fileExists(src) {
+			return fmt.Errorf("homepage file missing: %s", src)
+		}
+		dst := filepath.Join(proj.buildDir, "index.html")
+		if !fileExists(dst) || upToDate(src, dst) {
+			proj.verbose2("copy homepage: " + src)
+			proj.verbose("write homepage: " + dst)
+			if err := copyFile(src, dst); err != nil {
+				return err
+			}
+		}
+	}
+	fmt.Printf("time: %.2fs\n", time.Now().Sub(startTime).Seconds())
+	return nil
+}
+
+// upToDate returns false target file is newer than the prerequisite file or if
+// target does not exist.
+func upToDate(target, prerequisite string) bool {
+	result, err := fileIsOlder(prerequisite, target)
+	if err != nil {
+		return false
+	}
+	return result
+}
+
+// copyStaticFile copies the content directory srcFile to corresponding build
+// directory. Skips if the destination file is up to date. Creates missing
+// destination directories.
+func (proj *project) copyStaticFile(srcFile string) error {
+	if !pathIsInDir(srcFile, proj.contentDir) {
+		panic("copyStaticFile: static file is outside content directory: " + srcFile)
+	}
+	dstFile := pathTranslate(srcFile, proj.contentDir, proj.buildDir)
+	if upToDate(dstFile, srcFile) {
+		return nil
+	}
+	proj.verbose("copy static:  " + srcFile)
+	err := mkMissingDir(filepath.Dir(dstFile))
+	if err != nil {
+		return err
+	}
+	err = copyFile(srcFile, dstFile)
+	if err != nil {
+		return err
+	}
+	proj.verbose2("write static: " + dstFile)
+	return nil
+}
+
+// renderStaticFile renders file f from the content directory as a text template
+// and writes it to the corresponding build directory. Skips if the destination
+// file is newer than f and is newer than the modified time. Creates missing
+// destination directories.
+func (proj *project) renderStaticFile(f string, modified time.Time) error {
+	// Parse document.
+	doc, err := newDocument(f, proj)
+	if err != nil {
+		return err
+	}
+	if !rebuild(doc.buildPath, modified, &doc) {
+		return nil
+	}
+	// Render document markup as a text template.
+	proj.verbose2("render static: " + doc.contentPath)
+	proj.verbose2(doc.String())
+	markup := doc.content
+	if isTemplate(doc.contentPath, doc.templates) {
+		data := doc.frontMatter()
+		markup, err = proj.textTemplates.renderText("staticFile", markup, data)
+		if err != nil {
+			return err
+		}
+	}
+	proj.verbose("write static: " + doc.buildPath)
+	err = mkMissingDir(filepath.Dir(doc.buildPath))
+	if err != nil {
+		return err
+	}
+	return writeFile(doc.buildPath, markup)
+}
