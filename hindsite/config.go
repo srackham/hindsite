@@ -113,7 +113,12 @@ func (conf *config) parseFile(proj *project, f string) error {
 		conf.urlprefix = strings.TrimSuffix(value, "/")
 	}
 	if cf.Exclude != nil {
-		conf.exclude = strings.Split(*cf.Exclude, "|")
+		conf.exclude = strings.Split(filepath.ToSlash(*cf.Exclude), "|")
+		for _, pat := range conf.exclude {
+			if pat == "" {
+				return fmt.Errorf("exclude pattern cannot be blank: %s", *cf.Exclude)
+			}
+		}
 	}
 	if cf.Timezone != "" {
 		tz, err := time.LoadLocation(cf.Timezone)

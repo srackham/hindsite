@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -379,6 +380,13 @@ func (proj *project) build() error {
 		if info.IsDir() && f == filepath.Join(proj.templateDir, "init") {
 			return filepath.SkipDir
 		}
+		if proj.exclude(f) {
+			proj.verbose("exclude: " + f)
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
 		if !info.IsDir() {
 			switch filepath.Ext(f) {
 			case ".toml", ".yaml":
@@ -410,8 +418,7 @@ func (proj *project) build() error {
 		if err != nil {
 			return err
 		}
-		rel, _ := filepath.Rel(proj.contentDir, f)
-		if proj.exclude(rel) {
+		if proj.exclude(f) {
 			proj.verbose("exclude: " + f)
 			if info.IsDir() {
 				return filepath.SkipDir
@@ -641,8 +648,20 @@ func (proj *project) renderStaticFile(f string, modified time.Time) error {
 
 // exclude returns true if path name f matches a configuration exclude path.
 func (proj *project) exclude(f string) bool {
+	if pathIsInDir(f, proj.contentDir) {
+		f, _ = filepath.Rel(proj.contentDir, f)
+	} else {
+		f, _ = filepath.Rel(proj.templateDir, f)
+	}
+	f = filepath.ToSlash(f)
 	for _, pat := range proj.rootConf.exclude {
-		if matched, _ := filepath.Match(pat, f); matched {
+		if !strings.Contains(pat, "/") {
+			f = path.Base(f)
+		}
+		if pat[0] == '/' {
+			pat = pat[1:]
+		}
+		if matched, _ := path.Match(pat, f); matched {
 			return true
 		}
 	}
