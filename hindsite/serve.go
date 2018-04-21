@@ -115,8 +115,8 @@ func (proj *project) serve() error {
 	go func() {
 		out := make(chan fsnotify.Event)
 		go proj.watcherFilter(watcher.Events, out)
+		mu := sync.Mutex{}
 		for {
-			mu := sync.Mutex{}
 			select {
 			case evt := <-out:
 				mu.Lock()
