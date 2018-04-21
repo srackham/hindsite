@@ -24,7 +24,7 @@ type index struct {
 	primary     bool                 // True if this is a primary index.
 }
 
-type indexes []index
+type indexes []*index
 
 // page represents a document index page.
 type page struct {
@@ -71,7 +71,7 @@ func newIndexes(proj *project) (indexes, error) {
 			}
 			idx.conf = proj.configFor(idx.contentDir)
 			idx.url = path.Join("/", idx.conf.urlprefix, filepath.ToSlash(p))
-			idxs = append(idxs, idx)
+			idxs = append(idxs, &idx)
 		}
 		return nil
 	})
@@ -95,7 +95,7 @@ func (idxs indexes) addDocument(doc *document) {
 		if pathIsInDir(doc.templatePath, idx.templateDir) {
 			idxs[i].docs = append(idx.docs, doc)
 			if idx.primary {
-				doc.primaryIndex = &idxs[i]
+				doc.primaryIndex = idxs[i]
 			}
 		}
 	}
