@@ -121,24 +121,25 @@ func (proj *project) build() error {
 		return err
 	}
 	// Create indexes.
-	idxs, err := newIndexes(proj)
+	tmp, err := newIndexes(proj)
 	if err != nil {
 		return err
 	}
+	proj.idxs = tmp
 	for _, doc := range proj.docs {
-		idxs.addDocument(doc)
+		proj.idxs.addDocument(doc)
 	}
 	// Sort index documents then assign document prev/next according to the
 	// primary index ordering. Index document ordering ensures subsequent
 	// derived document tag indexes are also ordered.
-	for _, idx := range idxs {
+	for _, idx := range proj.idxs {
 		idx.docs.sortByDate()
 		if idx.primary {
 			idx.docs.setPrevNext()
 		}
 	}
 	// Build index pages.
-	err = idxs.build(confMod)
+	err = proj.idxs.build(confMod)
 	if err != nil {
 		return err
 	}
@@ -189,9 +190,8 @@ func (proj *project) buildStaticFile(f string, modified time.Time) error {
 	conf := proj.configFor(f)
 	if isTemplate(f, conf.templates) {
 		return proj.renderStaticFile(f, modified)
-	} else {
-		return proj.copyStaticFile(f)
 	}
+	return proj.copyStaticFile(f)
 }
 
 // copyStaticFile copies the content directory srcFile to corresponding build

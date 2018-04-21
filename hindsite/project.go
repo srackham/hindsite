@@ -31,6 +31,7 @@ type project struct {
 	rootConf      config
 	confs         configs
 	docs          documents
+	idxs          indexes
 	htmlTemplates htmlTemplates
 	textTemplates textTemplates
 }

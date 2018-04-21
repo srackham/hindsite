@@ -153,22 +153,24 @@ func (proj *project) updateFile(f string) error {
 	case proj.isDocument(f):
 		doc := proj.getDocument(f)
 		if doc == nil {
-			panic("modifyFile: missing document: " + f)
+			panic("updateFile: missing document: " + f)
 		}
 		newDoc, err := newDocument(f, proj)
 		if err != nil {
 			return err
 		}
-		if doc.primaryIndex != nil {
-			newDoc.primaryIndex = doc.primaryIndex
-			newDoc.next = doc.next
-			newDoc.prev = doc.prev
-		}
-		for i, d := range proj.docs {
-			if d == doc {
-				doc = &newDoc
-				proj.docs[i] = doc
-				break
+		oldDoc := *doc
+		doc.updateFrom(newDoc)
+		// If document front matter has changed rebuild affected indexes.
+		if doc.primaryIndex != nil && doc.header != oldDoc.header {
+			for _, idx := range proj.idxs {
+				if pathIsInDir(doc.templatePath, idx.templateDir) {
+					idx.docs.sortByDate()
+					if idx.primary {
+						idx.docs.setPrevNext()
+					}
+					idx.build()
+				}
 			}
 		}
 		err = proj.renderDocument(doc)

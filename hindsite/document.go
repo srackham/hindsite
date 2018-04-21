@@ -25,6 +25,7 @@ type document struct {
 	contentPath  string
 	buildPath    string
 	templatePath string    // Virtual path used to find document related templates.
+	header       string    // Front matter document header text.
 	content      string    // Markup text (without front matter header).
 	modified     time.Time // Document source file modified timestamp.
 	primaryIndex *index    // Top-level document index (nil if document is not indexed).
@@ -151,13 +152,14 @@ func (doc *document) extractFrontMatter() error {
 	default:
 		return nil
 	}
-	fmText, eof, err := readTo(end, scanner)
+	header, eof, err := readTo(end, scanner)
 	if err != nil {
 		return err
 	}
 	if eof {
 		return fmt.Errorf("missing front matter delimiter: %s: %s", end, doc.contentPath)
 	}
+	doc.header = header
 	description, eof, err := readTo("<!--more-->", scanner)
 	if err != nil {
 		return err
@@ -187,12 +189,12 @@ func (doc *document) extractFrontMatter() error {
 	}{}
 	switch format {
 	case "toml":
-		_, err := toml.Decode(fmText, &fm)
+		_, err := toml.Decode(header, &fm)
 		if err != nil {
 			return err
 		}
 	case "yaml":
-		err := yaml.Unmarshal([]byte(fmText), &fm)
+		err := yaml.Unmarshal([]byte(header), &fm)
 		if err != nil {
 			return err
 		}
@@ -353,4 +355,31 @@ func (docs documents) frontMatter() templateData {
 		data = append(data, doc.frontMatter())
 	}
 	return templateData{"docs": data}
+}
+
+// updateFrom copies fields set by newDocument from src document.
+func (doc *document) updateFrom(src document) {
+	doc.proj = src.proj
+	doc.conf = src.conf
+	doc.contentPath = src.contentPath
+	doc.buildPath = src.buildPath
+	doc.templatePath = src.templatePath
+	doc.header = src.header
+	doc.content = src.content
+	doc.modified = src.modified
+	// doc.primaryIndex = src.primaryIndex
+	// doc.prev = src.prev
+	// doc.next = src.next
+	doc.title = src.title
+	doc.date = src.date
+	doc.author = src.author
+	doc.templates = src.templates
+	doc.description = src.description
+	doc.addendum = src.addendum
+	doc.url = src.url
+	doc.tags = src.tags
+	doc.draft = src.draft
+	doc.slug = src.slug
+	doc.layout = src.layout
+	doc.user = src.user
 }
