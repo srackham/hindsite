@@ -18,6 +18,7 @@ func (proj *project) build() error {
 			return err
 		}
 	}
+	proj.docs = documents{}
 	if !proj.incremental {
 		// Delete everything in the build directory forcing a complete site rebuild.
 		files, _ := filepath.Glob(filepath.Join(proj.buildDir, "*"))
@@ -40,6 +41,9 @@ func (proj *project) build() error {
 	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
+		}
+		if f == proj.templateDir {
+			return nil
 		}
 		if info.IsDir() && f == filepath.Join(proj.templateDir, "init") {
 			return filepath.SkipDir
@@ -77,10 +81,12 @@ func (proj *project) build() error {
 	draftsCount := 0
 	docsCount := 0
 	staticCount := 0
-	docs := documents{}
 	err = filepath.Walk(proj.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
+		}
+		if f == proj.contentDir {
+			return nil
 		}
 		if proj.exclude(f) {
 			proj.verbose("exclude: " + f)
@@ -103,15 +109,10 @@ func (proj *project) build() error {
 					proj.verbose("skip draft: " + f)
 					return nil
 				}
-				docs = append(docs, &doc)
+				proj.docs = append(proj.docs, &doc)
 			default:
 				staticCount++
-				conf := proj.configFor(f)
-				if isTemplate(f, conf.templates) {
-					err = proj.renderStaticFile(f, confMod)
-				} else {
-					err = proj.copyStaticFile(f)
-				}
+				proj.buildStaticFile(f, confMod)
 			}
 		}
 		return err
@@ -124,7 +125,7 @@ func (proj *project) build() error {
 	if err != nil {
 		return err
 	}
-	for _, doc := range docs {
+	for _, doc := range proj.docs {
 		idxs.addDocument(doc)
 	}
 	// Sort index documents then assign document prev/next according to the
@@ -143,29 +144,13 @@ func (proj *project) build() error {
 	}
 	// Render documents. Documents are written before writing indexes so that
 	// they are available as soon as possible.
-	for _, doc := range docs {
+	for _, doc := range proj.docs {
 		if !rebuild(doc.buildPath, confMod, doc) {
 			continue
 		}
-		data := doc.frontMatter()
-		markup := doc.content
-		// Render document markup as a text template.
-		if isTemplate(doc.contentPath, doc.templates) {
-			proj.verbose2("render template: " + doc.contentPath)
-			markup, err = proj.textTemplates.renderText("documentMarkup", markup, data)
-			if err != nil {
-				return err
-			}
-		}
-		// Convert markup to HTML then render document layout to build directory.
-		proj.verbose2("render document: " + doc.contentPath)
-		data["body"] = doc.render(markup)
-		err = proj.htmlTemplates.render(doc.layout, data, doc.buildPath)
-		if err != nil {
+		if err = proj.renderDocument(doc); err != nil {
 			return err
 		}
-		proj.verbose("write document: " + doc.buildPath)
-		proj.verbose2(doc.String())
 	}
 	fmt.Printf("documents: %d\n", docsCount)
 	fmt.Printf("drafts: %d\n", draftsCount)
@@ -197,6 +182,16 @@ func upToDate(target, prerequisite string) bool {
 		return false
 	}
 	return result
+}
+
+// TODO: should be renderStaticFile() (copyStaticFile merged with renderStaticFile)
+func (proj *project) buildStaticFile(f string, modified time.Time) error {
+	conf := proj.configFor(f)
+	if isTemplate(f, conf.templates) {
+		return proj.renderStaticFile(f, modified)
+	} else {
+		return proj.copyStaticFile(f)
+	}
 }
 
 // copyStaticFile copies the content directory srcFile to corresponding build
@@ -253,4 +248,28 @@ func (proj *project) renderStaticFile(f string, modified time.Time) error {
 		return err
 	}
 	return writeFile(doc.buildPath, markup)
+}
+
+func (proj *project) renderDocument(doc *document) error {
+	var err error
+	data := doc.frontMatter()
+	markup := doc.content
+	// Render document markup as a text template.
+	if isTemplate(doc.contentPath, doc.templates) {
+		proj.verbose2("render template: " + doc.contentPath)
+		markup, err = proj.textTemplates.renderText("documentMarkup", markup, data)
+		if err != nil {
+			return err
+		}
+	}
+	// Convert markup to HTML then render document layout to build directory.
+	proj.verbose2("render document: " + doc.contentPath)
+	data["body"] = doc.render(markup)
+	err = proj.htmlTemplates.render(doc.layout, data, doc.buildPath)
+	if err != nil {
+		return err
+	}
+	proj.verbose("write document: " + doc.buildPath)
+	proj.verbose2(doc.String())
+	return nil
 }

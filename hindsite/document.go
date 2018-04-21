@@ -26,8 +26,8 @@ type document struct {
 	buildPath    string
 	templatePath string    // Virtual path used to find document related templates.
 	content      string    // Markup text (without front matter header).
-	primaryIndex *index    // Top-level document index (nil if document is not indexed).
 	modified     time.Time // Document source file modified timestamp.
+	primaryIndex *index    // Top-level document index (nil if document is not indexed).
 	prev         *document // Previous document in primary index.
 	next         *document // Next document in primary index.
 	// Front matter.

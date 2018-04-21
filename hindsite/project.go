@@ -30,6 +30,7 @@ type project struct {
 	verbosity     int
 	rootConf      config
 	confs         configs
+	docs          documents
 	htmlTemplates htmlTemplates
 	textTemplates textTemplates
 }
@@ -175,8 +176,8 @@ func (proj *project) parseArgs(args []string) error {
 		return nil
 	}
 	if err := checkOverlap("content", proj.contentDir, "template", proj.templateDir); err != nil {
-		// It's OK to build the init directory.
-		if !(proj.command == "build" && proj.contentDir == filepath.Join(proj.templateDir, "init")) {
+		// It's OK for the content directory to be the the template init directory.
+		if proj.contentDir != filepath.Join(proj.templateDir, "init") {
 			return err
 		}
 	}

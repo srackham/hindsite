@@ -120,11 +120,18 @@ func (proj *project) serve() error {
 			select {
 			case evt := <-out:
 				mu.Lock()
-				f := evt.Name
-				proj.println(time.Now().Format("15:04:05") + ": " + evt.Op.String() + ": " + f)
-				if err := proj.build(); err != nil {
+				start := time.Now()
+				proj.println(start.Format("15:04:05") + ": " + evt.Op.String() + ": " + evt.Name)
+				switch evt.Op {
+				case fsnotify.Write:
+					err = proj.updateFile(evt.Name)
+				default:
+					err = proj.build()
+				}
+				if err != nil {
 					done <- err
 				}
+				fmt.Printf("time: %.2fs\n", time.Now().Sub(start).Seconds())
 				proj.println("")
 				mu.Unlock()
 			case err := <-watcher.Errors:
@@ -138,4 +145,63 @@ func (proj *project) serve() error {
 	}()
 	// Wait for error exit.
 	return <-done
+}
+
+func (proj *project) updateFile(f string) error {
+	var err error
+	switch {
+	case proj.isDocument(f):
+		doc := proj.getDocument(f)
+		if doc == nil {
+			panic("modifyFile: missing document: " + f)
+		}
+		newDoc, err := newDocument(f, proj)
+		if err != nil {
+			return err
+		}
+		if doc.primaryIndex != nil {
+			newDoc.primaryIndex = doc.primaryIndex
+			newDoc.next = doc.next
+			newDoc.prev = doc.prev
+		}
+		for i, d := range proj.docs {
+			if d == doc {
+				doc = &newDoc
+				proj.docs[i] = doc
+				break
+			}
+		}
+		err = proj.renderDocument(doc)
+	case pathIsInDir(f, proj.contentDir):
+		err = proj.buildStaticFile(f, time.Time{})
+	default:
+		// template directory file.
+		err = proj.build()
+	}
+	return err
+}
+
+func (proj *project) isDocument(f string) bool {
+	ext := filepath.Ext(f)
+	return (ext == ".md" || ext == ".rmu") && pathIsInDir(f, proj.contentDir)
+}
+
+// UNUSED
+func (proj *project) isConfigFile(f string) bool {
+	base := filepath.Base(f)
+	return (base == "config.toml" || base == "config.yaml") && pathIsInDir(f, proj.templateDir)
+}
+
+// getDocument returns parsed document for source file f or nil if not found.
+func (proj *project) getDocument(f string) *document {
+	for _, doc := range proj.docs {
+		if doc.contentPath == f {
+			return doc
+		}
+	}
+	return nil
+}
+
+// setDocument replaces
+func (proj *project) setDocument(old, new *document) {
 }
