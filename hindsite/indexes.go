@@ -41,8 +41,6 @@ type page struct {
 func newIndex(proj *project) index {
 	idx := index{}
 	idx.proj = proj
-	idx.tagDocs = map[string]documents{}
-	idx.slugs = map[string]string{}
 	return idx
 }
 
@@ -147,12 +145,14 @@ func (idx index) build() error {
 	tagsTemplate := tmpls.name(idx.templateDir, "tags.html")
 	if tmpls.contains(tagsTemplate) {
 		// Build idx.tagDocs[].
+		idx.tagDocs = map[string]documents{}
 		for _, doc := range idx.docs {
 			for _, tag := range doc.tags {
 				idx.tagDocs[tag] = append(idx.tagDocs[tag], doc)
 			}
 		}
 		// Build index tag slugs.
+		idx.slugs = map[string]string{}
 		slugs := []string{}
 		for tag := range idx.tagDocs {
 			slug := slugify(tag, slugs)
