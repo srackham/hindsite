@@ -121,11 +121,10 @@ func (proj *project) build() error {
 		return err
 	}
 	// Create indexes.
-	tmp, err := newIndexes(proj)
+	proj.idxs, err = newIndexes(proj)
 	if err != nil {
 		return err
 	}
-	proj.idxs = tmp
 	for _, doc := range proj.docs {
 		proj.idxs.addDocument(doc)
 	}
