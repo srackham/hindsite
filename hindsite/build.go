@@ -104,7 +104,7 @@ func (proj *project) build() error {
 				if err != nil {
 					return err
 				}
-				if doc.draft && !proj.drafts {
+				if doc.isDraft() {
 					draftsCount++
 					proj.verbose("skip draft: " + f)
 					return nil

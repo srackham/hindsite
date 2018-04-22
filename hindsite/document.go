@@ -383,3 +383,8 @@ func (doc *document) updateFrom(src document) {
 	doc.layout = src.layout
 	doc.user = src.user
 }
+
+// isDraft returns true if document is a draft and the drafts option is not true.
+func (doc *document) isDraft() bool {
+	return doc.draft && !doc.proj.drafts
+}

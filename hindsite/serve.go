@@ -48,6 +48,9 @@ func (proj *project) httpserver() error {
 // watcherFilter filters and debounces fsnotify events. When there has been a
 // lull in file system events arriving on the in input channel then forward the
 // most recent accepted file system notification event to the output channel.
+//
+// TODO: Timestamp events so can display true processing time.
+//       Translate Rename event to Remove (outside move) and Rename (inside move, Name = "from->to").
 func (proj *project) watcherFilter(in chan fsnotify.Event, out chan fsnotify.Event) {
 	const lull time.Duration = 100 * time.Millisecond
 	var nextOut fsnotify.Event
@@ -128,14 +131,22 @@ func (proj *project) serve() error {
 					if err != nil {
 						done <- err
 					}
-					mu.Unlock()
 					proj.println("")
+					mu.Unlock()
 				}
 			case evt := <-out:
 				mu.Lock()
 				start := time.Now()
 				proj.println(start.Format("15:04:05") + ": " + evt.Op.String() + ": " + evt.Name)
+				// The Rename event occurs in two contexts:
+				// 1. When moved outsided watch directories the Rename event is delivered.
+				// 2. When moved within  the watch directories the Rename event is dropped
+				//    and the ensuing Create event is delivered.
 				switch evt.Op {
+				case fsnotify.Create:
+					err = proj.createFile(evt.Name)
+				case fsnotify.Remove, fsnotify.Rename:
+					err = proj.removeFile(evt.Name)
 				case fsnotify.Write:
 					err = proj.updateFile(evt.Name)
 				default:
@@ -160,30 +171,41 @@ func (proj *project) serve() error {
 	return <-done
 }
 
+// kbmonitor sends keyboard characters to the out channel.
 func kbmonitor(out chan rune) {
 	reader := bufio.NewReader(os.Stdin)
-	writer := bufio.NewWriter(os.Stdout)
 	for {
 		c, num, err := reader.ReadRune()
 		if num > 0 && err == nil {
-			writer.WriteRune(c)
 			out <- c
 		}
 	}
+}
+
+func (proj *project) createFile(f string) error {
+	return nil
+}
+
+func (proj *project) removeFile(f string) error {
+	return nil
 }
 
 func (proj *project) updateFile(f string) error {
 	var err error
 	switch {
 	case proj.isDocument(f):
-		doc := proj.getDocument(f)
-		if doc == nil {
-			// TODO: This may be because the draft status was set true so rebuild.
-			panic("updateFile: missing document: " + f)
-		}
 		newDoc, err := newDocument(f, proj)
 		if err != nil {
 			return err
+		}
+		doc := proj.getDocument(f)
+		if doc == nil {
+			if !newDoc.draft {
+				// Document that was a draft has changed to non-draft.
+				proj.createFile(f)
+			} else {
+				panic("updateFile: missing document: " + f)
+			}
 		}
 		oldDoc := *doc
 		doc.updateFrom(newDoc)
@@ -214,12 +236,6 @@ func (proj *project) isDocument(f string) bool {
 	return (ext == ".md" || ext == ".rmu") && pathIsInDir(f, proj.contentDir)
 }
 
-// UNUSED
-func (proj *project) isConfigFile(f string) bool {
-	base := filepath.Base(f)
-	return (base == "config.toml" || base == "config.yaml") && pathIsInDir(f, proj.templateDir)
-}
-
 // getDocument returns parsed document for source file f or nil if not found.
 func (proj *project) getDocument(f string) *document {
 	for _, doc := range proj.docs {
@@ -228,8 +244,4 @@ func (proj *project) getDocument(f string) *document {
 		}
 	}
 	return nil
-}
-
-// setDocument replaces
-func (proj *project) setDocument(old, new *document) {
 }
