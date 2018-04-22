@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -115,9 +116,21 @@ func (proj *project) serve() error {
 	go func() {
 		out := make(chan fsnotify.Event)
 		go proj.watcherFilter(watcher.Events, out)
+		kb := make(chan rune)
+		go kbmonitor(kb)
 		mu := sync.Mutex{}
 		for {
 			select {
+			case c := <-kb:
+				if c == 'r' || c == 'R' {
+					mu.Lock()
+					err = proj.build()
+					if err != nil {
+						done <- err
+					}
+					mu.Unlock()
+					proj.println("")
+				}
 			case evt := <-out:
 				mu.Lock()
 				start := time.Now()
@@ -128,12 +141,12 @@ func (proj *project) serve() error {
 				default:
 					err = proj.build()
 				}
+				mu.Unlock()
 				if err != nil {
 					done <- err
 				}
 				fmt.Printf("time: %.2fs\n", time.Now().Sub(start).Seconds())
 				proj.println("")
-				mu.Unlock()
 			case err := <-watcher.Errors:
 				done <- err
 			}
@@ -147,12 +160,25 @@ func (proj *project) serve() error {
 	return <-done
 }
 
+func kbmonitor(out chan rune) {
+	reader := bufio.NewReader(os.Stdin)
+	writer := bufio.NewWriter(os.Stdout)
+	for {
+		c, num, err := reader.ReadRune()
+		if num > 0 && err == nil {
+			writer.WriteRune(c)
+			out <- c
+		}
+	}
+}
+
 func (proj *project) updateFile(f string) error {
 	var err error
 	switch {
 	case proj.isDocument(f):
 		doc := proj.getDocument(f)
 		if doc == nil {
+			// TODO: This may be because the draft status was set true so rebuild.
 			panic("updateFile: missing document: " + f)
 		}
 		newDoc, err := newDocument(f, proj)
