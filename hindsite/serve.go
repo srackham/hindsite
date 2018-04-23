@@ -71,8 +71,7 @@ func (proj *project) watcherFilter(in chan fsnotify.Event, out chan fsnotify.Eve
 			default:
 				msg = "accepted"
 			}
-			// proj.verbose("fsnotify: " + msg + ": " + evt.Op.String() + ": " + evt.Name)
-			proj.println("fsnotify: " + msg + ": " + evt.Op.String() + ": " + evt.Name)
+			proj.verbose("fsnotify: " + msg + ": " + evt.Op.String() + ": " + evt.Name)
 			if !reject {
 				nextOut = evt
 				timer.Reset(lull)
@@ -149,7 +148,7 @@ func (proj *project) serve() error {
 				case fsnotify.Remove, fsnotify.Rename:
 					err = proj.removeFile(evt.Name)
 				case fsnotify.Write:
-					err = proj.updateFile(evt.Name)
+					err = proj.writeFile(evt.Name)
 				default:
 					err = proj.build()
 				}
@@ -172,7 +171,8 @@ func (proj *project) serve() error {
 	return <-done
 }
 
-// kbmonitor sends keyboard characters to the out channel.
+// kbmonitor sends keyboard characters to the out channel. The input source is
+// buffered so characters are only received on a lin-by-line basis.
 func kbmonitor(out chan rune) {
 	reader := bufio.NewReader(os.Stdin)
 	for {
@@ -183,6 +183,8 @@ func kbmonitor(out chan rune) {
 	}
 }
 
+// createFile handles the fsnotify Create event and adds the file to the build
+// set.
 func (proj *project) createFile(f string) error {
 	switch {
 	case proj.isDocument(f):
@@ -213,6 +215,8 @@ func (proj *project) createFile(f string) error {
 	}
 }
 
+// removeFile handles fsnotify Remove events and removes the document from the
+// build set.
 func (proj *project) removeFile(f string) error {
 	switch {
 	case proj.isDocument(f):
@@ -245,7 +249,9 @@ func (proj *project) removeFile(f string) error {
 	}
 }
 
-func (proj *project) updateFile(f string) error {
+// writeFile handles document creation an update events. If the document is
+// changed to a draft it is removed from the build set.
+func (proj *project) writeFile(f string) error {
 	switch {
 	case proj.isDocument(f):
 		newDoc, err := newDocument(f, proj)
@@ -254,11 +260,8 @@ func (proj *project) updateFile(f string) error {
 		}
 		doc := proj.getDocument(f)
 		if doc == nil {
-			if !newDoc.isDraft() {
-				// Document that was a draft has changed to non-draft.
-				return proj.createFile(f)
-			}
-			panic("updateFile: missing document: " + f)
+			// Document has just been created and written or was a draft and has changed to non-draft.
+			return proj.createFile(f)
 		}
 		if newDoc.isDraft() {
 			// Document changed to draft.
