@@ -191,7 +191,6 @@ func (proj *project) removeFile(f string) error {
 }
 
 func (proj *project) updateFile(f string) error {
-	var err error
 	switch {
 	case proj.isDocument(f):
 		newDoc, err := newDocument(f, proj)
@@ -200,35 +199,44 @@ func (proj *project) updateFile(f string) error {
 		}
 		doc := proj.getDocument(f)
 		if doc == nil {
-			if !newDoc.draft {
+			if !newDoc.isDraft() {
 				// Document that was a draft has changed to non-draft.
-				proj.createFile(f)
-			} else {
-				panic("updateFile: missing document: " + f)
+				return proj.createFile(f)
 			}
+			panic("updateFile: missing document: " + f)
+		}
+		if newDoc.isDraft() {
+			// Document changed to draft.
+			return proj.removeFile(f)
 		}
 		oldDoc := *doc
 		doc.updateFrom(newDoc)
-		// If document front matter has changed rebuild affected indexes.
 		if doc.primaryIndex != nil && doc.header != oldDoc.header {
+			// Document front matter has changed so rebuild affected indexes.
 			for _, idx := range proj.idxs {
 				if pathIsInDir(doc.templatePath, idx.templateDir) {
-					idx.docs.sortByDate()
-					if idx.primary {
-						idx.docs.setPrevNext()
+					if oldDoc.date.Equal(doc.date) && strings.Join(oldDoc.tags, ",") == strings.Join(doc.tags, ",") {
+						// Neither date ordering or tags have changed so only rebuild document index pages containing doc.
+						idx.build(doc)
+					} else {
+						// Rebuild all index files.
+						idx.docs.sortByDate()
+						if idx.isPrimary {
+							idx.docs.setPrevNext()
+						}
+						idx.build(nil)
 					}
-					idx.build()
 				}
 			}
 		}
-		err = proj.renderDocument(doc)
+		return proj.renderDocument(doc)
 	case pathIsInDir(f, proj.contentDir):
-		err = proj.buildStaticFile(f, time.Time{})
+		return proj.buildStaticFile(f, time.Time{})
 	default:
 		// template directory file.
-		err = proj.build()
+		return proj.build()
 	}
-	return err
+	return nil
 }
 
 func (proj *project) isDocument(f string) bool {

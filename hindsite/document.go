@@ -256,6 +256,10 @@ func (doc *document) frontMatter() templateData {
 	for _, tag := range doc.tags {
 		url := ""
 		if doc.primaryIndex != nil {
+			// TODO: Temp diags.
+			if doc.primaryIndex.slugs[tag] == "" {
+				panic(fmt.Sprintf("%#v", doc))
+			}
 			url = path.Join(doc.primaryIndex.url, "tags", doc.primaryIndex.slugs[tag]+"-1.html")
 		}
 		tags = append(tags, map[string]string{
@@ -312,6 +316,38 @@ func (doc *document) render(text string) template.HTML {
 	return template.HTML(html)
 }
 
+// updateFrom copies fields set by newDocument from src document.
+func (doc *document) updateFrom(src document) {
+	doc.proj = src.proj
+	doc.conf = src.conf
+	doc.contentPath = src.contentPath
+	doc.buildPath = src.buildPath
+	doc.templatePath = src.templatePath
+	doc.header = src.header
+	doc.content = src.content
+	doc.modified = src.modified
+	// doc.primaryIndex = src.primaryIndex
+	// doc.prev = src.prev
+	// doc.next = src.next
+	doc.title = src.title
+	doc.date = src.date
+	doc.author = src.author
+	doc.templates = src.templates
+	doc.description = src.description
+	doc.addendum = src.addendum
+	doc.url = src.url
+	doc.tags = src.tags
+	doc.draft = src.draft
+	doc.slug = src.slug
+	doc.layout = src.layout
+	doc.user = src.user
+}
+
+// isDraft returns true if document is a draft and the drafts option is not true.
+func (doc *document) isDraft() bool {
+	return doc.draft && !doc.proj.drafts
+}
+
 // Assign previous and next according to the current sort order.
 func (docs documents) setPrevNext() {
 	for i, doc := range docs {
@@ -348,6 +384,16 @@ func (docs documents) first(n int) documents {
 	return result
 }
 
+// contains returns true if doc is in docs.
+func (docs documents) contains(doc *document) bool {
+	for _, d := range docs {
+		if d == doc {
+			return true
+		}
+	}
+	return false
+}
+
 // Return documents front matter template data.
 func (docs documents) frontMatter() templateData {
 	data := []templateData{}
@@ -355,36 +401,4 @@ func (docs documents) frontMatter() templateData {
 		data = append(data, doc.frontMatter())
 	}
 	return templateData{"docs": data}
-}
-
-// updateFrom copies fields set by newDocument from src document.
-func (doc *document) updateFrom(src document) {
-	doc.proj = src.proj
-	doc.conf = src.conf
-	doc.contentPath = src.contentPath
-	doc.buildPath = src.buildPath
-	doc.templatePath = src.templatePath
-	doc.header = src.header
-	doc.content = src.content
-	doc.modified = src.modified
-	// doc.primaryIndex = src.primaryIndex
-	// doc.prev = src.prev
-	// doc.next = src.next
-	doc.title = src.title
-	doc.date = src.date
-	doc.author = src.author
-	doc.templates = src.templates
-	doc.description = src.description
-	doc.addendum = src.addendum
-	doc.url = src.url
-	doc.tags = src.tags
-	doc.draft = src.draft
-	doc.slug = src.slug
-	doc.layout = src.layout
-	doc.user = src.user
-}
-
-// isDraft returns true if document is a draft and the drafts option is not true.
-func (doc *document) isDraft() bool {
-	return doc.draft && !doc.proj.drafts
 }

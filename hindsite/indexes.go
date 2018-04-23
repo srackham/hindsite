@@ -21,7 +21,7 @@ type index struct {
 	docs        documents            // Parsed documents belonging to index.
 	tagDocs     map[string]documents // Partitions indexed documents by tag.
 	slugs       map[string]string    // Slugified tags.
-	primary     bool                 // True if this is a primary index.
+	isPrimary   bool                 // True if this is a primary index.
 }
 
 type indexes []*index
@@ -75,11 +75,11 @@ func newIndexes(proj *project) (indexes, error) {
 	})
 	// Assign primary indexes.
 	for i, idx1 := range idxs {
-		idxs[i].primary = true
+		idxs[i].isPrimary = true
 		for _, idx2 := range idxs {
 			if pathIsInDir(idx1.templateDir, idx2.templateDir) && idx1.templateDir != idx2.templateDir {
 				// idx1 is child of idx2.
-				idxs[i].primary = false
+				idxs[i].isPrimary = false
 			}
 		}
 	}
@@ -92,7 +92,7 @@ func (idxs indexes) addDocument(doc *document) {
 	for i, idx := range idxs {
 		if pathIsInDir(doc.templatePath, idx.templateDir) {
 			idxs[i].docs = append(idx.docs, doc)
-			if idx.primary {
+			if idx.isPrimary {
 				doc.primaryIndex = idxs[i]
 			}
 		}
@@ -107,7 +107,7 @@ func (idxs indexes) build(modified time.Time) error {
 	for _, idx := range idxs {
 		target := filepath.Join(idx.indexDir, "docs-1.html")
 		if rebuild(target, modified, idx.docs...) {
-			if err := idx.build(); err != nil {
+			if err := idx.build(nil); err != nil {
 				return err
 			}
 		}
@@ -116,7 +116,8 @@ func (idxs indexes) build(modified time.Time) error {
 }
 
 // build builds document and tag index pages.
-func (idx index) build() error {
+// If doc is not nil then only those document index pages containing doc are rendered.
+func (idx *index) build(doc *document) error {
 	tmpls := &idx.proj.htmlTemplates // Lexical shortcut.
 	// renderPages renders paginated document pages with named template.
 	// Additional template data is included.
@@ -126,6 +127,9 @@ func (idx index) build() error {
 			count += len(pg.docs)
 		}
 		for _, pg := range pgs {
+			if doc != nil && !pg.docs.contains(doc) {
+				continue
+			}
 			fm := pg.docs.frontMatter()
 			fm["count"] = strconv.Itoa(count)
 			fm["page"] = pg.frontMatter()
@@ -159,16 +163,18 @@ func (idx index) build() error {
 			slugs = append(slugs, slug)
 			idx.slugs[tag] = slug
 		}
-		// Render tags index.
-		data := idx.tagsData()
-		// Merge applicable configuration variables.
-		data["urlprefix"] = idx.conf.urlprefix
-		data["user"] = idx.conf.user
-		outfile := filepath.Join(idx.indexDir, "tags.html")
-		err := tmpls.render(tagsTemplate, data, outfile)
-		idx.proj.verbose("write index: " + outfile)
-		if err != nil {
-			return err
+		if doc == nil {
+			// Render tags index.
+			data := idx.tagsData()
+			// Merge applicable configuration variables.
+			data["urlprefix"] = idx.conf.urlprefix
+			data["user"] = idx.conf.user
+			outfile := filepath.Join(idx.indexDir, "tags.html")
+			err := tmpls.render(tagsTemplate, data, outfile)
+			idx.proj.verbose("write index: " + outfile)
+			if err != nil {
+				return err
+			}
 		}
 		// Render per-tag document index pages.
 		for tag := range idx.tagDocs {

@@ -133,7 +133,7 @@ func (proj *project) build() error {
 	// derived document tag indexes are also ordered.
 	for _, idx := range proj.idxs {
 		idx.docs.sortByDate()
-		if idx.primary {
+		if idx.isPrimary {
 			idx.docs.setPrevNext()
 		}
 	}
