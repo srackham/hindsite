@@ -128,15 +128,6 @@ func (proj *project) build() error {
 	for _, doc := range proj.docs {
 		proj.idxs.addDocument(doc)
 	}
-	// Sort index documents then assign document prev/next according to the
-	// primary index ordering. Index document ordering ensures subsequent
-	// derived document tag indexes are also ordered.
-	for _, idx := range proj.idxs {
-		idx.docs.sortByDate()
-		if idx.isPrimary {
-			idx.docs.setPrevNext()
-		}
-	}
 	// Build index pages.
 	err = proj.idxs.build(confMod)
 	if err != nil {

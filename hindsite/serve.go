@@ -71,7 +71,8 @@ func (proj *project) watcherFilter(in chan fsnotify.Event, out chan fsnotify.Eve
 			default:
 				msg = "accepted"
 			}
-			proj.verbose("fsnotify: " + msg + ": " + evt.Op.String() + ": " + evt.Name)
+			// proj.verbose("fsnotify: " + msg + ": " + evt.Op.String() + ": " + evt.Name)
+			proj.println("fsnotify: " + msg + ": " + evt.Op.String() + ": " + evt.Name)
 			if !reject {
 				nextOut = evt
 				timer.Reset(lull)
@@ -183,11 +184,65 @@ func kbmonitor(out chan rune) {
 }
 
 func (proj *project) createFile(f string) error {
-	return nil
+	switch {
+	case proj.isDocument(f):
+		if proj.getDocument(f) != nil {
+			panic("createFile: document already exists")
+		}
+		doc, err := newDocument(f, proj)
+		if err != nil {
+			return err
+		}
+		proj.docs = append(proj.docs, &doc)
+		proj.idxs.addDocument(&doc)
+		// Rebuild indexes containing the new document.
+		for _, idx := range proj.idxs {
+			if pathIsInDir(doc.templatePath, idx.templateDir) {
+				if err := idx.build(nil); err != nil {
+					return err
+				}
+			}
+		}
+		return proj.renderDocument(&doc)
+	case pathIsInDir(f, proj.contentDir):
+		return proj.buildStaticFile(f, time.Time{})
+	case pathIsInDir(f, proj.templateDir):
+		return proj.build()
+	default:
+		panic("file is not in watched directories: " + f)
+	}
 }
 
 func (proj *project) removeFile(f string) error {
-	return nil
+	switch {
+	case proj.isDocument(f):
+		doc := proj.getDocument(f)
+		if doc == nil {
+			// The document may have been a draft so can't assume this is an error.
+			return nil
+		}
+		// Delete from documents.
+		proj.docs = proj.docs.delete(doc)
+		// Rebuild indexes containing the removed document.
+		for _, idx := range proj.idxs {
+			if pathIsInDir(doc.templatePath, idx.templateDir) {
+				idx.docs = idx.docs.delete(doc)
+				if err := idx.build(nil); err != nil {
+					return err
+				}
+			}
+		}
+		proj.verbose("delete document: " + doc.buildPath)
+		return os.Remove(doc.buildPath)
+	case pathIsInDir(f, proj.contentDir):
+		f := pathTranslate(f, proj.contentDir, proj.buildDir)
+		proj.verbose("delete static: " + f)
+		return os.Remove(f)
+	case pathIsInDir(f, proj.templateDir):
+		return proj.build()
+	default:
+		panic("file is not in watched directories: " + f)
+	}
 }
 
 func (proj *project) updateFile(f string) error {
@@ -211,20 +266,21 @@ func (proj *project) updateFile(f string) error {
 		}
 		oldDoc := *doc
 		doc.updateFrom(newDoc)
-		if doc.primaryIndex != nil && doc.header != oldDoc.header {
+		// TODO: Does this actually save much i.e. is the document.header worth having?
+		if doc.header != oldDoc.header {
 			// Document front matter has changed so rebuild affected indexes.
 			for _, idx := range proj.idxs {
 				if pathIsInDir(doc.templatePath, idx.templateDir) {
 					if oldDoc.date.Equal(doc.date) && strings.Join(oldDoc.tags, ",") == strings.Join(doc.tags, ",") {
 						// Neither date ordering or tags have changed so only rebuild document index pages containing doc.
-						idx.build(doc)
-					} else {
-						// Rebuild all index files.
-						idx.docs.sortByDate()
-						if idx.isPrimary {
-							idx.docs.setPrevNext()
+						if err := idx.build(doc); err != nil {
+							return err
 						}
-						idx.build(nil)
+					} else {
+						// Rebuild the index completely.
+						if err := idx.build(nil); err != nil {
+							return err
+						}
 					}
 				}
 			}
@@ -232,11 +288,11 @@ func (proj *project) updateFile(f string) error {
 		return proj.renderDocument(doc)
 	case pathIsInDir(f, proj.contentDir):
 		return proj.buildStaticFile(f, time.Time{})
-	default:
-		// template directory file.
+	case pathIsInDir(f, proj.templateDir):
 		return proj.build()
+	default:
+		panic("file is not in watched directories: " + f)
 	}
-	return nil
 }
 
 func (proj *project) isDocument(f string) bool {

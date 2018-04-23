@@ -145,6 +145,15 @@ func (idx *index) build(doc *document) error {
 		}
 		return nil
 	}
+	if doc == nil {
+		// Sort index documents then assign document prev/next according to the
+		// primary index ordering. Index document ordering ensures subsequent
+		// derived document tag indexes are also ordered.
+		idx.docs.sortByDate()
+		if idx.isPrimary {
+			idx.docs.setPrevNext()
+		}
+	}
 	docsTemplate := tmpls.name(idx.templateDir, "docs.html")
 	tagsTemplate := tmpls.name(idx.templateDir, "tags.html")
 	if tmpls.contains(tagsTemplate) {

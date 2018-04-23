@@ -28,6 +28,7 @@ type document struct {
 	header       string    // Front matter document header text.
 	content      string    // Markup text (without front matter header).
 	modified     time.Time // Document source file modified timestamp.
+	// TODO: Is primaryIndex field necessary, it's only used on one place? Factor it out?
 	primaryIndex *index    // Top-level document index (nil if document is not indexed).
 	prev         *document // Previous document in primary index.
 	next         *document // Next document in primary index.
@@ -382,6 +383,17 @@ func (docs documents) first(n int) documents {
 		result = append(result, doc)
 	}
 	return result
+}
+
+// delete deletes document from docs and returns resulting slice. Panics if
+// document not in slice.
+func (docs documents) delete(doc *document) documents {
+	for i, d := range docs {
+		if d == doc {
+			return append(docs[:i], docs[i+1:]...)
+		}
+	}
+	panic("documents.delete: missing document: " + doc.contentPath)
 }
 
 // contains returns true if doc is in docs.

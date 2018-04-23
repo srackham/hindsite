@@ -129,7 +129,7 @@ func pathIsInDir(p, dir string) bool {
 // Translate srcPath to corresponding path in dstRoot.
 func pathTranslate(srcPath, srcRoot, dstRoot string) string {
 	if !pathIsInDir(srcPath, srcRoot) {
-		panic("pathTranslate: srcPath not in srcRoot")
+		panic("pathTranslate: srcPath not in srcRoot: " + srcPath)
 	}
 	dstPath, err := filepath.Rel(srcRoot, srcPath)
 	if err != nil {
