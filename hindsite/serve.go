@@ -56,11 +56,14 @@ func (proj *project) watcherFilter(in chan fsnotify.Event, out chan fsnotify.Eve
 			reject := false
 			var msg string
 			switch {
-			case proj.exclude(evt.Name):
-				msg = "excluded"
-				reject = true
 			case evt.Op == fsnotify.Chmod:
 				msg = "ignored"
+				reject = true
+			case dirExists(evt.Name):
+				msg = "ignored"
+				reject = true
+			case proj.exclude(evt.Name):
+				msg = "excluded"
 				reject = true
 			default:
 				msg = "accepted"
