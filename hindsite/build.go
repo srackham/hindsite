@@ -18,7 +18,7 @@ func (proj *project) build() error {
 			return err
 		}
 	}
-	proj.docs = documents{}
+	proj.docs = newDocumentsLookup()
 	if !proj.incremental {
 		// Delete everything in the build directory forcing a complete site rebuild.
 		files, _ := filepath.Glob(filepath.Join(proj.buildDir, "*"))
@@ -109,7 +109,9 @@ func (proj *project) build() error {
 					proj.verbose("skip draft: " + f)
 					return nil
 				}
-				proj.docs = append(proj.docs, &doc)
+				if err := proj.docs.add(&doc); err != nil {
+					return err
+				}
 			default:
 				staticCount++
 				proj.buildStaticFile(f, confMod)
@@ -125,7 +127,7 @@ func (proj *project) build() error {
 	if err != nil {
 		return err
 	}
-	for _, doc := range proj.docs {
+	for _, doc := range proj.docs.byContentPath {
 		proj.idxs.addDocument(doc)
 	}
 	// Build index pages.
@@ -133,9 +135,8 @@ func (proj *project) build() error {
 	if err != nil {
 		return err
 	}
-	// Render documents. Documents are written before writing indexes so that
-	// they are available as soon as possible.
-	for _, doc := range proj.docs {
+	// Render documents.
+	for _, doc := range proj.docs.byContentPath {
 		if !rebuild(doc.buildPath, confMod, doc) {
 			continue
 		}

@@ -30,7 +30,7 @@ type project struct {
 	verbosity     int
 	rootConf      config
 	confs         configs
-	docs          documents
+	docs          documentsLookup
 	idxs          indexes
 	htmlTemplates htmlTemplates
 	textTemplates textTemplates

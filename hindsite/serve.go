@@ -181,7 +181,7 @@ func kbmonitor(out chan rune) {
 func (proj *project) createFile(f string) error {
 	switch {
 	case proj.isDocument(f):
-		if proj.getDocument(f) != nil {
+		if proj.docs.byContentPath[f] != nil {
 			panic("createFile: document already exists")
 		}
 		doc, err := newDocument(f, proj)
@@ -192,7 +192,9 @@ func (proj *project) createFile(f string) error {
 			proj.verbose("skip draft: " + f)
 			return nil
 		}
-		proj.docs = append(proj.docs, &doc)
+		if err := proj.docs.add(&doc); err != nil {
+			return err
+		}
 		proj.idxs.addDocument(&doc)
 		// Rebuild indexes containing the new document.
 		for _, idx := range proj.idxs {
@@ -217,13 +219,13 @@ func (proj *project) createFile(f string) error {
 func (proj *project) removeFile(f string) error {
 	switch {
 	case proj.isDocument(f):
-		doc := proj.getDocument(f)
+		doc := proj.docs.byContentPath[f]
 		if doc == nil {
 			// The document may have been a draft so can't assume this is an error.
 			return nil
 		}
 		// Delete from documents.
-		proj.docs = proj.docs.delete(doc)
+		proj.docs.delete(doc)
 		// Rebuild indexes containing the removed document.
 		for _, idx := range proj.idxs {
 			if pathIsInDir(doc.templatePath, idx.templateDir) {
@@ -255,7 +257,7 @@ func (proj *project) writeFile(f string) error {
 		if err != nil {
 			return err
 		}
-		doc := proj.getDocument(f)
+		doc := proj.docs.byContentPath[f]
 		if doc == nil {
 			if newDoc.isDraft() {
 				// Draft document updated, don't do anything.
@@ -304,14 +306,4 @@ func (proj *project) writeFile(f string) error {
 func (proj *project) isDocument(f string) bool {
 	ext := filepath.Ext(f)
 	return (ext == ".md" || ext == ".rmu") && pathIsInDir(f, proj.contentDir)
-}
-
-// getDocument returns parsed document for source file f or nil if not found.
-func (proj *project) getDocument(f string) *document {
-	for _, doc := range proj.docs {
-		if doc.contentPath == f {
-			return doc
-		}
-	}
-	return nil
 }

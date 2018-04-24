@@ -12,16 +12,16 @@ import (
 )
 
 type index struct {
-	proj        *project             // Context.
-	conf        config               // Merged configuration for this index.
-	contentDir  string               // The directory that contains the indexed documents.
-	templateDir string               // The directory that contains the index templates.
-	indexDir    string               // The build directory that the index pages are written to.
-	url         string               // Synthesised index directory URL.
-	docs        documents            // Parsed documents belonging to index.
-	tagDocs     map[string]documents // Partitions indexed documents by tag.
-	slugs       map[string]string    // Slugified tags.
-	isPrimary   bool                 // True if this is a primary index.
+	proj        *project                 // Context.
+	conf        config                   // Merged configuration for this index.
+	contentDir  string                   // The directory that contains the indexed documents.
+	templateDir string                   // The directory that contains the index templates.
+	indexDir    string                   // The build directory that the index pages are written to.
+	url         string                   // Synthesised index directory URL.
+	docs        documentsList            // Parsed documents belonging to index.
+	tagDocs     map[string]documentsList // Partitions indexed documents by tag.
+	slugs       map[string]string        // Slugified tags.
+	isPrimary   bool                     // True if this is a primary index.
 }
 
 type indexes []*index
@@ -35,7 +35,7 @@ type page struct {
 	prev   *page
 	first  *page
 	last   *page
-	docs   documents
+	docs   documentsList
 }
 
 func newIndex(proj *project) index {
@@ -166,7 +166,7 @@ func (idx *index) build(doc *document) error {
 	tagsTemplate := tmpls.name(idx.templateDir, "tags.html")
 	if tmpls.contains(tagsTemplate) {
 		// Build idx.tagDocs[].
-		idx.tagDocs = map[string]documents{}
+		idx.tagDocs = map[string]documentsList{}
 		for _, doc := range idx.docs {
 			for _, tag := range doc.tags {
 				idx.tagDocs[tag] = append(idx.tagDocs[tag], doc)
@@ -223,7 +223,7 @@ func (idx index) tagsData() templateData {
 }
 
 // Synthesize index pages.
-func (idx *index) paginate(docs documents, filename string) []page {
+func (idx *index) paginate(docs documentsList, filename string) []page {
 	pgs := []page{}
 	pagesize := idx.conf.paginate
 	var pagecount int

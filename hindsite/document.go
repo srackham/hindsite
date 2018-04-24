@@ -47,8 +47,6 @@ type document struct {
 	user        map[string]string // User defined configuration key/values.
 }
 
-type documents []*document
-
 // Parse document content and front matter.
 func newDocument(contentfile string, proj *project) (document, error) {
 	if !pathIsInDir(contentfile, proj.contentDir) {
@@ -95,7 +93,9 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	if err := doc.extractFrontMatter(); err != nil {
 		return doc, err
 	}
-	if doc.slug != "" {
+	// TODO: Reenable slugs once a permalink mapping scheme is implemented.
+	// if doc.slug != "" {
+	if false {
 		// Change output file names to match document slug variable.
 		f := doc.slug + filepath.Ext(doc.buildPath)
 		doc.buildPath = filepath.Join(filepath.Dir(doc.buildPath), f)
@@ -349,8 +349,13 @@ func (doc *document) isDraft() bool {
 	return doc.draft && !doc.proj.drafts
 }
 
+/*
+	documentsList stores documentsList in an ordered list.
+*/
+type documentsList []*document
+
 // Assign previous and next according to the current sort order.
-func (docs documents) setPrevNext() {
+func (docs documentsList) setPrevNext() {
 	for i, doc := range docs {
 		if i == 0 {
 			doc.prev = nil
@@ -366,7 +371,7 @@ func (docs documents) setPrevNext() {
 }
 
 // Return documents slice sorted by date descending.
-func (docs documents) sortByDate() {
+func (docs documentsList) sortByDate() {
 	// Sort documents by decending date.
 	sort.Slice(docs, func(i, j int) bool {
 		return !docs[i].date.Before(docs[j].date)
@@ -374,8 +379,8 @@ func (docs documents) sortByDate() {
 }
 
 // Return slice of first n documents.
-func (docs documents) first(n int) documents {
-	result := documents{}
+func (docs documentsList) first(n int) documentsList {
+	result := documentsList{}
 	for i, doc := range docs {
 		if n >= 0 && i >= n {
 			break
@@ -387,7 +392,7 @@ func (docs documents) first(n int) documents {
 
 // delete deletes document from docs and returns resulting slice. Panics if
 // document not in slice.
-func (docs documents) delete(doc *document) documents {
+func (docs documentsList) delete(doc *document) documentsList {
 	for i, d := range docs {
 		if d == doc {
 			return append(docs[:i], docs[i+1:]...)
@@ -397,7 +402,7 @@ func (docs documents) delete(doc *document) documents {
 }
 
 // contains returns true if doc is in docs.
-func (docs documents) contains(doc *document) bool {
+func (docs documentsList) contains(doc *document) bool {
 	for _, d := range docs {
 		if d == doc {
 			return true
@@ -407,10 +412,42 @@ func (docs documents) contains(doc *document) bool {
 }
 
 // Return documents front matter template data.
-func (docs documents) frontMatter() templateData {
+func (docs documentsList) frontMatter() templateData {
 	data := []templateData{}
 	for _, doc := range docs {
 		data = append(data, doc.frontMatter())
 	}
 	return templateData{"docs": data}
+}
+
+/*
+	documentsLookup implement storage and retrieval of documents by contentPath and
+	buildPath
+*/
+type documentsLookup struct {
+	byContentPath map[string]*document // Documents keyed by contentPath.
+	byBuildPath   map[string]*document // Documents keyed by buildPath.
+}
+
+func newDocumentsLookup() documentsLookup {
+	return documentsLookup{map[string]*document{}, map[string]*document{}}
+}
+
+func (lookup *documentsLookup) add(doc *document) error {
+	d := lookup.byContentPath[doc.contentPath]
+	if d != nil {
+		panic("duplicate document: " + d.contentPath)
+	}
+	d = lookup.byBuildPath[doc.buildPath]
+	if d != nil {
+		return fmt.Errorf("documents have same build path: " + d.contentPath + ": " + doc.contentPath)
+	}
+	lookup.byBuildPath[doc.buildPath] = doc
+	lookup.byContentPath[doc.contentPath] = doc
+	return nil
+}
+
+func (lookup *documentsLookup) delete(doc *document) {
+	lookup.byBuildPath[doc.buildPath] = nil
+	lookup.byContentPath[doc.contentPath] = nil
 }
