@@ -39,6 +39,9 @@ func (proj *project) httpserver() error {
 	return http.ListenAndServe(":"+proj.port, nil)
 }
 
+// watcherLullTime is the watcherFilter debounce time.
+const watcherLullTime time.Duration = 20 * time.Millisecond
+
 // watcherFilter filters and debounces fsnotify events. When there has been a
 // lull in file system events arriving on the in input channel then forward the
 // most recent accepted file system notification event to the output channel.
@@ -46,9 +49,8 @@ func (proj *project) httpserver() error {
 // TODO: Timestamp events so can display true processing time.
 //       Translate Rename event to Remove (outside move) and Rename (inside move, Name = "from->to").
 func (proj *project) watcherFilter(in chan fsnotify.Event, out chan fsnotify.Event) {
-	const lull time.Duration = 20 * time.Millisecond
 	var nextOut fsnotify.Event
-	timer := time.NewTimer(lull)
+	timer := time.NewTimer(watcherLullTime)
 	timer.Stop()
 	for {
 		select {
@@ -72,7 +74,7 @@ func (proj *project) watcherFilter(in chan fsnotify.Event, out chan fsnotify.Eve
 			proj.verbose("fsnotify: " + time.Now().Format("15:04:05.000") + ": " + msg + ": " + evt.Op.String() + ": " + evt.Name)
 			if !reject {
 				nextOut = evt
-				timer.Reset(lull)
+				timer.Reset(watcherLullTime)
 			}
 		case <-timer.C:
 			out <- nextOut
@@ -135,21 +137,22 @@ func (proj *project) serve() error {
 			case evt := <-out:
 				mu.Lock()
 				start := time.Now()
-				proj.println(start.Format("15:04:05") + ": " + evt.Op.String() + ": " + evt.Name)
 				switch evt.Op {
 				case fsnotify.Create, fsnotify.Write:
+					proj.println(start.Format("15:04:05") + ": file updated: " + evt.Name)
 					err = proj.writeFile(evt.Name)
 				case fsnotify.Remove, fsnotify.Rename:
+					proj.println(start.Format("15:04:05") + ": file removed: " + evt.Name)
 					err = proj.removeFile(evt.Name)
 				default:
 					err = proj.build()
 				}
-				mu.Unlock()
 				if err != nil {
 					done <- err
 				}
-				fmt.Printf("time: %.2fs\n", time.Now().Sub(start).Seconds())
+				fmt.Printf("elapsed: %.3fs\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
 				proj.println("")
+				mu.Unlock()
 			case err := <-watcher.Errors:
 				done <- err
 			}
