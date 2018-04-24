@@ -16,12 +16,6 @@ import (
 
 // httpserver starts the HTTP server.
 func (proj *project) httpserver() error {
-	if err := proj.parseConfigs(); err != nil {
-		return err
-	}
-	if !dirExists(proj.buildDir) {
-		return fmt.Errorf("missing build directory: " + proj.buildDir)
-	}
 	// Tweaked http.StripPrefix() handler
 	// (https://golang.org/pkg/net/http/#StripPrefix). If URL does not start
 	// with prefix serve unmodified URL.
@@ -52,7 +46,7 @@ func (proj *project) httpserver() error {
 // TODO: Timestamp events so can display true processing time.
 //       Translate Rename event to Remove (outside move) and Rename (inside move, Name = "from->to").
 func (proj *project) watcherFilter(in chan fsnotify.Event, out chan fsnotify.Event) {
-	const lull time.Duration = 100 * time.Millisecond
+	const lull time.Duration = 20 * time.Millisecond
 	var nextOut fsnotify.Event
 	timer := time.NewTimer(lull)
 	timer.Stop()
@@ -71,7 +65,8 @@ func (proj *project) watcherFilter(in chan fsnotify.Event, out chan fsnotify.Eve
 			default:
 				msg = "accepted"
 			}
-			proj.verbose("fsnotify: " + msg + ": " + evt.Op.String() + ": " + evt.Name)
+			// proj.verbose2("fsnotify: " + time.Now().Format("15:04:05.000") + ": " + msg + ": " + evt.Op.String() + ": " + evt.Name)
+			proj.verbose("fsnotify: " + time.Now().Format("15:04:05.000") + ": " + msg + ": " + evt.Op.String() + ": " + evt.Name)
 			if !reject {
 				nextOut = evt
 				timer.Reset(lull)
@@ -195,6 +190,10 @@ func (proj *project) createFile(f string) error {
 		if err != nil {
 			return err
 		}
+		if doc.isDraft() {
+			proj.verbose("skip draft: " + f)
+			return nil
+		}
 		proj.docs = append(proj.docs, &doc)
 		proj.idxs.addDocument(&doc)
 		// Rebuild indexes containing the new document.
@@ -260,11 +259,17 @@ func (proj *project) writeFile(f string) error {
 		}
 		doc := proj.getDocument(f)
 		if doc == nil {
+			if newDoc.isDraft() {
+				// Draft document updated, don't do anything.
+				proj.verbose("skip draft: " + f)
+				return nil
+			}
 			// Document has just been created and written or was a draft and has changed to non-draft.
 			return proj.createFile(f)
 		}
 		if newDoc.isDraft() {
 			// Document changed to draft.
+			proj.verbose("skip draft: " + f)
 			return proj.removeFile(f)
 		}
 		oldDoc := *doc

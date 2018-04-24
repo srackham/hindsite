@@ -143,9 +143,6 @@ func (proj *project) build() error {
 			return err
 		}
 	}
-	fmt.Printf("documents: %d\n", docsCount)
-	fmt.Printf("drafts: %d\n", draftsCount)
-	fmt.Printf("static: %d\n", staticCount)
 	// Install home page.
 	if proj.rootConf.homepage != "" {
 		src := proj.rootConf.homepage
@@ -161,6 +158,9 @@ func (proj *project) build() error {
 			}
 		}
 	}
+	fmt.Printf("documents: %d\n", docsCount)
+	fmt.Printf("drafts: %d\n", draftsCount)
+	fmt.Printf("static: %d\n", staticCount)
 	fmt.Printf("time: %.2fs\n", time.Now().Sub(startTime).Seconds())
 	return nil
 }

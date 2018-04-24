@@ -116,8 +116,12 @@ func (idxs indexes) build(modified time.Time) error {
 }
 
 // build builds document and tag index pages.
+// If doc is nil then rebuild entire index.
 // If doc is not nil then only those document index pages containing doc are rendered.
 func (idx *index) build(doc *document) error {
+	if doc == nil {
+		idx.proj.verbose("build index: " + idx.indexDir)
+	}
 	tmpls := &idx.proj.htmlTemplates // Lexical shortcut.
 	// renderPages renders paginated document pages with named template.
 	// Additional template data is included.
@@ -138,7 +142,11 @@ func (idx *index) build(doc *document) error {
 			fm["urlprefix"] = idx.conf.urlprefix
 			fm["user"] = idx.conf.user
 			err := tmpls.render(tmpl, fm, pg.file)
-			idx.proj.verbose("write index: " + pg.file)
+			if doc != nil {
+				idx.proj.verbose("write index: " + pg.file)
+			} else {
+				idx.proj.verbose2("write index: " + pg.file)
+			}
 			if err != nil {
 				return err
 			}
@@ -180,7 +188,7 @@ func (idx *index) build(doc *document) error {
 			data["user"] = idx.conf.user
 			outfile := filepath.Join(idx.indexDir, "tags.html")
 			err := tmpls.render(tagsTemplate, data, outfile)
-			idx.proj.verbose("write index: " + outfile)
+			idx.proj.verbose2("write index: " + outfile)
 			if err != nil {
 				return err
 			}
