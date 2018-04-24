@@ -45,9 +45,6 @@ const watcherLullTime time.Duration = 20 * time.Millisecond
 // watcherFilter filters and debounces fsnotify events. When there has been a
 // lull in file system events arriving on the in input channel then forward the
 // most recent accepted file system notification event to the output channel.
-//
-// TODO: Timestamp events so can display true processing time.
-//       Translate Rename event to Remove (outside move) and Rename (inside move, Name = "from->to").
 func (proj *project) watcherFilter(in chan fsnotify.Event, out chan fsnotify.Event) {
 	var nextOut fsnotify.Event
 	timer := time.NewTimer(watcherLullTime)
@@ -70,6 +67,7 @@ func (proj *project) watcherFilter(in chan fsnotify.Event, out chan fsnotify.Eve
 			default:
 				msg = "accepted"
 			}
+			// TODO: Restore verbose2.
 			// proj.verbose2("fsnotify: " + time.Now().Format("15:04:05.000") + ": " + msg + ": " + evt.Op.String() + ": " + evt.Name)
 			proj.verbose("fsnotify: " + time.Now().Format("15:04:05.000") + ": " + msg + ": " + evt.Op.String() + ": " + evt.Name)
 			if !reject {

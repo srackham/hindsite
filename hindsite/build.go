@@ -175,7 +175,6 @@ func upToDate(target, prerequisite string) bool {
 	return result
 }
 
-// TODO: should be renderStaticFile() (copyStaticFile merged with renderStaticFile)
 func (proj *project) buildStaticFile(f string, modified time.Time) error {
 	conf := proj.configFor(f)
 	if isTemplate(f, conf.templates) {

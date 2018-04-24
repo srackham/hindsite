@@ -51,7 +51,6 @@ func slugify(text string, exclude stringlist) string {
 /*
 String lists.
 */
-// TODO Should we not just add methods to sort.StringSlice https://golang.org/pkg/sort/#StringSlice
 type stringlist []string
 
 // Returns the first index of the target string `t`, or

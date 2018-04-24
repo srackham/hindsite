@@ -257,7 +257,7 @@ func (doc *document) frontMatter() templateData {
 	for _, tag := range doc.tags {
 		url := ""
 		if doc.primaryIndex != nil {
-			// TODO: Temp diags.
+			// TODO: Remove temporary diagnostics (added after mysterious loss of tag URLS 23-Apr-2018).
 			if doc.primaryIndex.slugs[tag] == "" {
 				panic(fmt.Sprintf("%#v", doc))
 			}
