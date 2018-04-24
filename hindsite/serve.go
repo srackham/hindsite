@@ -136,17 +136,11 @@ func (proj *project) serve() error {
 				mu.Lock()
 				start := time.Now()
 				proj.println(start.Format("15:04:05") + ": " + evt.Op.String() + ": " + evt.Name)
-				// The Rename event occurs in two contexts:
-				// 1. When moved outsided watch directories the Rename event is delivered.
-				// 2. When moved within  the watch directories the Rename event is dropped
-				//    and the ensuing Create event is delivered.
 				switch evt.Op {
-				case fsnotify.Create:
-					err = proj.createFile(evt.Name)
+				case fsnotify.Create, fsnotify.Write:
+					err = proj.writeFile(evt.Name)
 				case fsnotify.Remove, fsnotify.Rename:
 					err = proj.removeFile(evt.Name)
-				case fsnotify.Write:
-					err = proj.writeFile(evt.Name)
 				default:
 					err = proj.build()
 				}
