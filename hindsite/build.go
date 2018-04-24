@@ -189,7 +189,7 @@ func (proj *project) buildStaticFile(f string, modified time.Time) error {
 // destination directories.
 func (proj *project) copyStaticFile(srcFile string) error {
 	if !pathIsInDir(srcFile, proj.contentDir) {
-		panic("copyStaticFile: static file is outside content directory: " + srcFile)
+		panic("static file is outside content directory: " + srcFile)
 	}
 	dstFile := pathTranslate(srcFile, proj.contentDir, proj.buildDir)
 	if upToDate(dstFile, srcFile) {

@@ -77,7 +77,7 @@ func (conf *config) parseFile(proj *project, f string) error {
 			return err
 		}
 	default:
-		panic("parseFile: illegal configuration file extension: " + f)
+		panic("illegal configuration file extension: " + f)
 	}
 	// Validate and merge parsed configuration.
 	if cf.Author != nil {

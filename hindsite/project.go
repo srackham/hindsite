@@ -121,7 +121,7 @@ func (proj *project) parseArgs(args []string) error {
 			case "-port":
 				proj.port = arg
 			default:
-				panic("parseArgs: illegal arugment: " + opt)
+				panic("illegal arugment: " + opt)
 			}
 			skip = true
 		default:
@@ -211,7 +211,7 @@ func (proj *project) execute() error {
 	case "serve":
 		err = proj.serve()
 	default:
-		panic("execute: illegal command: " + proj.command)
+		panic("illegal command: " + proj.command)
 	}
 	return err
 }
@@ -309,7 +309,7 @@ func (proj *project) exclude(f string) bool {
 // order to ensure the directory precedence.
 func (proj *project) configFor(p string) config {
 	if !pathIsInDir(p, proj.contentDir) {
-		panic("configFor: path outside content directory: " + p)
+		panic("path outside content directory: " + p)
 	}
 	dir := pathTranslate(p, proj.contentDir, proj.templateDir)
 	if fileExists(p) {

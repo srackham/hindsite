@@ -50,10 +50,10 @@ type document struct {
 // Parse document content and front matter.
 func newDocument(contentfile string, proj *project) (document, error) {
 	if !pathIsInDir(contentfile, proj.contentDir) {
-		panic("newDocument: document is outside content directory: " + contentfile)
+		panic("document is outside content directory: " + contentfile)
 	}
 	if !fileExists(contentfile) {
-		panic("newDocument: missing document: " + contentfile)
+		panic("missing document: " + contentfile)
 	}
 	doc := document{}
 	doc.proj = proj
@@ -398,7 +398,7 @@ func (docs documentsList) delete(doc *document) documentsList {
 			return append(docs[:i], docs[i+1:]...)
 		}
 	}
-	panic("documents.delete: missing document: " + doc.contentPath)
+	panic("missing document: " + doc.contentPath)
 }
 
 // contains returns true if doc is in docs.
