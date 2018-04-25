@@ -87,7 +87,7 @@ build-blog: install
 
 .PHONY: serve-blog
 serve-blog: build-blog
-	hindsite serve $(BLOG_DIR)
+	hindsite serve $(BLOG_DIR) -content $(BLOG_DIR)/template/init
 
 .PHONY: watch-blog
 watch-blog:
