@@ -21,7 +21,7 @@ func (proj *project) httpserver() error {
 	// with prefix serve unmodified URL.
 	stripPrefix := func(prefix string, h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			proj.verbose("request: " + r.URL.Path)
+			proj.verbose2("request: " + r.URL.Path)
 			if p := strings.TrimPrefix(r.URL.Path, prefix); len(p) < len(r.URL.Path) {
 				r2 := new(http.Request)
 				*r2 = *r

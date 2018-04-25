@@ -68,7 +68,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	// Extract title and date from file name.
 	doc.title = fileName(contentfile)
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
-		d, err := parseDate(doc.title[0:10], nil)
+		d, err := parseDate(doc.title[0:10], doc.conf.timezone)
 		if err != nil {
 			return doc, err
 		}
@@ -223,7 +223,7 @@ func (doc *document) extractFrontMatter() error {
 		doc.title = fm.Title
 	}
 	if fm.Date != "" {
-		d, err := parseDate(fm.Date, nil)
+		d, err := parseDate(fm.Date, doc.conf.timezone)
 		if err != nil {
 			return err
 		}
