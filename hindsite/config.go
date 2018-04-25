@@ -174,6 +174,7 @@ func (conf *config) String() (result string) {
 // parseConfig parses all configuration files from the project template
 // directory to project `confs`.
 func (proj *project) parseConfigs() error {
+	proj.confs = configs{}
 	if !dirExists(proj.templateDir) {
 		return fmt.Errorf("missing template directory: " + proj.templateDir)
 	}
