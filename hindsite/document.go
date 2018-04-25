@@ -42,6 +42,7 @@ type document struct {
 	url         string // Synthesised document URL.
 	tags        []string
 	draft       bool
+	permalink   string // URL template.
 	slug        string
 	layout      string            // Document template name.
 	user        map[string]string // User defined configuration key/values.
@@ -63,15 +64,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	}
 	doc.modified = info.ModTime()
 	doc.contentPath = contentfile
-	p, _ := filepath.Rel(proj.contentDir, doc.contentPath)
-	switch filepath.Ext(p) {
-	case ".md", ".rmu":
-		p = replaceExt(p, ".html")
-	}
-	doc.buildPath = filepath.Join(proj.buildDir, p)
-	doc.templatePath = filepath.Join(proj.templateDir, p)
 	doc.conf = proj.configFor(doc.contentPath)
-	doc.url = path.Join("/", doc.conf.urlprefix, filepath.ToSlash(p))
 	// Extract title and date from file name.
 	doc.title = fileName(contentfile)
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
@@ -86,6 +79,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	// Parse embedded front matter.
 	doc.author = doc.conf.author       // Default author.
 	doc.templates = doc.conf.templates // Default templates.
+	doc.permalink = doc.conf.permalink // Default permalink.
 	doc.content, err = readFile(doc.contentPath)
 	if err != nil {
 		return doc, err
@@ -93,13 +87,36 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	if err := doc.extractFrontMatter(); err != nil {
 		return doc, err
 	}
-	// TODO: Reenable slugs once a permalink mapping scheme is implemented.
-	// if doc.slug != "" {
-	if false {
-		// Change output file names to match document slug variable.
-		f := doc.slug + filepath.Ext(doc.buildPath)
-		doc.buildPath = filepath.Join(filepath.Dir(doc.buildPath), f)
-		doc.url = path.Join(path.Dir(doc.url), f)
+	// Synthesize build path and URL according to content path, permalink and slug values.
+	rel, _ := filepath.Rel(proj.contentDir, doc.contentPath)
+	doc.templatePath = filepath.Join(proj.templateDir, rel)
+	f := filepath.Base(rel)
+	switch filepath.Ext(f) {
+	case ".md", ".rmu":
+		f = replaceExt(f, ".html")
+	}
+	if doc.slug != "" {
+		f = doc.slug + filepath.Ext(f)
+	}
+	if doc.permalink != "" {
+		link := doc.permalink
+		link = strings.Replace(link, "%y", doc.date.Format("2006"), -1)
+		link = strings.Replace(link, "%m", doc.date.Format("01"), -1)
+		link = strings.Replace(link, "%d", doc.date.Format("02"), -1)
+		link = strings.Replace(link, "%f", f, -1)
+		link = strings.Replace(link, "%b", fileName(f), -1)
+		link = strings.TrimPrefix(link, "/")
+		if strings.HasSuffix(link, "/") {
+			// "Pretty" URLs.
+			doc.buildPath = filepath.Join(proj.buildDir, filepath.FromSlash(link), "index.html")
+			doc.url = path.Join("/", doc.conf.urlprefix, link) + "/"
+		} else {
+			doc.buildPath = filepath.Join(proj.buildDir, filepath.FromSlash(link))
+			doc.url = path.Join("/", doc.conf.urlprefix, link)
+		}
+	} else {
+		doc.buildPath = filepath.Join(proj.buildDir, filepath.Dir(rel), f)
+		doc.url = path.Join("/", doc.conf.urlprefix, path.Dir(filepath.ToSlash(rel)), f)
 	}
 	if doc.layout == "" {
 		// Find nearest document layout template file.
@@ -184,6 +201,7 @@ func (doc *document) extractFrontMatter() error {
 		Templates   *string
 		Tags        []string
 		Draft       bool
+		Permalink   string
 		Slug        string
 		Layout      string
 		User        map[string]string
@@ -217,6 +235,9 @@ func (doc *document) extractFrontMatter() error {
 	if fm.Templates != nil {
 		doc.templates = fm.Templates
 	}
+	if fm.Permalink != "" {
+		doc.permalink = fm.Permalink
+	}
 	if fm.Description != "" {
 		doc.description = fm.Description
 	}
@@ -241,12 +262,13 @@ func (doc *document) extractFrontMatter() error {
 	return nil
 }
 
-// frontMatter returns docment template data including merged configuration variables.
+// frontMatter returns document template data including merged configuration variables.
 func (doc *document) frontMatter() templateData {
 	data := templateData{}
 	data["title"] = doc.title
 	data["author"] = nz(doc.author)
-	data["templates"] = nz(doc.templates)
+	data["templates"] = nz(doc.templates) // TODO: Necessary in front matter?
+	data["permalink"] = doc.permalink     // TODO: Necessary in front matter?
 	data["shortdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.shortdate)
 	data["mediumdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.mediumdate)
 	data["longdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.longdate)
@@ -327,13 +349,11 @@ func (doc *document) updateFrom(src document) {
 	doc.header = src.header
 	doc.content = src.content
 	doc.modified = src.modified
-	// doc.primaryIndex = src.primaryIndex
-	// doc.prev = src.prev
-	// doc.next = src.next
 	doc.title = src.title
 	doc.date = src.date
 	doc.author = src.author
 	doc.templates = src.templates
+	doc.permalink = src.permalink
 	doc.description = src.description
 	doc.addendum = src.addendum
 	doc.url = src.url

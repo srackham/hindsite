@@ -22,6 +22,7 @@ type config struct {
 	homepage  string            // Use this file (relative to the build directory) for /index.html.
 	paginate  int               // Number of documents per index page. No pagination if zero or less.
 	urlprefix string            // Prefix for synthesised document and index page URLs.
+	permalink string            // URL template.
 	exclude   []string          // List of excluded content directory paths.
 	timezone  *time.Location    // Time zone for site generation.
 	user      map[string]string // User defined configuration key/values.
@@ -57,6 +58,7 @@ func (conf *config) parseFile(proj *project, f string) error {
 		Templates  *string // nil if undefined.
 		Exclude    *string // nil if undefined.
 		Homepage   string
+		Permalink  string
 		URLPrefix  string
 		Paginate   int
 		Timezone   string
@@ -85,6 +87,9 @@ func (conf *config) parseFile(proj *project, f string) error {
 	}
 	if cf.Templates != nil {
 		conf.templates = cf.Templates
+	}
+	if cf.Permalink != "" {
+		conf.permalink = cf.Permalink
 	}
 	if cf.Homepage != "" {
 		home := cf.Homepage
@@ -147,6 +152,7 @@ func (conf *config) data() templateData {
 	data := templateData{}
 	data["author"] = nz(conf.author)
 	data["templates"] = nz(conf.templates)
+	data["permalink"] = conf.permalink
 	data["homepage"] = conf.homepage
 	data["paginate"] = conf.paginate
 	data["urlprefix"] = conf.urlprefix
@@ -225,6 +231,9 @@ func (conf *config) merge(from config) {
 	}
 	if from.templates != nil {
 		conf.templates = from.templates
+	}
+	if from.permalink != "" {
+		conf.permalink = from.permalink
 	}
 	if from.paginate != 0 {
 		conf.paginate = from.paginate

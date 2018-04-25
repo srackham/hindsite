@@ -182,7 +182,7 @@ func (proj *project) createFile(f string) error {
 	switch {
 	case proj.isDocument(f):
 		if proj.docs.byContentPath[f] != nil {
-			"panic(document already exists")
+			panic("document already exists")
 		}
 		doc, err := newDocument(f, proj)
 		if err != nil {
