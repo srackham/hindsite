@@ -21,16 +21,25 @@ _hugo_:: hugo version v0.37 (64 bit). Hugo setup as per the Hugo [Quick
 Start](https://gohugo.io/getting-started/quick-start/) instructions.
 
 - Full rebuild (5000 documents and indexes): 120s.
-- Server command incremental rbuilds: 0.37s
+- Server command incremental: 0.37s
+
+Hugo server renders the website in-memory and is exceedingly fast and consistent
+in terms of render time for virtually any changes.
 
 _hindsite_:: hindsite v1.0.0 (64 bit).
-- Clean build (5000 documents and indexes): 13.95s
-- Incremental build (updating one document and indexes): 7.06s
-- Incremental build (updating no documents or indexes):1.10s
+- Clean build (5000 documents and indexes): 13.95s (22.10s with "pretty" URLs)
+- Incremental build (updating one document and entire index): 3.85s
+- Incremental build (updating one document): 0.02s
 
 NOTE: Exclude the project folder from Windows Defender anti-virus real-time
 protection (not doing this resulted in a 4x performance decrease for both
 hindsite and hugo).
+
+In terms of memory footprint hindsite is much lighter (Hugo builds an in-memory
+website:
+
+_hugo_:: The server when running consumed 10.8GB of RAM.
+_hindsite_:: The hindsite server consumed 58.4MB of RAM.
 
 /*
 hindsite runs faster on Linux:
@@ -48,23 +57,10 @@ This suggests:
 */
 
 
-.#auto-rebuild
-## How can you automatically rebuild and reload?
+## How can you automatically reload the browser
 When editing document source files it's nice to have the output update
-automatically in your Web browser when files are saved. This can be achieved
-using a file watcher program in conjunction with a browser auto reload
-extension.
-
-For example, hindsite includes an auto-rebuild script called
-[`watch-hindsite.sh`](TODO), it runs on Linux and uses the
-[inotify-tools](https://github.com/rvoicilas/inotify-tools) `inotifywait(1)`
-command to detect project changes and then automatically run the hindsite
-`build` command. Notice that the watcher script performs incremental and
-non-incremental builds based on the type of file system notification (see
-[Incremental builds](reference.html#incremental-builds)).
-
-If you preprocess static content e.g. with SASS, LESS etc. you will also need to
-conditionally rebuild them.
+automatically in your Web browser when the hindsite _serve_ command updates
+webpages. Browser live-reload can be achieved using a browser extension.
 
 
 ## Should I enable document and static file template expansion?

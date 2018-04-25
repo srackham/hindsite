@@ -1,5 +1,5 @@
 homepage = "reference.html"
-exclude = "config.rmu"
+exclude = "config.rmu|.*|*~|4913"
 
 [user]
 banner = "hindsite documentation"

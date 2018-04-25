@@ -34,17 +34,12 @@ newsletter website with just two hindsite commands:
     mkdir myproj
     hindsite init myproj -builtin blog
 
-2. Build the website:
-
-    hindsite build myproj
-
-To view the website in your browser:
-
-1. Start the hindsite web server:
+2. Build the website and start the hindsite web server:
 
     hindsite serve myproj
 
-2. Open your Web browser at http://localhost:1212
+To view the website in your browser open your Web browser at
+http://localhost:1212
 
 The best way to start learning hindsite is to browse the blog [project
 directory](#projects).
@@ -180,6 +175,8 @@ The build summary does not include [excluded files](TODO).
 
 
 ### Incremental builds
+TODO: Rewrite this section for server command.
+
 An incremental build only rebuilds those webpages that require updating.
 Incremental builds are faster and they facilitate incremental deployment. The
 incremental rebuild rules are:
@@ -201,14 +198,10 @@ aware of:
 3. Any changes that influence document generation and not monitored by the
    incremental build rules will not trigger an incremental rebuild.
 
-### Continuous builds
-Hindsite does not have a builtin file watcher, but this can be implemented with
-a file watcher script or application, see the [FAQ](faq.html#auto-rebuild) for
-details.
-
-
 ## serve command
-Starts a development webserver on the project build directory.
+Rebuilds the project then starts a development webserver on the project build
+directory. The _serve_ command automatically rebuilds affected webpages if any
+files in the _content_ or _template directories_ are added, modified or removed.
 
 Usage:
 
@@ -348,6 +341,29 @@ document index page. TOML example:
 
     paginate = 10
 
+`permalink`:: An optional URL template for built files. The file's URL is computed
+by substituting the following placeholders:
+..
+`%y`:: Four digit publication date year.
+`%m`:: Two digit publication date month.
+`%d`:: Two digit publication date day of month.
+`%f`:: The build file name.
+`%b`:: The build file name minus the file name extension.
+
+If the permalink ends with a trailing slash then hindsite creates "pretty" URLs
+by writing the build file to `index.html` in a directory with the page’s name.
+`permalink` can also be specified in the document [front matter](#front-matter).
+
+TOML examples:
+
+    permalink = "/posts/%y/%m/%d/%f"
+    permalink = "/posts/%y-%m-%d/%b/"
+
+A permalink URL will not change provided the `permalink` parameter, the document
+publication date and the document slug are not changed. Changing the source
+document's content directory location does not change a permalink URL.
+..
+
 `templates`:: A `|` separated list of file name extensions specifying document
 and static files in the content directory that undergo [text
 template](#text-templates) expansion. The file name extensions include the
@@ -356,11 +372,20 @@ also be set in the document [front matter](#font-matter). TOML example:
 
     templates = ".css|.html|.js|.md"
 
-`timezone`:: Sets the time zone for site generation. Set to a TZ name from the
-IANA Timezone Database or to `Local` (the system's local timezone). Defaults to
-`Local`. TOML example:
-
+`timezone`:: Sets the time zone for dates and times. Set to a TZ name from the
+IANA Timezone Database or to `"Local"` (the system's local timezone).
+TOML example:
+..
     timezone = "Pacific/Auckland"
+
+- `timezone` defaults to `"Local"`.
+- `timezone` determines the dates displayed by date [template
+  variables](#document-template-variables).
+- `timezone` is assigned to publication dates that are specified without a
+  timezone.
+- `permalink` dates are rendered in their assigned timezone, this ensures
+  permalinks do not change if the `timezone` is changed.
+..
 
 `urlprefix`:: This parameter is prepended to all synthesized document and index
 page [URLs](#urls). Its default value is a blank string. TOML examples:
@@ -515,14 +540,15 @@ is rendered as Markdown.
 from the file name `YYYY-MM-DD-` date prefix, if undefined it defaults to Jan 1 0001.
 The `date` format is RFC 3339 with the following relaxations:
 ..
-- If the time zone offet is omitted then UTC is assumed.
+- If the time zone offet is omitted then the [timezone](#configuration)
+  configuration parameter is assigned.
 - If the time is omitted then the time `00:00:00` is used.
 - A space character separator (instead of the letter `T`) between the date and
   the time is allowed.
 
 Examples with `timezone = "+13:00"`:
 
-    1979-05-27T07:32:00+13:00   # follows the RFC 3339 spec
+    1979-05-27T07:32:00+02:00   # 1979-05-27T07:32:00+02:00
     1979-05-27T07:32:00         # 1979-05-27T07:32:00+13:00
     1979-05-27 07:32:00         # 1979-05-27T07:32:00+13:00
     1979-05-27                  # 1979-05-27T00:00:00+13:00
@@ -538,8 +564,8 @@ command](#build-command) `-drafts` was specified. Defaults to false.
 `layout`:: The name of the template used to render the document. `layout`
 defaults to the closest `layout.html` [HTML template](#html-templates).
 
-`slug`:: Replaces the document file name in the built HTML and in [synthesized
-document URLs](#urls).
+`permalink`:: If specified it overrides the configuration
+[permalink](#configuration) value.
 
 `tags`:: A list of tag keywords and phrases. Examples:
 ```
@@ -582,7 +608,6 @@ templates and in [text templates](#text-templates).
 `.slug`:: Front matter variable.
 `.url`: Synthesized document [URL](#urls).
 `.tags`:: An iterable list of tags. Each item contains the variables `.tag` (the tag) and `.url` (the tag index URL).
-`.templates`:: Front matter variable.
 `.title`:: Document title.
 `.urlprefix`:: The [configuration](#configuration) `urlprefix`.
 `.user`:: The map of [front matter](#front-matter) `user` key/values.
@@ -663,14 +688,17 @@ as [document files](#documents).
 ## URLs
 hindsite synthesizes root-relative document and index page URLs. URLs are
 relative to the build directory and are prefixed with the `urlprefix`
-configuration parameter. If a [slug](#front-matter) front matter value is
-specified it replaces the document file name.
+[configuration parameter](#configuration). If a [slug](#front-matter) front
+matter value is specified it replaces the document file name.
 
 For example, if the build directory is `/myproj/build` and the rendered document
 is `/myproj/build/posts/foo.html` then the document URL will be
 `/posts/foo.html`. If the `urlprefix` is `/blog` then the URL would be
 `/blog/posts/foo.html`. If the document `slug` is `bar` the same URL becomes
 `/blog/posts/bar.html`.
+
+The above default behavior can be customized using the `permalink`
+[configuration parameter](#configuration).
 
 If you are deploying to a server subdirectory then you need to set the
 `urlprefix` configuration variable to ensure synthesized URLs are rooted
