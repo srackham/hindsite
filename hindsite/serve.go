@@ -149,7 +149,7 @@ func (proj *project) serve() error {
 						err = proj.installHomePage()
 					}
 				default:
-					err = proj.build()
+					panic("unexpected event: " + evt.Op.String() + ": " + evt.Name)
 				}
 				if err != nil {
 					done <- err
