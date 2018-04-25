@@ -145,19 +145,8 @@ func (proj *project) build() error {
 		}
 	}
 	// Install home page.
-	if proj.rootConf.homepage != "" {
-		src := proj.rootConf.homepage
-		if !fileExists(src) {
-			return fmt.Errorf("homepage file missing: %s", src)
-		}
-		dst := filepath.Join(proj.buildDir, "index.html")
-		if !fileExists(dst) || upToDate(src, dst) {
-			proj.verbose2("copy homepage: " + src)
-			proj.verbose("write homepage: " + dst)
-			if err := copyFile(src, dst); err != nil {
-				return err
-			}
-		}
+	if err := proj.installHomePage(); err != nil {
+		return err
 	}
 	fmt.Printf("documents: %d\n", docsCount)
 	fmt.Printf("drafts: %d\n", draftsCount)
@@ -174,6 +163,24 @@ func upToDate(target, prerequisite string) bool {
 		return false
 	}
 	return result
+}
+
+func (proj *project) installHomePage() error {
+	if proj.rootConf.homepage != "" {
+		src := proj.rootConf.homepage
+		if !fileExists(src) {
+			return fmt.Errorf("homepage file missing: %s", src)
+		}
+		dst := filepath.Join(proj.buildDir, "index.html")
+		if !fileExists(dst) || upToDate(src, dst) {
+			proj.verbose2("copy homepage: " + src)
+			proj.verbose("write homepage: " + dst)
+			if err := copyFile(src, dst); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (proj *project) buildStaticFile(f string, modified time.Time) error {

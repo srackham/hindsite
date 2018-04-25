@@ -139,9 +139,15 @@ func (proj *project) serve() error {
 				case fsnotify.Create, fsnotify.Write:
 					proj.println(start.Format("15:04:05") + ": updated: " + evt.Name)
 					err = proj.writeFile(evt.Name)
+					if err == nil {
+						err = proj.installHomePage()
+					}
 				case fsnotify.Remove, fsnotify.Rename:
 					proj.println(start.Format("15:04:05") + ": removed: " + evt.Name)
 					err = proj.removeFile(evt.Name)
+					if err == nil {
+						err = proj.installHomePage()
+					}
 				default:
 					err = proj.build()
 				}
