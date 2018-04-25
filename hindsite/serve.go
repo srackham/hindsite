@@ -137,10 +137,10 @@ func (proj *project) serve() error {
 				start := time.Now()
 				switch evt.Op {
 				case fsnotify.Create, fsnotify.Write:
-					proj.println(start.Format("15:04:05") + ": file updated: " + evt.Name)
+					proj.println(start.Format("15:04:05") + ": updated: " + evt.Name)
 					err = proj.writeFile(evt.Name)
 				case fsnotify.Remove, fsnotify.Rename:
-					proj.println(start.Format("15:04:05") + ": file removed: " + evt.Name)
+					proj.println(start.Format("15:04:05") + ": removed: " + evt.Name)
 					err = proj.removeFile(evt.Name)
 				default:
 					err = proj.build()
@@ -221,7 +221,8 @@ func (proj *project) removeFile(f string) error {
 	case proj.isDocument(f):
 		doc := proj.docs.byContentPath[f]
 		if doc == nil {
-			// The document may have been a draft so can't assume this is an error.
+			// The document may have been a directory or a draft so can't assume
+			// this is an error.
 			return nil
 		}
 		// Delete from documents.
@@ -239,8 +240,12 @@ func (proj *project) removeFile(f string) error {
 		return os.Remove(doc.buildPath)
 	case pathIsInDir(f, proj.contentDir):
 		f := pathTranslate(f, proj.contentDir, proj.buildDir)
-		proj.verbose("delete static: " + f)
-		return os.Remove(f)
+		// The deleted content may have been a directory.
+		if fileExists(f) {
+			proj.verbose("delete static: " + f)
+			return os.Remove(f)
+		}
+		return nil
 	case pathIsInDir(f, proj.templateDir):
 		return proj.build()
 	default:
