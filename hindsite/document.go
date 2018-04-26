@@ -104,7 +104,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 		link = strings.Replace(link, "%m", doc.date.Format("01"), -1)
 		link = strings.Replace(link, "%d", doc.date.Format("02"), -1)
 		link = strings.Replace(link, "%f", f, -1)
-		link = strings.Replace(link, "%b", fileName(f), -1)
+		link = strings.Replace(link, "%p", fileName(f), -1)
 		link = strings.TrimPrefix(link, "/")
 		if strings.HasSuffix(link, "/") {
 			// "Pretty" URLs.
