@@ -272,7 +272,8 @@ func (doc *document) frontMatter() templateData {
 	data["shortdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.shortdate)
 	data["mediumdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.mediumdate)
 	data["longdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.longdate)
-	data["date"] = data["mediumdate"] // Alias.
+	data["date"] = doc.date
+	data["now"] = time.Now()
 	data["slug"] = doc.slug
 	data["url"] = doc.url
 	tags := []map[string]string{}
