@@ -267,7 +267,7 @@ func rebuild(target string, modified time.Time, docs ...*document) bool {
 		return true
 	}
 	for _, doc := range docs {
-		if isOlder(targetMod, doc.modified) {
+		if isOlder(targetMod, doc.modtime) {
 			return true
 		}
 	}

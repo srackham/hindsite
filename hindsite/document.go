@@ -27,7 +27,7 @@ type document struct {
 	templatePath string    // Virtual path used to find document related templates.
 	header       string    // Front matter document header text.
 	content      string    // Markup text (without front matter header).
-	modified     time.Time // Document source file modified timestamp.
+	modtime      time.Time // Document source file modified timestamp.
 	// TODO: Is primaryIndex field necessary, it's only used on one place? Factor it out?
 	primaryIndex *index    // Top-level document index (nil if document is not indexed).
 	prev         *document // Previous document in primary index.
@@ -62,7 +62,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	if err != nil {
 		return doc, err
 	}
-	doc.modified = info.ModTime()
+	doc.modtime = info.ModTime()
 	doc.contentPath = contentfile
 	doc.conf = proj.configFor(doc.contentPath)
 	// Extract title and date from file name.
@@ -273,6 +273,7 @@ func (doc *document) frontMatter() templateData {
 	data["mediumdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.mediumdate)
 	data["longdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.longdate)
 	data["date"] = doc.date
+	data["modtime"] = doc.modtime
 	data["now"] = time.Now()
 	data["slug"] = doc.slug
 	data["url"] = doc.url
@@ -349,7 +350,7 @@ func (doc *document) updateFrom(src document) {
 	doc.templatePath = src.templatePath
 	doc.header = src.header
 	doc.content = src.content
-	doc.modified = src.modified
+	doc.modtime = src.modtime
 	doc.title = src.title
 	doc.date = src.date
 	doc.author = src.author
