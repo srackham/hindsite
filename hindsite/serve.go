@@ -285,21 +285,18 @@ func (proj *project) writeFile(f string) error {
 		}
 		oldDoc := *doc
 		doc.updateFrom(newDoc)
-		// TODO: Does this actually save much i.e. is the document.header worth having?
-		if doc.header != oldDoc.header {
-			// Document front matter has changed so rebuild affected indexes.
-			for _, idx := range proj.idxs {
-				if pathIsInDir(doc.templatePath, idx.templateDir) {
-					if oldDoc.date.Equal(doc.date) && strings.Join(oldDoc.tags, ",") == strings.Join(doc.tags, ",") {
-						// Neither date ordering or tags have changed so only rebuild document index pages containing doc.
-						if err := idx.build(doc); err != nil {
-							return err
-						}
-					} else {
-						// Rebuild the index completely.
-						if err := idx.build(nil); err != nil {
-							return err
-						}
+		// Rebuild affected document index pages.
+		for _, idx := range proj.idxs {
+			if pathIsInDir(doc.templatePath, idx.templateDir) {
+				if oldDoc.date.Equal(doc.date) && strings.Join(oldDoc.tags, ",") == strings.Join(doc.tags, ",") {
+					// Neither date ordering or tags have changed so only rebuild document index pages containing doc.
+					if err := idx.build(doc); err != nil {
+						return err
+					}
+				} else {
+					// Rebuild the index completely.
+					if err := idx.build(nil); err != nil {
+						return err
 					}
 				}
 			}

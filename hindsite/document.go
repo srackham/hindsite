@@ -25,7 +25,6 @@ type document struct {
 	contentPath  string
 	buildPath    string
 	templatePath string    // Virtual path used to find document related templates.
-	header       string    // Front matter document header text.
 	content      string    // Markup text (without front matter header).
 	modtime      time.Time // Document source file modified timestamp.
 	// TODO: Is primaryIndex field necessary, it's only used on one place? Factor it out?
@@ -176,7 +175,6 @@ func (doc *document) extractFrontMatter() error {
 	if eof {
 		return fmt.Errorf("missing front matter delimiter: %s: %s", end, doc.contentPath)
 	}
-	doc.header = header
 	description, eof, err := readTo("<!--more-->", scanner)
 	if err != nil {
 		return err
@@ -340,7 +338,6 @@ func (doc *document) updateFrom(src document) {
 	doc.contentPath = src.contentPath
 	doc.buildPath = src.buildPath
 	doc.templatePath = src.templatePath
-	doc.header = src.header
 	doc.content = src.content
 	doc.modtime = src.modtime
 	doc.title = src.title
