@@ -152,7 +152,7 @@ func (proj *project) serve() error {
 					panic("unexpected event: " + evt.Op.String() + ": " + evt.Name)
 				}
 				if err != nil {
-					done <- err
+					proj.logerror(err.Error())
 				}
 				fmt.Printf("elapsed: %.3fs\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
 				proj.println("")
