@@ -38,7 +38,6 @@ type document struct {
 	author      *string
 	templates   *string
 	description string
-	addendum    string
 	url         string // Synthesised document URL.
 	tags        []string
 	draft       bool
@@ -196,7 +195,6 @@ func (doc *document) extractFrontMatter() error {
 		Title       string
 		Date        string
 		Description string
-		Addendum    string
 		Author      *string
 		Templates   *string
 		Tags        []string
@@ -240,9 +238,6 @@ func (doc *document) extractFrontMatter() error {
 	}
 	if fm.Description != "" {
 		doc.description = fm.Description
-	}
-	if fm.Addendum != "" {
-		doc.addendum = fm.Addendum
 	}
 	if fm.Tags != nil {
 		doc.tags = fm.Tags
@@ -306,14 +301,11 @@ func (doc *document) frontMatter() templateData {
 		user[k] = v
 	}
 	data["user"] = user
-	// Process addendum and description as a text templates before rendering to HTML.
-	addendum := doc.addendum
+	// Process description as a text template before rendering to HTML.
 	description := doc.description
 	if isTemplate(doc.contentPath, doc.templates) {
-		addendum, _ = doc.proj.textTemplates.renderText("documentAddendum", addendum, data)
 		description, _ = doc.proj.textTemplates.renderText("documentDescription", description, data)
 	}
-	data["addendum"] = doc.render(addendum)
 	data["description"] = doc.render(description)
 	return data
 }
@@ -357,7 +349,6 @@ func (doc *document) updateFrom(src document) {
 	doc.templates = src.templates
 	doc.permalink = src.permalink
 	doc.description = src.description
-	doc.addendum = src.addendum
 	doc.url = src.url
 	doc.tags = src.tags
 	doc.draft = src.draft
