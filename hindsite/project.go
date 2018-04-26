@@ -40,29 +40,46 @@ func newProject() project {
 	return project{}
 }
 
-// verbose prints a message if `-v` option verbosity is equal to or greater than
+// message strips leading project directory from path names to make the message
+// more readable.
+func (proj *project) message(msg string) string {
+	return strings.Replace(msg, proj.projectDir+string(filepath.Separator), "", -1)
+}
+
+// logconsole prints a message if `-v` option verbosity is equal to or greater than
 // verbosity.
-func (proj *project) logconsole(verbosity int, message string) {
+func (proj *project) logconsole(verbosity int, msg string) {
 	if proj.verbosity >= verbosity {
-		message = strings.Replace(message, proj.projectDir+string(filepath.Separator), "", -1)
-		fmt.Println(message)
+		fmt.Println(proj.message(msg))
 	}
 }
 
+// logerror prints a message to stderr.
+func (proj *project) logerror(msg string) {
+	fmt.Fprintln(os.Stderr, "error: "+proj.message(msg))
+}
+
 // println unconditionally prints a message.
-func (proj *project) println(message string) {
-	proj.logconsole(0, message)
+func (proj *project) println(msg string) {
+	proj.logconsole(0, msg)
 }
 
 // verbose prints a message if `-v` verbose option was specified.
-func (proj *project) verbose(message string) {
-	proj.logconsole(1, message)
+func (proj *project) verbose(msg string) {
+	proj.logconsole(1, msg)
 }
 
 // verbose2 prints a message if the `-v` verbose option was specified more than
 // once.
-func (proj *project) verbose2(message string) {
-	proj.logconsole(2, message)
+func (proj *project) verbose2(msg string) {
+	proj.logconsole(2, msg)
+}
+
+func (proj *project) die(msg string) {
+	if msg != "" {
+		proj.logerror(msg)
+	}
+	os.Exit(1)
 }
 
 // parseArgs parses the hindsite command-line arguments.

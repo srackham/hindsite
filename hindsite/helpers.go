@@ -13,12 +13,6 @@ import (
 /*
 Miscellaneous functions.
 */
-func die(message string) {
-	if message != "" {
-		fmt.Fprintln(os.Stderr, "error: "+message)
-	}
-	os.Exit(1)
-}
 
 // nz returns the string pointed to by s or "" if s is nil.
 func nz(s *string) string {
