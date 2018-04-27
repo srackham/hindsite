@@ -58,9 +58,6 @@ func (proj *project) watcherFilter(in chan fsnotify.Event, out chan fsnotify.Eve
 			case evt.Op == fsnotify.Chmod:
 				msg = "ignored"
 				reject = true
-			case dirExists(evt.Name):
-				msg = "ignored"
-				reject = true
 			case proj.exclude(evt.Name):
 				msg = "excluded"
 				reject = true
@@ -138,9 +135,14 @@ func (proj *project) serve() error {
 				switch evt.Op {
 				case fsnotify.Create, fsnotify.Write:
 					proj.println(start.Format("15:04:05") + ": updated: " + evt.Name)
-					err = proj.writeFile(evt.Name)
-					if err == nil {
-						err = proj.installHomePage()
+					if dirExists(evt.Name) {
+						proj.verbose("watching: " + evt.Name)
+						err = watcher.Add(evt.Name)
+					} else {
+						err = proj.writeFile(evt.Name)
+						if err == nil {
+							err = proj.installHomePage()
+						}
 					}
 				case fsnotify.Remove, fsnotify.Rename:
 					proj.println(start.Format("15:04:05") + ": removed: " + evt.Name)
