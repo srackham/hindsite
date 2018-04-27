@@ -45,33 +45,40 @@ const watcherLullTime time.Duration = 20 * time.Millisecond
 // lull in file system events arriving on the in input channel then forward the
 // most recent accepted file system notification event to the output channel.
 func (proj *project) watcherFilter(in chan fsnotify.Event, out chan fsnotify.Event) {
-	var nextOut fsnotify.Event
+	var prev fsnotify.Event
 	timer := time.NewTimer(watcherLullTime)
 	timer.Stop()
 	for {
 		select {
 		case evt := <-in:
-			reject := false
+			accepted := false
 			var msg string
 			switch {
 			case evt.Op == fsnotify.Chmod:
 				msg = "ignored"
-				reject = true
 			case proj.exclude(evt.Name):
 				msg = "excluded"
-				reject = true
 			default:
 				msg = "accepted"
+				accepted = true
 			}
 			// TODO: Restore verbose2.
 			// proj.verbose2("fsnotify: " + time.Now().Format("15:04:05.000") + ": " + msg + ": " + evt.Op.String() + ": " + evt.Name)
 			proj.verbose("fsnotify: " + time.Now().Format("15:04:05.000") + ": " + msg + ": " + evt.Op.String() + ": " + evt.Name)
-			if !reject {
-				nextOut = evt
+			if accepted {
+				if prev.Op == fsnotify.Rename && prev.Name != evt.Name {
+					// A rename has ocurred within the content/template
+					// directories (Rename followed by immediately by Create) so
+					// forward the Rename to ensure the original file is deleted
+					// prior to the new file being created.
+					out <- prev
+				}
+				prev = evt
 				timer.Reset(watcherLullTime)
 			}
 		case <-timer.C:
-			out <- nextOut
+			out <- prev
+			prev = fsnotify.Event{}
 		}
 	}
 }
@@ -111,7 +118,7 @@ func (proj *project) serve() error {
 	done := make(chan error)
 	// Start thread to monitor file system notifications and rebuild website.
 	go func() {
-		out := make(chan fsnotify.Event)
+		out := make(chan fsnotify.Event, 2)
 		go proj.watcherFilter(watcher.Events, out)
 		kb := make(chan rune)
 		go kbmonitor(kb)
@@ -142,9 +149,6 @@ func (proj *project) serve() error {
 				case fsnotify.Remove, fsnotify.Rename:
 					proj.println(start.Format("15:04:05") + ": removed: " + evt.Name)
 					err = proj.removeFile(evt.Name)
-					if err == nil {
-						err = proj.installHomePage()
-					}
 				default:
 					panic("unexpected event: " + evt.Op.String() + ": " + evt.Name)
 				}
