@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -116,21 +115,17 @@ func (proj *project) serve() error {
 		go proj.watcherFilter(watcher.Events, out)
 		kb := make(chan rune)
 		go kbmonitor(kb)
-		mu := sync.Mutex{}
 		for {
 			select {
 			case c := <-kb:
 				if c == 'r' || c == 'R' {
-					mu.Lock()
 					err = proj.build()
 					if err != nil {
 						done <- err
 					}
 					proj.println("")
-					mu.Unlock()
 				}
 			case evt := <-out:
-				mu.Lock()
 				start := time.Now()
 				switch evt.Op {
 				case fsnotify.Create, fsnotify.Write:
@@ -158,7 +153,6 @@ func (proj *project) serve() error {
 				}
 				fmt.Printf("elapsed: %.3fs\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
 				proj.println("")
-				mu.Unlock()
 			case err := <-watcher.Errors:
 				done <- err
 			}
