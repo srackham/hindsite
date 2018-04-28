@@ -6,12 +6,21 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/jaschaephraim/lrserver"
 )
+
+// webpage contains the path name of the most recently requested HTML webpage.
+var webpage struct {
+	sync.Mutex
+	path string
+}
 
 // httpserver starts the HTTP server.
 func (proj *project) httpserver() error {
@@ -20,8 +29,17 @@ func (proj *project) httpserver() error {
 	// with prefix serve unmodified URL.
 	stripPrefix := func(prefix string, h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			proj.verbose2("request: " + r.URL.Path)
-			if p := strings.TrimPrefix(r.URL.Path, prefix); len(p) < len(r.URL.Path) {
+			p := r.URL.Path
+			if p == "/" {
+				p = "/index.html"
+			}
+			if path.Ext(p) == ".html" {
+				webpage.Lock()
+				webpage.path = p
+				webpage.Unlock()
+			}
+			proj.verbose("request: " + p)
+			if p := strings.TrimPrefix(p, prefix); len(p) < len(p) {
 				r2 := new(http.Request)
 				*r2 = *r
 				r2.URL = new(url.URL)
@@ -39,7 +57,7 @@ func (proj *project) httpserver() error {
 }
 
 // watcherLullTime is the watcherFilter debounce time.
-const watcherLullTime time.Duration = 20 * time.Millisecond
+const watcherLullTime time.Duration = 50 * time.Millisecond
 
 // watcherFilter filters and debounces fsnotify events. When there has been a
 // lull in file system events arriving on the in input channel then forward the
@@ -119,6 +137,16 @@ func (proj *project) serve() error {
 	}
 	// Error channel to exit serve command.
 	done := make(chan error)
+	// Start LiveReload server.
+	lr := lrserver.New(lrserver.DefaultName, lrserver.DefaultPort)
+	if proj.verbosity == 0 {
+		lr.SetStatusLog(nil)
+	}
+	go lr.ListenAndServe()
+	// Start Web server.
+	go func() {
+		done <- proj.httpserver()
+	}()
 	// Start thread to monitor file system notifications and rebuild website.
 	go func() {
 		out := make(chan fsnotify.Event, 2)
@@ -144,6 +172,9 @@ func (proj *project) serve() error {
 					if err == nil {
 						err = proj.installHomePage()
 					}
+					if err == nil {
+						lr.Reload(webpage.path)
+					}
 				case fsnotify.Remove, fsnotify.Rename:
 					proj.println(start.Format("15:04:05") + ": removed: " + evt.Name)
 					err = proj.removeFile(evt.Name)
@@ -159,10 +190,6 @@ func (proj *project) serve() error {
 				done <- err
 			}
 		}
-	}()
-	// Start web server thread.
-	go func() {
-		done <- proj.httpserver()
 	}()
 	// Wait for error exit.
 	return <-done
