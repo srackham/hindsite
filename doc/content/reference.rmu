@@ -1,3 +1,7 @@
+---
+permalink: /index.html
+---
+
 # Hindsite Reference
 
 ## Overview
@@ -171,12 +175,12 @@ specified this will be zero.
 
 _time_:: The execution time in seconds.
 
-The build summary does not include [excluded files](TODO).
+The build summary does not include files that are excluded by the
+[exclude](#configuration) configuration parameter.
 
-
+/*
+OLD: Relates to -incremental option.
 ### Incremental builds
-TODO: Rewrite this section for server command.
-
 An incremental build only rebuilds those webpages that require updating.
 Incremental builds are faster and they facilitate incremental deployment. The
 incremental rebuild rules are:
@@ -197,11 +201,14 @@ aware of:
    in the generated indexes until the dependent indexes are next rebuilt.
 3. Any changes that influence document generation and not monitored by the
    incremental build rules will not trigger an incremental rebuild.
+*/
 
 ## serve command
-Rebuilds the project then starts a development webserver on the project build
-directory. The _serve_ command automatically rebuilds affected webpages if any
-files in the _content_ or _template directories_ are added, modified or removed.
+The _serve_ command rebuilds the project then starts a development webserver on
+the project _build_ directory. The _serve_ command automatically
+[rebuilds](#incremental-rebuilds) affected webpages if any files in the
+_content_ or _template directories_ are added, modified or removed. The server
+also handles browser live reloading.
 
 Usage:
 
@@ -214,6 +221,24 @@ Applicable options:
     -v
 
 - `PORT` is the server port number (defaults to 1212).
+- Press the _R_ key followed by the _Enter_ key to force a clean rebuild.
+
+### Incremental rebuilds
+The [serve command](#serve-command) automatically performs partial builds in
+order to speed up live reloading and make the content creation process easier
+and more responsive.
+
+The amount of processing required will depend on the size of your site and the
+type of change. Most content updates are very fast but processing times increase
+if:
+
+- Indexed documents are added or deleted (necessitating full index rebuild).
+- A configuration file or template file is added, changed or removed
+  (necessitating a full site rebuild).
+
+To ensure build integrity you should always perform a clean build before
+deployment and after project structural changes (the serve command does not
+process changes to the project directory structure).
 
 
 ## Projects
@@ -277,7 +302,7 @@ characters. This convention is not enforced but is recommended because it:
 
 
 .#configuration
-## Configuration parameters 
+## Configuration
 Configuration parameters drive website generation. They are specified in TOML
 and YAML markup files in the project template directories named `config.toml`
 and `config.yaml` respectively. Configuration files are optional, though most
@@ -288,7 +313,7 @@ configuration files that lie on the corresponding _template directory_ path.
 Configuration files closer to the document or index base directory have higher
 precedence than those further up the directory path.
 
-Applicable configuration parameters are also merged into the document [front
+Applicable configuration parameters are merged into the document [front
 matter](#front-matter).
 
 The `exclude`, `homepage` and `urlprefix` configuration parameters are site-wide
@@ -297,7 +322,7 @@ are not subject to subdirectory configuration file parameter merging.
 
 Valid configuration parameters are:
 
-`author`:: Specifies the default document author and can be overridden by the
+`author`:: Specifies the default document author and is overridden by the
 document's _author_ [front matter](#front-matter) variable. TOML example:
 
     author = "Joe Bloggs"
@@ -305,9 +330,10 @@ document's _author_ [front matter](#front-matter) variable. TOML example:
 `exclude`:: A `|` separated list of file and directory paths in the content and
 template directories that are excluded from processing.
 
+- The path separator is a slash (`/`) character.
 - The paths are relative to the content or template directory and conform to
-  patterns matched by the Go [filepath.Match()
-  function](https://golang.org/pkg/path/filepath/#Match).
+  patterns matched by the Go [path.Match()
+  function](https://golang.org/pkg/path/#Match).
 - If the path contains no path separators then it is matched against file names
   e.g. `*.swp` will match all files with the `.swp` file name extension.
 - If the path contains path separators then it is matched against file paths
@@ -317,12 +343,12 @@ template directories that are excluded from processing.
   if it is in the top directory.
 - TOML example:
 
-    exclude = "config.rmu|*.swp|*~|4913"
+    exclude = "config.rmu|.*|*~|4913"
 
-`shortdate`, `mediumdate`, `longdate`:: These are date formats for template
-`shortdate`, `mediumdate` and `longdate` variables respectively (the `date`
-variable is an alias for `mediumdate`). The values conform to the layouts
-supported by Go [time.Format
+`shortdate`, `mediumdate`, `longdate`:: These are date formats for `shortdate`,
+`mediumdate` and `longdate` [document template
+variables](#document-template-variables) respectively. The values conform to the
+layouts supported by Go [time.Format
 function](https://golang.org/pkg/time/#Time.Format). The default values are:
 
     shortdate = "2006-01-02",
@@ -341,14 +367,15 @@ document index page. TOML example:
 
     paginate = 10
 
-`permalink`:: An optional URL template for built files. The file's URL is computed
-by substituting the following placeholders:
+`permalink`:: An optional URL and build path template for built files. The
+file's URL and build path is computed by substituting the following `permalink`
+placeholders:
 ..
 `%y`:: Four digit publication date year.
 `%m`:: Two digit publication date month.
 `%d`:: Two digit publication date day of month.
 `%f`:: The build file name.
-`%b`:: The build file name minus the file name extension.
+`%p`:: The build file name minus the file name extension.
 
 If the permalink ends with a trailing slash then hindsite creates "pretty" URLs
 by writing the build file to `index.html` in a directory with the page’s name.
@@ -357,7 +384,7 @@ by writing the build file to `index.html` in a directory with the page’s name.
 TOML examples:
 
     permalink = "/posts/%y/%m/%d/%f"
-    permalink = "/posts/%y-%m-%d/%b/"
+    permalink = "/posts/%y-%m-%d/%p/"
 
 A permalink URL will not change provided the `permalink` parameter, the document
 publication date and the document slug are not changed. Changing the source
@@ -506,7 +533,6 @@ Example YAML front matter:
 ---
 title:    Foo Bar
 description: An brief history of the origins of the foofoo valve.
-addendum: This article was updated March, 2018.
 date:     2018-02-16
 tags:     [foo foo valve, qux, baz]
 slug:     foofoo-valve-history
@@ -533,15 +559,13 @@ variables](#document-template-variables).
 `author`:: The document author. If not specified it defaults to corresponding
 [author](#configuration) configuration parameter value.
 
-`addendum`:: A general purpose content field, it defaults to blank. The addendum
-is rendered as Markdown.
-
 `date`:: The document publication date. If it is not specified it is extracted
 from the file name `YYYY-MM-DD-` date prefix, if undefined it defaults to Jan 1 0001.
 The `date` format is RFC 3339 with the following relaxations:
 ..
-- If the time zone offet is omitted then the [timezone](#configuration)
-  configuration parameter is assigned.
+- If the time zone offset is omitted then the [timezone](#configuration)
+  configuration parameter is assigned. This has the effect of always rendering
+  the date as written irrespective of the `timezone` parameter value.
 - If the time is omitted then the time `00:00:00` is used.
 - A space character separator (instead of the letter `T`) between the date and
   the time is allowed.
@@ -599,11 +623,12 @@ matter](#front-matter) values, document [configuration](#configuration)
 parameters and synthesized values. They are used in layout and index page
 templates and in [text templates](#text-templates).
 
-`.addendum`:: The document addendum (HTML).
 `.author`:: Document author.
 `.body`:: The Markdown document body rendered as HTML.
-`.date`, `.shortdate`, `.mediumdate`, `.longdate`:: Document publication date rendered using the various [configuration](#configuration) date layouts.
 `.description`:: The HTML document description (HTML).
+`.shortdate`, `.mediumdate`, `.longdate`:: Document publication date rendered using the various [configuration](#configuration) date layouts.
+`.date`:: Document publication date.
+`.modtime`:: Content file modification date and time.
 `.next`, `.prev`:: The next and previous document URLs in primary index order.
 `.slug`:: Front matter variable.
 `.url`: Synthesized document [URL](#urls).
@@ -652,10 +677,23 @@ directory is indexed.
 ..
 `docs.html` templates are rendered with the following template variables:
 
-`.docs`:: An iterable list of index page documents. Each list item contains a set of [document template variables](#document-template-variables).
+`.docs`:: An iterable list of index page documents. Each list item contains a
+set of [document template variables](#document-template-variables).
+
 `.count`:: The total number of documents in the index.
-`.page`:: The set of document index pages variables: `.number` (the page number); `.url` (the page URL); `.prev`, `.next`, `.first`, `.last` (each with the page number and URL of the previous, next, first and last index pages). For example `.page.prev.number` is the page number (1...) of the previous document index page.
+
+`.page`:: The set of document index pages variables:
+
+      `.number`::: The page number.
+
+      `.url`::: The page URL.
+
+      `.prev`, `.next`, `.first`, `.last`::: Each with the page `.number` and
+       `.url` of the previous, next, first and last index pages. For example
+      `.page.prev.number` is the page number (1...) of the previous document index page.
+
 `.urlprefix`:: The [configuration](#configuration) `urlprefix`.
+
 `.user`:: The index [configuration's](#configuration) `user` map.
 ..
 
@@ -663,10 +701,13 @@ directory is indexed.
 index webpage. If it is not present the tags index files are not built.
 `tags.html` templates are rendered with the following template variables:
 ..
+
 `.tags`:: An iterable list, each list item contains: `.tag` (the tag); `.url`
 (the URL of of the tag's document index); `.count` (the number of documents with
 this tag).
+
 `.urlprefix`:: The [configuration](#configuration) `urlprefix`.
+
 `.user`:: The index [configuration's](#configuration) `user` map.
 ..
 
@@ -705,7 +746,7 @@ If you are deploying to a server subdirectory then you need to set the
 correctly. For example, if are deploying to the server `http://example.com/blog`
 directory you need to set `urlprefix` to `/blog`.
 
-To synthesize absolute URLs include the URL domain in `urlprefix`.
+To synthesize absolute URLs include the URL domain in the `urlprefix`.
 
 
 ## Vocabulary

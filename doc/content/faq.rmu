@@ -10,7 +10,7 @@ feels like doing in this situation, I wrote my own program.
 
 
 ## How fast is hindsite?
-On full rebuilds hindsite is around ten times faster than Hugo in informal tests
+On full rebuilds hindsite is around six times faster than Hugo in informal tests
 based on 5000 Markdown posts (5000 Markdown files, 20MB total). hindsite is
 around ten times faster than Hugo for full rebuilds but on subsequent
 incremental rebuilds Hugo  is about twenty times faster than hindsite.
@@ -64,9 +64,14 @@ webpages. Browser live-reload can be achieved using a browser extension.
 
 
 ## Should I enable document and static file template expansion?
-Because the additional processing affects performance you should only enable it
-if you need it and, if performance is an issue, only for the documents or
-directories that need it.
+You should only enable it if you need it and, if performance is an issue, only
+for the documents or directories that need it.
+
+
+## How can I customize `data` and `modtime` template variable formats?
+TODO
+
+    {{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}
 
 
 ## How do I escape template expansion in content files?
@@ -116,8 +121,3 @@ content/
 
 Each index has it's own page template. This technique can be extended to create
 multiple additional indexes over a the same indexed document set.
-
-
-## I don't like file name extensions in URLs how can I remove them
-Web servers can be configured to do this, see [How to remove .html from
-URL](https://stackoverflow.com/questions/5730092/how-to-remove-html-from-url).
