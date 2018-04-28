@@ -161,6 +161,7 @@ func (proj *project) serve() error {
 					if err != nil {
 						done <- err
 					}
+					lr.Reload(webpage.path)
 					proj.println("")
 				}
 			case evt := <-out:
@@ -172,14 +173,14 @@ func (proj *project) serve() error {
 					if err == nil {
 						err = proj.installHomePage()
 					}
-					if err == nil {
-						lr.Reload(webpage.path)
-					}
 				case fsnotify.Remove, fsnotify.Rename:
 					proj.println(start.Format("15:04:05") + ": removed: " + evt.Name)
 					err = proj.removeFile(evt.Name)
 				default:
 					panic("unexpected event: " + evt.Op.String() + ": " + evt.Name)
+				}
+				if err == nil {
+					lr.Reload(webpage.path)
 				}
 				if err != nil {
 					proj.logerror(err.Error())
