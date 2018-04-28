@@ -10,7 +10,7 @@ porttitor natoque vel dolor.
 
 <!--more-->
 
-![image 1](./images/image-01.jpg)
+![image 1](/images/image-01.jpg)
 
 Est hac sed dis lectus pulvinar purus est ac sed cras tincidunt dis
 natoque Amet a et sed sed placerat dolor ac integer pulvinar nisi a

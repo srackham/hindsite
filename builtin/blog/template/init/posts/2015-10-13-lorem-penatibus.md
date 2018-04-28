@@ -8,7 +8,7 @@ slug: lorem-penatibus
 
 Porttitor sed hac porttitor tincidunt integer a natoque a in dis.
 
-![image 1](./images/image-01.jpg)
+![image 1](/images/image-01.jpg)
 
 Purus porttitor integer sed hac integer montes lectus sed purus
 porttitor parturient Amet.

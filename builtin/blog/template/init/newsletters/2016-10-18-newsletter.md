@@ -9,7 +9,7 @@ Nisi montes porttitor placerat penatibus scelerisque natoque
 parturient a lorem cursus arcu parturient scelerisque sed et dis dolor
 pulvinar ac pulvinar vel.
 
-![image 1](./images/image-01.jpg)
+![image 1](/images/image-03.jpg)
 
 Cras sed porttitor parturient tincidunt a sagittis cras natoque in
 mattis sed vel integer est hac mattis diam mattis cursus sagittis a ac

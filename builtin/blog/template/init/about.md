@@ -3,7 +3,7 @@
 Arcu sed hac nisi _duis porta_, sociis pulvinar. Montes enim, facilisis urna?
 Augue vel, magnis montes sociis auctor, ut! Placerat porta etiam, aliquet?
 
-![image 1](./newsletters/images/image-01.jpg)
+![image 1](/images/image-03.jpg)
 
 Integer a diam a `integer` mattis:
 

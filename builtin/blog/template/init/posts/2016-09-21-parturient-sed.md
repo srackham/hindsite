@@ -11,7 +11,7 @@ purus sed Amet arcu tincidunt diam lorem a est pulvinar dolor arcu
 diam cursus dis a hac Amet arcu sed placerat dis sed pulvinar montes
 ac purus cras.
 
-![image 2](./images/image-02.jpg)
+![image 2](/images/image-02.jpg)
 
 Cursus mattis penatibus et sagittis a cursus natoque nisi porttitor
 dis sed integer cras dis sed placerat cursus natoque cursus tincidunt

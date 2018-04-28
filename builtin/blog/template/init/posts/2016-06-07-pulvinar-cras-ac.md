@@ -11,7 +11,7 @@ placerat tincidunt integer ac natoque tincidunt nisi porttitor.
 
 <!--more-->
 
-![image 2](./images/image-02.jpg)
+![image 2](/images/image-02.jpg)
 
 Lorem purus placerat cras nisi in diam sagittis natoque in a ac mattis
 vel et scelerisque montes tincidunt penatibus in a cursus porttitor

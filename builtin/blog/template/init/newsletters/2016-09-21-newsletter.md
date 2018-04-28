@@ -10,7 +10,7 @@ mattis diam cursus Amet tincidunt a integer cras sed penatibus mattis
 purus lectus a mattis sed cursus natoque a natoque placerat integer
 sed dis penatibus hac est.
 
-![image 2](./images/image-02.jpg)
+![image 2](/images/image-04.jpg)
 
 Penatibus cras parturient cursus dolor placerat tincidunt placerat
 cras cras scelerisque nisi mattis pulvinar a est cras natoque ac est

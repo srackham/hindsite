@@ -8,7 +8,7 @@ slug: cras-est
 Lectus natoque montes vel est arcu diam tincidunt porttitor natoque
 purus a pulvinar lorem.
 
-![image 2](./images/image-02.jpg)
+![image 2](/images/image-04.jpg)
 
 Cursus pulvinar lectus placerat tincidunt sagittis cursus vel lectus
 sed lectus arcu et a lectus diam et a integer a parturient natoque

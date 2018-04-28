@@ -11,7 +11,7 @@ integer nisi Amet vel sed tincidunt montes a dis.
 
 <!--more-->
 
-![image 2](./images/image-02.jpg)
+![image 2](/images/image-02.jpg)
 
 Lorem mattis cras scelerisque hac cursus pulvinar sagittis integer a
 integer lorem cras pulvinar est parturient purus sed sed vel dolor

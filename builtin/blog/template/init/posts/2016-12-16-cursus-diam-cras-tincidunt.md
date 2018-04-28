@@ -12,7 +12,7 @@ dolor natoque integer integer mattis.
 
 <!--more-->
 
-![image 2](./images/image-02.jpg)
+![image 2](/images/image-02.jpg)
 
 Hac lorem lorem natoque lectus sagittis sed natoque arcu dis a integer
 natoque porttitor parturient lectus in mattis porttitor cursus lectus
