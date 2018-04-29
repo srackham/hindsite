@@ -16,39 +16,58 @@ import (
 	"github.com/jaschaephraim/lrserver"
 )
 
+// logRequest server request handler logs browser requests.
+func logRequest(proj *project, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		proj.verbose("request: " + r.URL.Path)
+		h.ServeHTTP(w, r)
+	})
+}
+
 // webpage contains the path name of the most recently requested HTML webpage.
 var webpage struct {
 	sync.Mutex
 	path string
 }
 
-// httpserver starts the HTTP server.
-func (proj *project) httpserver() error {
-	// Strip urlprefix. If URL does not start with prefix serve unmodified URL.
-	// Set the webpage path if the served file is HTML.
-	stripURLPrefix := func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			p := r.URL.Path
-			proj.verbose("request: " + p)
-			if strings.HasSuffix(p, "/") || path.Ext(p) == ".html" {
-				webpage.Lock()
-				webpage.path = p
-				webpage.Unlock()
-			}
-			if p2 := strings.TrimPrefix(p, proj.rootConf.urlprefix); len(p2) < len(p) {
-				r2 := new(http.Request)
-				*r2 = *r
-				r2.URL = new(url.URL)
-				*r2.URL = *r.URL
-				r2.URL.Path = p2
-				h.ServeHTTP(w, r2)
-			} else {
-				h.ServeHTTP(w, r)
-			}
-		})
-	}
+// setWebpage server request handler sets the shared webpage for requested HTML
+// pages.
+func setWebpage(proj *project, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		p := r.URL.Path
+		if strings.HasSuffix(p, "/") || path.Ext(p) == ".html" {
+			webpage.Lock()
+			webpage.path = p
+			webpage.Unlock()
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
+// stripURLPrefix server request handler strips the urlprefix from browser
+// request URLs. If URL does not start with prefix serve unmodified URL.
+func stripURLPrefix(proj *project, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		p := r.URL.Path
+		if p2 := strings.TrimPrefix(p, proj.rootConf.urlprefix); len(p2) < len(p) {
+			r2 := new(http.Request)
+			*r2 = *r
+			r2.URL = new(url.URL)
+			*r2.URL = *r.URL
+			r2.URL.Path = p2
+			h.ServeHTTP(w, r2)
+		} else {
+			h.ServeHTTP(w, r)
+		}
+	})
+}
+
+// startHTTPServer registers server request handlers and starts the HTTP server.
+func (proj *project) startHTTPServer() error {
 	handler := http.FileServer(http.Dir(proj.buildDir))
-	handler = stripURLPrefix(handler)
+	handler = stripURLPrefix(proj, handler)
+	handler = setWebpage(proj, handler)
+	handler = logRequest(proj, handler)
 	http.Handle("/", handler)
 	proj.println(fmt.Sprintf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port))
 	return http.ListenAndServe(":"+proj.port, nil)
@@ -143,7 +162,7 @@ func (proj *project) serve() error {
 	go lr.ListenAndServe()
 	// Start Web server.
 	go func() {
-		done <- proj.httpserver()
+		done <- proj.startHTTPServer()
 	}()
 	// Start thread to monitor file system notifications and rebuild website.
 	go func() {
