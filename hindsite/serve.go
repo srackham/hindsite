@@ -30,10 +30,7 @@ func (proj *project) httpserver() error {
 	stripPrefix := func(prefix string, h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			p := r.URL.Path
-			if strings.HasSuffix(p, "/") {
-				p += "index.html"
-			}
-			if path.Ext(p) == ".html" {
+			if strings.HasSuffix(p, "/") || path.Ext(p) == ".html" {
 				webpage.Lock()
 				webpage.path = p
 				webpage.Unlock()
