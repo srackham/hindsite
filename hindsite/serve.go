@@ -168,12 +168,14 @@ func (proj *project) serve() error {
 	go func() {
 		done <- proj.startHTTPServer()
 	}()
-	// Start thread to monitor file system notifications and rebuild website.
+	// Start watcher event filter.
+	fs := make(chan fsnotify.Event, 2)
+	go proj.watcherFilter(watcher, fs)
+	// Start keyboard monitor.
+	kb := make(chan rune)
+	go kbmonitor(kb)
+	// Start thread to monitor and execute build notifications.
 	go func() {
-		out := make(chan fsnotify.Event, 2)
-		go proj.watcherFilter(watcher, out)
-		kb := make(chan rune)
-		go kbmonitor(kb)
 		for {
 			select {
 			case c := <-kb:
@@ -185,7 +187,7 @@ func (proj *project) serve() error {
 					lr.Reload(webpage.path)
 					proj.println("")
 				}
-			case evt := <-out:
+			case evt := <-fs:
 				start := time.Now()
 				switch evt.Op {
 				case fsnotify.Create, fsnotify.Write:
