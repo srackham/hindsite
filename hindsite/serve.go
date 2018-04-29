@@ -30,8 +30,8 @@ func (proj *project) httpserver() error {
 	stripPrefix := func(prefix string, h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			p := r.URL.Path
-			if p == "/" {
-				p = "/index.html"
+			if strings.HasSuffix(p, "/") {
+				p += "index.html"
 			}
 			if path.Ext(p) == ".html" {
 				webpage.Lock()
@@ -39,19 +39,20 @@ func (proj *project) httpserver() error {
 				webpage.Unlock()
 			}
 			proj.verbose("request: " + p)
-			if p := strings.TrimPrefix(p, prefix); len(p) < len(p) {
+			if p2 := strings.TrimPrefix(p, prefix); len(p2) < len(p) {
 				r2 := new(http.Request)
 				*r2 = *r
 				r2.URL = new(url.URL)
 				*r2.URL = *r.URL
-				r2.URL.Path = p
+				r2.URL.Path = p2
 				h.ServeHTTP(w, r2)
 			} else {
 				h.ServeHTTP(w, r)
 			}
 		})
 	}
-	http.Handle("/", stripPrefix(proj.rootConf.urlprefix, http.FileServer(http.Dir(proj.buildDir))))
+	handler := stripPrefix(proj.rootConf.urlprefix, http.FileServer(http.Dir(proj.buildDir)))
+	http.Handle("/", handler)
 	proj.println(fmt.Sprintf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port))
 	return http.ListenAndServe(":"+proj.port, nil)
 }
@@ -179,11 +180,11 @@ func (proj *project) serve() error {
 				default:
 					panic("unexpected event: " + evt.Op.String() + ": " + evt.Name)
 				}
-				if err == nil {
-					lr.Reload(webpage.path)
-				}
 				if err != nil {
 					proj.logerror(err.Error())
+				}
+				if err == nil {
+					lr.Reload(webpage.path)
 				}
 				fmt.Printf("elapsed: %.3fs\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
 				proj.println("")
