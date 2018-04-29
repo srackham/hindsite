@@ -68,9 +68,13 @@ func (proj *project) startHTTPServer() error {
 	handler = stripURLPrefix(proj, handler)
 	handler = setWebpage(proj, handler)
 	handler = logRequest(proj, handler)
-	http.Handle("/", handler)
+
+	// http.Handle("/", handler)
+	// proj.println(fmt.Sprintf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port))
+	// return http.ListenAndServe(":"+proj.port, nil)
+
 	proj.println(fmt.Sprintf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port))
-	return http.ListenAndServe(":"+proj.port, nil)
+	return http.ListenAndServe(":"+proj.port, &ssHandler{Handler: handler})
 }
 
 // watcherLullTime is the watcherFilter debounce time.
@@ -156,6 +160,7 @@ func (proj *project) serve() error {
 	done := make(chan error)
 	// Start LiveReload server.
 	lr := lrserver.New(lrserver.DefaultName, lrserver.DefaultPort)
+	lr.SetLiveCSS(true)
 	if proj.verbosity == 0 {
 		lr.SetStatusLog(nil)
 	}

@@ -43,11 +43,11 @@ func slugify(text string, exclude stringlist) string {
 }
 
 func injectLiveReload(html string) string {
-	split := strings.Split(html, "</body>")
-	if len(split) == 2 {
-		const scripttag = "<script src=\"http://localhost:35729/livereload.js\"></script>\n"
-		return split[0] + scripttag + "</body>" + split[1]
-	}
+	// split := strings.Split(html, "</body>")
+	// if len(split) == 2 {
+	// 	const scripttag = "<script src=\"http://localhost:35729/livereload.js\"></script>\n"
+	// 	return split[0] + scripttag + "</body>" + split[1]
+	// }
 	return html
 }
 
