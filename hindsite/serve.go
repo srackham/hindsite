@@ -24,19 +24,18 @@ var webpage struct {
 
 // httpserver starts the HTTP server.
 func (proj *project) httpserver() error {
-	// Tweaked http.StripPrefix() handler
-	// (https://golang.org/pkg/net/http/#StripPrefix). If URL does not start
-	// with prefix serve unmodified URL.
-	stripPrefix := func(prefix string, h http.Handler) http.Handler {
+	// Strip urlprefix. If URL does not start with prefix serve unmodified URL.
+	// Set the webpage path if the served file is HTML.
+	stripURLPrefix := func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			p := r.URL.Path
+			proj.verbose("request: " + p)
 			if strings.HasSuffix(p, "/") || path.Ext(p) == ".html" {
 				webpage.Lock()
 				webpage.path = p
 				webpage.Unlock()
 			}
-			proj.verbose("request: " + p)
-			if p2 := strings.TrimPrefix(p, prefix); len(p2) < len(p) {
+			if p2 := strings.TrimPrefix(p, proj.rootConf.urlprefix); len(p2) < len(p) {
 				r2 := new(http.Request)
 				*r2 = *r
 				r2.URL = new(url.URL)
@@ -48,7 +47,8 @@ func (proj *project) httpserver() error {
 			}
 		})
 	}
-	handler := stripPrefix(proj.rootConf.urlprefix, http.FileServer(http.Dir(proj.buildDir)))
+	handler := http.FileServer(http.Dir(proj.buildDir))
+	handler = stripURLPrefix(handler)
 	http.Handle("/", handler)
 	proj.println(fmt.Sprintf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port))
 	return http.ListenAndServe(":"+proj.port, nil)
