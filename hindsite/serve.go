@@ -16,18 +16,25 @@ import (
 	"github.com/jaschaephraim/lrserver"
 )
 
+const (
+	// watcherLullTime is the watcherFilter debounce time.
+	watcherLullTime time.Duration = 50 * time.Millisecond
+)
+
+var (
+	// webpage shared variable contains the path name of the most recently requested HTML webpage.
+	webpage struct {
+		sync.Mutex
+		path string
+	}
+)
+
 // logRequest server request handler logs browser requests.
 func logRequest(proj *project, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		proj.verbose("request: " + r.URL.Path)
 		h.ServeHTTP(w, r)
 	})
-}
-
-// webpage contains the path name of the most recently requested HTML webpage.
-var webpage struct {
-	sync.Mutex
-	path string
 }
 
 // setWebpage server request handler sets the shared webpage for requested HTML
@@ -68,17 +75,9 @@ func (proj *project) startHTTPServer() error {
 	handler = stripURLPrefix(proj, handler)
 	handler = setWebpage(proj, handler)
 	handler = logRequest(proj, handler)
-
-	// http.Handle("/", handler)
-	// proj.println(fmt.Sprintf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port))
-	// return http.ListenAndServe(":"+proj.port, nil)
-
 	proj.println(fmt.Sprintf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port))
-	return http.ListenAndServe(":"+proj.port, &ssHandler{Handler: handler})
+	return http.ListenAndServe(":"+proj.port, &lrHandler{Handler: handler})
 }
-
-// watcherLullTime is the watcherFilter debounce time.
-const watcherLullTime time.Duration = 50 * time.Millisecond
 
 // watcherFilter filters and debounces fsnotify events. When there has been a
 // lull in file system events arriving on the in input channel then forward the
@@ -357,9 +356,4 @@ func (proj *project) writeFile(f string) error {
 	default:
 		panic("file is not in watched directories: " + f)
 	}
-}
-
-func (proj *project) isDocument(f string) bool {
-	ext := filepath.Ext(f)
-	return (ext == ".md" || ext == ".rmu") && pathIsInDir(f, proj.contentDir)
 }

@@ -244,7 +244,6 @@ func (proj *project) renderStaticFile(f string, modified time.Time) error {
 	if err != nil {
 		return err
 	}
-	markup = injectLiveReload(markup)
 	return writeFile(doc.buildPath, markup)
 }
 

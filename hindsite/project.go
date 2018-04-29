@@ -272,6 +272,11 @@ func isTemplate(f string, templates *string) bool {
 	return strings.Contains("|"+nz(templates)+"|", "|"+filepath.Ext(f)+"|")
 }
 
+func (proj *project) isDocument(f string) bool {
+	ext := filepath.Ext(f)
+	return (ext == ".md" || ext == ".rmu") && pathIsInDir(f, proj.contentDir)
+}
+
 // rebuild returns true if the target file does not exist or is newer than
 // modified time or newer than any document.
 func rebuild(target string, modified time.Time, docs ...*document) bool {

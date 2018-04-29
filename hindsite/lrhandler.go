@@ -1,3 +1,7 @@
+// Implements HTTP server handler that injects the LiveReload script tag into requested webpages.
+//
+// The code in this file is based on devserver code (https://github.com/prisoner/devserver).
+//
 package main
 
 import (
@@ -10,21 +14,21 @@ import (
 
 var (
 	body    = []byte("</body>")
-	newbody = []byte("<script src=\"http://127.0.0.1:35729/livereload.js\"></script>\n</body>")
+	newbody = []byte("<script src=\"http://localhost:35729/livereload.js\"></script>\n</body>")
 )
 
-type ssResponseWriter struct {
+type lrResponseWriter struct {
 	http.ResponseWriter
 }
 
-func (w *ssResponseWriter) Write(bs []byte) (int, error) {
+func (w *lrResponseWriter) Write(bs []byte) (int, error) {
 	if strings.Contains(w.Header().Get("Content-Type"), "text/html") {
-		bs = bytes.Replace(bs, body, newbody, -1)
+		bs = bytes.Replace(bs, body, newbody, 1)
 	}
 	return w.ResponseWriter.Write(bs)
 }
 
-func (w *ssResponseWriter) WriteHeader(code int) {
+func (w *lrResponseWriter) WriteHeader(code int) {
 	if strings.Contains(w.Header().Get("Content-Type"), "text/html") {
 		l, _ := strconv.Atoi(w.Header().Get("Content-Length"))
 		l = l + len(newbody) - len(body)
@@ -36,16 +40,16 @@ func (w *ssResponseWriter) WriteHeader(code int) {
 	w.ResponseWriter.WriteHeader(code)
 }
 
-type ssHandler struct {
+type lrHandler struct {
 	http.Handler
 }
 
-func (h *ssHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *lrHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.String() == "/favicon.ico" {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
-	w2 := &ssResponseWriter{
+	w2 := &lrResponseWriter{
 		ResponseWriter: w,
 	}
 	h.Handler.ServeHTTP(w2, r)

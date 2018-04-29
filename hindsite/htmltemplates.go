@@ -71,6 +71,5 @@ func (tmpls htmlTemplates) render(name string, data templateData, outfile string
 	if err := mkMissingDir(filepath.Dir(outfile)); err != nil {
 		return err
 	}
-	html = injectLiveReload(html)
 	return writeFile(outfile, html)
 }
