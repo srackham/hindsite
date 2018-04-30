@@ -217,12 +217,14 @@ func (proj *project) serve() error {
 		}
 	}()
 	// Launch browser.
-	go func() {
-		proj.verbose("launching browser: " + rooturl)
-		if err := launchBrowser(rooturl); err != nil {
-			proj.logerror(err.Error())
-		}
-	}()
+	if proj.launch {
+		go func() {
+			proj.verbose("launching browser: " + rooturl)
+			if err := launchBrowser(rooturl); err != nil {
+				proj.logerror(err.Error())
+			}
+		}()
+	}
 	// Wait for error exit.
 	return <-done
 }

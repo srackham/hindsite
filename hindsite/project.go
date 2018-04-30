@@ -31,6 +31,7 @@ type project struct {
 	indexDir      string
 	drafts        bool
 	port          string
+	launch        bool
 	incremental   bool
 	builtin       string
 	verbosity     int
@@ -121,6 +122,8 @@ func (proj *project) parseArgs(args []string) error {
 			proj.projectDir = opt
 		case opt == "-drafts":
 			proj.drafts = true
+		case opt == "-launch":
+			proj.launch = true
 		case opt == "-incremental":
 			proj.incremental = true
 		case opt == "-v":
@@ -266,6 +269,7 @@ The options are:
     -builtin  NAME
     -incremental
     -drafts
+    -launch
     -v
 
 Version:    ` + VERS + " (" + OS + ")" + `
