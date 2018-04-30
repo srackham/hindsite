@@ -370,16 +370,20 @@ func (proj *project) writeFile(f string) error {
 	}
 }
 
+// launchBrowser launches the browser at the url address. Waits till launch
+// completed. Credit: https://stackoverflow.com/a/39324149/1136455
 func launchBrowser(url string) error {
-	launchers := map[string]string{
-		"darwin": "open",
-		"linux":  "xdg-open",
-		"win32":  "start",
+	var cmd string
+	var args []string
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start"}
+	case "darwin":
+		cmd = "open"
+	default: // "linux", "freebsd", "openbsd", "netbsd"
+		cmd = "xdg-open"
 	}
-	launcher, ok := launchers[runtime.GOOS]
-	if !ok {
-		return fmt.Errorf("browser launch unsupported for this OS: %s", runtime.GOOS)
-	}
-	cmd := exec.Command(launcher, url)
-	return cmd.Run()
+	args = append(args, url)
+	return exec.Command(cmd, args...).Run()
 }
