@@ -27,26 +27,29 @@ install: test
 .PHONY: build
 build:
 	mkdir -p ./bin
+	BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)
+	COMMIT=$$(git rev-parse --short HEAD)
 	VERS=$$(git describe --tags --abbrev=0)
+	BUILD_FLAGS="-X main.BUILT=$$BUILT -X main.COMMIT=$$COMMIT -X main.VERS=$$VERS"
 
 	export GOOS=linux
 	export GOARCH=amd64
-	LDFLAGS="-X main.VERS=$$VERS -X main.OS=$$GOOS/$$GOARCH"
+	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
 	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-linux-amd64 ./...
 
 	export GOOS=darwin
 	export GOARCH=amd64
-	LDFLAGS="-X main.VERS=$$VERS -X main.OS=$$GOOS/$$GOARCH"
+	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
 	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-darwin-amd64 ./...
 
 	export GOOS=windows
 	export GOARCH=amd64
-	LDFLAGS="-X main.VERS=$$VERS -X main.OS=$$GOOS/$$GOARCH"
+	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
 	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-windows-amd64.exe ./...
 
 	export GOOS=windows
 	export GOARCH=386
-	LDFLAGS="-X main.VERS=$$VERS -X main.OS=$$GOOS/$$GOARCH"
+	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
 	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-windows-386.exe ./...
 
 .PHONY: test
@@ -57,20 +60,17 @@ test: bindata
 clean:
 	go clean -i ./...
 
-.PHONY: doc
-doc: build-doc serve-doc
+.PHONY: push
+push:
+	git push -u --tags origin master
 
 .PHONY: build-doc
 build-doc: install
 	hindsite build doc
 
 .PHONY: serve-doc
-serve-doc: build-doc
+serve-doc: install
 	hindsite serve doc
-
-.PHONY: push
-push:
-	git push -u --tags origin master
 
 #
 # Builtin blog development tasks.
@@ -86,13 +86,9 @@ build-blog: install
 	hindsite build $(BLOG_DIR) -content $(BLOG_DIR)/template/init
 
 .PHONY: serve-blog
-serve-blog: build-blog
+serve-blog: install
 	hindsite serve $(BLOG_DIR) -content $(BLOG_DIR)/template/init
 
-.PHONY: watch-blog
-watch-blog:
-	./bin/watch-hindsite.sh $(BLOG_DIR) -content $(BLOG_DIR)/template/init
-
 .PHONY: validate-blog
-validate-blog:
+validate-blog: build-blog
 	for f in $$(find $(BLOG_DIR)/build -name "*.html"); do echo $$f; html-validator --verbose --format text --file $$f; done
