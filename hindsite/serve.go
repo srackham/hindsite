@@ -6,10 +6,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -39,8 +37,7 @@ func logRequest(proj *project, h http.Handler) http.Handler {
 	})
 }
 
-// setWebpage server request handler sets the shared webpage for requested HTML
-// pages.
+// setWebpage server request handler sets the shared webpage variable.
 func setWebpage(proj *project, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := r.URL.Path
@@ -369,22 +366,4 @@ func (proj *project) writeFile(f string) error {
 	default:
 		panic("file is not in watched directories: " + f)
 	}
-}
-
-// launchBrowser launches the browser at the url address. Waits till launch
-// completed. Credit: https://stackoverflow.com/a/39324149/1136455
-func launchBrowser(url string) error {
-	var cmd string
-	var args []string
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "cmd"
-		args = []string{"/c", "start"}
-	case "darwin":
-		cmd = "open"
-	default: // "linux", "freebsd", "openbsd", "netbsd"
-		cmd = "xdg-open"
-	}
-	args = append(args, url)
-	return exec.Command(cmd, args...).Run()
 }
