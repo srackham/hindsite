@@ -164,6 +164,7 @@ func (proj *project) serve() error {
 	lr.SetLiveCSS(true)
 	if proj.verbosity == 0 {
 		lr.SetStatusLog(nil)
+		lr.SetErrorLog(nil)
 	}
 	go lr.ListenAndServe()
 	// Start Web server.
