@@ -93,6 +93,7 @@ func (conf *config) parseFile(proj *project, f string) error {
 	}
 	if cf.Homepage != "" {
 		home := cf.Homepage
+		home = filepath.FromSlash(home)
 		if !filepath.IsAbs(home) {
 			home = filepath.Join(proj.buildDir, home)
 		} else {
