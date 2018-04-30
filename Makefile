@@ -28,7 +28,7 @@ install: test
 build:
 	mkdir -p ./bin
 	BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)
-	COMMIT=$$(git rev-parse --short HEAD)
+	COMMIT=$$(git rev-parse HEAD)
 	VERS=$$(git describe --tags --abbrev=0)
 	BUILD_FLAGS="-X main.BUILT=$$BUILT -X main.COMMIT=$$COMMIT -X main.VERS=$$VERS"
 
