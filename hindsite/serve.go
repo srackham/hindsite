@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -75,7 +77,6 @@ func (proj *project) startHTTPServer() error {
 	handler = stripURLPrefix(proj, handler)
 	handler = setWebpage(proj, handler)
 	handler = logRequest(proj, handler)
-	proj.println(fmt.Sprintf("\nServing build directory %s on http://localhost:%s/\nPress Ctrl+C to stop\n", proj.buildDir, proj.port))
 	return http.ListenAndServe(":"+proj.port, &lrHandler{Handler: handler})
 }
 
@@ -126,6 +127,7 @@ func (proj *project) watcherFilter(watcher *fsnotify.Watcher, out chan fsnotify.
 
 // serve implements the serve comand.
 func (proj *project) serve() error {
+	rooturl := "http://localhost:" + proj.port + "/"
 	// Full rebuild to initialize document and index structures.
 	if err := proj.build(); err != nil {
 		return err
@@ -166,6 +168,7 @@ func (proj *project) serve() error {
 	go lr.ListenAndServe()
 	// Start Web server.
 	go func() {
+		proj.println(fmt.Sprintf("\nServing build directory %s on %s\nPress Ctrl+C to stop\n", proj.buildDir, rooturl))
 		done <- proj.startHTTPServer()
 	}()
 	// Start watcher event filter.
@@ -213,6 +216,13 @@ func (proj *project) serve() error {
 			case err := <-watcher.Errors:
 				done <- err
 			}
+		}
+	}()
+	// Launch browser.
+	go func() {
+		proj.verbose("launching browser: " + rooturl)
+		if err := launchBrowser(rooturl); err != nil {
+			proj.logerror(err.Error())
 		}
 	}()
 	// Wait for error exit.
@@ -358,4 +368,18 @@ func (proj *project) writeFile(f string) error {
 	default:
 		panic("file is not in watched directories: " + f)
 	}
+}
+
+func launchBrowser(url string) error {
+	launchers := map[string]string{
+		"darwin": "open",
+		"linux":  "xdg-open",
+		"win32":  "start",
+	}
+	launcher, ok := launchers[runtime.GOOS]
+	if !ok {
+		return fmt.Errorf("browser launch unsupported for this OS: %s", runtime.GOOS)
+	}
+	cmd := exec.Command(launcher, url)
+	return cmd.Run()
 }
