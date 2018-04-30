@@ -9,6 +9,11 @@ to my modest requirements. I wasn't having fun, so I did what every programmer
 feels like doing in this situation, I wrote my own program.
 
 
+## How can I configure the content language
+Use a user defined variable e.g. `.user.lang` in your configuration or document front matter then
+render it in your document templates with e.g. `{{.user.lang}}`.
+
+
 ## How fast is hindsite?
 On full rebuilds hindsite is around six times faster than Hugo in informal tests
 based on 5000 Markdown posts (5000 Markdown files, 20MB total). hindsite is
@@ -56,6 +61,20 @@ This suggests:
 - Scanning and parsing: 0.60s (12%)
 */
 
+
+## Relative or root-relative intra-site links?
+A relative link is a URL equivalent to a relative directory path e.g.
+`./images/beach.jpg`. A root-relative link is relative to the website root and
+begins with a slash e.g. `/images/beach.jpg`.
+
+- Relative links are not affected by the `urlprefix` whereas root-relative links
+  are.
+- Relative links are broken by changes to the `permalink` configuration
+  parameter, root-relative links are not.
+
+The `urlprefix` and `permalink` parameters do not tend to change much so this
+is probably just something to be aware of. Although you could enable document template
+expansion and prefix root-relative URLs with `{{.urlprefix}}`.
 
 ## How can you automatically reload the browser
 When editing document source files it's nice to have the output update
