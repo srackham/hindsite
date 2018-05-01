@@ -233,8 +233,8 @@ func (proj *project) parseConfigs() error {
 }
 
 // merge merges non-"zero" configuration parameters into configuration.
-// homepage, templates and urlprefix parameters are global (root configuration)
-// parameters and are not merged.
+// exclude, include, homepage and urlprefix parameters are global (root
+// configuration) parameters and are not merged.
 func (conf *config) merge(from config) {
 	if from.origin != "" {
 		conf.origin = from.origin
