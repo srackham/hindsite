@@ -132,9 +132,13 @@ Common command options:
 `-template TEMPLATE_DIR`:: the project template directory (defaults to `PROJECT_DIR/template`).
 `-v`:: Increase verbosity. `-vv` is an alias for `-v -v`.
 
-Content, build and template directories cannot overlap, with one exception: the
-content directory can be `TEMPLATE_DIR/init`. This is handy for testing template
-initialization content.
+
+- Content, build and template directories cannot overlap, with one exception:
+  the content directory can be `TEMPLATE_DIR/init`. This is handy for testing
+  template initialization content.
+- Projects are not restricted to a single content, template and build directory.
+  The `-content`, `-template` and `-build` options allow separate builds from
+  differing combinations of content and template directories.
 
 
 .#help-command
@@ -202,6 +206,9 @@ Applicable options:
     -drafts
     -v
 
+- Files and directories not created by the _build_ command are deleted from
+  `BUILD_DIR`.
+- All files are rebuilt unconditionally.
 - If the `-incremental` option is specified only new and updated files are
   rebuilt (by default the entire contents of the build directory is deleted and
   the site is completely rebuilt).
@@ -209,10 +216,6 @@ Applicable options:
 - Content, build and template directories cannot overlap, with one exception:
   the content directory can be `TEMPLATE_DIR/init`. This is handy for testing
   template initialization content.
-
-Note that projects are not restricted to a single content, template and build
-directory. The `-content`, `-template` and `-build` options allow separate
-builds from differing combinations of content and template directories.
 
 Execution:
 
@@ -226,14 +229,28 @@ Execution:
 5. Document bodies are rendered with their corresponding layout templates.
 6. If the [homepage](#configuration) is specified it is copied to `index.html`.
 
+#### Build summary
+The printed build summary includes:
+
+_documents_:: The total number of Markdown documents (including skipped drafts).
+
+_static_:: The total number of static files.
+
+_drafts_:: The number of skipped draft documents. If the `-drafts` option is
+specified this will be zero.
+
+_time_:: The execution time in seconds.
+
+The build summary does not include [excluded](#configuration) files.
+
 
 .#serve-command
 ### serve
-The _serve_ command rebuilds the project then starts a development webserver on
-the project _build_ directory. If files in the _content_ or _template
-directories_ are added, modified or removed the _serve_ command automatically
-[rebuilds](#incremental-rebuilds) affected webpages. The server also handles
-browser live reloading and has a browser launching option.
+The _serve_ command completely rebuilds the project then starts a development
+webserver on the project _build_ directory. If files in the _content_ or
+_template directories_ are added, modified or removed the _serve_ command
+automatically [rebuilds](#partial-rebuilds) affected webpages. The server also
+handles browser live reloading and has a browser launching option.
 
 Usage:
 
@@ -250,29 +267,13 @@ Applicable options:
     -v
 
 - `-port` sets the server port number to `PORT` (defaults to 1212).
-- The `-launch` option opens the default web browser on the site home page.
-- Press the _R_ key followed by the _Enter_ key to force a clean rebuild.
+- The `-launch` option opens the default web browser on the home page.
+- Press the _R_ key followed by the _Enter_ key to force a complete rebuild.
 
-### Build summary
-The printed build summary includes:
-
-_documents_:: The total number of Markdown documents (including skipped drafts).
-
-_static_:: The total number of static files.
-
-_drafts_:: The number of skipped draft documents. If the `-drafts` option is
-specified this will be zero.
-
-_time_:: The execution time in seconds.
-
-The build summary does not include files that are excluded by the
-[exclude](#configuration) configuration parameter.
-
-
-### Incremental rebuilds
-The [serve command](#serve-command) automatically performs partial builds in
-order to speed up live reloads and to make the content creation process easier
-and more responsive.
+#### Partial rebuilds
+The [serve command](#serve-command) automatically performs partial builds when
+content files are modified, added or deleted in order to speed up live reloads
+and to make the content creation process easier and more responsive.
 
 The amount of processing required will depend on the size of your site and the
 type of change. Most content updates are very fast but processing times increase
@@ -282,7 +283,7 @@ if:
 - A configuration file or template file is added, changed or removed
   (necessitating a full site rebuild).
 
-To ensure build integrity you should always perform a clean build before
+To ensure build integrity you should always perform a complete rebuild before
 deployment and after project structural changes (the serve command does not
 process changes to the project directory structure).
 
@@ -305,9 +306,9 @@ precedence than those further up the directory path.
 Some configuration parameters are merged into the [document template
 variables](#document-template-variables).
 
-The `exclude`, `homepage` and `urlprefix` configuration parameters are site-wide
-and are always taken from the template directory root configuration i.e. they
-are not subject to configuration file parameter merging.
+The `exclude`, `include`, `homepage` and `urlprefix` configuration parameters
+are site-wide and are always taken from the template directory root
+configuration i.e. they are not subject to configuration file parameter merging.
 
 ### Parameters
 Valid configuration parameters are:
@@ -317,23 +318,32 @@ document's _author_ [front matter](#front-matter) value. TOML example:
 
     author = "Joe Bloggs"
 
-`exclude`:: A `|` separated list of file and directory paths in the content and
-template directories that are excluded from processing.
+`exclude`:: A `|` separated list of file and directory paths specifying files
+that are excluded from processing. TOML example:
+..
+    exclude = "config.rmu|.*|*~|4913"
 
+- The paths are relative to the content or template directories.
 - The path separator is a slash (`/`) character.
-- The paths are relative to the content or template directory and conform to
-  patterns matched by the Go [path.Match()
-  function](https://golang.org/pkg/path/#Match).
-- If the path contains no path separators then it is matched against file names
-  e.g. `*.swp` will match all files with the `.swp` file name extension.
-- If the path contains path separators then it is matched against file paths
-  e.g. `posts/*.md` will only match files in the `posts` directory.
-- To exclude a file in the content or template root directories prefix the file
+- The file paths can contain wildcard patterns conforming to patterns matched by
+  the Go [path.Match() function](https://golang.org/pkg/path/#Match).
+- If the path contains no path separators then it is matched against all file
+  names e.g. `*.swp` will match all files from content and template directories
+  with the `.swp` file name extension.
+- If the path contains path separators then it is matched against the file path
+  e.g. `posts/*.md` will only match files with the `.md` extension from the
+  `posts` directory.
+- To exclude a file in the content or template root directories prefix the name
   name with a file separator e.g. `/config.rmu` will exclude `config.rmu` only
   if it is in the top directory.
-- TOML example:
+- If the path ends with a slash then it specifies a directory whose contents are
+  excluded (no wildcards are allowed). For example `news/archive/` excludes all
+  files from the `news/archive` directory.
+..
 
-    exclude = "config.rmu|.*|*~|4913"
+`include`:: A `|` separated list of file and directory paths specifying files
+that are processed unconditionally i.e. irrespective of the `exclude` parameter.
+Parameter values have the same format as the `exclude` parameter.
 
 `shortdate`, `mediumdate`, `longdate`:: These are date formats for `shortdate`,
 `mediumdate` and `longdate` [document template
