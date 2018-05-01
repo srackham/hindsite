@@ -23,7 +23,8 @@ type config struct {
 	paginate  int               // Number of documents per index page. No pagination if zero or less.
 	urlprefix string            // Prefix for synthesised document and index page URLs.
 	permalink string            // URL template.
-	exclude   []string          // List of excluded content directory paths.
+	exclude   []string          // List of excluded content patterns.
+	include   []string          // List of included content patterns.
 	timezone  *time.Location    // Time zone for site generation.
 	user      map[string]string // User defined configuration key/values.
 	// Date formats for template variables: date, shortdate, mediumdate, longdate.
@@ -54,9 +55,10 @@ func (conf *config) parseFile(proj *project, f string) error {
 		return err
 	}
 	cf := struct {
-		Author     *string // nil if undefined.
-		Templates  *string // nil if undefined.
-		Exclude    *string // nil if undefined.
+		Author     *string
+		Templates  *string
+		Exclude    *string
+		Include    *string
 		Homepage   string
 		Permalink  string
 		URLPrefix  string
@@ -126,6 +128,14 @@ func (conf *config) parseFile(proj *project, f string) error {
 			}
 		}
 	}
+	if cf.Include != nil {
+		conf.include = strings.Split(filepath.ToSlash(*cf.Include), "|")
+		for _, pat := range conf.include {
+			if pat == "" {
+				return fmt.Errorf("include pattern cannot be blank: %s", *cf.Include)
+			}
+		}
+	}
 	if cf.Timezone != "" {
 		tz, err := time.LoadLocation(cf.Timezone)
 		if err != nil {
@@ -158,6 +168,7 @@ func (conf *config) data() templateData {
 	data["paginate"] = conf.paginate
 	data["urlprefix"] = conf.urlprefix
 	data["exclude"] = strings.Join(conf.exclude, "|")
+	data["include"] = strings.Join(conf.include, "|")
 	data["timezone"] = conf.timezone.String()
 	data["shortdate"] = conf.shortdate
 	data["mediumdate"] = conf.mediumdate

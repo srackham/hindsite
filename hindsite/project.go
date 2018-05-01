@@ -344,7 +344,7 @@ func (proj *project) match(f string, patterns []string) bool {
 
 // exclude returns true if path name f is excluded.
 func (proj *project) exclude(f string) bool {
-	return proj.match(f, proj.rootConf.exclude)
+	return proj.match(f, proj.rootConf.exclude) && !proj.match(f, proj.rootConf.include)
 }
 
 // configFor returns the merged configuration for content directory path p.
@@ -374,6 +374,7 @@ func (proj *project) configFor(p string) config {
 		if i == 0 {
 			// Assign global root configuration values.
 			result.exclude = conf.exclude
+			result.include = conf.include
 			result.homepage = conf.homepage
 			result.urlprefix = conf.urlprefix
 		}
