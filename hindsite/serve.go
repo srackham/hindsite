@@ -92,13 +92,13 @@ func (proj *project) watcherFilter(watcher *fsnotify.Watcher, out chan fsnotify.
 			switch {
 			case evt.Op == fsnotify.Chmod:
 				msg = "ignored"
+			case proj.exclude(evt.Name):
+				msg = "excluded"
 			case dirExists(evt.Name):
 				msg = "ignored"
 				if evt.Op == fsnotify.Create {
 					watcher.Add(evt.Name)
 				}
-			case proj.exclude(evt.Name):
-				msg = "excluded"
 			default:
 				msg = "accepted"
 				accepted = true

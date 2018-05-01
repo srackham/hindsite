@@ -308,26 +308,43 @@ func rebuild(target string, modified time.Time, docs ...*document) bool {
 	return false
 }
 
-// exclude returns true if path name f matches a configuration exclude path.
-func (proj *project) exclude(f string) bool {
-	if pathIsInDir(f, proj.contentDir) {
+// match returns true if path name f matches one of the patterns.
+// The match is purely lexical.
+func (proj *project) match(f string, patterns []string) bool {
+	switch {
+	case pathIsInDir(f, proj.contentDir):
 		f, _ = filepath.Rel(proj.contentDir, f)
-	} else {
+	case pathIsInDir(f, proj.templateDir):
 		f, _ = filepath.Rel(proj.templateDir, f)
+	default:
+		panic("matched path must reside in content or template directories: " + f)
 	}
 	f = filepath.ToSlash(f)
-	for _, pat := range proj.rootConf.exclude {
-		if !strings.Contains(pat, "/") {
-			f = path.Base(f)
+	matched := false
+	for _, pat := range patterns {
+		if strings.HasSuffix(pat, "/") {
+			if pathIsInDir(f, strings.TrimSuffix(pat, "/")) {
+				matched = true
+			}
+		} else {
+			if !strings.Contains(pat, "/") {
+				f = path.Base(f)
+			}
+			if pat[0] == '/' {
+				pat = pat[1:]
+			}
+			matched, _ = path.Match(pat, f)
 		}
-		if pat[0] == '/' {
-			pat = pat[1:]
-		}
-		if matched, _ := path.Match(pat, f); matched {
+		if matched {
 			return true
 		}
 	}
 	return false
+}
+
+// exclude returns true if path name f is excluded.
+func (proj *project) exclude(f string) bool {
+	return proj.match(f, proj.rootConf.exclude)
 }
 
 // configFor returns the merged configuration for content directory path p.
