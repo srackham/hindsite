@@ -271,7 +271,7 @@ func (proj *project) createFile(f string) error {
 		}
 		return proj.renderDocument(&doc)
 	case pathIsInDir(f, proj.contentDir):
-		return proj.buildStaticFile(f, time.Time{})
+		return proj.buildStaticFile(f)
 	case pathIsInDir(f, proj.templateDir):
 		return proj.build()
 	default:
@@ -362,7 +362,7 @@ func (proj *project) writeFile(f string) error {
 		}
 		return proj.renderDocument(doc)
 	case pathIsInDir(f, proj.contentDir):
-		return proj.buildStaticFile(f, time.Time{})
+		return proj.buildStaticFile(f)
 	case pathIsInDir(f, proj.templateDir):
 		return proj.build()
 	default:

@@ -6,7 +6,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 // Build ldflags.
@@ -32,7 +31,6 @@ type project struct {
 	drafts        bool
 	port          string
 	launch        bool
-	incremental   bool
 	builtin       string
 	verbosity     int
 	rootConf      config
@@ -124,8 +122,6 @@ func (proj *project) parseArgs(args []string) error {
 			proj.drafts = true
 		case opt == "-launch":
 			proj.launch = true
-		case opt == "-incremental":
-			proj.incremental = true
 		case opt == "-v":
 			proj.verbosity++
 		case opt == "-vv":
@@ -256,7 +252,7 @@ Usage:
 The commands are:
 
     init    initialize a new project
-    build   generate the website
+    build   build the website
     serve   start development webserver
     help    display usage summary
 
@@ -267,7 +263,6 @@ The options are:
     -build    BUILD_DIR
     -port     PORT
     -builtin  NAME
-    -incremental
     -drafts
     -launch
     -v
@@ -287,25 +282,6 @@ func isTemplate(f string, templates *string) bool {
 func (proj *project) isDocument(f string) bool {
 	ext := filepath.Ext(f)
 	return (ext == ".md" || ext == ".rmu") && pathIsInDir(f, proj.contentDir)
-}
-
-// rebuild returns true if the target file does not exist or is newer than
-// modified time or newer than any document.
-func rebuild(target string, modified time.Time, docs ...*document) bool {
-	info, err := os.Stat(target)
-	if err != nil {
-		return true
-	}
-	targetMod := info.ModTime()
-	if isOlder(targetMod, modified) {
-		return true
-	}
-	for _, doc := range docs {
-		if isOlder(targetMod, doc.modtime) {
-			return true
-		}
-	}
-	return false
 }
 
 // match returns true if path name f matches one of the patterns.

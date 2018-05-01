@@ -19,20 +19,11 @@ func (proj *project) build() error {
 		}
 	}
 	proj.docs = newDocumentsLookup()
-	if !proj.incremental {
-		// Delete everything in the build directory forcing a complete site rebuild.
-		files, _ := filepath.Glob(filepath.Join(proj.buildDir, "*"))
-		for _, f := range files {
-			if err := os.RemoveAll(f); err != nil {
-				return err
-			}
-		}
-	}
-	// confMod records the most recent date a change was made to a configuration file or a template file.
-	var confMod time.Time
-	updateConfMod := func(info os.FileInfo) {
-		if isOlder(confMod, info.ModTime()) {
-			confMod = info.ModTime()
+	// Delete everything in the build directory forcing a complete site rebuild.
+	files, _ := filepath.Glob(filepath.Join(proj.buildDir, "*"))
+	for _, f := range files {
+		if err := os.RemoveAll(f); err != nil {
+			return err
 		}
 	}
 	// Parse all template files.
@@ -59,15 +50,12 @@ func (proj *project) build() error {
 			switch filepath.Ext(f) {
 			case ".toml", ".yaml":
 				// Skip configuration file.
-				updateConfMod(info)
 			case ".html":
 				// Compile HTML template.
-				updateConfMod(info)
 				proj.verbose("parse template: " + f)
 				err = proj.htmlTemplates.add(f)
 			case ".txt":
 				// Compile text template.
-				updateConfMod(info)
 				proj.verbose("parse template: " + f)
 				err = proj.textTemplates.add(f)
 			}
@@ -114,7 +102,7 @@ func (proj *project) build() error {
 				}
 			default:
 				staticCount++
-				proj.buildStaticFile(f, confMod)
+				proj.buildStaticFile(f)
 			}
 		}
 		return err
@@ -131,15 +119,12 @@ func (proj *project) build() error {
 		proj.idxs.addDocument(doc)
 	}
 	// Build index pages.
-	err = proj.idxs.build(confMod)
+	err = proj.idxs.build()
 	if err != nil {
 		return err
 	}
 	// Render documents.
 	for _, doc := range proj.docs.byContentPath {
-		if !rebuild(doc.buildPath, confMod, doc) {
-			continue
-		}
 		if err = proj.renderDocument(doc); err != nil {
 			return err
 		}
@@ -183,10 +168,10 @@ func (proj *project) installHomePage() error {
 	return nil
 }
 
-func (proj *project) buildStaticFile(f string, modified time.Time) error {
+func (proj *project) buildStaticFile(f string) error {
 	conf := proj.configFor(f)
 	if isTemplate(f, conf.templates) {
-		return proj.renderStaticFile(f, modified)
+		return proj.renderStaticFile(f)
 	}
 	return proj.copyStaticFile(f)
 }
@@ -219,14 +204,11 @@ func (proj *project) copyStaticFile(srcFile string) error {
 // and writes it to the corresponding build directory. Skips if the destination
 // file is newer than f and is newer than the modified time. Creates missing
 // destination directories.
-func (proj *project) renderStaticFile(f string, modified time.Time) error {
+func (proj *project) renderStaticFile(f string) error {
 	// Parse document.
 	doc, err := newDocument(f, proj)
 	if err != nil {
 		return err
-	}
-	if !rebuild(doc.buildPath, modified, &doc) {
-		return nil
 	}
 	// Render document markup as a text template.
 	proj.verbose2("render static: " + doc.contentPath)

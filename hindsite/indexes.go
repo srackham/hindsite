@@ -8,7 +8,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type index struct {
@@ -103,13 +102,10 @@ func (idxs indexes) addDocument(doc *document) {
 // configuration or template file. If any document in the index has been
 // modified since the index was last built then the index must be completely
 // rebuild.
-func (idxs indexes) build(modified time.Time) error {
+func (idxs indexes) build() error {
 	for _, idx := range idxs {
-		target := filepath.Join(idx.indexDir, "docs-1.html")
-		if rebuild(target, modified, idx.docs...) {
-			if err := idx.build(nil); err != nil {
-				return err
-			}
+		if err := idx.build(nil); err != nil {
+			return err
 		}
 	}
 	return nil
