@@ -32,9 +32,9 @@ Hugo server renders the website in-memory and is exceedingly fast and consistent
 in terms of render time for virtually any changes.
 
 _hindsite_:: hindsite v1.0.0 (64 bit).
-- Clean build (5000 documents and indexes): 13.95s (22.10s with "pretty" URLs)
-- Incremental build (updating one document and entire index): 3.85s
-- Incremental build (updating one document): 0.02s
+- Clean build (5000 documents and indexes): 20.72s (27.08s with "pretty" URLs)
+- Partial build (updating one document and entire index): 3.85s
+- Partial build (updating one document): 0.065s
 
 NOTE: Exclude the project folder from Windows Defender anti-virus real-time
 protection (not doing this resulted in a 4x performance decrease for both
@@ -46,20 +46,12 @@ website:
 _hugo_:: The server when running consumed 10.8GB of RAM.
 _hindsite_:: The hindsite server consumed 58.4MB of RAM.
 
-/*
 hindsite runs faster on Linux:
 
 _hindsite_:: hindsite v1.0.0 (64 bit).
-- Clean build (5000 documents and indexes): 5.15s
-- Incremental build (updating one document and indexes): 4.10s
-- Incremental build (updating no documents or indexes):0.60s
-
-This suggests:
-
-- Documents rendering: 1.05s (20%)
-- Index rendering: 3.5s (68%)
-- Scanning and parsing: 0.60s (12%)
-*/
+- Clean build (5000 documents and indexes): 5.01s (5.46s with "pretty" URLs)
+- Partial build (updating one document and entire index): 2.81s
+- Partial build (updating one document): 0.061s
 
 
 ## Relative or root-relative intra-site links?

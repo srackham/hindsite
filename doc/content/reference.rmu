@@ -202,16 +202,12 @@ Applicable options:
     -content CONTENT_DIR
     -build BUILD_DIR
     -template TEMPLATE_DIR
-    -incremental
     -drafts
     -v
 
 - Files and directories not created by the _build_ command are deleted from
   `BUILD_DIR`.
 - All files are rebuilt unconditionally.
-- If the `-incremental` option is specified only new and updated files are
-  rebuilt (by default the entire contents of the build directory is deleted and
-  the site is completely rebuilt).
 - Specify `-drafts` to include draft documents.
 - Content, build and template directories cannot overlap, with one exception:
   the content directory can be `TEMPLATE_DIR/init`. This is handy for testing
