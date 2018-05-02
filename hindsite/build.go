@@ -10,6 +10,7 @@ import (
 // build implements the build command.
 func (proj *project) build() error {
 	startTime := time.Now()
+	// Parse configuration files.
 	if err := proj.parseConfigs(); err != nil {
 		return err
 	}

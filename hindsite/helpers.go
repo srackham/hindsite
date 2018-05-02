@@ -151,46 +151,6 @@ func pathTranslate(srcPath, srcRoot, dstRoot string) string {
 	return filepath.Join(dstRoot, dstPath)
 }
 
-// TODO: UNUSED
-// Search for files from base directory up to root directory.
-// Return found files.
-// Files are ordered by location (base to root).
-// If a directory in the base path does not exist it is silent skipped.
-// If n >= 0 the function returns first n matched files.
-func filesInPath(base, root string, patterns []string, n int) (files []string, err error) {
-	if !filepath.IsAbs(base) {
-		return files, fmt.Errorf("base path is not absolute: %s", base)
-	}
-	if !filepath.IsAbs(root) {
-		return files, fmt.Errorf("root path is not absolute: %s", root)
-	}
-	if base != root && !pathIsInDir(base, root) {
-		return files, fmt.Errorf("base is not a child of root of base: %s: %s", base, root)
-	}
-	p := base
-	count := 0
-	for {
-		for _, pat := range patterns {
-			matches, err := filepath.Glob(filepath.Join(p, pat))
-			if err != nil {
-				return files, err
-			}
-			for _, match := range matches {
-				if count >= n {
-					break
-				}
-				files = append(files, match)
-				count++
-			}
-		}
-		if p == root {
-			break
-		}
-		p = filepath.Dir(p)
-	}
-	return files, nil
-}
-
 // isOlder returns true if oldtime is older than newtime by at least 0.5s.
 func isOlder(oldtime, newtime time.Time) bool {
 	delta := time.Second / 2

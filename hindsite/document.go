@@ -18,7 +18,6 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-// document TODO
 type document struct {
 	proj         *project // Context.
 	conf         config   // Merged configuration for this document.
@@ -27,7 +26,6 @@ type document struct {
 	templatePath string    // Virtual path used to find document related templates.
 	content      string    // Markup text (without front matter header).
 	modtime      time.Time // Document source file modified timestamp.
-	// TODO: Is primaryIndex field necessary, it's only used on one place? Factor it out?
 	primaryIndex *index    // Top-level document index (nil if document is not indexed).
 	prev         *document // Previous document in primary index.
 	next         *document // Next document in primary index.
@@ -260,23 +258,20 @@ func (doc *document) frontMatter() templateData {
 	data := templateData{}
 	data["title"] = doc.title
 	data["author"] = nz(doc.author)
-	data["templates"] = nz(doc.templates) // TODO: Necessary in front matter?
-	data["permalink"] = doc.permalink     // TODO: Necessary in front matter?
+	data["templates"] = nz(doc.templates)
+	data["permalink"] = doc.permalink
 	data["shortdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.shortdate)
 	data["mediumdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.mediumdate)
 	data["longdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.longdate)
 	data["date"] = doc.date
 	data["modtime"] = doc.modtime
+	data["layout"] = doc.layout
 	data["slug"] = doc.slug
 	data["url"] = doc.url
 	tags := []map[string]string{}
 	for _, tag := range doc.tags {
 		url := ""
 		if doc.primaryIndex != nil {
-			// TODO: Remove temporary diagnostics (added after mysterious loss of tag URLS 23-Apr-2018).
-			if doc.primaryIndex.slugs[tag] == "" {
-				panic(fmt.Sprintf("%#v", doc))
-			}
 			url = path.Join(doc.primaryIndex.url, "tags", doc.primaryIndex.slugs[tag]+"-1.html")
 		}
 		tags = append(tags, map[string]string{
@@ -292,7 +287,6 @@ func (doc *document) frontMatter() templateData {
 	if doc.next != nil {
 		data["next"] = templateData{"url": doc.next.url}
 	}
-	data["urlprefix"] = doc.conf.urlprefix
 	user := doc.conf.user
 	for k, v := range doc.user {
 		user[k] = v
