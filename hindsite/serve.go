@@ -159,6 +159,8 @@ func (proj *project) serve() error {
 	// Start LiveReload server.
 	lr := lrserver.New(lrserver.DefaultName, lrserver.DefaultPort)
 	lr.SetLiveCSS(true)
+	lr.StatusLog().SetPrefix("reload: ")
+	lr.ErrorLog().SetPrefix("reload: ")
 	if proj.verbosity == 0 {
 		lr.SetStatusLog(nil)
 		lr.SetErrorLog(nil)
