@@ -16,7 +16,7 @@ type index struct {
 	contentDir  string                   // The directory that contains the indexed documents.
 	templateDir string                   // The directory that contains the index templates.
 	indexDir    string                   // The build directory that the index pages are written to.
-	url         string                   // Synthesised index directory URL.
+	url         string                   // Synthesized index directory URL.
 	docs        documentsList            // Parsed documents belonging to index.
 	tagDocs     map[string]documentsList // Partitions indexed documents by tag.
 	slugs       map[string]string        // Slugified tags.

@@ -35,7 +35,7 @@ type document struct {
 	author      *string
 	templates   *string
 	description string
-	url         string // Synthesised document URL.
+	url         string // Synthesized document URL.
 	tags        []string
 	draft       bool
 	permalink   string // URL template.
@@ -424,7 +424,7 @@ func (docs documentsList) frontMatter() templateData {
 }
 
 /*
-	documentsLookup implement storage and retrieval of documents by contentPath and
+	documentsLookup implements storage and retrieval of documents by contentPath and
 	buildPath
 */
 type documentsLookup struct {
