@@ -141,16 +141,6 @@ func (proj *project) build() error {
 	return nil
 }
 
-// upToDate returns false target file is newer than the prerequisite file or if
-// target does not exist.
-func upToDate(target, prerequisite string) bool {
-	result, err := fileIsOlder(prerequisite, target)
-	if err != nil {
-		return false
-	}
-	return result
-}
-
 func (proj *project) installHomePage() error {
 	if proj.rootConf.homepage != "" {
 		src := proj.rootConf.homepage
@@ -158,12 +148,10 @@ func (proj *project) installHomePage() error {
 			return fmt.Errorf("homepage file missing: %s", src)
 		}
 		dst := filepath.Join(proj.buildDir, "index.html")
-		if !fileExists(dst) || upToDate(src, dst) {
-			proj.verbose2("copy homepage: " + src)
-			proj.verbose("write homepage: " + dst)
-			if err := copyFile(src, dst); err != nil {
-				return err
-			}
+		proj.verbose2("copy homepage: " + src)
+		proj.verbose("write homepage: " + dst)
+		if err := copyFile(src, dst); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -178,16 +166,12 @@ func (proj *project) buildStaticFile(f string) error {
 }
 
 // copyStaticFile copies the content directory srcFile to corresponding build
-// directory. Skips if the destination file is up to date. Creates missing
-// destination directories.
+// directory. Creates missing destination directories.
 func (proj *project) copyStaticFile(srcFile string) error {
 	if !pathIsInDir(srcFile, proj.contentDir) {
 		panic("static file is outside content directory: " + srcFile)
 	}
 	dstFile := pathTranslate(srcFile, proj.contentDir, proj.buildDir)
-	if upToDate(dstFile, srcFile) {
-		return nil
-	}
 	proj.verbose("copy static:  " + srcFile)
 	err := mkMissingDir(filepath.Dir(dstFile))
 	if err != nil {
@@ -202,8 +186,7 @@ func (proj *project) copyStaticFile(srcFile string) error {
 }
 
 // renderStaticFile renders file f from the content directory as a text template
-// and writes it to the corresponding build directory. Skips if the destination
-// file is newer than f and is newer than the modified time. Creates missing
+// and writes it to the corresponding build directory. Creates missing
 // destination directories.
 func (proj *project) renderStaticFile(f string) error {
 	// Parse document.

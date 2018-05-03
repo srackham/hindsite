@@ -19,9 +19,9 @@ type config struct {
 	// Configuration parameters.
 	author    *string           // Default document author (nil if undefined).
 	templates *string           // Comma separated list of content file name extensions to undergo text template expansion (nil if undefined).
-	homepage  string            // Use this file (relative to the build directory) for /index.html.
+	homepage  string            // Use this built file for /index.html.
 	paginate  int               // Number of documents per index page. No pagination if zero or less.
-	urlprefix string            // Prefix for synthesised document and index page URLs.
+	urlprefix string            // Prefix for synthesized document and index page URLs.
 	permalink string            // URL template.
 	exclude   []string          // List of excluded content patterns.
 	include   []string          // List of included content patterns.

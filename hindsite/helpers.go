@@ -151,27 +151,13 @@ func pathTranslate(srcPath, srcRoot, dstRoot string) string {
 	return filepath.Join(dstRoot, dstPath)
 }
 
-// isOlder returns true if oldtime is older than newtime by at least 0.5s.
-func isOlder(oldtime, newtime time.Time) bool {
-	delta := time.Second / 2
-	diff := newtime.Sub(oldtime)
-	return diff > 0 && diff > delta
-}
-
-// fileIsOlder returns true if oldfile's modification time is older than
-// newfile's by at least 0.5s. Returns error is one or both files do not exist.
-func fileIsOlder(oldfile, newfile string) (bool, error) {
-	info, err := os.Stat(newfile)
+// fileModTime returns file f's modification time or zero time if it can't.
+func fileModTime(f string) time.Time {
+	info, err := os.Stat(f)
 	if err != nil {
-		return false, err
+		return time.Time{}
 	}
-	newtime := info.ModTime()
-	info, err = os.Stat(oldfile)
-	if err != nil {
-		return false, err
-	}
-	oldtime := info.ModTime()
-	return isOlder(oldtime, newtime), nil
+	return info.ModTime()
 }
 
 /*
