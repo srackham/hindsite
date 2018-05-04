@@ -1,90 +1,34 @@
 # Hindsite FAQ
 
 
-## Why another website generator?
-Late 2017 I upgraded to the latest version of Hugo after a three year break from
-blogging. Faced with the usual upgrade compatibility issues plus a broken theme
-I found myself reluctantly relearning lots of stuff that was just not relevant
-to my modest requirements. I wasn't having fun, so I did what every programmer
-feels like doing in this situation, I wrote my own program.
+## Does hindsite support themes?
+Themes are baked in, every [project template directory]({reference}/#projects)
+is a theme and the [init command]({reference}/#init-command) is the "theme"
+installer.
+
+## How do I stop hindsite processing dotfiles?
+Add a `.*` pattern to the [`exclude` configuration
+parameter]({reference}/#configuration-parameters).
 
 
-## How can I configure the content language
-Use a user defined variable e.g. `.user.lang` in your configuration or document front matter then
-render it in your document templates with e.g. `{{.user.lang}}`.
+## Should I enable document and static file text template expansion?
+You should only enable [text template]({reference}/#text-templates) expansion if
+you need it. If performance is an issue, only enable it for those documents or
+directories that need it.
 
 
-## How fast is hindsite?
-On full rebuilds hindsite is around six times faster than Hugo in informal tests
-based on 5000 Markdown posts (5000 Markdown files, 20MB total). hindsite is
-around ten times faster than Hugo for full rebuilds but on subsequent
-incremental rebuilds Hugo  is about twenty times faster than hindsite.
-
-The results run on Dell XPS27 PC under Windows 10 are:
-
-_hugo_:: hugo version v0.37 (64 bit). Hugo setup as per the Hugo [Quick
-Start](https://gohugo.io/getting-started/quick-start/) instructions.
-
-- Full rebuild (5000 documents and indexes): 120s.
-- Server command incremental: 0.37s
-
-Hugo server renders the website in-memory and is exceedingly fast and consistent
-in terms of render time for virtually any changes.
-
-_hindsite_:: hindsite v1.0.0 (64 bit).
-- Clean build (5000 documents and indexes): 20.72s (27.08s with "pretty" URLs)
-- Partial build (updating one document and entire index): 3.85s
-- Partial build (updating one document): 0.065s
-
-NOTE: Exclude the project folder from Windows Defender anti-virus real-time
-protection (not doing this resulted in a 4x performance decrease for both
-hindsite and hugo).
-
-In terms of memory footprint hindsite is much lighter (Hugo builds an in-memory
-website:
-
-_hugo_:: The server when running consumed 10.8GB of RAM.
-_hindsite_:: The hindsite server consumed 58.4MB of RAM.
-
-hindsite runs faster on Linux:
-
-_hindsite_:: hindsite v1.0.0 (64 bit).
-- Clean build (5000 documents and indexes): 5.01s (5.46s with "pretty" URLs)
-- Partial build (updating one document and entire index): 2.81s
-- Partial build (updating one document): 0.061s
-
-
-## Relative or root-relative intra-site links?
-A relative link is a URL equivalent to a relative directory path e.g.
-`./images/beach.jpg`. A root-relative link is relative to the website root and
-begins with a slash e.g. `/images/beach.jpg`.
-
-- Relative links are not affected by the `urlprefix` whereas root-relative links
-  are.
-- Relative links are broken by changes to the `permalink` configuration
-  parameter, root-relative links are not.
-
-The `urlprefix` and `permalink` parameters do not tend to change much so this
-is probably just something to be aware of. Although you could enable document template
-expansion and prefix root-relative URLs with `{{.urlprefix}}`.
-
-## How can you automatically reload the browser
-When editing document source files it's nice to have the output update
-automatically in your Web browser when the hindsite _serve_ command updates
-webpages. Browser live-reload can be achieved using a browser extension.
-
-
-## Should I enable document and static file template expansion?
-You should only enable it if you need it and, if performance is an issue, only
-for the documents or directories that need it.
-
-
-## How can I customize `data` and `modtime` template variable formats?
-TODO
+## How can I customize `.date` and `.modtime` template variable formats?
+Use the Go [Format function](https://golang.org/pkg/time/#Time.Format). For
+example:
 
     {{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}
 
+The `.shortdate`, `.mediumdate` and `.longdate` [document template
+variables]({reference}/#document-template-variables) are simpler and preferable
+to using `.date` directly.
 
+
+/*
 ## How do I escape template expansion in content files?
 Quote the template variable as a raw string. For example, to render this:
 
@@ -96,17 +40,19 @@ Use this:
 
 See [How do I escape "{{" and "}}" delimiters in Go templates?
 ](https://stackoverflow.com/questions/17641887/how-do-i-escape-and-delimiters-in-go-templates)
+*/
 
 
 ## How can I partition documents into separate categories
-Put them in separate indexes. Indexes are similar to [Wordpress
+Put them in separate indexes. [Indexes]({reference}/#indexes) are similar to [Wordpress
 categories](https://en.support.wordpress.com/posts/categories-vs-tags/) but they
-are file system based so you do not have to assign them explicitly. Documents
-belong to their own and parent indexes (not to arbitrary indexes).
+are folder based so you do not have to assign them explicitly.
+
 
 ## I want a single page document index
-Set the `paginate` configuration parameter to `-1` and all indexed documents
-will appear on the first page.
+Set the [`paginate` configuration
+parameter]({reference}/#configuration-parameters) to `-1` and all indexed
+documents will appear on the first page.
 
 
 ## I want both paginated and single page document indexes
@@ -130,5 +76,61 @@ content/
         all/    # Move documents here from posts.
 ```
 
-Each index has it's own page template. This technique can be extended to create
-multiple additional indexes over a the same indexed document set.
+Each index has it's own page `docs.html` template. This technique can be
+extended to create multiple additional indexes over a the same indexed document
+set.
+
+
+## Relative or root-relative intra-site links?
+A relative link is a URL equivalent to a relative directory path e.g.
+`./images/beach.jpg`. A root-relative link is relative to the website root and
+begins with a slash e.g. `/images/beach.jpg`.
+
+- Relative links are not affected by the `urlprefix` whereas root-relative links
+  are.
+- Relative links are broken by changes to the content document location and the
+  `permalink` configuration parameter, root-relative links are not.
+
+The `urlprefix` and `permalink` parameters do not tend to change much so this
+is probably just something to be aware of. Although you could enable document template
+expansion and prefix root-relative URLs with `{{.urlprefix}}`.
+
+## How fast is hindsite?
+Short answer: it depends on your project's size and structure and the platform
+you run it on.
+
+hindsite compares favorably with [Hugo](https://gohugo.io/) (which advertises
+itself as "The world’s fastest framework for building websites").
+
+In informal measurements carried out on a site with 5000 Markdown posts (20MB
+total) hindsite was around four times faster than Hugo on full rebuilds but on
+subsequent incremental rebuilds hindsite ranges from six times faster than Hugo
+(if only related indexes pages are rebuilt) to around ten times slower than Hugo
+(if all index pages have to be rebuilt).
+
+_Platform_::
+hindsite v1.0.0 (64 bit) running on Dell XPS27 PC under Windows 10.
+
+_Build times and memory consumption_::
+- Clean build (all documents and indexes): 20.72s (27.08s with "pretty" URLs)
+- Partial build (updating one document and entire index): 3.85s
+- Partial build (updating one document): 0.07s
+- Server while running consumed 58.4MB of RAM.
+
+The same documents were built with Hugo:
+
+_Platform_:: Hugo v0.37 (64 bit) running on Dell XPS27 PC under Windows 10. Hugo
+setup as per the Hugo [Quick
+Start](https://gohugo.io/getting-started/quick-start/) instructions.
+
+_Build times and memory consumption_::
+- Full rebuild (all documents and indexes): 120s.
+- Server command partial rebuild: 0.37s
+- Server while running consumed 10.8GB of RAM.
+
+The Hugo server has fast and consistent incremental rebuild times for
+virtually any changes.
+
+NOTE: Exclude the project folder from Windows Defender anti-virus real-time
+protection (not doing this imposed a 4x performance decrease for both
+hindsite and Hugo).

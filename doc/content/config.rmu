@@ -7,6 +7,8 @@
 */
 {--header-ids} = 'yes'
 {--header-links} = 'yes'
+{faq} = '/faq.html'
+{reference} = '/index.html'
 {github} = 'https://github.com/srackham/hindsite'
 
 

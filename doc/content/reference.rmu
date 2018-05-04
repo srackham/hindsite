@@ -7,30 +7,18 @@ permalink: /index.html
 ## Overview
 hindsite is a static website generator. It builds static websites with optional
 document and tag indexes from Markdown source documents (e.g. blogs posts,
-newsletters, articles).
+newsletters, articles). Features:
 
-The goal is an intuitive, minimalist application that is easy to use and
-understand. The number of features and concepts have been kept to a minimum.
-
-/*
-Features:
-
-- Structural transparency -- content, template and build directory trees
-  mirror each other.
-- One template language (native Go templates) for both templates and content.
-- Unified front matter, configuration parameters and user defined template
-  variables can be applied to Markdown documents and static files.
-- Use of TOML or YAML markup for configuration and front matter.
-- The directory hierarchy establishes the index hierarchy and the configuration
-  and template file precedence.
-- Themes are not separate, every project template directory is a theme.
-- hindsite is lightweight (less than 2,000 lines of executable code).
-*/
+- Stand-alone single-file executable.
+- Fast site builds.
+- Built-in development web server with Live Reload, file watcher and automatic
+  incremental rebuilds.
+- Light weight with minimal complexity.
 
 
 ## Quick Start
-[Download hindsite](TODO) for your platform and create a fully functional blog and
-newsletter website with just two hindsite commands:
+[Download the hindsite executable](TODO) for your platform and create a fully
+functional blog and newsletter website with just two hindsite commands:
 
 1. Create a new Hindsite project directory and install the builtin blog
    template:
@@ -45,7 +33,7 @@ newsletter website with just two hindsite commands:
 The best way to start learning hindsite is to browse the blog [project
 directory](#projects).
 
-Try editing content documents and templates and rebuilding. If you are familar
+Try editing content documents and templates and rebuilding. If you are familiar
 with Jekyll or Hugo you'll be right a home (hindsite can read Jekyll and Hugo
 Markdown document front matter).
 
@@ -53,7 +41,7 @@ Markdown document front matter).
 ## Projects
 A hindsite project consists of three separate directories:
 
-- A _content directory_ containing [Markdown documents](#documents) and
+- A _content directory_ containing Markdown [documents](#documents) and
   [static resource files](#static-files).
 - A _template directory_ containing [templates](#templates) and project
   [configuration files](#configuration).
@@ -98,15 +86,15 @@ directory is a one-to-one reconstruction of the content directory.
 The `build/indexes` directory contains the generated document and tag index
 pages.
 
-The `template/init` directory is used by the [init command](#init-command) to
-initialize new _content_ directories.
+The `template/init` directory is optional, it contains static resources and
+example documents which serve as a starting point for new projects (see the
+[init command](#init-command)) in all other respects it is just another content
+directory.
 
 File and directory names should only contain lower case alpha numeric and hyphen
-characters. This convention is not enforced but is recommended because it:
-
-* Ensures consistent, readable URLs without ugly encodings for illegal URL
-  characters.
-* Allows file names to map to reasonable document titles.
+characters. This convention is not enforced but is recommended because it
+ensures consistent, readable URLs without ugly encodings for illegal URL
+characters.
 
 
 ## Commands
@@ -141,20 +129,20 @@ Common command options:
   differing combinations of content and template directories.
 
 
-.#help-command
-### help
-Prints command usage and options summary plus the hindsite version number.
+### help command
+The _help_ command prints command usage and options summary plus hindsite
+version information.
 
 Usage:
 
     hindsite help
 
-- `hindsite`, `hindsite -h` and `hindsite --help` are all aliases for `hindsite help`.
+`hindsite`, `hindsite -h` and `hindsite --help` are all aliases for `hindsite help`.
 
 
-.#init-command
-### init
-Initializes a project content directory from a project template.
+### init command
+The _init_ command initializes a project _content_ directory from a _template_
+directory or from one ot the built-in templates.
 
 Usage:
 
@@ -169,18 +157,17 @@ Applicable options:
 
 - The `CONTENT_DIR` must be empty.
 - If the `-builtin` option is specified the `TEMPLATE_DIR` must also be empty.
-- `NAME` is a builtin template name viz. `blog` or `minimal`.
+- The `-builtin` option `NAME` is one of the following:
+   `blog`:: A blog and newsletter project.
+   `minimal`:: A minimal project.
 
-Execution:
+Command execution:
 
-1. If the `-builtin` option is specified then copy the builtin template to
-   `TEMPLATE_DIR`.
-2. Recreate the template directory structure in the content directory (skipping
-   the `TEMPLATE_DIR/init` directory).
-3. If the `TEMPLATE_DIR/init` directory exists its contents is recursively
-   copied to the content directory. The `init` directory is optional, it
-   contains static resources and example documents which serve as a starting
-   point for new projects -- it really is just a content directory.
+1. If the `-builtin` option is specified then the selected builtin template is
+   copied to the `TEMPLATE_DIR`.
+2. The template directory structure is recreated in the content directory.
+3. If the `TEMPLATE_DIR/init` directory exists its contents is copied to the
+   content directory.
 
 The following example installs the builtin `blog` template to `./template` then
 copies the contents of the `./template/init` directory to the `./content`
@@ -189,9 +176,9 @@ directory:
     hindsite init . -builtin blog
 
 
-.#build-command
-### build
-Build a static website.
+### build command
+The _build_ command generates a static website in the _build_ directory using
+files from the _content_ and _template_ directories.
 
 Usage:
 
@@ -200,30 +187,31 @@ Usage:
 Applicable options:
 
     -content CONTENT_DIR
-    -build BUILD_DIR
     -template TEMPLATE_DIR
+    -build BUILD_DIR
     -drafts
     -v
 
-- Files and directories not created by the _build_ command are deleted from
-  `BUILD_DIR`.
-- All files are rebuilt unconditionally.
-- Specify `-drafts` to include draft documents.
+- All files from the _content_ directory not that are not
+  [excluded](#configuration) are rebuilt.
+- If the `-drafts` option is specified [draft documents](#documents) are included
+  in the built website.
 - Content, build and template directories cannot overlap, with one exception:
-  the content directory can be `TEMPLATE_DIR/init`. This is handy for testing
-  template initialization content.
+  the content directory can be `TEMPLATE_DIR/init` (this is handy for testing
+  template initialization content).
 
-Execution:
+Command execution:
 
-1. All configuration files in the template directories are parsed.
-2. All templates from templates directories are parsed.
-3. The content directory is recursively scanned and:
+1. Configuration files in the template directories are parsed.
+2. All files and folders in the _build_ directory are deleted.
+3. Templates from templates directories are parsed.
+4. The content directory is recursively scanned and:
    * Document front matter is parsed.
    * Static files are processed and copied to the corresponding build
      directories.
-4. Document indexes are built.
-5. Document bodies are rendered with their corresponding layout templates.
-6. If the [homepage](#configuration) is specified it is copied to `index.html`.
+5. Document indexes are built.
+6. Document bodies are rendered with their corresponding layout templates.
+7. If a [homepage](#configuration) is specified it is copied to `index.html`.
 
 #### Build summary
 The printed build summary includes:
@@ -240,13 +228,12 @@ _time_:: The execution time in seconds.
 The build summary does not include [excluded](#configuration) files.
 
 
-.#serve-command
-### serve
-The _serve_ command completely rebuilds the project then starts a development
-webserver on the project _build_ directory. If files in the _content_ or
-_template directories_ are added, modified or removed the _serve_ command
-automatically [rebuilds](#partial-rebuilds) affected webpages. The server also
-handles browser live reloading and has a browser launching option.
+### serve command
+The _serve_ command rebuilds the project then starts the built-in webserver on
+the project _build_ directory. If files in the _content_ or _template
+directories_ changed the _serve_ command automatically
+[rebuilds](#partial-rebuilds) affected webpages. The server also handles browser
+live reloading.
 
 Usage:
 
@@ -255,8 +242,8 @@ Usage:
 Applicable options:
 
     -content CONTENT_DIR
-    -build BUILD_DIR
     -template TEMPLATE_DIR
+    -build BUILD_DIR
     -drafts
     -launch
     -port PORT
@@ -267,9 +254,9 @@ Applicable options:
 - Press the _R_ key followed by the _Enter_ key to force a complete rebuild.
 
 #### Partial rebuilds
-The [serve command](#serve-command) automatically performs partial builds when
-content files are modified, added or deleted in order to speed up live reloads
-and to make the content creation process easier and more responsive.
+To speed up live reloads and to make the content creation process easier and
+more responsive the [serve command](#serve-command) automatically performs
+partial builds when content files are modified, added or deleted.
 
 The amount of processing required will depend on the size of your site and the
 type of change. Most content updates are very fast but processing times increase
@@ -281,14 +268,13 @@ if:
 
 To ensure build integrity you should always perform a complete rebuild before
 deployment and after project structural changes (the serve command does not
-process changes to the project directory structure).
+automatically process changes to the project directory structure).
 
 
-.#configuration
 ## Configuration
 Website generation is customized with configuration parameters.
 
-### Files
+### Configuration files
 Configuration parameters are specified in TOML and YAML markup files in the
 project template directories named `config.toml` and `config.yaml` respectively.
 Configuration files are optional, though most projects will have at least one at
@@ -306,7 +292,7 @@ The `exclude`, `include`, `homepage` and `urlprefix` configuration parameters
 are site-wide and are always taken from the template directory root
 configuration i.e. they are not subject to configuration file parameter merging.
 
-### Parameters
+### Configuration parameters
 Valid configuration parameters are:
 
 `author`:: Specifies the default document author and is overridden by the
@@ -315,7 +301,8 @@ document's _author_ [front matter](#front-matter) value. TOML example:
     author = "Joe Bloggs"
 
 `exclude`:: A `|` separated list of file and directory paths specifying files
-that are excluded from processing. TOML example:
+that are excluded from processing (all files are processed by default). TOML
+example:
 ..
     exclude = "config.rmu|.*|*~|4913"
 
@@ -329,12 +316,12 @@ that are excluded from processing. TOML example:
 - If the path contains path separators then it is matched against the file path
   e.g. `posts/*.md` will only match files with the `.md` extension from the
   `posts` directory.
-- To exclude a file in the content or template root directories prefix the name
-  name with a file separator e.g. `/config.rmu` will exclude `config.rmu` only
-  if it is in the top directory.
 - If the path ends with a slash then it specifies a directory whose contents are
   excluded (no wildcards are allowed). For example `news/archive/` excludes all
   files from the `news/archive` directory.
+- To exclude a file in the content or template root directories prefix the name
+  name with a file separator e.g. `/config.rmu` will exclude `config.rmu` only
+  if it is in the top directory.
 ..
 
 `include`:: A `|` separated list of file and directory paths specifying files
@@ -358,7 +345,7 @@ separator to ensure cross-platform compatibility. TOML example:
 
     homepage = "indexes/posts/docs-1.html"
 
-`paginate`:: This parameter sets the number of documnts per document index
+`paginate`:: This parameter sets the number of documents per document index
 page. The default value is 5. Set to -1 to include all documents on a single
 document index page. TOML example:
 
@@ -419,10 +406,8 @@ page [URLs](#urls). Its default value is a blank string. TOML examples:
     urlprefix = "https://www.example.com"
 
 `user`:: This is a user defined key/value map and provides a mechanism for
-defining custom template variables. _user_ is merged with the higher precedence
-document [front matter](#front-matter) _user_ variable and made available within
-documents and document templates. Both keys and values are strings and the keys
-must be legal [Go identifier](https://golang.org/ref/spec#Identifiers). For
+defining custom template variables. Both keys and values are strings and the
+keys must be legal [Go identifier](https://golang.org/ref/spec#Identifiers). For
 example:
 ..
 
@@ -453,12 +438,15 @@ document is generates a wepage e.g. a blog post, a newsletter or an article. The
 template](#html-templates) and writes the resulting HTML webpage to the
 corresponding _build directory_ path.
 
+Documents can contain optional [front matter](#front-matter) values
+which are accessible as template variables](#templates).
+
+A documents with the [draft](#front-matter) front matter value set will not be
+included in the built website unless the `-drafts` command option is specified.
+
 If the document is classified as a template (see the [templates](#configuration)
 configuration parameter) then it is rendered as a
-[text template](#text-template) prior to layout template processing.
-
-Documents can contain optional [front matter](#front-matter) values
-which are available to the document's _layout template_.
+[text template](#text-templates) prior to layout template processing.
 
 NOTE: In addition to Markdown, _hindsite_ can also process [Rimu
 markup](http://rimumarkup.org/) (this feature is currently experimental). The
@@ -473,47 +461,50 @@ location in the _build directory_.
 
 If a static file is classified as a template (see the
 [templates](#configuration) configuration parameter) then it is rendered as a
-[text template](#text-template) prior to being written to the _build directory_.
+[text template](#text-templates) prior to being written to the _build directory_.
 
 
 ## Indexes
-The hindsite build command generates paginated document and tag indexes. The
-following HTML index files are built for each index:
-
-  `docs-1.html`, `docs-2.html` ...:: Paginated document index files. The number
-  of documents per index page is set by the [paginate](#configuration)
-  configuration parameter. Rendered with the corresponding
-  [docs.html](#html-template) template.
-
-  `tags.html`:: A list of document tags linked to paginated per-tag document
-  index files in the `tags` subdirectory. Rendered with the corresponding
-  [tags.html](#html-template) template.
-
-  `tags/<tag>-1.html`, `tags/<tag>-2.html` ...:: Paginated per-tag document
-  index files. The number of documents per index page is set by the
-  [paginate](#configuration) configuration parameter. Rendered with the
-  corresponding [docs.html](#html-template) template.
-
+The hindsite build command generates paginated document and tag indexes.
 
 - A content directory is indexed when the corresponding template directory
-  contains a [docs.html](#html-templates) template.
+  contains a [`docs.html` template](#html-templates).
 - Documents from the indexed content directory and all subdirectories contribute
   to the index.
 - A project can contain any number of indexed content directories.
 - Indexes can be nested. This allows categorized document subdirectories to have
   separate indexes along with aggregated parent directory indexes.
+- A _primary index_ is an index that is not nested (has no parent index). A
+  document can only belong to one primary index.
 - Generated index pages are written to a directory named `indexes` located at
   the root of the _build directory_.
 - The `indexes` directory structure mirrors the _templates_ directory.
+
+The following HTML index files are built for each index:
+
+  `docs-1.html`, `docs-2.html` ...:: Paginated document index files. The number
+  of documents per index page is set by the [paginate](#configuration)
+  configuration parameter. Rendered with the corresponding
+  [docs.html](#html-templates) template.
+
+  `tags.html`:: A list of document tags linked to paginated per-tag document
+  index files in the `tags` subdirectory. Rendered with the corresponding
+  [tags.html](#html-templates) template.
+
+  `tags/<tag>-1.html`, `tags/<tag>-2.html` ...:: Paginated per-tag document
+  index files. The number of documents per index page is set by the
+  [paginate](#configuration) configuration parameter. Rendered with the
+  corresponding [docs.html](#html-templates) template.
+
 
 
 ## Front matter
 Front matter is a document specific set of named values. Front matter values are
 embedded in a front matter header at the beginning of the document file.
 
-### Format
+### Front matter header
 The front matter header begins with a start delimiter, which must be the first
-line of the file, and ends with the corresponding end delimiter (alson on a
+line of the file, and ends with the corresponding end delimiter (also on on a
 separate line). The delimiter determines the front matter format
 ([TOML](https://github.com/toml-lang/toml) or
 [YAML](https://learn.getgrav.org/advanced/yaml)).
@@ -551,7 +542,7 @@ draft = "true"
 +++
 ```
 
-### Values
+### Front matter values
 Front matter document values control webpage generation and are used in
 [document template variables](#document-template-variables).
 
@@ -624,21 +615,38 @@ parameter value.
 Document template variables are a combination of document [front
 matter](#front-matter) values, document [configuration](#configuration)
 parameters and synthesized values. They are used in layout and index page
-templates and in [text templates](#text-templates).
+[HTML templates](#html-templates) and in [text templates](#text-templates).
 
 `.author`:: Document author.
+
 `.body`:: The Markdown document body rendered as HTML.
+
 `.description`:: The HTML document description (HTML).
-`.shortdate`, `.mediumdate`, `.longdate`:: The document publication date strings formatted using the `shortdate`, `mediumdate` and `longdate` [configuration parameters](#configuration) respectively.
+
+`.shortdate`, `.mediumdate`, `.longdate`:: The document publication date strings
+formatted using the `shortdate`, `mediumdate` and `longdate` [configuration
+parameters](#configuration) respectively.
+
 `.date`:: Document publication date.
+
 `.modtime`:: Content file modification date and time.
+
 `.next`, `.prev`:: The next and previous document URLs in primary index order.
+
 `.slug`:: [Front matter](#front-matter) value.
+
 `.url`:: Synthesized document [URL](#urls).
-`.tags`:: An iterable list of tags. Each item contains the variables `.tag` (the tag) and `.url` (the tag index URL).
+
+`.tags`:: An iterable list of tags. Each item contains the variables `.tag` (the
+tag) and `.url` (the tag index URL).
+
 `.title`:: Document title.
+
 `.urlprefix`:: The [configuration](#configuration) `urlprefix`.
-`.user`:: The map of [front matter](#front-matter) `user` key/values.
+
+`.user`:: This key/value map is synthesized by merging the (higher precedence)
+document [front matter](#front-matter) `user` value with the document's `user`
+[configuration parameter](#configuration).
 
 
 ## Templates
@@ -654,14 +662,13 @@ Each template file contributes one or more named templates: the file itself plus
 any explicitly declared templates within the file. The implicit template name is
 its file name relative to the _template directory_ and using the slash (`/`)
 path separator character. For example the `/blog/template/posts/layout.html`
-template in the `/blog/template` template directory is assigned the name
+template in the `/blog/template` directory is assigned the name
 `posts/layout.html`.
 
 Both HTML and text templates share the common [Go template
 syntax](https://golang.org/pkg/text/template/).
 
-.#html-templates
-### HTML
+### HTML templates
 HTML templates are used to build index and content document HTML webpages. All
 the `.html` files in the project _template directory_ (excluding the `init`
 directory) contribute to the set of named HTML templates. All HTML templates
@@ -701,7 +708,7 @@ set of [document template variables](#document-template-variables).
 
 `.urlprefix`:: The [configuration](#configuration) `urlprefix`.
 
-`.user`:: The index [configuration's](#configuration) `user` key/value map.
+`.user`:: The index [configuration](#configuration) `user` key/value map.
 ..
 
 `tags.html`:: This optional index template is used to build a `tags.html` tags
@@ -717,23 +724,24 @@ index webpage. If it is not present the tags index files are not built.
 
 `.urlprefix`:: The [configuration](#configuration) `urlprefix`.
 
-`.user`:: The index [configuration's](#configuration) `user` map.
+`.user`:: The index [configuration](#configuration) `user` key/value map.
 ..
 
 
-.#text-templates
-### Text
+### Text templates
 Text template expansion is optional in [documents](#documents) and [static
 files](#static-files). By default there is no document or static file expansion,
-it is enabled by the [templates](#configuration) configuration parameter.
+it is enabled by the [`templates` configuration
+parameter](#configuration-parameters).
 
 In addition to [document template variables](#document-template-variables) all
 `.txt` files in the project _template directory_ (excluding the `init`
 directory) contribute to the set of named text templates available during
 document file and static file template expansion.
 
-[Static files](#static-files) that are subject to template expansion can include the same [front matter header](#front-matter)
-as [document files](#documents).
+[Static files](#static-files) that are subject to template expansion can include
+the same [front matter header](#front-matter-header) as [document
+files](#documents).
 
 
 ## URLs
