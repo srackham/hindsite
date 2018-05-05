@@ -181,10 +181,6 @@ func (proj *project) parseArgs(args []string) error {
 		return err
 	}
 	proj.verbose2("build directory: " + proj.buildDir)
-	proj.indexDir, err = getPath(proj.indexDir, filepath.Join(proj.buildDir, "indexes"))
-	if err != nil {
-		return err
-	}
 	// Content, template and build directories cannot be nested.
 	checkOverlap := func(name1, dir1, name2, dir2 string) error {
 		if dir1 == dir2 {
@@ -210,9 +206,7 @@ func (proj *project) parseArgs(args []string) error {
 	if err := checkOverlap("build", proj.buildDir, "template", proj.templateDir); err != nil {
 		return err
 	}
-	if !pathIsInDir(proj.indexDir, proj.buildDir) {
-		return fmt.Errorf("index directory must reside in build directory: %s", proj.buildDir)
-	}
+	proj.indexDir = filepath.Join(proj.buildDir, "indexes")
 	return nil
 }
 
