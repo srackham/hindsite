@@ -148,13 +148,14 @@ func (proj *project) serve() error {
 			return nil
 		})
 	}
+	if err := watcherAddDir(proj.templateDir); err != nil {
+		return err
+	}
+	// If content directory is in template directory don't add it twice.
 	if proj.contentDir != proj.initDir {
 		if err := watcherAddDir(proj.contentDir); err != nil {
 			return err
 		}
-	}
-	if err := watcherAddDir(proj.templateDir); err != nil {
-		return err
 	}
 	// Error channel to exit serve command.
 	done := make(chan error)
