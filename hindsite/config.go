@@ -194,7 +194,7 @@ func (proj *project) parseConfigs() error {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() && f == filepath.Join(proj.templateDir, "init") {
+		if info.IsDir() && f == proj.initDir {
 			return filepath.SkipDir
 		}
 		if !info.IsDir() {

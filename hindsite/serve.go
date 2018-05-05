@@ -148,8 +148,10 @@ func (proj *project) serve() error {
 			return nil
 		})
 	}
-	if err := watcherAddDir(proj.contentDir); err != nil {
-		return err
+	if proj.contentDir != proj.initDir {
+		if err := watcherAddDir(proj.contentDir); err != nil {
+			return err
+		}
 	}
 	if err := watcherAddDir(proj.templateDir); err != nil {
 		return err

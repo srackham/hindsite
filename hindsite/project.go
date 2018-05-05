@@ -28,6 +28,7 @@ type project struct {
 	templateDir   string
 	buildDir      string
 	indexDir      string
+	initDir       string
 	drafts        bool
 	port          string
 	launch        bool
@@ -181,6 +182,9 @@ func (proj *project) parseArgs(args []string) error {
 		return err
 	}
 	proj.verbose2("build directory: " + proj.buildDir)
+	// init and indexes directories are hardwired.
+	proj.indexDir = filepath.Join(proj.buildDir, "indexes")
+	proj.initDir = filepath.Join(proj.templateDir, "init")
 	// Content, template and build directories cannot be nested.
 	checkOverlap := func(name1, dir1, name2, dir2 string) error {
 		if dir1 == dir2 {
@@ -196,7 +200,7 @@ func (proj *project) parseArgs(args []string) error {
 	}
 	if err := checkOverlap("content", proj.contentDir, "template", proj.templateDir); err != nil {
 		// It's OK for the content directory to be the the template init directory.
-		if proj.contentDir != filepath.Join(proj.templateDir, "init") {
+		if proj.contentDir != proj.initDir {
 			return err
 		}
 	}
@@ -206,7 +210,6 @@ func (proj *project) parseArgs(args []string) error {
 	if err := checkOverlap("build", proj.buildDir, "template", proj.templateDir); err != nil {
 		return err
 	}
-	proj.indexDir = filepath.Join(proj.buildDir, "indexes")
 	return nil
 }
 

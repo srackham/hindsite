@@ -52,7 +52,6 @@ func (proj *project) init() error {
 		}
 	}
 	// Create the template directory structure in the content directory.
-	initDir := filepath.Join(proj.templateDir, "init")
 	if err := mkMissingDir(proj.contentDir); err != nil {
 		return err
 	}
@@ -63,7 +62,7 @@ func (proj *project) init() error {
 		if f == proj.templateDir {
 			return nil
 		}
-		if info.IsDir() && f == initDir {
+		if info.IsDir() && f == proj.initDir {
 			return filepath.SkipDir
 		}
 		if info.IsDir() {
@@ -77,15 +76,15 @@ func (proj *project) init() error {
 		return err
 	}
 	// Copy the contents of the optional template init directory to the content directory.
-	if dirExists(initDir) {
-		err = filepath.Walk(initDir, func(f string, info os.FileInfo, err error) error {
+	if dirExists(proj.initDir) {
+		err = filepath.Walk(proj.initDir, func(f string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
-			if f == initDir {
+			if f == proj.initDir {
 				return nil
 			}
-			dst := pathTranslate(f, initDir, proj.contentDir)
+			dst := pathTranslate(f, proj.initDir, proj.contentDir)
 			if info.IsDir() {
 				if !dirExists(dst) {
 					proj.verbose("make directory: " + dst)

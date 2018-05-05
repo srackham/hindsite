@@ -133,6 +133,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 // extractFrontMatter extracts and parses front matter and description from the
 // start of the document. The front matter is stripped from the content.
 func (doc *document) extractFrontMatter() error {
+	// Read line by line until end or a line matching `end`` is found.
 	readTo := func(end string, scanner *bufio.Scanner) (text string, eof bool, err error) {
 		for scanner.Scan() {
 			if end != "" && scanner.Text() == end {
@@ -171,7 +172,7 @@ func (doc *document) extractFrontMatter() error {
 		return err
 	}
 	if eof {
-		return fmt.Errorf("missing front matter delimiter: %s: %s", end, doc.contentPath)
+		return fmt.Errorf("missing front matter closing delimiter: %s: %s", end, doc.contentPath)
 	}
 	description, eof, err := readTo("<!--more-->", scanner)
 	if err != nil {

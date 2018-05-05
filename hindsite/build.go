@@ -37,7 +37,7 @@ func (proj *project) build() error {
 		if f == proj.templateDir {
 			return nil
 		}
-		if info.IsDir() && f == filepath.Join(proj.templateDir, "init") {
+		if info.IsDir() && f == proj.initDir {
 			return filepath.SkipDir
 		}
 		if proj.exclude(f) {
