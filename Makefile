@@ -35,22 +35,26 @@ build:
 	export GOOS=linux
 	export GOARCH=amd64
 	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
-	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-linux-amd64 ./...
+	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-linux-amd64-$$VERS ./...
 
 	export GOOS=darwin
 	export GOARCH=amd64
 	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
-	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-darwin-amd64 ./...
+	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-darwin-amd64-$$VERS ./...
 
 	export GOOS=windows
 	export GOARCH=amd64
 	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
-	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-windows-amd64.exe ./...
+	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-windows-amd64-$$VERS.exe ./...
 
 	export GOOS=windows
 	export GOARCH=386
 	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
-	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-windows-386.exe ./...
+	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-windows-386-$$VERS.exe ./...
+
+	cd bin
+	sha1sum hindsite-* > SHA1SUM
+	md5sum hindsite-* > MD5SUM
 
 .PHONY: test
 test: bindata
