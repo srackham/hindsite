@@ -25,7 +25,7 @@ install: test
 	go install ./...
 
 .PHONY: build
-build:
+build: build-doc
 	mkdir -p ./bin
 	BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)
 	COMMIT=$$(git rev-parse HEAD)
@@ -71,11 +71,11 @@ push:
 
 .PHONY: build-doc
 build-doc: install
-	hindsite build doc
+	hindsite build docsrc -build docs
 
 .PHONY: serve-doc
 serve-doc: install
-	hindsite serve doc
+	hindsite serve docsrc -build docs -launch -v
 
 #
 # Builtin blog development tasks.

@@ -1,0 +1,120 @@
+
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<title>Faq</title>
+<link type="text/css" rel="stylesheet" href="/main.css">
+<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
+</head>
+<body>
+<div id="nav" class="no-print">
+    <span id="toc-button">&#8801;</span>
+</div>
+<div id="sidebar" class="no-print">
+<div id="toc" class="no-print">
+  <h2>Links</h2>
+  <div class="h2"><a href="/index.html">Reference</a></div>
+  <div class="h2"><a href="/faq.html">FAQ</a></div>
+  <div class="h2"><a href="https://github.com/srackham/hindsite">Github</a></div>
+  <div id="auto-toc"></div>
+</div>
+</div>
+<div id="main">
+<div id="article">
+
+<h1 id="hindsite-faq">Hindsite FAQ</h1>
+<h2 id="does-hindsite-support-themes">Does hindsite support themes?</h2>
+<p>Themes are baked in, every <a href="/index.html/#projects">project template directory</a>
+is a theme and the <a href="/index.html/#init-command">init command</a> is the &ldquo;theme&rdquo;
+installer.</p>
+<h2 id="how-do-i-stop-hindsite-processing-dotfiles">How do I stop hindsite processing dotfiles?</h2>
+<p>Add a <code>.*</code> pattern to the <a href="/index.html/#configuration-parameters"><code>exclude</code> configuration
+parameter</a>.</p>
+<h2 id="should-i-enable-document-and-static-file-text-template-expansion">Should I enable document and static file text template expansion?</h2>
+<p>You should only enable <a href="/index.html/#text-templates">text template</a> expansion if
+you need it. If performance is an issue, only enable it for those documents or
+directories that need it.</p>
+<h2 id="how-can-i-customize-date-and-modtime-template-variable-formats">How can I customize <code>.date</code> and <code>.modtime</code> template variable formats?</h2>
+<p>Use the Go <a href="https://golang.org/pkg/time/#Time.Format">Format function</a>. For
+example:</p>
+<pre class="no-highlight"><code>{{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}</code></pre>
+<p>The <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="/index.html/#document-template-variables">document template
+variables</a> are simpler and preferable
+to using <code>.date</code> directly.</p>
+<h2 id="how-can-i-partition-documents-into-separate-categories">How can I partition documents into separate categories</h2>
+<p>Put them in separate indexes. <a href="/index.html/#indexes">Indexes</a> are similar to <a href="https://en.support.wordpress.com/posts/categories-vs-tags/">Wordpress
+categories</a> but they
+are folder based so you do not have to assign them explicitly.</p>
+<h2 id="i-want-a-single-page-document-index">I want a single page document index</h2>
+<p>Set the <a href="/index.html/#configuration-parameters"><code>paginate</code> configuration
+parameter</a> to <code>-1</code> and all indexed
+documents will appear on the first page.</p>
+<h2 id="i-want-both-paginated-and-single-page-document-indexes">I want both paginated and single page document indexes</h2>
+<p>This technique creates a second nested index:</p>
+<ol><li>Create a child index with the <code>paginate</code> configuration parameter set to <code>-1</code>.
+   For example:<pre class="no-highlight"><code>template/
+    posts/
+        docs.html           # Paginated document index template.
+        all/
+            docs.html       # Non-paginated (single-page) document index template.
+            config.toml     # paginate = -1</code></pre>
+</li><li>Create a corresponding content child directory and move the content documents into it:<pre class="no-highlight"><code>content/
+    posts/
+        all/    # Move documents here from posts.</code></pre>
+</li></ol><p>Each index has it's own page <code>docs.html</code> template. This technique can be
+extended to create multiple additional indexes over a the same indexed document
+set.</p>
+<h2 id="relative-or-root-relative-intra-site-links">Relative or root-relative intra-site links?</h2>
+<p>A relative link is a URL equivalent to a relative directory path e.g.
+<code>./images/beach.jpg</code>. A root-relative link is relative to the website root and
+begins with a slash e.g. <code>/images/beach.jpg</code>.</p>
+<ul><li>Relative links are not affected by the <code>urlprefix</code> whereas root-relative links
+  are.</li><li>Relative links are broken by changes to the content document location and the
+  <code>permalink</code> configuration parameter, root-relative links are not.</li></ul><p>The <code>urlprefix</code> and <code>permalink</code> parameters do not tend to change much so this
+is probably just something to be aware of. Although you could enable document template
+expansion and prefix root-relative URLs with <code>{{.urlprefix}}</code>.</p>
+<h2 id="how-fast-is-hindsite">How fast is hindsite?</h2>
+<p>hindsite compares favorably with <a href="https://gohugo.io/">Hugo</a> (which bills
+itself as &ldquo;The world’s fastest framework for building websites&rdquo;).</p>
+<p>In informal measurements carried out on a site with 5000 Markdown posts (20MB
+total) hindsite was two to four times faster than Hugo on full rebuilds but on
+subsequent incremental rebuilds hindsite ranges from six times faster than Hugo
+(if related indexes pages are rebuilt) to around ten times slower than Hugo (if
+all index pages have to be rebuilt). The <code>hugo</code> build command uses 9 times more
+memory than the <code>hindsite build</code> command; the <code>hugo server</code> command consumed a
+whopping 11.2GB (almost 200 times the <code>hindsite serve</code> command).</p>
+<dl><dt><em>Platform</em></dt><dd>hindsite v0.9.0 (windows/amd64) running on Dell XPS27 PC under Windows 10.</dd><dt><em>Build times and memory consumption</em></dt><dd><ul><li><code>hindsite build</code> command (full build): 72.11s (first run), 23.76s
+  (subsequent), memory consumption 34.1MB.</li><li><code>hindsite serve</code> command: 63.14s (initial full build), 21.74s (subsequent),
+  memory consumption 58.1MB.</li><li><code>hindsite serve</code> command (partial build, updating one document and entire
+  index): 3.74s, memory consumption 58.4MB.</li><li><code>hindsite serve</code> command (partial build updating one document): 0.07s, memory
+  consumption 58.2MB.</li></ul></dd></dl><p>The same documents were built with Hugo:</p>
+<dl><dt><em>Platform</em></dt><dd>Hugo v0.37.1 (windows/amd64) running on Dell XPS27 PC under Windows<ol><li>Hugo setup as per the <a href="https://gohugo.io/getting-started/quick-start/">Hugo <em>Quick Start</em>
+instructions</a>.</li></ol></dd><dt><em>Build times and memory consumption</em></dt><dd><ul><li><code>hugo</code> command (full rebuild): 153.99s (first run), 135.51s (subsequent),
+  memory consumption 314.3MB.</li><li><code>hugo server</code> command (initial full build): 119.67s, memory consumption 11.2GB.</li><li><code>hugo server</code> command (partial rebuild): 0.34s, memory consumption 11.2GB.</li></ul></dd></dl><p><i class="sans-font">NOTE</i>: Exclude the project folder from Windows Defender anti-virus real-time
+protection (not doing this imposed a 4x performance decrease for both
+hindsite and Hugo).</p>
+
+</div>
+</div>
+<script src="/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/go.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/kotlin.min.js"></script>
+<script>
+hljs.initHighlightingOnLoad();
+window.onload = function() {
+  var headings = [].slice.call(document.body.querySelectorAll('#article > h1, #article > h2, #article > h3'));
+  headings.forEach(function(heading) {
+    setHeaderLink(heading);
+    appendTocEntry(heading);
+  });
+  if (isSmallScreen()) {
+    toggleToc();  
+  }
+}
+</script>
+</body>
+</html>
