@@ -1,4 +1,4 @@
-# Makefile to log workflow.
+# hindsite Makefile
 
 # Set defaults (see http://clarkgrubb.com/makefile-style-guide#prologue)
 MAKEFLAGS += --warn-undefined-variables
@@ -32,29 +32,44 @@ build:
 	VERS=$$(git describe --tags --abbrev=0)
 	BUILD_FLAGS="-X main.BUILT=$$BUILT -X main.COMMIT=$$COMMIT -X main.VERS=$$VERS"
 
+	cd bin
+	cp ../LICENSE .
+	cp ../README.md README
+
 	export GOOS=linux
 	export GOARCH=amd64
 	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
-	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-linux-amd64-$$VERS ./...
+	EXE=hindsite-$$VERS-$$GOOS-$$GOARCH
+	ZIP=$$EXE.zip
+	go build -ldflags "$$LDFLAGS" -o $$EXE ../...
+	zip $$ZIP README LICENSE $$EXE
 
 	export GOOS=darwin
 	export GOARCH=amd64
 	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
-	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-darwin-amd64-$$VERS ./...
+	EXE=hindsite-$$VERS-$$GOOS-$$GOARCH
+	ZIP=$$EXE.zip
+	go build -ldflags "$$LDFLAGS" -o $$EXE ../...
+	zip $$ZIP README LICENSE $$EXE
 
 	export GOOS=windows
 	export GOARCH=amd64
 	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
-	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-windows-amd64-$$VERS.exe ./...
+	EXE=hindsite-$$VERS-$$GOOS-$$GOARCH
+	ZIP=$$EXE.zip
+	go build -ldflags "$$LDFLAGS" -o $$EXE.exe ../...
+	zip $$ZIP README LICENSE $$EXE.exe
 
 	export GOOS=windows
 	export GOARCH=386
 	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
-	go build -ldflags "$$LDFLAGS" -o ./bin/hindsite-windows-386-$$VERS.exe ./...
+	EXE=hindsite-$$VERS-$$GOOS-$$GOARCH
+	ZIP=$$EXE.zip
+	go build -ldflags "$$LDFLAGS" -o $$EXE.exe ../...
+	zip $$ZIP README LICENSE $$EXE.exe
 
-	cd bin
-	sha1sum hindsite-* > SHA1SUM
-	md5sum hindsite-* > MD5SUM
+	sha1sum hindsite-*.zip > SHA1SUM
+	md5sum hindsite-*.zip > MD5SUM
 
 .PHONY: test
 test: bindata
