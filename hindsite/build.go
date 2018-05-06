@@ -131,7 +131,7 @@ func (proj *project) build() error {
 		}
 	}
 	// Install home page.
-	if err := proj.installHomePage(); err != nil {
+	if err := proj.copyHomePage(); err != nil {
 		return err
 	}
 	fmt.Printf("documents: %d\n", docsCount)
@@ -141,7 +141,7 @@ func (proj *project) build() error {
 	return nil
 }
 
-func (proj *project) installHomePage() error {
+func (proj *project) copyHomePage() error {
 	if proj.rootConf.homepage != "" {
 		src := proj.rootConf.homepage
 		if !fileExists(src) {

@@ -203,7 +203,7 @@ func (proj *project) serve() error {
 					err = proj.writeFile(evt.Name)
 					if err == nil && t.Before(fileModTime(proj.rootConf.homepage)) {
 						// homepage was modified by this event.
-						err = proj.installHomePage()
+						err = proj.copyHomePage()
 					}
 				case fsnotify.Remove, fsnotify.Rename:
 					proj.println(start.Format("15:04:05") + ": removed: " + evt.Name)
