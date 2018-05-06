@@ -31,43 +31,29 @@ build:
 	COMMIT=$$(git rev-parse HEAD)
 	VERS=$$(git describe --tags --abbrev=0)
 	BUILD_FLAGS="-X main.BUILT=$$BUILT -X main.COMMIT=$$COMMIT -X main.VERS=$$VERS"
-
+	build () {
+		export GOOS=$$1
+		export GOARCH=$$2
+		LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
+		NAME=hindsite-$$VERS-$$GOOS-$$GOARCH
+		EXE=$$NAME/hindsite
+		if [ "$$1" = "windows" ]; then
+			EXE=$$EXE.exe
+		fi
+		ZIP=$$NAME.zip
+		rm -f $$ZIP
+		rm -rf $$NAME
+		mkdir $$NAME
+		cp ../LICENSE $$NAME
+		cp ../README.md $$NAME/README.txt
+		go build -ldflags "$$LDFLAGS" -o $$EXE ../...
+		zip $$ZIP $$NAME/*
+	}
 	cd bin
-	cp ../LICENSE .
-	cp ../README.md README
-
-	export GOOS=linux
-	export GOARCH=amd64
-	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
-	EXE=hindsite-$$VERS-$$GOOS-$$GOARCH
-	ZIP=$$EXE.zip
-	go build -ldflags "$$LDFLAGS" -o $$EXE ../...
-	zip $$ZIP README LICENSE $$EXE
-
-	export GOOS=darwin
-	export GOARCH=amd64
-	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
-	EXE=hindsite-$$VERS-$$GOOS-$$GOARCH
-	ZIP=$$EXE.zip
-	go build -ldflags "$$LDFLAGS" -o $$EXE ../...
-	zip $$ZIP README LICENSE $$EXE
-
-	export GOOS=windows
-	export GOARCH=amd64
-	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
-	EXE=hindsite-$$VERS-$$GOOS-$$GOARCH
-	ZIP=$$EXE.zip
-	go build -ldflags "$$LDFLAGS" -o $$EXE.exe ../...
-	zip $$ZIP README LICENSE $$EXE.exe
-
-	export GOOS=windows
-	export GOARCH=386
-	LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
-	EXE=hindsite-$$VERS-$$GOOS-$$GOARCH
-	ZIP=$$EXE.zip
-	go build -ldflags "$$LDFLAGS" -o $$EXE.exe ../...
-	zip $$ZIP README LICENSE $$EXE.exe
-
+	build linux amd64
+	build darwin amd64
+	build windows amd64
+	build windows 386
 	sha1sum hindsite-*.zip > SHA1SUM
 	md5sum hindsite-*.zip > MD5SUM
 
