@@ -96,40 +96,41 @@ is probably just something to be aware of. Although you could enable document te
 expansion and prefix root-relative URLs with `{{.urlprefix}}`.
 
 ## How fast is hindsite?
-Short answer: it depends on your project's size and structure and the platform
-you run it on.
-
-hindsite compares favorably with [Hugo](https://gohugo.io/) (which advertises
+hindsite compares favorably with [Hugo](https://gohugo.io/) (which bills
 itself as "The world’s fastest framework for building websites").
 
 In informal measurements carried out on a site with 5000 Markdown posts (20MB
-total) hindsite was around four times faster than Hugo on full rebuilds but on
+total) hindsite was two to four times faster than Hugo on full rebuilds but on
 subsequent incremental rebuilds hindsite ranges from six times faster than Hugo
-(if only related indexes pages are rebuilt) to around ten times slower than Hugo
-(if all index pages have to be rebuilt).
+(if related indexes pages are rebuilt) to around ten times slower than Hugo (if
+all index pages have to be rebuilt). The `hugo` build command uses 9 times more
+memory than the `hindsite build` command; the `hugo server` command consumed a
+whopping 11.2GB (almost 200 times the `hindsite serve` command).
 
 _Platform_::
-hindsite v1.0.0 (64 bit) running on Dell XPS27 PC under Windows 10.
+hindsite v0.9.0 (windows/amd64) running on Dell XPS27 PC under Windows 10.
 
 _Build times and memory consumption_::
-- Clean build (all documents and indexes): 20.72s (27.08s with "pretty" URLs)
-- Partial build (updating one document and entire index): 3.85s
-- Partial build (updating one document): 0.07s
-- Server while running consumed 58.4MB of RAM.
+- `hindsite build` command (full build): 72.11s (first run), 23.76s
+  (subsequent), memory consumption 34.1MB.
+- `hindsite serve` command: 63.14s (initial full build), 21.74s (subsequent),
+  memory consumption 58.1MB.
+- `hindsite serve` command (partial build, updating one document and entire
+  index): 3.74s, memory consumption 58.4MB.
+- `hindsite serve` command (partial build updating one document): 0.07s, memory
+  consumption 58.2MB.
 
 The same documents were built with Hugo:
 
-_Platform_:: Hugo v0.37 (64 bit) running on Dell XPS27 PC under Windows 10. Hugo
-setup as per the Hugo [Quick
-Start](https://gohugo.io/getting-started/quick-start/) instructions.
+_Platform_:: Hugo v0.37.1 (windows/amd64) running on Dell XPS27 PC under Windows
+10. Hugo setup as per the [Hugo _Quick Start_
+instructions](https://gohugo.io/getting-started/quick-start/).
 
 _Build times and memory consumption_::
-- Full rebuild (all documents and indexes): 120s.
-- Server command partial rebuild: 0.37s
-- Server while running consumed 10.8GB of RAM.
-
-The Hugo server has fast and consistent incremental rebuild times for
-virtually any changes.
+- `hugo` command (full rebuild): 153.99s (first run), 135.51s (subsequent),
+  memory consumption 314.3MB.
+- `hugo server` command (initial full build): 119.67s, memory consumption 11.2GB.
+- `hugo server` command (partial rebuild): 0.34s, memory consumption 11.2GB.
 
 NOTE: Exclude the project folder from Windows Defender anti-virus real-time
 protection (not doing this imposed a 4x performance decrease for both

@@ -17,21 +17,25 @@ newsletters, articles). Features:
 
 
 ## Quick Start
-[Download the hindsite executable](TODO) for your platform and create a fully
-functional blog and newsletter website with just two hindsite commands:
+Create a fully functional blog and newsletter website with just two hindsite
+commands:
 
-1. Create a new Hindsite project directory and install the builtin blog
+1. [Download the hindsite
+   release](https://github.com/srackham/hindsite/releases) for your platform and
+   extract the hindsite executable.
+
+2. Create a new Hindsite project directory and install the builtin blog
    template:
 
     mkdir myproj
     hindsite init myproj -builtin blog
 
-2. Build the website, start the hindsite web server and open it in the browser:
+3. Build the website, start the hindsite web server and open it in the browser:
 
     hindsite serve myproj -launch
 
-The best way to start learning hindsite is to browse the blog [project
-directory](#projects).
+Include the `-v` (verbose) command option to see what's going on. The best way
+to start learning hindsite is to browse the blog [project directory](#projects).
 
 Try editing content documents and templates and rebuilding. If you are familiar
 with Jekyll or Hugo you'll be right a home (hindsite can read Jekyll and Hugo
@@ -193,7 +197,7 @@ Applicable options:
     -v
 
 - All files from the _content_ directory not that are not
-  [excluded](#configuration) are rebuilt.
+  [excluded](#configuration-parameters) are rebuilt.
 - If the `-drafts` option is specified [draft documents](#documents) are included
   in the built website.
 - Content, build and template directories cannot overlap, with one exception:
@@ -211,7 +215,8 @@ Command execution:
      directories.
 5. Document indexes are built.
 6. Document bodies are rendered with their corresponding layout templates.
-7. If a [homepage](#configuration) is specified it is copied to `index.html`.
+7. If a [homepage](#configuration-parameters) is specified it is copied to
+   `index.html`.
 
 #### Build summary
 The printed build summary includes:
@@ -225,7 +230,7 @@ specified this will be zero.
 
 _time_:: The execution time in seconds.
 
-The build summary does not include [excluded](#configuration) files.
+The build summary does not include [excluded](#configuration-parameters) files.
 
 
 ### serve command
@@ -250,7 +255,7 @@ Applicable options:
     -v
 
 - `-port` sets the server port number to `PORT` (defaults to 1212).
-- The `-launch` option opens the default web browser on the home page.
+- The `-launch` option opens the project home page in the default web browser.
 - Press the _R_ key followed by the _Enter_ key to force a complete rebuild.
 
 #### Partial rebuilds
@@ -275,32 +280,29 @@ automatically process changes to the project directory structure).
 Website generation is customized with configuration parameters.
 
 ### Configuration files
-Configuration parameters are specified in TOML and YAML markup files in the
-project template directories named `config.toml` and `config.yaml` respectively.
-Configuration files are optional, though most projects will have at least one at
-the root of the template directory.
+Configuration parameters are specified in TOML and YAML markup files named
+`config.toml` and `config.yaml` respectively.
 
-The configuration applied to each document or index is computed by merging the
-configuration files that lie on the corresponding _template directory_ path.
-Configuration files closer to the document or index directory have higher
-precedence than those further up the directory path.
-
-Some configuration parameters are merged into the [document template
-variables](#document-template-variables).
-
-The `exclude`, `include`, `homepage` and `urlprefix` configuration parameters
-are site-wide and are always taken from the template directory root
-configuration i.e. they are not subject to configuration file parameter merging.
+- Configuration files can be assigned, per directory, anywhere in the _template
+  directory tree_.
+- A configuration file only affects documents in the corresponding content
+  directory and subdirectories.
+- The configuration applied to a document or index is computed by merging
+  configuration files lying on the corresponding _template directory_ path.
+  Configuration files closer to the document have higher precedence than those
+  further up the directory path.
+- Configuration files are optional, though most projects will have at least one
+  at the root of the template directory.
 
 ### Configuration parameters
 Valid configuration parameters are:
 
 `author`:: Specifies the default document author and is overridden by the
-document's _author_ [front matter](#front-matter) value. TOML example:
+document's [`author` front matter value](#front-matter-values). TOML example:
 
     author = "Joe Bloggs"
 
-`exclude`:: A `|` separated list of file and directory paths specifying files
+`exclude` †:: A `|` separated list of file and directory paths specifying files
 that are excluded from processing (all files are processed by default). TOML
 example:
 ..
@@ -324,7 +326,7 @@ example:
   if it is in the top directory.
 ..
 
-`include`:: A `|` separated list of file and directory paths specifying files
+`include` †:: A `|` separated list of file and directory paths specifying files
 that are processed unconditionally i.e. irrespective of the `exclude` parameter.
 Parameter values have the same format as the `exclude` parameter.
 
@@ -338,7 +340,7 @@ function](https://golang.org/pkg/time/#Time.Format). The default values are:
     mediumdate = "2-Jan-2006",
     longdate = "Mon Jan 2, 2006",
 
-`homepage`:: The `homepage` parameter is the name of a file, relative to the
+`homepage` †:: The `homepage` parameter is the name of a file, relative to the
 build directory, that is copied by the `build` command to the root of the build
 directory and named `index.html`. Use the slash (`/`) character as the path
 separator to ensure cross-platform compatibility. TOML example:
@@ -363,7 +365,8 @@ placeholders:
 
 If the permalink ends with a trailing slash then hindsite creates "pretty" URLs
 by writing the build file to `index.html` in a directory with the page’s name.
-`permalink` can also be specified in the document [front matter](#front-matter).
+`permalink` can also be specified in the document [front
+matter](#front-matter).
 
 TOML examples:
 
@@ -393,13 +396,13 @@ TOML example:
 - `.shortdate`, `.mediumdate` and `.longdate` [document template
   variables](#document-template-variables) are rendered in the configured
   `timezone`.
-- `timezone` is assigned to [publication dates](#front-matter) values that are
-  specified without a timezone.
+- `timezone` is assigned to [publication `date` values](#front-matter-values)
+  that are specified without a timezone.
 - `permalink` dates are rendered in their assigned timezone, this ensures
   permalinks do not change if the `timezone` is changed.
 ..
 
-`urlprefix`:: This parameter is prepended to all synthesized document and index
+`urlprefix` †:: This parameter is prepended to all synthesized document and index
 page [URLs](#urls). Its default value is a blank string. TOML examples:
 
     urlprefix = "/blog"
@@ -431,6 +434,14 @@ Are available as these template variables:
 ```
 ..
 
+† The `exclude`, `include`, `homepage` and `urlprefix` configuration parameters
+are site-wide and are always taken from the template directory root
+configuration i.e. they can only be specified in the template root configuration file.
+
+Some configuration parameters are merged into the [document template
+variables](#document-template-variables).
+
+
 ## Documents
 _Documents_ are Markdown (`.md`) files in the project _content directory_. Each
 document is generates a wepage e.g. a blog post, a newsletter or an article. The
@@ -438,15 +449,17 @@ document is generates a wepage e.g. a blog post, a newsletter or an article. The
 template](#html-templates) and writes the resulting HTML webpage to the
 corresponding _build directory_ path.
 
-Documents can contain optional [front matter](#front-matter) values
+Documents can contain optional [front matter values](#front-matter-values)
 which are accessible as template variables](#templates).
 
-A documents with the [draft](#front-matter) front matter value set will not be
-included in the built website unless the `-drafts` command option is specified.
+A documents with the [draft](#front-matter-values) front matter value set will
+not be included in the built website unless the `-drafts` command option is
+specified.
 
-If the document is classified as a template (see the [templates](#configuration)
-configuration parameter) then it is rendered as a
-[text template](#text-templates) prior to layout template processing.
+If the document is classified as a template (see the
+[`templates`](#configuration-parameters) configuration parameter) then it is
+rendered as a [text template](#text-templates) prior to layout template
+processing.
 
 NOTE: In addition to Markdown, _hindsite_ can also process [Rimu
 markup](http://rimumarkup.org/) (this feature is currently experimental). The
@@ -460,8 +473,9 @@ These include website resources such as CSS, JavaScript and image files. The
 location in the _build directory_.
 
 If a static file is classified as a template (see the
-[templates](#configuration) configuration parameter) then it is rendered as a
-[text template](#text-templates) prior to being written to the _build directory_.
+[`templates`](#configuration-parameters) configuration parameter) then it is
+rendered as a [text template](#text-templates) prior to being written to the
+_build directory_.
 
 
 ## Indexes
@@ -483,9 +497,9 @@ The hindsite build command generates paginated document and tag indexes.
 The following HTML index files are built for each index:
 
   `docs-1.html`, `docs-2.html` ...:: Paginated document index files. The number
-  of documents per index page is set by the [paginate](#configuration)
-  configuration parameter. Rendered with the corresponding
-  [docs.html](#html-templates) template.
+  of documents per index page is set by the
+  [`paginate`](#configuration-parameters) configuration parameter. Rendered with
+  the corresponding [docs.html](#html-templates) template.
 
   `tags.html`:: A list of document tags linked to paginated per-tag document
   index files in the `tags` subdirectory. Rendered with the corresponding
@@ -493,8 +507,8 @@ The following HTML index files are built for each index:
 
   `tags/<tag>-1.html`, `tags/<tag>-2.html` ...:: Paginated per-tag document
   index files. The number of documents per index page is set by the
-  [paginate](#configuration) configuration parameter. Rendered with the
-  corresponding [docs.html](#html-templates) template.
+  [`paginate`](#configuration-parameters) configuration parameter. Rendered with
+  the corresponding [docs.html](#html-templates) template.
 
 
 
@@ -522,7 +536,7 @@ Example YAML front matter:
 ```
 ---
 title:    Foo Bar
-description: An brief history of the origins of the foofoo valve.
+description: A brief history of the origins of the foofoo valve.
 date:     2018-02-16
 tags:     [foo foo valve, qux, baz]
 slug:     foofoo-valve-history
@@ -534,7 +548,7 @@ Example TOML front matter:
 ```
 +++
 title = "Foo Bar"
-description = "An brief history of the origins of the foofoo valve."
+description = "A brief history of the origins of the foofoo valve."
 date = "2018-02-16"
 tags = ["foo foo valve", "qux", "baz"]
 slug = "foofoo-valve-history"
@@ -547,15 +561,16 @@ Front matter document values control webpage generation and are used in
 [document template variables](#document-template-variables).
 
 `author`:: The document author. If not specified it defaults to corresponding
-[author](#configuration) configuration parameter value.
+[`author`](#configuration-parameters) configuration parameter value.
 
 `date`:: The document publication date. If it is not specified it is extracted
 from the file name `YYYY-MM-DD-` date prefix, if undefined it defaults to Jan 1 0001.
 The `date` format is RFC 3339 with the following relaxations:
 ..
-- If the time zone offset is omitted then the [timezone](#configuration)
-  configuration parameter is assigned. This has the effect of always rendering
-  the date as written irrespective of the `timezone` parameter value.
+- If the time zone offset is omitted then the
+  [`timezone`](#configuration-parameters) configuration parameter is assigned.
+  This has the effect of always rendering the date as written irrespective of
+  the `timezone` parameter value.
 - If the time is omitted then the time `00:00:00` is used.
 - A space character separator (instead of the letter `T`) between the date and
   the time is allowed.
@@ -570,16 +585,17 @@ Examples with `timezone = "+13:00"`:
 
 `description`:: A brief summary of the document. If not specified `description`
 defaults to the content up to the first `<!--more-->` tag or blank if there is
-no _more_ tag. The description is rendered as Markdown.
+no `<!--more-->` tag. The `<!--more-->` tag must appear alone on a separate
+line. The description is rendered as Markdown.
 
-`draft`:: If set to "true" then the document is not processed unless the
+`draft`:: If set to `true` then the document is not processed unless the
 `-drafts` was specified. Defaults to false.
 
 `layout`:: The name of the template used to render the document. `layout`
 defaults to the closest `layout.html` [HTML template](#html-templates).
 
 `permalink`:: If specified it overrides the configuration
-[permalink](#configuration) value.
+[`permalink`](#configuration-parameters) value.
 
 `tags`:: A list of tag keywords and phrases. Examples:
 ```
@@ -590,12 +606,12 @@ tags = ["foo foo valve", "qux", "baz"]
 tags: [foo foo valve, qux, baz]
 ```
 
-`templates`:: If specified it overrides the configuration
-[templates](#configuration) value. The only sensible values in this context are
-a blank string (to disable text template expansion) or the document's file name
-extension (to enable text template expansion).
+`templates`:: If specified it overrides the [`templates`](#configuration-parameters)
+configuration value. The only sensible values in this context are a blank string
+(to disable text template expansion) or the document's file name extension (to
+enable text template expansion).
 
-`.slug`:: The slug replaces the file name (minus file name extension) of the
+`slug`:: The slug replaces the file name (minus file name extension) of the
 generated document webpage which also determines the last component of the
 document's URL.
 
@@ -606,16 +622,17 @@ by spaces; then capitalized.
 `url`:: The synthesized document [URL](#urls).
 
 `user`:: `user` is a user defined key/value map. It is merged with the lower
-precedence [user](#configuration) configuration parameter to become the `.user`
-template variable. If not specified it defaults to the `user` configuration
-parameter value.
+precedence [`user`](#configuration-parameters) configuration parameter to become
+the `.user` template variable. If `user` is not specified in the document front
+matter it defaults to the `user` configuration parameter value.
 
 
 ## Document template variables
-Document template variables are a combination of document [front
-matter](#front-matter) values, document [configuration](#configuration)
-parameters and synthesized values. They are used in layout and index page
-[HTML templates](#html-templates) and in [text templates](#text-templates).
+Document template variables are a combination of document [front matter
+values](#front-matter-values), document [configuration
+parameters](#configuration-parameters) and synthesized values. They are used in
+layout and index page [HTML templates](#html-templates) and in [text
+templates](#text-templates).
 
 `.author`:: Document author.
 
@@ -625,7 +642,7 @@ parameters and synthesized values. They are used in layout and index page
 
 `.shortdate`, `.mediumdate`, `.longdate`:: The document publication date strings
 formatted using the `shortdate`, `mediumdate` and `longdate` [configuration
-parameters](#configuration) respectively.
+parameters](#configuration-parameters) respectively.
 
 `.date`:: Document publication date.
 
@@ -633,7 +650,7 @@ parameters](#configuration) respectively.
 
 `.next`, `.prev`:: The next and previous document URLs in primary index order.
 
-`.slug`:: [Front matter](#front-matter) value.
+`.slug`:: [Front matter value](#front-matter-values).
 
 `.url`:: Synthesized document [URL](#urls).
 
@@ -642,11 +659,11 @@ tag) and `.url` (the tag index URL).
 
 `.title`:: Document title.
 
-`.urlprefix`:: The [configuration](#configuration) `urlprefix`.
+`.urlprefix`:: The [`urlprefix`](#configuration-parameters) configuration value.
 
 `.user`:: This key/value map is synthesized by merging the (higher precedence)
-document [front matter](#front-matter) `user` value with the document's `user`
-[configuration parameter](#configuration).
+document [front matter `user` value](#front-matter-values) with the document's `user`
+[configuration parameter](#configuration-parameters).
 
 
 ## Templates
@@ -680,7 +697,7 @@ The following template files have special significance:
 content document webpages. A project can have one or more layout templates. The
 selected layout template is the one closest to the content document on the
 corresponding _template directory_ path (but this can be overridden using the
-document [front matter](#front-matter) _layout_ value). These conventions
+document [front matter `layout` value](#front-matter-values)). These conventions
 allow document layouts to be assigned per directory and per document. Layouts
 are rendered with the corresponding [document template
 variables](#document-template-variables).
@@ -706,9 +723,9 @@ set of [document template variables](#document-template-variables).
        `.url` of the previous, next, first and last index pages. For example
       `.page.prev.number` is the page number (1...) of the previous document index page.
 
-`.urlprefix`:: The [configuration](#configuration) `urlprefix`.
+`.urlprefix`:: The [`urlprefix`](#configuration-parameters) value.
 
-`.user`:: The index [configuration](#configuration) `user` key/value map.
+`.user`:: The index configuration [`user`](#configuration-parameters) key/value map.
 ..
 
 `tags.html`:: This optional index template is used to build a `tags.html` tags
@@ -722,9 +739,9 @@ index webpage. If it is not present the tags index files are not built.
   `.url`::: The URL of of the tag's document index.
   `.count`::: The number of documents with this tag.
 
-`.urlprefix`:: The [configuration](#configuration) `urlprefix`.
+`.urlprefix`:: The [`urlprefix`](#configuration-parameters) value.
 
-`.user`:: The index [configuration](#configuration) `user` key/value map.
+`.user`:: The index configuration [`user`](#configuration values) key/value map.
 ..
 
 
@@ -746,9 +763,10 @@ files](#documents).
 
 ## URLs
 hindsite synthesizes root-relative document and index page URLs. URLs are
-relative to the build directory and are prefixed with the `urlprefix`
-[configuration parameter](#configuration). If a [slug](#front-matter) front
-matter value is specified it replaces the document file name.
+relative to the build directory and are prefixed with the
+[`urlprefix`](#configuration-parameters) configuration parameter. If a
+[`slug`](#front-matter-values) front matter value is specified it replaces the
+document file name.
 
 For example, if the build directory is `/myproj/build` and the rendered document
 is `/myproj/build/posts/foo.html` then:
@@ -758,7 +776,7 @@ is `/myproj/build/posts/foo.html` then:
 - If the document `slug` is `bar` the URL becomes `/blog/posts/bar.html`
 
 The above default behavior can be customized using the `permalink`
-[configuration parameter](#configuration).
+[configuration parameter](#configuration-parameters).
 
 If you are deploying to a web server subdirectory then you need to set the
 `urlprefix` configuration parameter to ensure synthesized URLs are rooted
