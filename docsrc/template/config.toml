@@ -1,4 +1,5 @@
 exclude = "config.rmu|.*|*~|4913"
+urlprefix = "/hindsite"
 
 [user]
 banner = "hindsite documentation"
