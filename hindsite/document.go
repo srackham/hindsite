@@ -267,6 +267,7 @@ func (doc *document) frontMatter() templateData {
 	data["date"] = doc.date
 	data["modtime"] = doc.modtime
 	data["layout"] = doc.layout
+	data["urlprefix"] = doc.conf.urlprefix
 	data["slug"] = doc.slug
 	data["url"] = doc.url
 	tags := []map[string]string{}
