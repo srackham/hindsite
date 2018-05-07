@@ -1,5 +1,6 @@
 # Hindsite website generator
 
+# UNDER CONSTRUCTION -- DO NOT USE THIS PROJECT YET
 ## Overview
 hindsite is a static website generator. It builds static websites with optional
 document and tag indexes from Markdown source documents (e.g. blogs posts,
