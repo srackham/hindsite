@@ -67,7 +67,7 @@ func newIndexes(proj *project) (indexes, error) {
 				return err
 			}
 			idx.conf = proj.configFor(idx.contentDir)
-			idx.url = path.Join("/", idx.conf.urlprefix, filepath.ToSlash(p))
+			idx.url = idx.conf.joinPrefix(filepath.ToSlash(p))
 			idxs = append(idxs, &idx)
 		}
 		return nil

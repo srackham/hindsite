@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -266,4 +267,18 @@ func (conf *config) merge(from config) {
 	for k, v := range from.user {
 		conf.user[k] = v
 	}
+}
+
+// joinPrefix joins path elements and prefixes them with the urlprefix.
+func (conf *config) joinPrefix(elem ...string) string {
+	if strings.HasSuffix(conf.urlprefix, "/") {
+		panic("urlprefix has '/' suffix: " + conf.urlprefix)
+	}
+	if len(elem[0]) == 0 {
+		panic("joinPrefix: missing argument")
+	}
+	if strings.HasPrefix(elem[0], "/") {
+		panic("relative URL has '/' prefix: " + elem[0])
+	}
+	return conf.urlprefix + "/" + path.Join(elem...)
 }

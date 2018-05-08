@@ -105,14 +105,14 @@ func newDocument(contentfile string, proj *project) (document, error) {
 		if strings.HasSuffix(link, "/") {
 			// "Pretty" URLs.
 			doc.buildPath = filepath.Join(proj.buildDir, filepath.FromSlash(link), "index.html")
-			doc.url = path.Join("/", doc.conf.urlprefix, link) + "/"
+			doc.url = doc.conf.joinPrefix(link) + "/"
 		} else {
 			doc.buildPath = filepath.Join(proj.buildDir, filepath.FromSlash(link))
-			doc.url = path.Join("/", doc.conf.urlprefix, link)
+			doc.url = doc.conf.joinPrefix(link)
 		}
 	} else {
 		doc.buildPath = filepath.Join(proj.buildDir, filepath.Dir(rel), f)
-		doc.url = path.Join("/", doc.conf.urlprefix, path.Dir(filepath.ToSlash(rel)), f)
+		doc.url = doc.conf.joinPrefix(path.Dir(filepath.ToSlash(rel)), f)
 	}
 	if doc.layout == "" {
 		// Find nearest document layout template file.
