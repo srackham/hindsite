@@ -45,10 +45,6 @@ type lrHandler struct {
 }
 
 func (h *lrHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.URL.String() == "/favicon.ico" {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
 	w2 := &lrResponseWriter{
 		ResponseWriter: w,
 	}
