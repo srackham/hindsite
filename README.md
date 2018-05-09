@@ -1,9 +1,9 @@
 # Hindsite website generator
 
 ## IMPORTANT: hindsite is currently in a pre-release phase and is not production ready
-Having said that, the current release (v0.9.2) is feature-complete and has no
-known significant bugs, but there are some loose ends to be tidied up (mainly
-regards the documentation and the release process).
+Having said that, the current release is feature-complete and has no known
+significant bugs, but there are some loose ends to be tidied up (mainly regards
+the documentation and the release process).
 
 ## Overview
 hindsite is a static website generator. It builds static websites with optional
