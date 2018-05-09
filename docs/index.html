@@ -247,8 +247,12 @@ TOML example:<pre class="no-highlight"><code>timezone = "Pacific/Auckland"</code
   that are specified without a timezone.</li><li><code>permalink</code> dates are rendered in their assigned timezone, this ensures
   permalinks do not change if the <code>timezone</code> is changed.</li></ul>
 </dd><dt><code>urlprefix</code> †</dt><dd>This parameter is prepended to all synthesized document and index
-page <a href="#urls">URLs</a>. Its default value is a blank string. TOML examples:<pre class="no-highlight"><code>urlprefix = "/blog"
-urlprefix = "https://www.example.com"</code></pre>
+page <a href="#urls">URLs</a>. Its default value is a blank string. TOML examples:<pre class="no-highlight"><code>urlprefix = "/blog"                     # Root-relative URL prefix.
+urlprefix = "https://www.example.com"   # Absolute URL prefix.</code></pre>
+<p><i class="sans-font">NOTE</i>: If an absolute URL prefix is specified then it will be ignored by the
+<a href="#serve-command">serve command</a> and is assigned the default blank value. You
+must run the <a href="#build-command">build command</a> before deploying a site with an
+absolute URL prefix.</p>
 </dd><dt><code>user</code></dt><dd>This is a user defined key/value map and provides a mechanism for
 defining custom template variables. Both keys and values are strings and the
 keys must be legal <a href="https://golang.org/ref/spec#Identifiers">Go identifier</a>. For
