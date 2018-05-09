@@ -104,7 +104,10 @@
   .light-background {
     background-color: #f8f8f8;
     border: none;
-    white-space: pre-wrap;
+    white-space: pre;
+  }
+  *:not(pre) > code {
+    white-space: nowrap;
   }
   .dl-horizontal > dd {
     margin-top: 1.0rem;
