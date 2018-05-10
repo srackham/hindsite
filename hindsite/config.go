@@ -269,7 +269,9 @@ func (conf *config) merge(from config) {
 	}
 }
 
-// joinPrefix joins path elements and prefixes them with the urlprefix.
+// joinPrefix joins path elements and prefixes them with the urlprefix. The
+// urlprefix cannot be processed by path.Join because it would replace '//' with
+// '/' in an absolute urlprefix (e.g. http://example.com),
 func (conf *config) joinPrefix(elem ...string) string {
 	if strings.HasSuffix(conf.urlprefix, "/") {
 		panic("urlprefix has '/' suffix: " + conf.urlprefix)

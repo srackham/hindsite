@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -16,7 +15,7 @@ type index struct {
 	contentDir  string                   // The directory that contains the indexed documents.
 	templateDir string                   // The directory that contains the index templates.
 	indexDir    string                   // The build directory that the index pages are written to.
-	url         string                   // Synthesized index directory URL.
+	url         string                   // Index directory relative URL (sans urlprefix).
 	docs        documentsList            // Parsed documents belonging to index.
 	tagDocs     map[string]documentsList // Partitions indexed documents by tag.
 	slugs       map[string]string        // Slugified tags.
@@ -67,7 +66,7 @@ func newIndexes(proj *project) (indexes, error) {
 				return err
 			}
 			idx.conf = proj.configFor(idx.contentDir)
-			idx.url = idx.conf.joinPrefix(filepath.ToSlash(p))
+			idx.url = filepath.ToSlash(p)
 			idxs = append(idxs, &idx)
 		}
 		return nil
@@ -207,7 +206,7 @@ func (idx index) tagsData() templateData {
 	for tag, docs := range idx.tagDocs {
 		data := map[string]string{
 			"tag":   tag,
-			"url":   path.Join(idx.url, "tags", idx.slugs[tag]+"-1.html"),
+			"url":   idx.conf.joinPrefix(idx.url, "tags", idx.slugs[tag]+"-1.html"),
 			"count": strconv.Itoa(len(docs)),
 		}
 		tags = append(tags, data)
@@ -238,7 +237,7 @@ func (idx *index) paginate(docs documentsList, filename string) []page {
 		}
 		f := fmt.Sprintf(filename, pg.number)
 		pg.file = filepath.Join(idx.indexDir, f)
-		pg.url = path.Join(idx.url, filepath.ToSlash(f))
+		pg.url = idx.conf.joinPrefix(idx.url, filepath.ToSlash(f))
 		pgs = append(pgs, pg)
 	}
 	for i := range pgs {

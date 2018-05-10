@@ -274,7 +274,7 @@ func (doc *document) frontMatter() templateData {
 	for _, tag := range doc.tags {
 		url := ""
 		if doc.primaryIndex != nil {
-			url = path.Join(doc.primaryIndex.url, "tags", doc.primaryIndex.slugs[tag]+"-1.html")
+			url = doc.primaryIndex.conf.joinPrefix(doc.primaryIndex.url, "tags", doc.primaryIndex.slugs[tag]+"-1.html")
 		}
 		tags = append(tags, map[string]string{
 			"tag": tag,
