@@ -13,16 +13,35 @@ GOFLAGS ?=
 
 BINDATA_FILES = $(shell find ./builtin/minimal/template) $(shell find ./builtin/blog/template)
 
-./hindsite/bindata.go: $(BINDATA_FILES)
-	cd ./hindsite
-	go-bindata -prefix ../builtin/ -ignore '/(build|content)/' ../builtin/...
+bindata.go: $(BINDATA_FILES)
+	go-bindata -prefix ./builtin/ -ignore '/(build|content)/' ./builtin/...
 
 .PHONY: bindata
-bindata: ./hindsite/bindata.go
+bindata: bindata.go
 
 .PHONY: install
 install: test
 	go install ./...
+
+.PHONY: test
+test: bindata
+	go test ./...
+
+.PHONY: clean
+clean:
+	go clean -i ./...
+
+.PHONY: push
+push:
+	git push -u --tags origin master
+
+.PHONY: build-doc
+build-doc: install
+	hindsite build docsrc -build docs
+
+.PHONY: serve-doc
+serve-doc: install
+	hindsite serve docsrc -build docs -launch -v
 
 .PHONY: build
 build: build-doc
@@ -50,33 +69,47 @@ build: build-doc
 		zip $$ZIP $$NAME/*
 	}
 	cd bin
-	rm -rf hindsite-*
 	build linux amd64
 	build darwin amd64
 	build windows amd64
 	build windows 386
-	sha1sum hindsite-*.zip > SHA1SUM
-	md5sum hindsite-*.zip > MD5SUM
+	sha1sum hindsite-$$VERS*.zip > hindsite-$$VERS-checksums-sha1.txt
 
-.PHONY: test
-test: bindata
-	go test ./...
-
-.PHONY: clean
-clean:
-	go clean -i ./...
-
-.PHONY: push
-push:
-	git push -u --tags origin master
-
-.PHONY: build-doc
-build-doc: install
-	hindsite build docsrc -build docs
-
-.PHONY: serve-doc
-serve-doc: install
-	hindsite serve docsrc -build docs -launch -v
+.PHONY: release
+release:
+	REPO=hindsite
+	USER=srackham
+	VERS=$$(git describe --tags --abbrev=0)
+	upload () {
+		export GOOS=$$1
+		export GOARCH=$$2
+		FILE=hindsite-$$VERS-$$GOOS-$$GOARCH.zip
+		github-release upload \
+			--user $$USER \
+			--repo $$REPO \
+			--tag $$VERS \
+			--name $$FILE \
+			--file $$FILE
+	}
+	github-release release \
+		--user $$USER \
+		--repo $$REPO \
+		--tag $$VERS \
+		--name "hindsite $$VERS" \
+		--description "hindsite builds static websites from Markdown source documents." \
+		--pre-release
+	cd bin
+	upload linux amd64
+	upload darwin amd64
+	upload windows amd64
+	upload windows 386
+	SUMS=hindsite-$$VERS-checksums-sha1.txt
+	github-release upload \
+		--user $$USER \
+		--repo $$REPO \
+		--tag $$VERS \
+		--name $$SUMS \
+		--file $$SUMS
 
 #
 # Builtin blog development tasks.
