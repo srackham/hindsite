@@ -20,9 +20,9 @@ newsletters, articles). Features:
 Create a fully functional blog and newsletter website with just two hindsite
 commands:
 
-1. [Download the hindsite
-   release](https://github.com/srackham/hindsite/releases) for your platform and
-   extract the hindsite executable.
+1. Download the binary for your platform from the [releases
+   page](https://github.com/srackham/hindsite/releases) and extract the
+   `hindsite` executable.
 
 2. Create a new Hindsite project directory and install the builtin blog
    template:
@@ -411,7 +411,7 @@ page [URLs](#urls). Its default value is a blank string. TOML examples:
 NOTE: If an absolute URL prefix is specified then it will be ignored by the
 [serve command](#serve-command) and is assigned the default blank value. You
 must run the [build command](#build-command) before deploying a site with an
-absolute URL prefix.
+absolute URL prefix (this restriction will be removed in a future release).
 ..
 
 `user`:: This is a user defined key/value map and provides a mechanism for
@@ -790,6 +790,35 @@ correctly. For example, if are deploying to the server `http://example.com/blog`
 directory you need to set `urlprefix` to `/blog`.
 
 To synthesize absolute URLs include the URL domain in the `urlprefix`.
+
+
+## Building hindsite
+If you have the [Go language](https://golang.org/) installed and want to compile
+hindsite from source code then run the following command to automatically
+download, compile and install hindsite:
+
+    go get github.com/srackham/hindsite  
+
+NOTE:
+
+- `go get` downloads the _HEAD_ from the _master_ branch which may not be the
+  same as the latest tagged release.
+-  `go get` does not (yet) install vendored packages, it installs the latest
+   dependent packages globally which may not be the same as the vendored
+   versions.
+
+Use [dep](https://github.com/golang/dep) to install vendored packages in the `vendor` directory:
+
+    cd <hindsite-source-directory>
+    dep ensure
+
+To build a specific tagged release you need to run:
+
+    cd <hindsite-source-directory>
+    git checkout tags/<tag-name>
+    dep ensure
+    go install ./...
+    git checkout master   # Reinstate master branch.
 
 
 /*

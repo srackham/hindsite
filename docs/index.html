@@ -34,9 +34,9 @@ newsletters, articles). Features:</p>
   incremental rebuilds.</li><li>Light weight with minimal complexity.</li></ul><h2 id="quick-start">Quick Start</h2>
 <p>Create a fully functional blog and newsletter website with just two hindsite
 commands:</p>
-<ol><li><a href="https://github.com/srackham/hindsite/releases">Download the hindsite
-   release</a> for your platform and
-   extract the hindsite executable.</li><li>Create a new Hindsite project directory and install the builtin blog
+<ol><li>Download the binary for your platform from the <a href="https://github.com/srackham/hindsite/releases">releases
+   page</a> and extract the
+   <code>hindsite</code> executable.</li><li>Create a new Hindsite project directory and install the builtin blog
    template:<pre class="no-highlight"><code>mkdir myproj
 hindsite init myproj -builtin blog</code></pre>
 </li><li>Build the website, start the hindsite web server and open it in the browser:<pre class="no-highlight"><code>hindsite serve myproj -launch</code></pre>
@@ -252,7 +252,7 @@ urlprefix = "https://www.example.com"   # Absolute URL prefix.</code></pre>
 <p><i class="sans-font">NOTE</i>: If an absolute URL prefix is specified then it will be ignored by the
 <a href="#serve-command">serve command</a> and is assigned the default blank value. You
 must run the <a href="#build-command">build command</a> before deploying a site with an
-absolute URL prefix.</p>
+absolute URL prefix (this restriction will be removed in a future release).</p>
 </dd><dt><code>user</code></dt><dd>This is a user defined key/value map and provides a mechanism for
 defining custom template variables. Both keys and values are strings and the
 keys must be legal <a href="https://golang.org/ref/spec#Identifiers">Go identifier</a>. For
@@ -455,6 +455,24 @@ is <code>/myproj/build/posts/foo.html</code> then:</p>
 correctly. For example, if are deploying to the server <code>http://example.com/blog</code>
 directory you need to set <code>urlprefix</code> to <code>/blog</code>.</p>
 <p>To synthesize absolute URLs include the URL domain in the <code>urlprefix</code>.</p>
+<h2 id="building-hindsite">Building hindsite</h2>
+<p>If you have the <a href="https://golang.org/">Go language</a> installed and want to compile
+hindsite from source code then run the following command to automatically
+download, compile and install hindsite:</p>
+<pre class="no-highlight"><code>go get github.com/srackham/hindsite  </code></pre>
+<p><i class="sans-font">NOTE</i>:</p>
+<ul><li><code>go get</code> downloads the <em>HEAD</em> from the <em>master</em> branch which may not be the
+  same as the latest tagged release.</li><li><code>go get</code> does not (yet) install vendored packages, it installs the latest
+   dependent packages globally which may not be the same as the vendored
+   versions.</li></ul><p>Use <a href="https://github.com/golang/dep">dep</a> to install vendored packages in the <code>vendor</code> directory:</p>
+<pre class="no-highlight"><code>cd &lt;hindsite-source-directory&gt;
+dep ensure</code></pre>
+<p>To build a specific tagged release you need to run:</p>
+<pre class="no-highlight"><code>cd &lt;hindsite-source-directory&gt;
+git checkout tags/&lt;tag-name&gt;
+dep ensure
+go install ./...
+git checkout master   # Reinstate master branch.</code></pre>
 
 
 </div>
