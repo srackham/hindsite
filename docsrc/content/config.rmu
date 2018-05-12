@@ -7,8 +7,9 @@
 */
 {--header-ids} = 'yes'
 {--header-links} = 'yes'
-{faq} = '/faq.html'
-{reference} = '/index.html'
+{urlprefix} = '/hindsite'
+{faq} = '{urlprefix}/faq.html'
+{reference} = '{urlprefix}'
 {github} = 'https://github.com/srackham/hindsite'
 
 
