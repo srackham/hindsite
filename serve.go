@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -50,31 +49,17 @@ func setWebpage(proj *project, h http.Handler) http.Handler {
 	})
 }
 
-// stripURLPrefix server request handler strips the urlprefix from browser
-// request URLs. If URL does not start with prefix serve unmodified URL.
-func stripURLPrefix(proj *project, h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p := r.URL.Path
-		if p2 := strings.TrimPrefix(p, proj.rootConf.urlprefix); len(p2) < len(p) {
-			r2 := new(http.Request)
-			*r2 = *r
-			r2.URL = new(url.URL)
-			*r2.URL = *r.URL
-			r2.URL.Path = p2
-			h.ServeHTTP(w, r2)
-		} else {
-			h.ServeHTTP(w, r)
-		}
-	})
-}
-
 // startHTTPServer registers server request handlers and starts the HTTP server.
 func (proj *project) startHTTPServer() error {
 	handler := http.FileServer(http.Dir(proj.buildDir))
-	handler = stripURLPrefix(proj, handler)
 	handler = setWebpage(proj, handler)
 	handler = logRequest(proj, handler)
-	return http.ListenAndServe(":"+proj.port, &lrHandler{Handler: handler})
+	return http.ListenAndServe(
+		":"+proj.port,
+		&lrHandler{
+			Handler:   handler,
+			urlprefix: proj.rootConf.urlprefix,
+		})
 }
 
 // watcherFilter filters and debounces fsnotify events. When there has been a

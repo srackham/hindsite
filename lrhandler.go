@@ -6,34 +6,31 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
-)
-
-var (
-	body    = []byte("</body>")
-	newbody = []byte("<script src=\"http://localhost:35729/livereload.js\"></script>\n</body>")
 )
 
 type lrResponseWriter struct {
 	http.ResponseWriter
+	urlprefix string
 }
 
 func (w *lrResponseWriter) Write(bs []byte) (int, error) {
+	const script = "<script src=\"http://localhost:35729/livereload.js\"></script>"
 	if strings.Contains(w.Header().Get("Content-Type"), "text/html") {
-		bs = bytes.Replace(bs, body, newbody, 1)
+		bs = bytes.Replace(bs, []byte("</body>"), []byte(script+"\n</body>"), 1)
+		if w.urlprefix != "" {
+			bs = bytes.Replace(bs, []byte("href=\""+w.urlprefix), []byte("href=\""), -1)
+			bs = bytes.Replace(bs, []byte("src=\""+w.urlprefix), []byte("src=\""), -1)
+		}
 	}
 	return w.ResponseWriter.Write(bs)
 }
 
 func (w *lrResponseWriter) WriteHeader(code int) {
 	if strings.Contains(w.Header().Get("Content-Type"), "text/html") {
-		l, _ := strconv.Atoi(w.Header().Get("Content-Length"))
-		l = l + len(newbody) - len(body)
 		h := w.Header()
-		h.Set("Content-Length", fmt.Sprintf("%d", l))
+		h.Del("Content-Length")
 		h.Del("Last-Modified")
 		h.Del("Date")
 	}
@@ -42,11 +39,13 @@ func (w *lrResponseWriter) WriteHeader(code int) {
 
 type lrHandler struct {
 	http.Handler
+	urlprefix string
 }
 
 func (h *lrHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w2 := &lrResponseWriter{
 		ResponseWriter: w,
+		urlprefix:      h.urlprefix,
 	}
 	h.Handler.ServeHTTP(w2, r)
 }

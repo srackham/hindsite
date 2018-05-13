@@ -350,10 +350,6 @@ func (proj *project) configFor(p string) config {
 			result.include = conf.include
 			result.homepage = conf.homepage
 			result.urlprefix = conf.urlprefix
-			if proj.command == "serve" && strings.HasPrefix(conf.urlprefix, "http") {
-				// serve command does not process absolute urlprefixes.
-				result.urlprefix = ""
-			}
 		}
 	}
 	return result
