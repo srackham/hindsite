@@ -49,17 +49,48 @@ func setWebpage(proj *project, h http.Handler) http.Handler {
 	})
 }
 
+// htmlFilter server request handler injects the LiveReload script tag into the
+// body and strips the urlprefix from href URLs.
+func htmlFilter(proj *project, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		p := r.URL.Path
+		if strings.HasSuffix(p, "/") {
+			p += "index.html"
+		}
+		if path.Ext(p) == ".html" {
+			p = filepath.Join(proj.buildDir, filepath.FromSlash(p[1:])) // Convert URL path to file path.
+			if !fileExists(p) {
+				http.Error(w, "404: file not found: "+p, 404)
+				return
+
+			}
+			content, err := readFile(p)
+			if err != nil {
+				http.Error(w, "500: "+err.Error(), 500)
+				return
+			}
+			// Inject LiveReload script tag.
+			content = strings.Replace(content, "</body>", "<script src=\"http://localhost:35729/livereload.js\"></script>\n</body>", 1)
+			if proj.rootConf.urlprefix != "" {
+				// Strip urlprefix from URLs.
+				content = strings.Replace(content, "href=\""+proj.rootConf.urlprefix, "href=\"", -1)
+				content = strings.Replace(content, "src=\""+proj.rootConf.urlprefix, "src=\"", -1)
+			}
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Write([]byte(content))
+		} else {
+			h.ServeHTTP(w, r)
+		}
+	})
+}
+
 // startHTTPServer registers server request handlers and starts the HTTP server.
 func (proj *project) startHTTPServer() error {
 	handler := http.FileServer(http.Dir(proj.buildDir))
+	handler = htmlFilter(proj, handler)
 	handler = setWebpage(proj, handler)
 	handler = logRequest(proj, handler)
-	return http.ListenAndServe(
-		":"+proj.port,
-		&lrHandler{
-			Handler:   handler,
-			urlprefix: proj.rootConf.urlprefix,
-		})
+	return http.ListenAndServe(":"+proj.port, handler)
 }
 
 // watcherFilter filters and debounces fsnotify events. When there has been a
