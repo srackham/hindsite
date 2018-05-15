@@ -166,7 +166,11 @@ live reloading.</p>
 -launch
 -port PORT
 -v</code></pre>
-<ul><li><code>-port</code> sets the server port number to <code>PORT</code> (defaults to 1212).</li><li>The <code>-launch</code> option opens the project home page in the default web browser.</li><li>Press the <em>R</em> key followed by the <em>Enter</em> key to force a complete rebuild.</li></ul><h4 id="partial-rebuilds">Partial rebuilds</h4>
+<ul><li><code>-port</code> sets the server port number to <code>PORT</code> (defaults to 1212).</li><li>The <code>-launch</code> option opens the project home page in the default web browser.</li><li>Press the <em>R</em> key followed by the <em>Enter</em> key to force a complete rebuild.</li><li>The server strips the <code>urlprefix</code> from URLs in HTML files before sending them
+  to the browser. This allows the build to be tested irrespective of the
+  <code>urlprefix</code> value.</li><li>To enable browser live reloads the server inserts the
+  <a href="http://livereload.com/">LiveReload</a> script tag into HTML files prior to
+  sending them to the browser.</li></ul><h4 id="partial-rebuilds">Partial rebuilds</h4>
 <p>To speed up live reloads and to make the content creation process easier and
 more responsive the <a href="#serve-command">serve command</a> automatically performs
 partial builds when content files are modified, added or deleted.</p>
@@ -249,10 +253,6 @@ TOML example:<pre class="no-highlight"><code>timezone = "Pacific/Auckland"</code
 </dd><dt><code>urlprefix</code> †</dt><dd>This parameter is prepended to all synthesized document and index
 page <a href="#urls">URLs</a>. Its default value is a blank string. TOML examples:<pre class="no-highlight"><code>urlprefix = "/blog"                     # Root-relative URL prefix.
 urlprefix = "https://www.example.com"   # Absolute URL prefix.</code></pre>
-<p><i class="sans-font">NOTE</i>: If an absolute URL prefix is specified then it will be ignored by the
-<a href="#serve-command">serve command</a> and is assigned the default blank value. You
-must run the <a href="#build-command">build command</a> before deploying a site with an
-absolute URL prefix (this restriction will be removed in a future release).</p>
 </dd><dt><code>user</code></dt><dd>This is a user defined key/value map and provides a mechanism for
 defining custom template variables. Both keys and values are strings and the
 keys must be legal <a href="https://golang.org/ref/spec#Identifiers">Go identifier</a>. For
@@ -455,10 +455,12 @@ is <code>/myproj/build/posts/foo.html</code> then:</p>
 correctly. For example, if are deploying to the server <code>http://example.com/blog</code>
 directory you need to set <code>urlprefix</code> to <code>/blog</code>.</p>
 <p>To synthesize absolute URLs include the URL domain in the <code>urlprefix</code>.</p>
+<p><i class="sans-font">NOTE</i>: The hindsite <a href="#serve-command">serve command</a> strips the <code>urlprefix</code> from
+HTML responses before sending them to the browser.</p>
 <h2 id="building-hindsite">Building hindsite</h2>
 <p>If you have the <a href="https://golang.org/">Go language</a> installed and want to compile
-hindsite from source code then run the following command to automatically
-download, compile and install hindsite:</p>
+hindsite from source code then run the following command to download, compile
+and install hindsite:</p>
 <pre class="no-highlight"><code>go get github.com/srackham/hindsite  </code></pre>
 <p><i class="sans-font">NOTE</i>:</p>
 <ul><li><code>go get</code> downloads the <em>HEAD</em> from the <em>master</em> branch which may not be the

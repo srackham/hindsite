@@ -257,6 +257,13 @@ Applicable options:
 - `-port` sets the server port number to `PORT` (defaults to 1212).
 - The `-launch` option opens the project home page in the default web browser.
 - Press the _R_ key followed by the _Enter_ key to force a complete rebuild.
+- The server strips the `urlprefix` from URLs in HTML files before sending them
+  to the browser. This allows the build to be tested irrespective of the
+  `urlprefix` value.
+- To enable browser live reloads the server inserts the
+  [LiveReload](http://livereload.com/) script tag into HTML files prior to
+  sending them to the browser.
+
 
 #### Partial rebuilds
 To speed up live reloads and to make the content creation process easier and
@@ -404,15 +411,9 @@ TOML example:
 
 `urlprefix` †:: This parameter is prepended to all synthesized document and index
 page [URLs](#urls). Its default value is a blank string. TOML examples:
-..
+
     urlprefix = "/blog"                     # Root-relative URL prefix.
     urlprefix = "https://www.example.com"   # Absolute URL prefix.
-
-NOTE: If an absolute URL prefix is specified then it will be ignored by the
-[serve command](#serve-command) and is assigned the default blank value. You
-must run the [build command](#build-command) before deploying a site with an
-absolute URL prefix (this restriction will be removed in a future release).
-..
 
 `user`:: This is a user defined key/value map and provides a mechanism for
 defining custom template variables. Both keys and values are strings and the
@@ -791,11 +792,14 @@ directory you need to set `urlprefix` to `/blog`.
 
 To synthesize absolute URLs include the URL domain in the `urlprefix`.
 
+NOTE: The hindsite [serve command](#serve-command) strips the `urlprefix` from
+HTML responses before sending them to the browser.
+
 
 ## Building hindsite
 If you have the [Go language](https://golang.org/) installed and want to compile
-hindsite from source code then run the following command to automatically
-download, compile and install hindsite:
+hindsite from source code then run the following command to download, compile
+and install hindsite:
 
     go get github.com/srackham/hindsite  
 
