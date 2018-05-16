@@ -36,20 +36,23 @@
 
 {{define "docfooter"}}
 <div class="docsfooter no-print">
-    <span class="left">
-        {{if .prev.url}}
-        « <a href="{{.prev.url}}">Previous</a>
-        {{else}}
-        <span class="disabled">« Previous</span>
-        {{end}}
-    </span>
-    <span class="right">
-        {{if .next.url}}
-        <a href="{{.next.url}}">Next</a> »
-        {{else}}
-        <span class="disabled">Next »</span>
-        {{end}}
-    </span>
+    <div>
+        <span class="left">
+            {{if .prev.url}}
+            « <a href="{{.prev.url}}">Previous</a>
+            {{else}}
+            <span class="disabled">« Previous</span>
+            {{end}}
+        </span>
+        <span class="right">
+            {{if .next.url}}
+            <a href="{{.next.url}}">Next</a> »
+            {{else}}
+            <span class="disabled">Next »</span>
+            {{end}}
+        </span>
+    </div>
+    <div class="clear"></div>
 </div>
 {{end}}
 
