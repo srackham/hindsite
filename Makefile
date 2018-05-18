@@ -35,16 +35,20 @@ clean:
 push:
 	git push -u --tags origin master
 
-.PHONY: build-doc
-build-doc: install
+.PHONY: build-docs
+build-docs: install
 	hindsite build docsrc -build docs
 
-.PHONY: serve-doc
-serve-doc: install
+.PHONY: serve-docs
+serve-docs: install
 	hindsite serve docsrc -build docs -launch -v
 
+.PHONY: validate-docs
+validate-docs: build-docs
+	for f in $$(find ./docs -name "*.html"); do echo $$f; html-validator --verbose --format text --file $$f; done
+
 .PHONY: build
-build: build-doc
+build: build-docs
 	mkdir -p ./bin
 	BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)
 	COMMIT=$$(git rev-parse HEAD)
@@ -111,22 +115,16 @@ release:
 		--name $$SUMS \
 		--file $$SUMS
 
-#
-# Builtin blog development tasks.
-#
 BLOG_DIR = ./builtin/blog
-
-.PHONY: blog
-blog: build-blog serve-blog
 
 # Built the builtin blog's init directory.
 .PHONY: build-blog
 build-blog: install
-	hindsite build $(BLOG_DIR) -content $(BLOG_DIR)/template/init
+	hindsite build $(BLOG_DIR) -content $(BLOG_DIR)/template/init -v
 
 .PHONY: serve-blog
 serve-blog: install
-	hindsite serve $(BLOG_DIR) -content $(BLOG_DIR)/template/init
+	hindsite serve $(BLOG_DIR) -content $(BLOG_DIR)/template/init -launch -v
 
 .PHONY: validate-blog
 validate-blog: build-blog
