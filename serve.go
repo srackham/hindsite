@@ -203,6 +203,7 @@ func (proj *project) serve() error {
 			select {
 			case c := <-kb:
 				if c == 'r' || c == 'R' {
+					proj.println("rebuilding...")
 					err = proj.build()
 					if err != nil {
 						done <- err
