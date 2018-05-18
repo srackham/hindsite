@@ -11,5 +11,5 @@ builtin/blog/content/
 builtin/blog/build/
 builtin/minimal/content/
 builtin/minimal/build/
-benchmark.zip
+hindsite-benchmark.zip
 vendor/
