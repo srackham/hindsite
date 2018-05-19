@@ -9,11 +9,11 @@ hindsite is a static website generator. It builds static websites with optional
 document and tag indexes from Markdown source documents (e.g. blogs posts,
 newsletters, articles). Features:
 
-- Stand-alone single-file executable.
-- Fast site builds.
-- Built-in development web server with Live Reload, file watcher and automatic
-  incremental rebuilds.
 - Light weight with minimal complexity.
+- [High performance]({faq}#how-fast-is-hindsite).
+- Stand-alone single-file executable.
+- Built-in development web server with Live Reload, file watcher and incremental
+  rebuilds.
 
 
 ## Quick Start
@@ -267,8 +267,8 @@ Applicable options:
 
 #### Partial rebuilds
 To speed up live reloads and to make the content creation process easier and
-more responsive the [serve command](#serve-command) automatically performs
-partial builds when content files are modified, added or deleted.
+more responsive the _serve command_ automatically performs partial builds when
+content files are modified, added or deleted.
 
 The amount of processing required will depend on the size of your site and the
 type of change. Most content updates are very fast but processing times increase
@@ -278,22 +278,24 @@ if:
 - A configuration file or template file is added, changed or removed
   (necessitating a full site rebuild).
 
-To ensure build integrity you should always perform a complete rebuild before
-deployment and after project structural changes (the serve command does not
-automatically process changes to the project directory structure).
+IMPORTANT: To ensure build integrity you should always perform a complete
+rebuild before deployment and after project structural changes (the serve
+command does not automatically process changes to the project directory
+structure).
 
 
 ## Configuration
-Website generation is customized with configuration parameters.
+Website generation is customized with configuration parameters from one or more
+configuration files.
 
 ### Configuration files
-Configuration parameters are specified in TOML and YAML markup files named
-`config.toml` and `config.yaml` respectively.
+Configuration files are TOML and YAML markup files named `config.toml` and
+`config.yaml` respectively in the project _template directory_.
 
-- Configuration files can be assigned, per directory, anywhere in the _template
-  directory tree_.
+- Configuration files can located anywhere except the _init_ directory in the
+  _template directory tree_.
 - A configuration file only affects documents in the corresponding content
-  directory and subdirectories.
+  directory and its subdirectories.
 - The configuration applied to a document or index is computed by merging
   configuration files lying on the corresponding _template directory_ path.
   Configuration files closer to the document have higher precedence than those
@@ -389,7 +391,7 @@ document's content directory location does not change a permalink URL.
 and static files in the content directory that undergo [text
 template](#text-templates) expansion. The file name extensions include the
 leading dot character. By default no content files are expanded. `templates` can
-also be set in the document [front matter](#font-matter). TOML example:
+also be set in the document [front matter](#front-matter). TOML example:
 
     templates = ".css|.html|.js|.md"
 
@@ -469,8 +471,7 @@ rendered as a [text template](#text-templates) prior to layout template
 processing.
 
 NOTE: In addition to Markdown, _hindsite_ can also process [Rimu
-markup](http://rimumarkup.org/) (this feature is currently experimental). The
-documentation you are reading is written in Rimu.
+markup](http://rimumarkup.org/). This documentation is written in Rimu.
 
 
 ## Static files
@@ -593,16 +594,18 @@ Examples with `timezone = "+13:00"`:
 `description`:: A brief summary of the document. If not specified `description`
 defaults to the content up to the first `<!--more-->` tag or blank if there is
 no `<!--more-->` tag. The `<!--more-->` tag must appear alone on a separate
-line. The description is rendered as Markdown.
+line. The description is processed as Markdown.
 
-`draft`:: If set to `true` then the document is not processed unless the
-`-drafts` was specified. Defaults to false.
+`draft`:: If set to `true` then the document will not be processed. This can be
+overridden with the [build](#build-command) and [serve](#serve-command) command
+`-drafts` option. Defaults to `false`.
 
 `layout`:: The name of the template used to render the document. `layout`
 defaults to the closest `layout.html` [HTML template](#html-templates).
 
-`permalink`:: If specified it overrides the configuration
-[`permalink`](#configuration-parameters) value.
+`permalink`:: Sets the document [`permalink`](#configuration-parameters) value.
+Defaults to the [`permalink`](#configuration-parameters) configuration parameter
+value.
 
 `tags`:: A list of tag keywords and phrases. Examples:
 ```
@@ -613,7 +616,7 @@ tags = ["foo foo valve", "qux", "baz"]
 tags: [foo foo valve, qux, baz]
 ```
 
-`templates`:: If specified it overrides the [`templates`](#configuration-parameters)
+`templates`:: Defaults to the [`templates`](#configuration-parameters)
 configuration value. The only sensible values in this context are a blank string
 (to disable text template expansion) or the document's file name extension (to
 enable text template expansion).
@@ -626,12 +629,11 @@ document's URL.
 file name stripped of the date prefix (if there is one); with hyphens replaced
 by spaces; then capitalized.
 
-`url`:: The synthesized document [URL](#urls).
-
 `user`:: `user` is a user defined key/value map. It is merged with the lower
-precedence [`user`](#configuration-parameters) configuration parameter to become
-the `.user` template variable. If `user` is not specified in the document front
-matter it defaults to the `user` configuration parameter value.
+precedence [`user` configuration parameter](#configuration-parameters) to become
+the `.user` [template variable](#document-template-variables). If `user` is not
+specified in the document front matter it defaults to the `user` configuration
+parameter value.
 
 
 ## Document template variables
@@ -645,28 +647,35 @@ templates](#text-templates).
 
 `.body`:: The Markdown document body rendered as HTML.
 
-`.description`:: The HTML document description (HTML).
+`.description`:: The rendered (HTML) document
+[`description`](#front-matter-values) front matter value.
 
 `.shortdate`, `.mediumdate`, `.longdate`:: The document publication date strings
 formatted using the `shortdate`, `mediumdate` and `longdate` [configuration
 parameters](#configuration-parameters) respectively.
 
-`.date`:: Document publication date.
+`.date`:: [`date`](#front-matter-values) front matter value.
+
+`.layout`:: [`layout`](#front-matter-values) front matter value.
 
 `.modtime`:: Content file modification date and time.
 
 `.next`, `.prev`:: The next and previous document URLs in primary index order.
 
-`.slug`:: [Front matter value](#front-matter-values).
+`.permalink`:: [`permalink`](#front-matter-values) front matter value.
+
+`.slug`:: [`slug`](#front-matter-values) front matter value.
 
 `.url`:: Synthesized document [URL](#urls).
 
 `.tags`:: An iterable list of tags. Each item contains the variables `.tag` (the
 tag) and `.url` (the tag index URL).
 
+`.templates`:: [`templates`](#front-matter-values) front matter value.
+
 `.title`:: Document title.
 
-`.urlprefix`:: The [`urlprefix`](#configuration-parameters) configuration value.
+`.urlprefix`:: [`urlprefix`](#configuration-parameters) configuration value.
 
 `.user`:: This key/value map is synthesized by merging the (higher precedence)
 document [front matter `user` value](#front-matter-values) with the document's `user`
@@ -730,7 +739,7 @@ set of [document template variables](#document-template-variables).
        `.url` of the previous, next, first and last index pages. For example
       `.page.prev.number` is the page number (1...) of the previous document index page.
 
-`.urlprefix`:: The [`urlprefix`](#configuration-parameters) value.
+`.urlprefix`:: The [`urlprefix`](#configuration-parameters) configuration parameter value.
 
 `.user`:: The index configuration [`user`](#configuration-parameters) key/value map.
 ..
@@ -746,9 +755,9 @@ index webpage. If it is not present the tags index files are not built.
   `.url`::: The URL of of the tag's document index.
   `.count`::: The number of documents with this tag.
 
-`.urlprefix`:: The [`urlprefix`](#configuration-parameters) value.
+`.urlprefix`:: The [`urlprefix`](#configuration-parameters) configuration parameter value.
 
-`.user`:: The index configuration [`user`](#configuration values) key/value map.
+`.user`:: The index configuration [`user`](#configuration-parameters) key/value map.
 ..
 
 
@@ -785,12 +794,13 @@ is `/myproj/build/posts/foo.html` then:
 The above default behavior can be customized using the `permalink`
 [configuration parameter](#configuration-parameters).
 
+To synthesize absolute URLs include the URL domain in the `urlprefix`.
+
 If you are deploying to a web server subdirectory then you need to set the
 `urlprefix` configuration parameter to ensure synthesized URLs are rooted
 correctly. For example, if are deploying to the server `http://example.com/blog`
-directory you need to set `urlprefix` to `/blog`.
-
-To synthesize absolute URLs include the URL domain in the `urlprefix`.
+directory you need to set `urlprefix` to either `/blog` (to generate
+root-relative URLs) or `http://example.com/blog` (to generate absolute URLs).
 
 NOTE: The hindsite [serve command](#serve-command) strips the `urlprefix` from
 HTML responses before sending them to the browser.
@@ -821,53 +831,5 @@ To build a specific tagged release you need to run:
     cd <hindsite-source-directory>
     git checkout tags/<tag-name>
     dep ensure
-    go install ./...
+    make build            # Writes built releases to ./bin directory.
     git checkout master   # Reinstate master branch.
-
-
-/*
-## Vocabulary
-**build directory**: A directory (default name `build`) into which the generated
-Website is written.
-
-**document**: A Markdown (`.md`) in the project _content directory_. Each
-document generates a corresponding wepage e.g. a blog post, a newsletter or an
-article.
-
-**configuration file**: Optional TOML (`config.toml`) or YAML (`config.yaml`)
-files containing configuration parameters located in the project's _template
-directory_.
-
-**content directory**: A directory (default name `content`) containing content
-[documents](#documents) and [static files](#static-files).
-
-**front matter**: Meta-data embedded at the start of [documents](#documents) and
-[static files](#static-files).
-
-**primary index**: An [index](#indexes) that is not nested (has no parent
-index). A document can only belong to one primary index.
-
-**project**: A hindsite [project](#projects) consists of a _content directory_,
-a _template directory_ and a _build directory_. Hindsite uses the contents of
-the template and content directories to generate a website which it writes to
-the build directory.
-
-**indexed directory**: A directory in the content directory that generates a
-document [index](#indexes) and optional tag indexes. The corresponding template
-directory contains a [docs.html](#html-templates) template and an optional
-[tags.html](#html-templates) template. The presence of the `docs.html` template
-flags the directory as indexed.
-
-**indexed document**: A [document](#documents) residing in an indexed directory.
-
-**indexes directory**: The `indexes` directory at the root of the build
-directory containing generated index pages.
-
-**secondary index**: An index that is nested inside a parent index.
-
-**tag**: A keyword or phrase used to categorize a content document.
-
-**template directory**: A directory (default name `template`) containing [HTML
-templates](#html-templates) and [configuration files](#configuration).
-
-*/

@@ -23,7 +23,7 @@ example:
 
     {{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}
 
-The `.shortdate`, `.mediumdate` and `.longdate` [document template
+NOTE: The `.shortdate`, `.mediumdate` and `.longdate` [document template
 variables]({reference}/#document-template-variables) are simpler and preferable
 to using `.date` directly.
 
@@ -99,39 +99,78 @@ expansion and prefix root-relative URLs with `{{.urlprefix}}`.
 hindsite compares favorably with [Hugo](https://gohugo.io/) (which bills
 itself as "The world’s fastest framework for building websites").
 
-In informal measurements carried out on a site with 5000 Markdown posts (20MB
-total) hindsite was two to four times faster than Hugo on full rebuilds but on
+In informal measurements carried out on a site with 5000 Markdown posjs (20MB
+total) hindsite was four to five times faster than Hugo on full rebuilds. On
 subsequent incremental rebuilds hindsite ranges from six times faster than Hugo
 (if related indexes pages are rebuilt) to around ten times slower than Hugo (if
-all index pages have to be rebuilt). The `hugo` build command uses 9 times more
-memory than the `hindsite build` command; the `hugo server` command consumed a
-whopping 11.2GB (almost 200 times the `hindsite serve` command).
+all index pages have to be rebuilt). The `hugo` build command uses approximately
+ten times more memory than the `hindsite build` command; the `hugo server`
+command consumed a whopping 11.2GB (around 180 times the `hindsite serve`
+command).
 
-_Platform_::
-hindsite v0.9.0 (windows/amd64) running on Dell XPS27 PC under Windows 10.
+IMPORTANT: This is not an "apples with apples" comparison, Hugo is more complex
+and has more features than hindsite. Differences between the respective themes
+is also a factor -- the Hugo theme is heavier than the hindsite theme. As always,
+benchmarks are irrelevant if they do not address your specific use cases.
 
-_Build times and memory consumption_::
-- `hindsite build` command (full build): 72.11s (first run), 23.76s
-  (subsequent), memory consumption 34.1MB.
-- `hindsite serve` command: 63.14s (initial full build), 21.74s (subsequent),
-  memory consumption 58.1MB.
-- `hindsite serve` command (partial build, updating one document and entire
-  index): 3.74s, memory consumption 58.4MB.
-- `hindsite serve` command (partial build updating one document): 0.07s, memory
-  consumption 58.2MB.
+#### hindsite v1.0.0 (windows/amd64) running on Dell XPS27 PC under Windows 10.
+_Execution times_::
+- `hindsite build` command: 27.72s (full build, average of 5).
+- `hindsite serve` command: 29.64s (full rebuild, average of 5).
+- `hindsite serve` command: 4.91s (partial build, one document and
+  entire index, average of 5).
+- `hindsite serve` command: 0.07s (partial build, one document and related index
+  pages, average of 5).
 
-The same documents were built with Hugo:
+  _Memory consumption_::
+  - `hindsite build` command: 34MB
+  - `hindsite server` command: 62MB
 
-_Platform_:: Hugo v0.37.1 (windows/amd64) running on Dell XPS27 PC under Windows
-10. Hugo setup as per the [Hugo _Quick Start_
+#### Hugo v0.40.3 (windows/amd64) running on Dell XPS27 PC under Windows 10
+Hugo setup as per the [Hugo _Quick Start_
 instructions](https://gohugo.io/getting-started/quick-start/).
 
-_Build times and memory consumption_::
-- `hugo` command (full rebuild): 153.99s (first run), 135.51s (subsequent),
-  memory consumption 314.3MB.
-- `hugo server` command (initial full build): 119.67s, memory consumption 11.2GB.
-- `hugo server` command (partial rebuild): 0.34s, memory consumption 11.2GB.
+_Execution times_::
+- `hugo` command: 162.92s (full build, average of 5).
+- `hugo server` command: 128.64s (initial full build).
+- `hugo server` command: 0.47s (partial rebuild).
 
-NOTE: Exclude the project folder from Windows Defender anti-virus real-time
-protection (not doing this imposed a 4x performance decrease for both
-hindsite and Hugo).
+  _Memory consumption_::
+  - `hugo` command: 337MB
+  - `hugo server` command: 11.2GB
+
+NOTE: Exclude the project folders from Windows Defender anti-virus real-time
+protection (not doing this imposed a 4x performance decrease for both hindsite
+and Hugo).
+
+The benchmarked hindsite and Hugo projects are available in the downloadable
+[hindsite-benchmark.zip](https://drive.google.com/uc?export=download&id=1vm1542RE3W7s9qIYfyYsiTvuwXFZaMP_)
+file (7.4MB):
+
+```
+├── hindsite
+│   ├── build
+│   ├── content
+│   └── template
+└── hugo
+    ├── archetypes
+    ├── content
+    ├── data
+    ├── layouts
+    ├── public
+    ├── static
+    └── themes
+```
+
+To compare performance run `hindsite` and `hugo` commands from their respective
+project directories:
+
+```
+cd hindsite
+hindsite build .  # Build.
+hindsite serve .  # Build and serve.
+
+cd hugo
+hugo              # Build.
+hugo server       # Build and serve.
+```

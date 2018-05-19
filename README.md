@@ -1,22 +1,16 @@
 # Hindsite website generator
 
 
-## IMPORTANT: hindsite is currently in a pre-release phase and is not production ready
-Having said that, the current release is feature-complete and has no known
-significant bugs, but there are some loose ends to be tidied up (mainly regards
-the documentation and the release process).
-
-
 ## Overview
 hindsite is a static website generator. It builds static websites with optional
 document and tag indexes from Markdown source documents (e.g. blogs posts,
 newsletters, articles). Features:
 
-- Stand-alone single-file executable.
-- Fast site builds.
-- Built-in development web server with Live Reload, file watcher and automatic
-  incremental rebuilds.
 - Light weight with minimal complexity.
+- [High performance](https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite).
+- Stand-alone single-file executable.
+- Built-in development web server with Live Reload, file watcher and incremental
+  rebuilds.
 
 
 ## Install

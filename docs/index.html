@@ -30,8 +30,8 @@
 <p>hindsite is a static website generator. It builds static websites with optional
 document and tag indexes from Markdown source documents (e.g. blogs posts,
 newsletters, articles). Features:</p>
-<ul><li>Stand-alone single-file executable.</li><li>Fast site builds.</li><li>Built-in development web server with Live Reload, file watcher and automatic
-  incremental rebuilds.</li><li>Light weight with minimal complexity.</li></ul><h2 id="quick-start">Quick Start</h2>
+<ul><li>Light weight with minimal complexity.</li><li><a href="/hindsite/faq.html#how-fast-is-hindsite">High performance</a>.</li><li>Stand-alone single-file executable.</li><li>Built-in development web server with Live Reload, file watcher and incremental
+  rebuilds.</li></ul><h2 id="quick-start">Quick Start</h2>
 <p>Create a fully functional blog and newsletter website with just two hindsite
 commands:</p>
 <ol><li>Download the binary for your platform from the <a href="https://github.com/srackham/hindsite/releases">releases
@@ -172,23 +172,25 @@ live reloading.</p>
   <a href="http://livereload.com/">LiveReload</a> script tag into HTML files prior to
   sending them to the browser.</li></ul><h4 id="partial-rebuilds">Partial rebuilds</h4>
 <p>To speed up live reloads and to make the content creation process easier and
-more responsive the <a href="#serve-command">serve command</a> automatically performs
-partial builds when content files are modified, added or deleted.</p>
+more responsive the <em>serve command</em> automatically performs partial builds when
+content files are modified, added or deleted.</p>
 <p>The amount of processing required will depend on the size of your site and the
 type of change. Most content updates are very fast but processing times increase
 if:</p>
 <ul><li>Indexed documents are added or deleted (necessitating full index rebuild).</li><li>A configuration file or template file is added, changed or removed
-  (necessitating a full site rebuild).</li></ul><p>To ensure build integrity you should always perform a complete rebuild before
-deployment and after project structural changes (the serve command does not
-automatically process changes to the project directory structure).</p>
+  (necessitating a full site rebuild).</li></ul><p><i class="sans-font">IMPORTANT</i>: To ensure build integrity you should always perform a complete
+rebuild before deployment and after project structural changes (the serve
+command does not automatically process changes to the project directory
+structure).</p>
 <h2 id="configuration">Configuration</h2>
-<p>Website generation is customized with configuration parameters.</p>
+<p>Website generation is customized with configuration parameters from one or more
+configuration files.</p>
 <h3 id="configuration-files">Configuration files</h3>
-<p>Configuration parameters are specified in TOML and YAML markup files named
-<code>config.toml</code> and <code>config.yaml</code> respectively.</p>
-<ul><li>Configuration files can be assigned, per directory, anywhere in the <em>template
-  directory tree</em>.</li><li>A configuration file only affects documents in the corresponding content
-  directory and subdirectories.</li><li>The configuration applied to a document or index is computed by merging
+<p>Configuration files are TOML and YAML markup files named <code>config.toml</code> and
+<code>config.yaml</code> respectively in the project <em>template directory</em>.</p>
+<ul><li>Configuration files can located anywhere except the <em>init</em> directory in the
+  <em>template directory tree</em>.</li><li>A configuration file only affects documents in the corresponding content
+  directory and its subdirectories.</li><li>The configuration applied to a document or index is computed by merging
   configuration files lying on the corresponding <em>template directory</em> path.
   Configuration files closer to the document have higher precedence than those
   further up the directory path.</li><li>Configuration files are optional, though most projects will have at least one
@@ -241,7 +243,7 @@ document's content directory location does not change a permalink URL.</p>
 and static files in the content directory that undergo <a href="#text-templates">text
 template</a> expansion. The file name extensions include the
 leading dot character. By default no content files are expanded. <code>templates</code> can
-also be set in the document <a href="#font-matter">front matter</a>. TOML example:<pre class="no-highlight"><code>templates = ".css|.html|.js|.md"</code></pre>
+also be set in the document <a href="#front-matter">front matter</a>. TOML example:<pre class="no-highlight"><code>templates = ".css|.html|.js|.md"</code></pre>
 </dd><dt><code>timezone</code></dt><dd>Sets the time zone for dates and times. Set to a TZ name from the
 IANA Timezone Database or to <code>"Local"</code> (the system's local timezone).
 TOML example:<pre class="no-highlight"><code>timezone = "Pacific/Auckland"</code></pre>
@@ -289,8 +291,7 @@ specified.</p>
 rendered as a <a href="#text-templates">text template</a> prior to layout template
 processing.</p>
 <p><i class="sans-font">NOTE</i>: In addition to Markdown, <em>hindsite</em> can also process <a href="http://rimumarkup.org/">Rimu
-markup</a> (this feature is currently experimental). The
-documentation you are reading is written in Rimu.</p>
+markup</a>. This documentation is written in Rimu.</p>
 <h2 id="static-files">Static files</h2>
 <p>Static files are non-document (non-Markdown) files in the <em>content directory</em>.
 These include website resources such as CSS, JavaScript and image files. The
@@ -363,34 +364,38 @@ The <code>date</code> format is RFC 3339 with the following relaxations:<ul><li>
 </dd><dt><code>description</code></dt><dd>A brief summary of the document. If not specified <code>description</code>
 defaults to the content up to the first <code>&lt;!--more--&gt;</code> tag or blank if there is
 no <code>&lt;!--more--&gt;</code> tag. The <code>&lt;!--more--&gt;</code> tag must appear alone on a separate
-line. The description is rendered as Markdown.</dd><dt><code>draft</code></dt><dd>If set to <code>true</code> then the document is not processed unless the
-<code>-drafts</code> was specified. Defaults to false.</dd><dt><code>layout</code></dt><dd>The name of the template used to render the document. <code>layout</code>
-defaults to the closest <code>layout.html</code> <a href="#html-templates">HTML template</a>.</dd><dt><code>permalink</code></dt><dd>If specified it overrides the configuration
-<a href="#configuration-parameters"><code>permalink</code></a> value.</dd><dt><code>tags</code></dt><dd>A list of tag keywords and phrases. Examples:<pre class="no-highlight"><code># TOML
+line. The description is processed as Markdown.</dd><dt><code>draft</code></dt><dd>If set to <code>true</code> then the document will not be processed. This can be
+overridden with the <a href="#build-command">build</a> and <a href="#serve-command">serve</a> command
+<code>-drafts</code> option. Defaults to <code>false</code>.</dd><dt><code>layout</code></dt><dd>The name of the template used to render the document. <code>layout</code>
+defaults to the closest <code>layout.html</code> <a href="#html-templates">HTML template</a>.</dd><dt><code>permalink</code></dt><dd>Sets the document <a href="#configuration-parameters"><code>permalink</code></a> value.
+Defaults to the <a href="#configuration-parameters"><code>permalink</code></a> configuration parameter
+value.</dd><dt><code>tags</code></dt><dd>A list of tag keywords and phrases. Examples:<pre class="no-highlight"><code># TOML
 tags = ["foo foo valve", "qux", "baz"]
 
 # YAML
 tags: [foo foo valve, qux, baz]</code></pre>
-</dd><dt><code>templates</code></dt><dd>If specified it overrides the <a href="#configuration-parameters"><code>templates</code></a>
+</dd><dt><code>templates</code></dt><dd>Defaults to the <a href="#configuration-parameters"><code>templates</code></a>
 configuration value. The only sensible values in this context are a blank string
 (to disable text template expansion) or the document's file name extension (to
 enable text template expansion).</dd><dt><code>slug</code></dt><dd>The slug replaces the file name (minus file name extension) of the
 generated document webpage which also determines the last component of the
 document's URL.</dd><dt><code>title</code></dt><dd>The document title. If not specified <code>title</code> defaults the document
 file name stripped of the date prefix (if there is one); with hyphens replaced
-by spaces; then capitalized.</dd><dt><code>url</code></dt><dd>The synthesized document <a href="#urls">URL</a>.</dd><dt><code>user</code></dt><dd><code>user</code> is a user defined key/value map. It is merged with the lower
-precedence <a href="#configuration-parameters"><code>user</code></a> configuration parameter to become
-the <code>.user</code> template variable. If <code>user</code> is not specified in the document front
-matter it defaults to the <code>user</code> configuration parameter value.</dd></dl><h2 id="document-template-variables">Document template variables</h2>
+by spaces; then capitalized.</dd><dt><code>user</code></dt><dd><code>user</code> is a user defined key/value map. It is merged with the lower
+precedence <a href="#configuration-parameters"><code>user</code> configuration parameter</a> to become
+the <code>.user</code> <a href="#document-template-variables">template variable</a>. If <code>user</code> is not
+specified in the document front matter it defaults to the <code>user</code> configuration
+parameter value.</dd></dl><h2 id="document-template-variables">Document template variables</h2>
 <p>Document template variables are a combination of document <a href="#front-matter-values">front matter
 values</a>, document <a href="#configuration-parameters">configuration
 parameters</a> and synthesized values. They are used in
 layout and index page <a href="#html-templates">HTML templates</a> and in <a href="#text-templates">text
 templates</a>.</p>
-<dl><dt><code>.author</code></dt><dd>Document author.</dd><dt><code>.body</code></dt><dd>The Markdown document body rendered as HTML.</dd><dt><code>.description</code></dt><dd>The HTML document description (HTML).</dd><dt><code>.shortdate</code>, <code>.mediumdate</code>, <code>.longdate</code></dt><dd>The document publication date strings
+<dl><dt><code>.author</code></dt><dd>Document author.</dd><dt><code>.body</code></dt><dd>The Markdown document body rendered as HTML.</dd><dt><code>.description</code></dt><dd>The rendered (HTML) document
+<a href="#front-matter-values"><code>description</code></a> front matter value.</dd><dt><code>.shortdate</code>, <code>.mediumdate</code>, <code>.longdate</code></dt><dd>The document publication date strings
 formatted using the <code>shortdate</code>, <code>mediumdate</code> and <code>longdate</code> <a href="#configuration-parameters">configuration
-parameters</a> respectively.</dd><dt><code>.date</code></dt><dd>Document publication date.</dd><dt><code>.modtime</code></dt><dd>Content file modification date and time.</dd><dt><code>.next</code>, <code>.prev</code></dt><dd>The next and previous document URLs in primary index order.</dd><dt><code>.slug</code></dt><dd><a href="#front-matter-values">Front matter value</a>.</dd><dt><code>.url</code></dt><dd>Synthesized document <a href="#urls">URL</a>.</dd><dt><code>.tags</code></dt><dd>An iterable list of tags. Each item contains the variables <code>.tag</code> (the
-tag) and <code>.url</code> (the tag index URL).</dd><dt><code>.title</code></dt><dd>Document title.</dd><dt><code>.urlprefix</code></dt><dd>The <a href="#configuration-parameters"><code>urlprefix</code></a> configuration value.</dd><dt><code>.user</code></dt><dd>This key/value map is synthesized by merging the (higher precedence)
+parameters</a> respectively.</dd><dt><code>.date</code></dt><dd><a href="#front-matter-values"><code>date</code></a> front matter value.</dd><dt><code>.layout</code></dt><dd><a href="#front-matter-values"><code>layout</code></a> front matter value.</dd><dt><code>.modtime</code></dt><dd>Content file modification date and time.</dd><dt><code>.next</code>, <code>.prev</code></dt><dd>The next and previous document URLs in primary index order.</dd><dt><code>.permalink</code></dt><dd><a href="#front-matter-values"><code>permalink</code></a> front matter value.</dd><dt><code>.slug</code></dt><dd><a href="#front-matter-values"><code>slug</code></a> front matter value.</dd><dt><code>.url</code></dt><dd>Synthesized document <a href="#urls">URL</a>.</dd><dt><code>.tags</code></dt><dd>An iterable list of tags. Each item contains the variables <code>.tag</code> (the
+tag) and <code>.url</code> (the tag index URL).</dd><dt><code>.templates</code></dt><dd><a href="#front-matter-values"><code>templates</code></a> front matter value.</dd><dt><code>.title</code></dt><dd>Document title.</dd><dt><code>.urlprefix</code></dt><dd><a href="#configuration-parameters"><code>urlprefix</code></a> configuration value.</dd><dt><code>.user</code></dt><dd>This key/value map is synthesized by merging the (higher precedence)
 document <a href="#front-matter-values">front matter <code>user</code> value</a> with the document's <code>user</code>
 <a href="#configuration-parameters">configuration parameter</a>.</dd></dl><h2 id="templates">Templates</h2>
 <p><em>hindsite</em> uses Go templates to build webpages. There are two types of
@@ -424,10 +429,10 @@ directory is indexed.<p><code>docs.html</code> templates are rendered with the f
 <dl><dt><code>.docs</code></dt><dd>An iterable list of index page documents. Each list item contains a
 set of <a href="#document-template-variables">document template variables</a>.</dd><dt><code>.count</code></dt><dd>The total number of documents in the index.</dd><dt><code>.page</code></dt><dd>Document index page variables:<dl><dt><code>.number</code></dt><dd>The page number.</dd><dt><code>.url</code></dt><dd>The page URL.</dd><dt><code>.prev</code>, <code>.next</code>, <code>.first</code>, <code>.last</code></dt><dd>Each with the page <code>.number</code> and
        <code>.url</code> of the previous, next, first and last index pages. For example
-      <code>.page.prev.number</code> is the page number (1&hellip;) of the previous document index page.</dd></dl></dd><dt><code>.urlprefix</code></dt><dd>The <a href="#configuration-parameters"><code>urlprefix</code></a> value.</dd><dt><code>.user</code></dt><dd>The index configuration <a href="#configuration-parameters"><code>user</code></a> key/value map.</dd></dl>
+      <code>.page.prev.number</code> is the page number (1&hellip;) of the previous document index page.</dd></dl></dd><dt><code>.urlprefix</code></dt><dd>The <a href="#configuration-parameters"><code>urlprefix</code></a> configuration parameter value.</dd><dt><code>.user</code></dt><dd>The index configuration <a href="#configuration-parameters"><code>user</code></a> key/value map.</dd></dl>
 </dd><dt><code>tags.html</code></dt><dd>This optional index template is used to build a <code>tags.html</code> tags
 index webpage. If it is not present the tags index files are not built.
-<code>tags.html</code> templates are rendered with the following template variables:<dl><dt><code>.tags</code></dt><dd>An iterable list, each list item contains:<dl><dt><code>.tag</code></dt><dd>The tag.</dd><dt><code>.url</code></dt><dd>The URL of of the tag's document index.</dd><dt><code>.count</code></dt><dd>The number of documents with this tag.</dd></dl></dd><dt><code>.urlprefix</code></dt><dd>The <a href="#configuration-parameters"><code>urlprefix</code></a> value.</dd><dt><code>.user</code></dt><dd>The index configuration [<code>user</code>](#configuration values) key/value map.</dd></dl>
+<code>tags.html</code> templates are rendered with the following template variables:<dl><dt><code>.tags</code></dt><dd>An iterable list, each list item contains:<dl><dt><code>.tag</code></dt><dd>The tag.</dd><dt><code>.url</code></dt><dd>The URL of of the tag's document index.</dd><dt><code>.count</code></dt><dd>The number of documents with this tag.</dd></dl></dd><dt><code>.urlprefix</code></dt><dd>The <a href="#configuration-parameters"><code>urlprefix</code></a> configuration parameter value.</dd><dt><code>.user</code></dt><dd>The index configuration <a href="#configuration-parameters"><code>user</code></a> key/value map.</dd></dl>
 </dd></dl><h3 id="text-templates">Text templates</h3>
 <p>Text template expansion is optional in <a href="#documents">documents</a> and <a href="#static-files">static
 files</a>. By default there is no document or static file expansion,
@@ -450,11 +455,12 @@ document file name.</p>
 is <code>/myproj/build/posts/foo.html</code> then:</p>
 <ul><li>The document URL will be <code>/posts/foo.html</code></li><li>If the <code>urlprefix</code> is <code>/blog</code> then the URL would be <code>/blog/posts/foo.html</code></li><li>If the document <code>slug</code> is <code>bar</code> the URL becomes <code>/blog/posts/bar.html</code></li></ul><p>The above default behavior can be customized using the <code>permalink</code>
 <a href="#configuration-parameters">configuration parameter</a>.</p>
+<p>To synthesize absolute URLs include the URL domain in the <code>urlprefix</code>.</p>
 <p>If you are deploying to a web server subdirectory then you need to set the
 <code>urlprefix</code> configuration parameter to ensure synthesized URLs are rooted
 correctly. For example, if are deploying to the server <code>http://example.com/blog</code>
-directory you need to set <code>urlprefix</code> to <code>/blog</code>.</p>
-<p>To synthesize absolute URLs include the URL domain in the <code>urlprefix</code>.</p>
+directory you need to set <code>urlprefix</code> to either <code>/blog</code> (to generate
+root-relative URLs) or <code>http://example.com/blog</code> (to generate absolute URLs).</p>
 <p><i class="sans-font">NOTE</i>: The hindsite <a href="#serve-command">serve command</a> strips the <code>urlprefix</code> from
 HTML responses before sending them to the browser.</p>
 <h2 id="building-hindsite">Building hindsite</h2>
@@ -473,9 +479,8 @@ dep ensure</code></pre>
 <pre class="no-highlight"><code>cd &lt;hindsite-source-directory&gt;
 git checkout tags/&lt;tag-name&gt;
 dep ensure
-go install ./...
+make build            # Writes built releases to ./bin directory.
 git checkout master   # Reinstate master branch.</code></pre>
-
 
 </div>
 </div>

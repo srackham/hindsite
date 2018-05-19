@@ -41,7 +41,7 @@ directories that need it.</p>
 <p>Use the Go <a href="https://golang.org/pkg/time/#Time.Format">Format function</a>. For
 example:</p>
 <pre class="no-highlight"><code>{{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}</code></pre>
-<p>The <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="/hindsite/#document-template-variables">document template
+<p><i class="sans-font">NOTE</i>: The <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="/hindsite/#document-template-variables">document template
 variables</a> are simpler and preferable
 to using <code>.date</code> directly.</p>
 <h2 id="how-can-i-partition-documents-into-separate-categories">How can I partition documents into separate categories</h2>
@@ -79,23 +79,52 @@ expansion and prefix root-relative URLs with <code>{{.urlprefix}}</code>.</p>
 <h2 id="how-fast-is-hindsite">How fast is hindsite?</h2>
 <p>hindsite compares favorably with <a href="https://gohugo.io/">Hugo</a> (which bills
 itself as &ldquo;The world’s fastest framework for building websites&rdquo;).</p>
-<p>In informal measurements carried out on a site with 5000 Markdown posts (20MB
-total) hindsite was two to four times faster than Hugo on full rebuilds but on
+<p>In informal measurements carried out on a site with 5000 Markdown posjs (20MB
+total) hindsite was four to five times faster than Hugo on full rebuilds. On
 subsequent incremental rebuilds hindsite ranges from six times faster than Hugo
 (if related indexes pages are rebuilt) to around ten times slower than Hugo (if
-all index pages have to be rebuilt). The <code>hugo</code> build command uses 9 times more
-memory than the <code>hindsite build</code> command; the <code>hugo server</code> command consumed a
-whopping 11.2GB (almost 200 times the <code>hindsite serve</code> command).</p>
-<dl><dt><em>Platform</em></dt><dd>hindsite v0.9.0 (windows/amd64) running on Dell XPS27 PC under Windows 10.</dd><dt><em>Build times and memory consumption</em></dt><dd><ul><li><code>hindsite build</code> command (full build): 72.11s (first run), 23.76s
-  (subsequent), memory consumption 34.1MB.</li><li><code>hindsite serve</code> command: 63.14s (initial full build), 21.74s (subsequent),
-  memory consumption 58.1MB.</li><li><code>hindsite serve</code> command (partial build, updating one document and entire
-  index): 3.74s, memory consumption 58.4MB.</li><li><code>hindsite serve</code> command (partial build updating one document): 0.07s, memory
-  consumption 58.2MB.</li></ul></dd></dl><p>The same documents were built with Hugo:</p>
-<dl><dt><em>Platform</em></dt><dd>Hugo v0.37.1 (windows/amd64) running on Dell XPS27 PC under Windows<ol><li>Hugo setup as per the <a href="https://gohugo.io/getting-started/quick-start/">Hugo <em>Quick Start</em>
-instructions</a>.</li></ol></dd><dt><em>Build times and memory consumption</em></dt><dd><ul><li><code>hugo</code> command (full rebuild): 153.99s (first run), 135.51s (subsequent),
-  memory consumption 314.3MB.</li><li><code>hugo server</code> command (initial full build): 119.67s, memory consumption 11.2GB.</li><li><code>hugo server</code> command (partial rebuild): 0.34s, memory consumption 11.2GB.</li></ul></dd></dl><p><i class="sans-font">NOTE</i>: Exclude the project folder from Windows Defender anti-virus real-time
-protection (not doing this imposed a 4x performance decrease for both
-hindsite and Hugo).</p>
+all index pages have to be rebuilt). The <code>hugo</code> build command uses approximately
+ten times more memory than the <code>hindsite build</code> command; the <code>hugo server</code>
+command consumed a whopping 11.2GB (around 180 times the <code>hindsite serve</code>
+command).</p>
+<p><i class="sans-font">IMPORTANT</i>: This is not an &ldquo;apples with apples&rdquo; comparison, Hugo is more complex
+and has more features than hindsite. Differences between the respective themes
+is also a factor &mdash; the Hugo theme is heavier than the hindsite theme. As always,
+benchmarks are irrelevant if they do not address your specific use cases.</p>
+<h4 id="hindsite-v1-0-0-windows-amd64-running-on-dell-xps27-pc-under-windows-10">hindsite v1.0.0 (windows/amd64) running on Dell XPS27 PC under Windows 10.</h4>
+<dl><dt><em>Execution times</em></dt><dd><ul><li><code>hindsite build</code> command: 27.72s (full build, average of 5).</li><li><code>hindsite serve</code> command: 29.64s (full rebuild, average of 5).</li><li><code>hindsite serve</code> command: 4.91s (partial build, one document and
+  entire index, average of 5).</li><li><code>hindsite serve</code> command: 0.07s (partial build, one document and related index
+  pages, average of 5).</li></ul></dd><dt><em>Memory consumption</em></dt><dd><ul><li><code>hindsite build</code> command: 34MB</li><li><code>hindsite server</code> command: 62MB</li></ul></dd></dl><h4 id="hugo-v0-40-3-windows-amd64-running-on-dell-xps27-pc-under-windows-10">Hugo v0.40.3 (windows/amd64) running on Dell XPS27 PC under Windows 10</h4>
+<p>Hugo setup as per the <a href="https://gohugo.io/getting-started/quick-start/">Hugo <em>Quick Start</em>
+instructions</a>.</p>
+<dl><dt><em>Execution times</em></dt><dd><ul><li><code>hugo</code> command: 162.92s (full build, average of 5).</li><li><code>hugo server</code> command: 128.64s (initial full build).</li><li><code>hugo server</code> command: 0.47s (partial rebuild).</li></ul></dd><dt><em>Memory consumption</em></dt><dd><ul><li><code>hugo</code> command: 337MB</li><li><code>hugo server</code> command: 11.2GB</li></ul></dd></dl><p><i class="sans-font">NOTE</i>: Exclude the project folders from Windows Defender anti-virus real-time
+protection (not doing this imposed a 4x performance decrease for both hindsite
+and Hugo).</p>
+<p>The benchmarked hindsite and Hugo projects are available in the downloadable
+<a href="https://drive.google.com/uc?export=download&amp;id=1vm1542RE3W7s9qIYfyYsiTvuwXFZaMP_">hindsite-benchmark.zip</a>
+file (7.4MB):</p>
+<pre class="no-highlight"><code>├── hindsite
+│   ├── build
+│   ├── content
+│   └── template
+└── hugo
+    ├── archetypes
+    ├── content
+    ├── data
+    ├── layouts
+    ├── public
+    ├── static
+    └── themes</code></pre>
+<p>To compare performance run <code>hindsite</code> and <code>hugo</code> commands from their respective
+project directories:</p>
+<pre class="no-highlight"><code>cd hindsite
+hindsite build .  # Build.
+hindsite serve .  # Build and serve.
+
+cd hugo
+hugo              # Build.
+hugo server       # Build and serve.</code></pre>
+
 
 </div>
 </div>
