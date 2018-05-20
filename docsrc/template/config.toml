@@ -1,4 +1,4 @@
-exclude = "config.rmu|.*|*~|4913"
+exclude = "config.rmu|*~|4913"
 urlprefix = "/hindsite"
 
 [user]

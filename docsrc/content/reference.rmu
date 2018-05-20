@@ -312,11 +312,13 @@ document's [`author` front matter value](#front-matter-values). TOML example:
     author = "Joe Bloggs"
 
 `exclude` †:: A `|` separated list of file and directory paths specifying files
-that are excluded from processing (all files are processed by default). TOML
-example:
+from the project _content_ and _template_ directories that are excluded from
+processing. TOML example:
 ..
-    exclude = "config.rmu|.*|*~|4913"
+    exclude = "config.rmu|*~|4913"
 
+- Dotfiles (file names starting with a period) are excluded by default. To force
+  inclusion of a dotfile add it to the `include` parameter.
 - The paths are relative to the content or template directories.
 - The path separator is a slash (`/`) character.
 - The file paths can contain wildcard patterns conforming to patterns matched by
@@ -331,13 +333,15 @@ example:
   excluded (no wildcards are allowed). For example `news/archive/` excludes all
   files from the `news/archive` directory.
 - To exclude a file in the content or template root directories prefix the name
-  name with a file separator e.g. `/config.rmu` will exclude `config.rmu` only
+  name with a path separator e.g. `/config.rmu` will exclude `config.rmu` only
   if it is in the top directory.
 ..
 
 `include` †:: A `|` separated list of file and directory paths specifying files
 that are processed unconditionally i.e. irrespective of the `exclude` parameter.
-Parameter values have the same format as the `exclude` parameter.
+Parameter values have the same format as the `exclude` parameter. TOML example:
+
+    include = ".htaccess"
 
 `shortdate`, `mediumdate`, `longdate`:: These are date formats for `shortdate`,
 `mediumdate` and `longdate` [document template

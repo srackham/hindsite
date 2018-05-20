@@ -199,9 +199,10 @@ configuration files.</p>
 <dl><dt><code>author</code></dt><dd>Specifies the default document author and is overridden by the
 document's <a href="#front-matter-values"><code>author</code> front matter value</a>. TOML example:<pre class="no-highlight"><code>author = "Joe Bloggs"</code></pre>
 </dd><dt><code>exclude</code> †</dt><dd>A <code>|</code> separated list of file and directory paths specifying files
-that are excluded from processing (all files are processed by default). TOML
-example:<pre class="no-highlight"><code>exclude = "config.rmu|.*|*~|4913"</code></pre>
-<ul><li>The paths are relative to the content or template directories.</li><li>The path separator is a slash (<code>/</code>) character.</li><li>The file paths can contain wildcard patterns conforming to patterns matched by
+from the project <em>content</em> and <em>template</em> directories that are excluded from
+processing. TOML example:<pre class="no-highlight"><code>exclude = "config.rmu|*~|4913"</code></pre>
+<ul><li>Dotfiles (file names starting with a period) are excluded by default. To force
+  inclusion of a dotfile add it to the <code>include</code> parameter.</li><li>The paths are relative to the content or template directories.</li><li>The path separator is a slash (<code>/</code>) character.</li><li>The file paths can contain wildcard patterns conforming to patterns matched by
   the Go <a href="https://golang.org/pkg/path/#Match">path.Match() function</a>.</li><li>If the path contains no path separators then it is matched against all file
   names e.g. <code>*.swp</code> will match all files from content and template directories
   with the <code>.swp</code> file name extension.</li><li>If the path contains path separators then it is matched against the file path
@@ -209,11 +210,12 @@ example:<pre class="no-highlight"><code>exclude = "config.rmu|.*|*~|4913"</code>
   <code>posts</code> directory.</li><li>If the path ends with a slash then it specifies a directory whose contents are
   excluded (no wildcards are allowed). For example <code>news/archive/</code> excludes all
   files from the <code>news/archive</code> directory.</li><li>To exclude a file in the content or template root directories prefix the name
-  name with a file separator e.g. <code>/config.rmu</code> will exclude <code>config.rmu</code> only
+  name with a path separator e.g. <code>/config.rmu</code> will exclude <code>config.rmu</code> only
   if it is in the top directory.</li></ul>
 </dd><dt><code>include</code> †</dt><dd>A <code>|</code> separated list of file and directory paths specifying files
 that are processed unconditionally i.e. irrespective of the <code>exclude</code> parameter.
-Parameter values have the same format as the <code>exclude</code> parameter.</dd><dt><code>shortdate</code>, <code>mediumdate</code>, <code>longdate</code></dt><dd>These are date formats for <code>shortdate</code>,
+Parameter values have the same format as the <code>exclude</code> parameter. TOML example:<pre class="no-highlight"><code>include = ".htaccess"</code></pre>
+</dd><dt><code>shortdate</code>, <code>mediumdate</code>, <code>longdate</code></dt><dd>These are date formats for <code>shortdate</code>,
 <code>mediumdate</code> and <code>longdate</code> <a href="#document-template-variables">document template
 variables</a> respectively. The values conform to the
 layouts supported by Go <a href="https://golang.org/pkg/time/#Time.Format">time.Format
