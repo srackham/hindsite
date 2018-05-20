@@ -340,17 +340,15 @@ func (proj *project) configFor(p string) config {
 		dir = filepath.Dir(dir)
 	}
 	result := newConfig()
-	for i, conf := range proj.confs {
+	for _, conf := range proj.confs {
 		if pathIsInDir(dir, conf.origin) {
 			result.merge(conf)
 		}
-		if i == 0 {
-			// Assign global root configuration values.
-			result.exclude = conf.exclude
-			result.include = conf.include
-			result.homepage = conf.homepage
-			result.urlprefix = conf.urlprefix
-		}
 	}
+	// Global root configuration values.
+	result.exclude = proj.rootConf.exclude
+	result.include = proj.rootConf.include
+	result.homepage = proj.rootConf.homepage
+	result.urlprefix = proj.rootConf.urlprefix
 	return result
 }

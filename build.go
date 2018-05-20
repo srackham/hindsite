@@ -14,6 +14,12 @@ func (proj *project) build() error {
 	if err := proj.parseConfigs(); err != nil {
 		return err
 	}
+	// Synthesize root config.
+	proj.rootConf = newConfig()
+	if len(proj.confs) > 0 && proj.confs[0].origin == proj.templateDir {
+		proj.rootConf.merge(proj.confs[0])
+	}
+	proj.verbose2("root config: \n" + proj.rootConf.String())
 	if !dirExists(proj.buildDir) {
 		if err := os.Mkdir(proj.buildDir, 0775); err != nil {
 			return err

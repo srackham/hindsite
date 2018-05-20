@@ -39,6 +39,7 @@ type configs []config
 // Return default configuration.
 func newConfig() config {
 	conf := config{
+		exclude:    []string{".*"},
 		paginate:   5,
 		shortdate:  "2006-01-02",
 		mediumdate: "2-Jan-2006",
@@ -122,7 +123,7 @@ func (conf *config) parseFile(proj *project, f string) error {
 		conf.urlprefix = strings.TrimSuffix(value, "/")
 	}
 	if cf.Exclude != nil {
-		conf.exclude = strings.Split(filepath.ToSlash(*cf.Exclude), "|")
+		conf.exclude = append([]string{".*"}, strings.Split(filepath.ToSlash(*cf.Exclude), "|")...)
 		for _, pat := range conf.exclude {
 			if pat == "" {
 				return fmt.Errorf("exclude pattern cannot be blank: %s", *cf.Exclude)
@@ -228,14 +229,10 @@ func (proj *project) parseConfigs() error {
 	sort.Slice(proj.confs, func(i, j int) bool {
 		return proj.confs[i].origin < proj.confs[j].origin
 	})
-	proj.rootConf = proj.configFor(proj.contentDir)
-	proj.verbose2("root config: \n" + proj.rootConf.String())
 	return nil
 }
 
-// merge merges non-"zero" configuration parameters into configuration.
-// exclude, include, homepage and urlprefix parameters are global (root
-// configuration) parameters and are not merged.
+// merge merges "non-zero" configuration parameters into configuration.
 func (conf *config) merge(from config) {
 	if from.origin != "" {
 		conf.origin = from.origin
@@ -263,6 +260,18 @@ func (conf *config) merge(from config) {
 	}
 	if from.longdate != "" {
 		conf.longdate = from.longdate
+	}
+	if from.homepage != "" {
+		conf.homepage = from.homepage
+	}
+	if from.urlprefix != "" {
+		conf.urlprefix = from.urlprefix
+	}
+	if from.exclude != nil {
+		conf.exclude = from.exclude
+	}
+	if from.include != nil {
+		conf.include = from.include
 	}
 	for k, v := range from.user {
 		conf.user[k] = v
