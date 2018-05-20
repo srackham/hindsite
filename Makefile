@@ -100,8 +100,7 @@ release:
 		--repo $$REPO \
 		--tag $$VERS \
 		--name "hindsite $$VERS" \
-		--description "hindsite builds static websites from Markdown source documents." \
-		--pre-release
+		--description "hindsite builds static websites from Markdown source documents."
 	cd bin
 	upload linux amd64
 	upload darwin amd64
