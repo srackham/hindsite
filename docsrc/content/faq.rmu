@@ -6,10 +6,6 @@ Themes are baked in, every [project template directory]({reference}/#projects)
 is a theme and the [init command]({reference}/#init-command) is the "theme"
 installer.
 
-## How do I stop hindsite processing dotfiles?
-Add a `.*` pattern to the [`exclude` configuration
-parameter]({reference}/#configuration-parameters).
-
 
 ## Should I enable document and static file text template expansion?
 You should only enable [text template]({reference}/#text-templates) expansion if
