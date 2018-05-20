@@ -1,6 +1,6 @@
 homepage = "about.html"
 longdate = "Jan 2, 2006"
-exclude = ".*|*~|4913"
+exclude = "*~|4913"
 
 [user]
 banner = "hindsite | blog"

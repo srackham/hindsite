@@ -58,19 +58,22 @@
 
 {{define "docsfooter"}}
 <div class="docsfooter">
-    <span class="left">
-        {{if .prev.url}}
-        « <a href="{{.first.url}}">First</a> &nbsp;&nbsp; « <a href="{{.prev.url}}">Newer</a>
-        {{else}}
-        <span class="disabled">« First &nbsp;&nbsp; « Newer</span>
-        {{end}}
-    </span>
-    <span class="right">
-        {{if .next.url}}
-        <a href="{{.next.url}}">Older</a> » &nbsp;&nbsp; <a href="{{.last.url}}">Last</a> »
-        {{else}}
-        <span class="disabled">Older » &nbsp;&nbsp; Last »</span>
-        {{end}}
-    </span>
+    <div>
+        <span class="left">
+            {{if .prev.url}}
+            « <a href="{{.first.url}}">First</a> &nbsp;&nbsp; « <a href="{{.prev.url}}">Newer</a>
+            {{else}}
+            <span class="disabled">« First &nbsp;&nbsp; « Newer</span>
+            {{end}}
+        </span>
+        <span class="right">
+            {{if .next.url}}
+            <a href="{{.next.url}}">Older</a> » &nbsp;&nbsp; <a href="{{.last.url}}">Last</a> »
+            {{else}}
+            <span class="disabled">Older » &nbsp;&nbsp; Last »</span>
+            {{end}}
+        </span>
+    </div>
+    <div class="clear"></div>
 </div>
 {{end}}
