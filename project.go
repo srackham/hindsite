@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -351,4 +352,51 @@ func (proj *project) configFor(p string) config {
 	result.homepage = proj.rootConf.homepage
 	result.urlprefix = proj.rootConf.urlprefix
 	return result
+}
+
+// parseConfig parses all configuration files from the project template
+// directory to project `confs`.
+func (proj *project) parseConfigs() error {
+	proj.confs = configs{}
+	if !dirExists(proj.templateDir) {
+		return fmt.Errorf("missing template directory: " + proj.templateDir)
+	}
+	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() && f == proj.initDir {
+			return filepath.SkipDir
+		}
+		if !info.IsDir() {
+			return nil
+		}
+		conf := config{}
+		conf.origin = f
+		found := false
+		for _, v := range []string{"config.toml", "config.yaml"} {
+			cf := filepath.Join(f, v)
+			if fileExists(cf) {
+				found = true
+				proj.verbose("read config: " + cf)
+				if err := conf.parseFile(proj, cf); err != nil {
+					return err
+				}
+			}
+		}
+		if found {
+			proj.confs = append(proj.confs, conf)
+			proj.verbose2(conf.String())
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	// Sort configurations by ascending origin directory to ensure deeper
+	// configurations have precedence.
+	sort.Slice(proj.confs, func(i, j int) bool {
+		return proj.confs[i].origin < proj.confs[j].origin
+	})
+	return nil
 }
