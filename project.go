@@ -112,12 +112,12 @@ func (proj *project) parseArgs(args []string) error {
 				return fmt.Errorf("illegal command: %s", opt)
 			}
 			if len(args) == 2 && opt != "help" {
-				return fmt.Errorf("project directory not specifed")
+				return fmt.Errorf("project directory not specified")
 			}
 			proj.command = opt
 		case i == 2:
 			if !dirExists(opt) && strings.HasPrefix(opt, "-") {
-				return fmt.Errorf("project directory not specifed")
+				return fmt.Errorf("project directory not specified")
 			}
 			proj.projectDir = opt
 		case opt == "-drafts":
@@ -145,7 +145,7 @@ func (proj *project) parseArgs(args []string) error {
 			case "-port":
 				proj.port = arg
 			default:
-				panic("illegal arugment: " + opt)
+				panic("illegal argument: " + opt)
 			}
 			skip = true
 		default:
@@ -208,10 +208,7 @@ func (proj *project) parseArgs(args []string) error {
 	if err := checkOverlap("build", proj.buildDir, "content", proj.contentDir); err != nil {
 		return err
 	}
-	if err := checkOverlap("build", proj.buildDir, "template", proj.templateDir); err != nil {
-		return err
-	}
-	return nil
+	return checkOverlap("build", proj.buildDir, "template", proj.templateDir)
 }
 
 func isCommand(name string) bool {

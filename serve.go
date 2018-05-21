@@ -122,7 +122,7 @@ func (proj *project) watcherFilter(watcher *fsnotify.Watcher, out chan fsnotify.
 			proj.verbose("fsnotify: " + time.Now().Format("15:04:05.000") + ": " + msg + ": " + evt.Op.String() + ": " + evt.Name)
 			if accepted {
 				if prev.Op == fsnotify.Rename && prev.Name != evt.Name {
-					// A rename has ocurred within the watched directories
+					// A rename has occurred within the watched directories
 					// (Rename followed by immediately by Create) so forward the
 					// Rename to ensure the original file is deleted prior to
 					// the new file being created.
