@@ -5,12 +5,11 @@ permalink: /index.html
 # Hindsite Reference
 
 ## Overview
-hindsite is a static website generator. It builds static websites with optional
-document and tag indexes from Markdown source documents (e.g. blogs posts,
-newsletters, articles). Features:
+hindsite is a fast, lightweight static website generator. It builds static
+websites with optional document and tag indexes from Markdown source documents
+(e.g. blogs posts, newsletters, articles). Features:
 
-- Light weight with minimal complexity.
-- [High performance]({faq}#how-fast-is-hindsite).
+- [High performance](https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite).
 - Stand-alone single-file executable.
 - Built-in development web server with Live Reload, file watcher and incremental
   rebuilds.
@@ -22,7 +21,8 @@ commands:
 
 1. Download the binary for your platform from the [releases
    page](https://github.com/srackham/hindsite/releases) and extract the
-   `hindsite` executable.
+   `hindsite` executable (see [_Building hindsite_](#building-hindsite) if you
+   prefer to build and install from source).
 
 2. Create a new Hindsite project directory and install the builtin blog
    template:
@@ -37,9 +37,8 @@ commands:
 Include the `-v` (verbose) command option to see what's going on. The best way
 to start learning hindsite is to browse the blog [project directory](#projects).
 
-Try editing content documents and templates and rebuilding. If you are familiar
-with Jekyll or Hugo you'll be right a home (hindsite can read Jekyll and Hugo
-Markdown document front matter).
+If you are familiar with Jekyll or Hugo you'll be right a home (hindsite can
+read Jekyll and Hugo Markdown document [front matter](#front-matter)).
 
 
 ## Projects
@@ -261,8 +260,8 @@ Applicable options:
   to the browser. This allows the build to be tested irrespective of the
   `urlprefix` value.
 - To enable browser live reloads the server inserts the
-  [LiveReload](http://livereload.com/) script tag into HTML files prior to
-  sending them to the browser.
+  [LiveReload script](https://github.com/livereload/livereload-js) tag into HTML
+  files prior to sending them to the browser.
 
 
 #### Partial rebuilds
@@ -456,14 +455,19 @@ variables](#document-template-variables).
 
 
 ## Documents
-_Documents_ are Markdown (`.md`) files in the project _content directory_. Each
-document is generates a wepage e.g. a blog post, a newsletter or an article. The
-[build command](#build-command) combines the document with its [layout
+_Documents_ are [Markdown](https://daringfireball.net/projects/markdown/)
+(`.md`) files in the project [_content directory_](#projects). Each document is
+generates a wepage e.g. a blog post, a newsletter or an article. The [build
+command](#build-command) combines the document with its [layout
 template](#html-templates) and writes the resulting HTML webpage to the
 corresponding _build directory_ path.
 
-Documents can contain optional [front matter values](#front-matter-values)
-which are accessible as template variables](#templates).
+hindsite uses the [Blackfriday Markdown
+processor](https://github.com/russross/blackfriday) which supports a number of
+common [Markdown
+extensions](https://github.com/russross/blackfriday#extensions).
+
+Documents can include an optional [front matter header](#front-matter-header).
 
 A documents with the [draft](#front-matter-values) front matter value set will
 not be included in the built website unless the `-drafts` command option is
@@ -475,14 +479,15 @@ rendered as a [text template](#text-templates) prior to layout template
 processing.
 
 NOTE: In addition to Markdown, _hindsite_ can also process [Rimu
-markup](http://rimumarkup.org/). This documentation is written in Rimu.
+markup](https://srackham.github.io/rimu/). This documentation is written in
+Rimu.
 
 
 ## Static files
-Static files are non-document (non-Markdown) files in the _content directory_.
-These include website resources such as CSS, JavaScript and image files. The
-[build command](#build-command) copies static files to the corresponding
-location in the _build directory_.
+Static files are non-document (non-Markdown) files in the [_content
+directory_](#projects). These include website resources such as CSS, JavaScript
+and image files. The [build command](#build-command) copies static files to the
+corresponding location in the _build directory_.
 
 If a static file is classified as a template (see the
 [`templates`](#configuration-parameters) configuration parameter) then it is
@@ -630,8 +635,8 @@ generated document webpage which also determines the last component of the
 document's URL.
 
 `title`:: The document title. If not specified `title` defaults the document
-file name stripped of the date prefix (if there is one); with hyphens replaced
-by spaces; then capitalized.
+file name stripped of the date prefix (if there is one), with hyphens replaced
+by spaces, then capitalized.
 
 `user`:: `user` is a user defined key/value map. It is merged with the lower
 precedence [`user` configuration parameter](#configuration-parameters) to become

@@ -27,24 +27,24 @@
 
 <h1 id="hindsite-reference">Hindsite Reference</h1>
 <h2 id="overview">Overview</h2>
-<p>hindsite is a static website generator. It builds static websites with optional
-document and tag indexes from Markdown source documents (e.g. blogs posts,
-newsletters, articles). Features:</p>
-<ul><li>Light weight with minimal complexity.</li><li><a href="/hindsite/faq.html#how-fast-is-hindsite">High performance</a>.</li><li>Stand-alone single-file executable.</li><li>Built-in development web server with Live Reload, file watcher and incremental
+<p>hindsite is a fast, lightweight static website generator. It builds static
+websites with optional document and tag indexes from Markdown source documents
+(e.g. blogs posts, newsletters, articles). Features:</p>
+<ul><li><a href="https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite">High performance</a>.</li><li>Stand-alone single-file executable.</li><li>Built-in development web server with Live Reload, file watcher and incremental
   rebuilds.</li></ul><h2 id="quick-start">Quick Start</h2>
 <p>Create a fully functional blog and newsletter website with just two hindsite
 commands:</p>
 <ol><li>Download the binary for your platform from the <a href="https://github.com/srackham/hindsite/releases">releases
    page</a> and extract the
-   <code>hindsite</code> executable.</li><li>Create a new Hindsite project directory and install the builtin blog
+   <code>hindsite</code> executable (see <a href="#building-hindsite"><em>Building hindsite</em></a> if you
+   prefer to build and install from source).</li><li>Create a new Hindsite project directory and install the builtin blog
    template:<pre class="no-highlight"><code>mkdir myproj
 hindsite init myproj -builtin blog</code></pre>
 </li><li>Build the website, start the hindsite web server and open it in the browser:<pre class="no-highlight"><code>hindsite serve myproj -launch</code></pre>
 </li></ol><p>Include the <code>-v</code> (verbose) command option to see what's going on. The best way
 to start learning hindsite is to browse the blog <a href="#projects">project directory</a>.</p>
-<p>Try editing content documents and templates and rebuilding. If you are familiar
-with Jekyll or Hugo you'll be right a home (hindsite can read Jekyll and Hugo
-Markdown document front matter).</p>
+<p>If you are familiar with Jekyll or Hugo you'll be right a home (hindsite can
+read Jekyll and Hugo Markdown document <a href="#front-matter">front matter</a>).</p>
 <h2 id="projects">Projects</h2>
 <p>A hindsite project consists of three separate directories:</p>
 <ul><li>A <em>content directory</em> containing Markdown <a href="#documents">documents</a> and
@@ -169,8 +169,8 @@ live reloading.</p>
 <ul><li><code>-port</code> sets the server port number to <code>PORT</code> (defaults to 1212).</li><li>The <code>-launch</code> option opens the project home page in the default web browser.</li><li>Press the <em>R</em> key followed by the <em>Enter</em> key to force a complete rebuild.</li><li>The server strips the <code>urlprefix</code> from URLs in HTML files before sending them
   to the browser. This allows the build to be tested irrespective of the
   <code>urlprefix</code> value.</li><li>To enable browser live reloads the server inserts the
-  <a href="http://livereload.com/">LiveReload</a> script tag into HTML files prior to
-  sending them to the browser.</li></ul><h4 id="partial-rebuilds">Partial rebuilds</h4>
+  <a href="https://github.com/livereload/livereload-js">LiveReload script</a> tag into HTML
+  files prior to sending them to the browser.</li></ul><h4 id="partial-rebuilds">Partial rebuilds</h4>
 <p>To speed up live reloads and to make the content creation process easier and
 more responsive the <em>serve command</em> automatically performs partial builds when
 content files are modified, added or deleted.</p>
@@ -278,13 +278,17 @@ configuration i.e. they can only be specified in the template root configuration
 <p>Some configuration parameters are merged into the <a href="#document-template-variables">document template
 variables</a>.</p>
 <h2 id="documents">Documents</h2>
-<p><em>Documents</em> are Markdown (<code>.md</code>) files in the project <em>content directory</em>. Each
-document is generates a wepage e.g. a blog post, a newsletter or an article. The
-<a href="#build-command">build command</a> combines the document with its <a href="#html-templates">layout
+<p><em>Documents</em> are <a href="https://daringfireball.net/projects/markdown/">Markdown</a>
+(<code>.md</code>) files in the project <a href="#projects"><em>content directory</em></a>. Each document is
+generates a wepage e.g. a blog post, a newsletter or an article. The <a href="#build-command">build
+command</a> combines the document with its <a href="#html-templates">layout
 template</a> and writes the resulting HTML webpage to the
 corresponding <em>build directory</em> path.</p>
-<p>Documents can contain optional <a href="#front-matter-values">front matter values</a>
-which are accessible as template variables](#templates).</p>
+<p>hindsite uses the <a href="https://github.com/russross/blackfriday">Blackfriday Markdown
+processor</a> which supports a number of
+common <a href="https://github.com/russross/blackfriday#extensions">Markdown
+extensions</a>.</p>
+<p>Documents can include an optional <a href="#front-matter-header">front matter header</a>.</p>
 <p>A documents with the <a href="#front-matter-values">draft</a> front matter value set will
 not be included in the built website unless the <code>-drafts</code> command option is
 specified.</p>
@@ -292,13 +296,14 @@ specified.</p>
 <a href="#configuration-parameters"><code>templates</code></a> configuration parameter) then it is
 rendered as a <a href="#text-templates">text template</a> prior to layout template
 processing.</p>
-<p><i class="sans-font">NOTE</i>: In addition to Markdown, <em>hindsite</em> can also process <a href="http://rimumarkup.org/">Rimu
-markup</a>. This documentation is written in Rimu.</p>
+<p><i class="sans-font">NOTE</i>: In addition to Markdown, <em>hindsite</em> can also process <a href="https://srackham.github.io/rimu/">Rimu
+markup</a>. This documentation is written in
+Rimu.</p>
 <h2 id="static-files">Static files</h2>
-<p>Static files are non-document (non-Markdown) files in the <em>content directory</em>.
-These include website resources such as CSS, JavaScript and image files. The
-<a href="#build-command">build command</a> copies static files to the corresponding
-location in the <em>build directory</em>.</p>
+<p>Static files are non-document (non-Markdown) files in the <a href="#projects"><em>content
+directory</em></a>. These include website resources such as CSS, JavaScript
+and image files. The <a href="#build-command">build command</a> copies static files to the
+corresponding location in the <em>build directory</em>.</p>
 <p>If a static file is classified as a template (see the
 <a href="#configuration-parameters"><code>templates</code></a> configuration parameter) then it is
 rendered as a <a href="#text-templates">text template</a> prior to being written to the
@@ -382,8 +387,8 @@ configuration value. The only sensible values in this context are a blank string
 enable text template expansion).</dd><dt><code>slug</code></dt><dd>The slug replaces the file name (minus file name extension) of the
 generated document webpage which also determines the last component of the
 document's URL.</dd><dt><code>title</code></dt><dd>The document title. If not specified <code>title</code> defaults the document
-file name stripped of the date prefix (if there is one); with hyphens replaced
-by spaces; then capitalized.</dd><dt><code>user</code></dt><dd><code>user</code> is a user defined key/value map. It is merged with the lower
+file name stripped of the date prefix (if there is one), with hyphens replaced
+by spaces, then capitalized.</dd><dt><code>user</code></dt><dd><code>user</code> is a user defined key/value map. It is merged with the lower
 precedence <a href="#configuration-parameters"><code>user</code> configuration parameter</a> to become
 the <code>.user</code> <a href="#document-template-variables">template variable</a>. If <code>user</code> is not
 specified in the document front matter it defaults to the <code>user</code> configuration
