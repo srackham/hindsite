@@ -91,7 +91,7 @@
     font-size: 90%;
     background-color: #f8f8f8;
   }
-  .hljs { background-color: #f8f8f8; }
+  .hljs { background-color: var(--code-background) !important; }
   pre {
     font-family: Consolas, "Andale Mono", Monaco, monospace;
     line-height: normal;

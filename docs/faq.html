@@ -37,10 +37,29 @@ directories that need it.</p>
 <h2 id="how-can-i-customize-date-and-modtime-template-variable-formats">How can I customize <code>.date</code> and <code>.modtime</code> template variable formats?</h2>
 <p>Use the Go <a href="https://golang.org/pkg/time/#Time.Format">Format function</a>. For
 example:</p>
-<pre class="no-highlight"><code>{{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}</code></pre>
+<pre><code>{{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}</code></pre>
 <p><i class="sans-font">NOTE</i>: The <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="/hindsite/#document-template-variables">document template
 variables</a> are simpler and preferable
 to using <code>.date</code> directly.</p>
+<h2 id="how-do-you-configure-source-code-highlighting">How do you configure source code highlighting?</h2>
+<p>By including <a href="https://github.com/isagalaev/highlight.js">highlight.js</a> CSS and scripts:</p>
+<ol><li>Include <a href="https://github.com/srackham/hindsite/blob/master/docsrc/template/partials.html#L10">highlighter CSS in the HTML
+   header</a>.</li><li>Include the <a href="https://github.com/srackham/hindsite/blob/master/docsrc/template/partials.html#L33">highlighter scripts at the end of the HTML
+   body</a>.
+   Languages which are not in the default library can be inluded separately.</li><li>Include <a href="https://github.com/srackham/hindsite/blob/master/docsrc/template/partials.html#L37">highlighter
+   initialization code</a>
+   at the end of the HTML body:<pre class="javascript"><code>hljs.configure({languages: []});  // Turn off automatic language detection.
+hljs.initHighlightingOnLoad();</code></pre>
+</li><li>You may also need to <a href="https://github.com/srackham/hindsite/blob/master/docsrc/content/main.css#L94">tweak <code>.hljs</code> CSS class
+   properties</a>.</li></ol><p>Now when you annotate Markdown <em>fenced blocks</em> with the language name the source
+will be highlighted, for example:</p>
+<pre><code>``` javascript
+var myHeading = document.querySelector('h1');
+myHeading.textContent = 'Hello world!';
+```</code></pre>
+<p>Renders as:</p>
+<pre class="javascript"><code>var myHeading = document.querySelector('h1');
+myHeading.textContent = 'Hello world!';</code></pre>
 <h2 id="how-can-i-partition-documents-into-separate-categories">How can I partition documents into separate categories</h2>
 <p>Put them in separate indexes. <a href="/hindsite/#indexes">Indexes</a> are similar to <a href="https://en.support.wordpress.com/posts/categories-vs-tags/">Wordpress
 categories</a> but they
@@ -52,13 +71,13 @@ documents will appear on the first page.</p>
 <h2 id="i-want-both-paginated-and-single-page-document-indexes">I want both paginated and single page document indexes</h2>
 <p>This technique creates a second nested index:</p>
 <ol><li>Create a child index with the <code>paginate</code> configuration parameter set to <code>-1</code>.
-   For example:<pre class="no-highlight"><code>template/
+   For example:<pre><code>template/
     posts/
         docs.html           # Paginated document index template.
         all/
             docs.html       # Non-paginated (single-page) document index template.
             config.toml     # paginate = -1</code></pre>
-</li><li>Create a corresponding content child directory and move the content documents into it:<pre class="no-highlight"><code>content/
+</li><li>Create a corresponding content child directory and move the content documents into it:<pre><code>content/
     posts/
         all/    # Move documents here from posts.</code></pre>
 </li></ol><p>Each index has it's own page <code>docs.html</code> template. This technique can be
@@ -100,7 +119,7 @@ and Hugo).</p>
 <p>The benchmarked hindsite and Hugo projects are available in the downloadable
 <a href="https://drive.google.com/uc?export=download&amp;id=1vm1542RE3W7s9qIYfyYsiTvuwXFZaMP_">hindsite-benchmark.zip</a>
 file (7.4MB):</p>
-<pre class="no-highlight"><code>├── hindsite
+<pre><code>├── hindsite
 │   ├── build
 │   ├── content
 │   └── template
@@ -114,7 +133,7 @@ file (7.4MB):</p>
     └── themes</code></pre>
 <p>To compare performance run <code>hindsite</code> and <code>hugo</code> commands from their respective
 project directories:</p>
-<pre class="no-highlight"><code>cd hindsite
+<pre><code>cd hindsite
 hindsite build .  # Build.
 hindsite serve .  # Build and serve.
 
@@ -128,8 +147,9 @@ hugo server       # Build and serve.</code></pre>
 <script src="/hindsite/main.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/go.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/typescript.min.js"></script>
 <script>
+hljs.configure({languages: []});  
 hljs.initHighlightingOnLoad();
 window.onload = function() {
   var headings = [].slice.call(document.body.querySelectorAll('#article > h1, #article > h2, #article > h3'));

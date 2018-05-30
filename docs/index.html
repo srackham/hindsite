@@ -30,7 +30,7 @@
 <p>hindsite is a fast, lightweight static website generator. It builds static
 websites with optional document and tag indexes from Markdown source documents
 (e.g. blogs posts, newsletters, articles). Features:</p>
-<ul><li><a href="https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite">High performance</a>.</li><li>Stand-alone single-file executable.</li><li>Built-in development web server with Live Reload, file watcher and incremental
+<ul><li><a href="/hindsite/faq.html#how-fast-is-hindsite">High performance</a>.</li><li>Stand-alone single-file executable.</li><li>Built-in development web server with Live Reload, file watcher and incremental
   rebuilds.</li></ul><h2 id="quick-start">Quick Start</h2>
 <p>Create a fully functional blog and newsletter website with just two hindsite
 commands:</p>
@@ -38,9 +38,9 @@ commands:</p>
    page</a> and extract the
    <code>hindsite</code> executable (see <a href="#building-hindsite"><em>Building hindsite</em></a> if you
    prefer to build and install from source).</li><li>Create a new Hindsite project directory and install the builtin blog
-   template:<pre class="no-highlight"><code>mkdir myproj
+   template:<pre><code>mkdir myproj
 hindsite init myproj -builtin blog</code></pre>
-</li><li>Build the website, start the hindsite web server and open it in the browser:<pre class="no-highlight"><code>hindsite serve myproj -launch</code></pre>
+</li><li>Build the website, start the hindsite web server and open it in the browser:<pre><code>hindsite serve myproj -launch</code></pre>
 </li></ol><p>Include the <code>-v</code> (verbose) command option to see what's going on. The best way
 to start learning hindsite is to browse the blog <a href="#projects">project directory</a>.</p>
 <p>If you are familiar with Jekyll or Hugo you'll be right a home (hindsite can
@@ -56,7 +56,7 @@ folder, but this convention is not enforced: a single template can process
 multiple content directories just as a single content directory can be processed
 by multiple templates.</p>
 <p>For example, here's the builtin blog project structure:</p>
-<pre class="no-highlight"><code>├── build
+<pre><code>├── build
 │   ├── images
 │   ├── indexes
 │   │   ├── newsletters
@@ -91,12 +91,12 @@ ensures consistent, readable URLs without ugly encodings for illegal URL
 characters.</p>
 <h2 id="commands">Commands</h2>
 <p>Usage:</p>
-<pre class="no-highlight"><code>hindsite init  PROJECT_DIR [OPTIONS]
+<pre><code>hindsite init  PROJECT_DIR [OPTIONS]
 hindsite build PROJECT_DIR [OPTIONS]
 hindsite serve PROJECT_DIR [OPTIONS]
 hindsite help</code></pre>
 <p>Commands:</p>
-<pre class="no-highlight"><code>init    initialize a new project
+<pre><code>init    initialize a new project
 build   generate the website
 serve   start development webserver
 help    display usage summary</code></pre>
@@ -109,15 +109,15 @@ help    display usage summary</code></pre>
 <p>The <em>help</em> command prints command usage and options summary plus hindsite
 version information.</p>
 <p>Usage:</p>
-<pre class="no-highlight"><code>hindsite help</code></pre>
+<pre><code>hindsite help</code></pre>
 <p><code>hindsite</code>, <code>hindsite -h</code> and <code>hindsite --help</code> are all aliases for <code>hindsite help</code>.</p>
 <h3 id="init-command">init command</h3>
 <p>The <em>init</em> command initializes a project <em>content</em> directory from a <em>template</em>
 directory or from one ot the built-in templates.</p>
 <p>Usage:</p>
-<pre class="no-highlight"><code>hindsite init  PROJECT_DIR [OPTIONS]</code></pre>
+<pre><code>hindsite init  PROJECT_DIR [OPTIONS]</code></pre>
 <p>Applicable options:</p>
-<pre class="no-highlight"><code>-content CONTENT_DIR
+<pre><code>-content CONTENT_DIR
 -template TEMPLATE_DIR
 -builtin NAME
 -v</code></pre>
@@ -127,14 +127,14 @@ directory or from one ot the built-in templates.</p>
    content directory.</li></ol><p>The following example installs the builtin <code>blog</code> template to <code>./template</code> then
 copies the contents of the <code>./template/init</code> directory to the <code>./content</code>
 directory:</p>
-<pre class="no-highlight"><code>hindsite init . -builtin blog</code></pre>
+<pre><code>hindsite init . -builtin blog</code></pre>
 <h3 id="build-command">build command</h3>
 <p>The <em>build</em> command generates a static website in the <em>build</em> directory using
 files from the <em>content</em> and <em>template</em> directories.</p>
 <p>Usage:</p>
-<pre class="no-highlight"><code>hindsite build PROJECT_DIR [OPTIONS]</code></pre>
+<pre><code>hindsite build PROJECT_DIR [OPTIONS]</code></pre>
 <p>Applicable options:</p>
-<pre class="no-highlight"><code>-content CONTENT_DIR
+<pre><code>-content CONTENT_DIR
 -template TEMPLATE_DIR
 -build BUILD_DIR
 -drafts
@@ -157,9 +157,9 @@ directories</em> changed the <em>serve</em> command automatically
 <a href="#partial-rebuilds">rebuilds</a> affected webpages. The server also handles browser
 live reloading.</p>
 <p>Usage:</p>
-<pre class="no-highlight"><code>hindsite serve PROJECT_DIR [OPTIONS]</code></pre>
+<pre><code>hindsite serve PROJECT_DIR [OPTIONS]</code></pre>
 <p>Applicable options:</p>
-<pre class="no-highlight"><code>-content CONTENT_DIR
+<pre><code>-content CONTENT_DIR
 -template TEMPLATE_DIR
 -build BUILD_DIR
 -drafts
@@ -197,10 +197,10 @@ configuration files.</p>
   at the root of the template directory.</li></ul><h3 id="configuration-parameters">Configuration parameters</h3>
 <p>Valid configuration parameters are:</p>
 <dl><dt><code>author</code></dt><dd>Specifies the default document author and is overridden by the
-document's <a href="#front-matter-values"><code>author</code> front matter value</a>. TOML example:<pre class="no-highlight"><code>author = "Joe Bloggs"</code></pre>
+document's <a href="#front-matter-values"><code>author</code> front matter value</a>. TOML example:<pre><code>author = "Joe Bloggs"</code></pre>
 </dd><dt><code>exclude</code> †</dt><dd>A <code>|</code> separated list of file and directory paths specifying files
 from the project <em>content</em> and <em>template</em> directories that are excluded from
-processing. TOML example:<pre class="no-highlight"><code>exclude = "config.rmu|*~|4913"</code></pre>
+processing. TOML example:<pre><code>exclude = "config.rmu|*~|4913"</code></pre>
 <ul><li>Dotfiles (file names starting with a period) are excluded by default. To force
   inclusion of a dotfile add it to the <code>include</code> parameter.</li><li>The paths are relative to the content or template directories.</li><li>The path separator is a slash (<code>/</code>) character.</li><li>The file paths can contain wildcard patterns conforming to patterns matched by
   the Go <a href="https://golang.org/pkg/path/#Match">path.Match() function</a>.</li><li>If the path contains no path separators then it is matched against all file
@@ -214,21 +214,21 @@ processing. TOML example:<pre class="no-highlight"><code>exclude = "config.rmu|*
   if it is in the top directory.</li></ul>
 </dd><dt><code>include</code> †</dt><dd>A <code>|</code> separated list of file and directory paths specifying files
 that are processed unconditionally i.e. irrespective of the <code>exclude</code> parameter.
-Parameter values have the same format as the <code>exclude</code> parameter. TOML example:<pre class="no-highlight"><code>include = ".htaccess"</code></pre>
+Parameter values have the same format as the <code>exclude</code> parameter. TOML example:<pre><code>include = ".htaccess"</code></pre>
 </dd><dt><code>shortdate</code>, <code>mediumdate</code>, <code>longdate</code></dt><dd>These are date formats for <code>shortdate</code>,
 <code>mediumdate</code> and <code>longdate</code> <a href="#document-template-variables">document template
 variables</a> respectively. The values conform to the
 layouts supported by Go <a href="https://golang.org/pkg/time/#Time.Format">time.Format
-function</a>. The default values are:<pre class="no-highlight"><code>shortdate = "2006-01-02",
+function</a>. The default values are:<pre><code>shortdate = "2006-01-02",
 mediumdate = "2-Jan-2006",
 longdate = "Mon Jan 2, 2006",</code></pre>
 </dd><dt><code>homepage</code> †</dt><dd>The <code>homepage</code> parameter is the name of a file, relative to the
 build directory, that is copied by the <code>build</code> command to the root of the build
 directory and named <code>index.html</code>. Use the slash (<code>/</code>) character as the path
-separator to ensure cross-platform compatibility. TOML example:<pre class="no-highlight"><code>homepage = "indexes/posts/docs-1.html"</code></pre>
+separator to ensure cross-platform compatibility. TOML example:<pre><code>homepage = "indexes/posts/docs-1.html"</code></pre>
 </dd><dt><code>paginate</code></dt><dd>This parameter sets the number of documents per document index
 page. The default value is 5. Set to -1 to include all documents on a single
-document index page. TOML example:<pre class="no-highlight"><code>paginate = 10</code></pre>
+document index page. TOML example:<pre><code>paginate = 10</code></pre>
 </dd><dt><code>permalink</code></dt><dd>An optional URL and build path template for built files. The
 file's URL and build path is computed by substituting the following <code>permalink</code>
 placeholders:<dl><dt><code>%y</code></dt><dd>Four digit publication date year.</dd><dt><code>%m</code></dt><dd>Two digit publication date month.</dd><dt><code>%d</code></dt><dd>Two digit publication date day of month.</dd><dt><code>%f</code></dt><dd>The build file name.</dd><dt><code>%p</code></dt><dd>The build file name minus the file name extension.</dd></dl><p>If the permalink ends with a trailing slash then hindsite creates &ldquo;pretty&rdquo; URLs
@@ -236,7 +236,7 @@ by writing the build file to <code>index.html</code> in a directory with the pag
 <code>permalink</code> can also be specified in the document <a href="#front-matter">front
 matter</a>.</p>
 <p>TOML examples:</p>
-<pre class="no-highlight"><code>permalink = "/posts/%y/%m/%d/%f"
+<pre><code>permalink = "/posts/%y/%m/%d/%f"
 permalink = "/posts/%y-%m-%d/%p/"</code></pre>
 <p>A permalink URL will not change provided the <code>permalink</code> parameter, the document
 publication date and the document slug are not changed. Changing the source
@@ -245,22 +245,22 @@ document's content directory location does not change a permalink URL.</p>
 and static files in the content directory that undergo <a href="#text-templates">text
 template</a> expansion. The file name extensions include the
 leading dot character. By default no content files are expanded. <code>templates</code> can
-also be set in the document <a href="#front-matter">front matter</a>. TOML example:<pre class="no-highlight"><code>templates = ".css|.html|.js|.md"</code></pre>
+also be set in the document <a href="#front-matter">front matter</a>. TOML example:<pre><code>templates = ".css|.html|.js|.md"</code></pre>
 </dd><dt><code>timezone</code></dt><dd>Sets the time zone for dates and times. Set to a TZ name from the
 IANA Timezone Database or to <code>"Local"</code> (the system's local timezone).
-TOML example:<pre class="no-highlight"><code>timezone = "Pacific/Auckland"</code></pre>
+TOML example:<pre><code>timezone = "Pacific/Auckland"</code></pre>
 <ul><li><code>timezone</code> defaults to <code>"Local"</code>.</li><li><code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="#document-template-variables">document template
   variables</a> are rendered in the configured
   <code>timezone</code>.</li><li><code>timezone</code> is assigned to <a href="#front-matter-values">publication <code>date</code> values</a>
   that are specified without a timezone.</li><li><code>permalink</code> dates are rendered in their assigned timezone, this ensures
   permalinks do not change if the <code>timezone</code> is changed.</li></ul>
 </dd><dt><code>urlprefix</code> †</dt><dd>This parameter is prepended to all synthesized document and index
-page <a href="#urls">URLs</a>. Its default value is a blank string. TOML examples:<pre class="no-highlight"><code>urlprefix = "/blog"                     # Root-relative URL prefix.
+page <a href="#urls">URLs</a>. Its default value is a blank string. TOML examples:<pre><code>urlprefix = "/blog"                     # Root-relative URL prefix.
 urlprefix = "https://www.example.com"   # Absolute URL prefix.</code></pre>
 </dd><dt><code>user</code></dt><dd>This is a user defined key/value map and provides a mechanism for
 defining custom template variables. Both keys and values are strings and the
 keys must be legal <a href="https://golang.org/ref/spec#Identifiers">Go identifier</a>. For
-example:<pre class="no-highlight"><code># TOML
+example:<pre><code># TOML
 [user]
 banner = "News &amp; Views"
 byline = "Ac eros etiam enim pellentesque proin"
@@ -270,7 +270,7 @@ user:
   banner: News &amp; Views
   byline: Ac eros etiam enim pellentesque proin, tincidunt augue</code></pre>
 <p>Are available as these template variables:</p>
-<pre class="no-highlight"><code>.user.banner
+<pre><code>.user.banner
 .user.byline</code></pre>
 </dd></dl><p>† The <code>exclude</code>, <code>include</code>, <code>homepage</code> and <code>urlprefix</code> configuration parameters
 are site-wide and are always taken from the template directory root
@@ -336,7 +336,7 @@ separate line). The delimiter determines the front matter format
 <dl><dt><em>Start delimiters</em></dt><dd>TOML: <code>+++</code><br>
     YAML: <code>---</code>, <code>&lt;!--</code>, <code>/***</code></dd><dt><em>End delimiters</em></dt><dd>TOML: <code>+++</code><br>
     YAML: <code>---</code>, <code>--&gt;</code>, <code>***/</code></dd></dl><p>Example YAML front matter:</p>
-<pre class="no-highlight"><code>---
+<pre><code>---
 title:    Foo Bar
 description: A brief history of the origins of the foofoo valve.
 date:     2018-02-16
@@ -345,7 +345,7 @@ slug:     foofoo-valve-history
 draft:    true
 ---</code></pre>
 <p>Example TOML front matter:</p>
-<pre class="no-highlight"><code>+++
+<pre><code>+++
 title = "Foo Bar"
 description = "A brief history of the origins of the foofoo valve."
 date = "2018-02-16"
@@ -364,7 +364,7 @@ The <code>date</code> format is RFC 3339 with the following relaxations:<ul><li>
   This has the effect of always rendering the date as written irrespective of
   the <code>timezone</code> parameter value.</li><li>If the time is omitted then the time <code>00:00:00</code> is used.</li><li>A space character separator (instead of the letter <code>T</code>) between the date and
   the time is allowed.</li></ul><p>Examples with <code>timezone = "+13:00"</code>:</p>
-<pre class="no-highlight"><code>1979-05-27T07:32:00+02:00   # 1979-05-27T07:32:00+02:00
+<pre><code>1979-05-27T07:32:00+02:00   # 1979-05-27T07:32:00+02:00
 1979-05-27T07:32:00         # 1979-05-27T07:32:00+13:00
 1979-05-27 07:32:00         # 1979-05-27T07:32:00+13:00
 1979-05-27                  # 1979-05-27T00:00:00+13:00</code></pre>
@@ -376,7 +376,7 @@ overridden with the <a href="#build-command">build</a> and <a href="#serve-comma
 <code>-drafts</code> option. Defaults to <code>false</code>.</dd><dt><code>layout</code></dt><dd>The name of the template used to render the document. <code>layout</code>
 defaults to the closest <code>layout.html</code> <a href="#html-templates">HTML template</a>.</dd><dt><code>permalink</code></dt><dd>Sets the document <a href="#configuration-parameters"><code>permalink</code></a> value.
 Defaults to the <a href="#configuration-parameters"><code>permalink</code></a> configuration parameter
-value.</dd><dt><code>tags</code></dt><dd>A list of tag keywords and phrases. Examples:<pre class="no-highlight"><code># TOML
+value.</dd><dt><code>tags</code></dt><dd>A list of tag keywords and phrases. Examples:<pre><code># TOML
 tags = ["foo foo valve", "qux", "baz"]
 
 # YAML
@@ -474,16 +474,16 @@ HTML responses before sending them to the browser.</p>
 <p>If you have the <a href="https://golang.org/">Go language</a> installed and want to compile
 hindsite from source code then run the following command to download, compile
 and install hindsite:</p>
-<pre class="no-highlight"><code>go get github.com/srackham/hindsite  </code></pre>
+<pre><code>go get github.com/srackham/hindsite  </code></pre>
 <p><i class="sans-font">NOTE</i>:</p>
 <ul><li><code>go get</code> downloads the <em>HEAD</em> from the <em>master</em> branch which may not be the
   same as the latest tagged release.</li><li><code>go get</code> does not (yet) install vendored packages, it installs the latest
    dependent packages globally which may not be the same as the vendored
    versions.</li></ul><p>Use <a href="https://github.com/golang/dep">dep</a> to install vendored packages in the <code>vendor</code> directory:</p>
-<pre class="no-highlight"><code>cd &lt;hindsite-source-directory&gt;
+<pre><code>cd &lt;hindsite-source-directory&gt;
 dep ensure</code></pre>
 <p>To build a specific tagged release you need to run:</p>
-<pre class="no-highlight"><code>cd &lt;hindsite-source-directory&gt;
+<pre><code>cd &lt;hindsite-source-directory&gt;
 git checkout tags/&lt;tag-name&gt;
 dep ensure
 make build            # Writes built releases to ./bin directory.
@@ -494,8 +494,9 @@ git checkout master   # Reinstate master branch.</code></pre>
 <script src="/hindsite/main.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/go.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/typescript.min.js"></script>
 <script>
+hljs.configure({languages: []});  
 hljs.initHighlightingOnLoad();
 window.onload = function() {
   var headings = [].slice.call(document.body.querySelectorAll('#article > h1, #article > h2, #article > h3'));
