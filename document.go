@@ -41,6 +41,7 @@ type document struct {
 	permalink   string // URL template.
 	slug        string
 	layout      string            // Document template name.
+	id          string            // Unique document ID>
 	user        map[string]string // User defined configuration key/values.
 }
 
@@ -199,6 +200,7 @@ func (doc *document) extractFrontMatter() error {
 		Permalink   string
 		Slug        string
 		Layout      string
+		ID          string
 		User        map[string]string
 	}{}
 	switch format {
@@ -248,6 +250,9 @@ func (doc *document) extractFrontMatter() error {
 	if fm.Layout != "" {
 		doc.layout = fm.Layout
 	}
+	if fm.ID != "" {
+		doc.id = fm.ID
+	}
 	if fm.User != nil {
 		doc.user = fm.User
 	}
@@ -267,6 +272,7 @@ func (doc *document) frontMatter() templateData {
 	data["date"] = doc.date
 	data["modtime"] = doc.modtime
 	data["layout"] = doc.layout
+	data["id"] = doc.id
 	data["urlprefix"] = doc.conf.urlprefix
 	data["slug"] = doc.slug
 	data["url"] = doc.url
@@ -346,6 +352,7 @@ func (doc *document) updateFrom(src document) {
 	doc.draft = src.draft
 	doc.slug = src.slug
 	doc.layout = src.layout
+	doc.id = src.id
 	doc.user = src.user
 }
 
