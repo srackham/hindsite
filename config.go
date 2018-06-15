@@ -22,6 +22,7 @@ type config struct {
 	paginate  int               // Number of documents per index page. No pagination if zero or less.
 	urlprefix string            // Prefix for synthesized document and index page URLs.
 	permalink string            // URL template.
+	id        string            // Front matter id behavior: "optional",  "mandatory" or "urlpath".
 	exclude   []string          // List of excluded content patterns.
 	include   []string          // List of included content patterns.
 	timezone  *time.Location    // Time zone for site generation.
@@ -38,6 +39,7 @@ type configs []config
 func newConfig() config {
 	conf := config{
 		exclude:    []string{".*"},
+		id:         "optional",
 		paginate:   5,
 		shortdate:  "2006-01-02",
 		mediumdate: "2-Jan-2006",
@@ -60,6 +62,7 @@ func (conf *config) parseFile(proj *project, f string) error {
 		Exclude    *string
 		Include    *string
 		Homepage   string
+		ID         string
 		Permalink  string
 		URLPrefix  string
 		Paginate   int
@@ -108,6 +111,14 @@ func (conf *config) parseFile(proj *project, f string) error {
 			return fmt.Errorf("homepage cannot be a directory: %s", home)
 		}
 		conf.homepage = home
+	}
+	if cf.ID != "" {
+		switch cf.ID {
+		case "optional", "mandatory", "urlpath":
+			conf.id = cf.ID
+		default:
+			return fmt.Errorf("illegal id configuration parameter value: %s", cf.ID)
+		}
 	}
 	if cf.Paginate != 0 {
 		conf.paginate = cf.Paginate
@@ -163,6 +174,7 @@ func (conf *config) data() templateData {
 	data := templateData{}
 	data["author"] = nz(conf.author)
 	data["templates"] = nz(conf.templates)
+	data["id"] = conf.id
 	data["permalink"] = conf.permalink
 	data["homepage"] = conf.homepage
 	data["paginate"] = conf.paginate
@@ -190,6 +202,9 @@ func (conf *config) merge(from config) {
 	}
 	if from.author != nil {
 		conf.author = from.author
+	}
+	if from.id != "" {
+		conf.id = from.id
 	}
 	if from.templates != nil {
 		conf.templates = from.templates

@@ -33,6 +33,7 @@ type document struct {
 	title       string
 	date        time.Time
 	author      *string
+	id          *string // Unique document ID.
 	templates   *string
 	description string
 	url         string // Synthesized document URL.
@@ -41,7 +42,6 @@ type document struct {
 	permalink   string // URL template.
 	slug        string
 	layout      string            // Document template name.
-	id          string            // Unique document ID>
 	user        map[string]string // User defined configuration key/values.
 }
 
@@ -128,6 +128,20 @@ func newDocument(contentfile string, proj *project) (document, error) {
 		}
 		doc.layout = proj.htmlTemplates.name(layout)
 	}
+	switch doc.conf.id {
+	case "optional":
+	case "mandatory":
+		if doc.id == nil || *doc.id == "" {
+			return doc, fmt.Errorf("missing document id for: %s", doc.contentPath)
+		}
+	case "urlpath":
+		if doc.id == nil {
+			s := strings.TrimPrefix(doc.url, doc.conf.urlprefix)
+			doc.id = &s
+		}
+	default:
+		panic("illegal doc.conf.id for :" + doc.contentPath + ": " + doc.conf.id)
+	}
 	return doc, nil
 }
 
@@ -200,7 +214,7 @@ func (doc *document) extractFrontMatter() error {
 		Permalink   string
 		Slug        string
 		Layout      string
-		ID          string
+		ID          *string
 		User        map[string]string
 	}{}
 	switch format {
@@ -229,6 +243,9 @@ func (doc *document) extractFrontMatter() error {
 	if fm.Author != nil {
 		doc.author = fm.Author
 	}
+	if fm.ID != nil {
+		doc.id = fm.ID
+	}
 	if fm.Templates != nil {
 		doc.templates = fm.Templates
 	}
@@ -250,9 +267,6 @@ func (doc *document) extractFrontMatter() error {
 	if fm.Layout != "" {
 		doc.layout = fm.Layout
 	}
-	if fm.ID != "" {
-		doc.id = fm.ID
-	}
 	if fm.User != nil {
 		doc.user = fm.User
 	}
@@ -264,6 +278,7 @@ func (doc *document) frontMatter() templateData {
 	data := templateData{}
 	data["title"] = doc.title
 	data["author"] = nz(doc.author)
+	data["id"] = nz(doc.id)
 	data["templates"] = nz(doc.templates)
 	data["permalink"] = doc.permalink
 	data["shortdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.shortdate)
@@ -272,7 +287,6 @@ func (doc *document) frontMatter() templateData {
 	data["date"] = doc.date
 	data["modtime"] = doc.modtime
 	data["layout"] = doc.layout
-	data["id"] = doc.id
 	data["urlprefix"] = doc.conf.urlprefix
 	data["slug"] = doc.slug
 	data["url"] = doc.url
