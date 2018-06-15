@@ -215,6 +215,14 @@ processing. TOML example:<pre><code>exclude = "config.rmu|*~|4913"</code></pre>
 </dd><dt><code>include</code> †</dt><dd>A <code>|</code> separated list of file and directory paths specifying files
 that are processed unconditionally i.e. irrespective of the <code>exclude</code> parameter.
 Parameter values have the same format as the <code>exclude</code> parameter. TOML example:<pre><code>include = ".htaccess"</code></pre>
+</dd><dt id="id-configuration-parameter"><code>id</code></dt><dd>Specifies the default behavior of the <a href="#document-id">document <code>id</code> front matter
+ value</a>:<ul><li>If the <code>id</code> configuration parameter is <code>optional</code> then <code>id</code> front matter
+  values default to blank.</li><li>If the <code>id</code> configuration parameter is <code>urlpath</code> then document <code>id</code> front
+  matter values default to the document URL stripped of the
+  <a href="#urlprefix"><code>urlprefix</code></a>.</li><li>If the <code>id</code> configuration parameter is <code>mandatory</code> then document front matter
+  <code>id</code>'s must have explicit non-blank values (an error is generated if a
+  document <code>id</code> is not specified).</li></ul><p>The <code>id</code> configuration parameter defaults to <code>optional</code>. TOML example:</p>
+<pre><code>id = "urlpath"</code></pre>
 </dd><dt><code>shortdate</code>, <code>mediumdate</code>, <code>longdate</code></dt><dd>These are date formats for <code>shortdate</code>,
 <code>mediumdate</code> and <code>longdate</code> <a href="#document-template-variables">document template
 variables</a> respectively. The values conform to the
@@ -254,7 +262,7 @@ TOML example:<pre><code>timezone = "Pacific/Auckland"</code></pre>
   <code>timezone</code>.</li><li><code>timezone</code> is assigned to <a href="#front-matter-values">publication <code>date</code> values</a>
   that are specified without a timezone.</li><li><code>permalink</code> dates are rendered in their assigned timezone, this ensures
   permalinks do not change if the <code>timezone</code> is changed.</li></ul>
-</dd><dt><code>urlprefix</code> †</dt><dd>This parameter is prepended to all synthesized document and index
+</dd><dt id="urlprefix"><code>urlprefix</code> †</dt><dd>This parameter is prepended to all synthesized document and index
 page <a href="#urls">URLs</a>. Its default value is a blank string. TOML examples:<pre><code>urlprefix = "/blog"                     # Root-relative URL prefix.
 urlprefix = "https://www.example.com"   # Absolute URL prefix.</code></pre>
 </dd><dt><code>user</code></dt><dd>This is a user defined key/value map and provides a mechanism for
@@ -373,7 +381,9 @@ defaults to the content up to the first <code>&lt;!--more--&gt;</code> tag or bl
 no <code>&lt;!--more--&gt;</code> tag. The <code>&lt;!--more--&gt;</code> tag must appear alone on a separate
 line. The description is processed as Markdown.</dd><dt><code>draft</code></dt><dd>If set to <code>true</code> then the document will not be processed. This can be
 overridden with the <a href="#build-command">build</a> and <a href="#serve-command">serve</a> command
-<code>-drafts</code> option. Defaults to <code>false</code>.</dd><dt><code>layout</code></dt><dd>The name of the template used to render the document. <code>layout</code>
+<code>-drafts</code> option. Defaults to <code>false</code>.</dd><dt id="document-id"><code>id</code></dt><dd>A unique document identifier.<ul><li>Non-blank <code>id</code> values must be unique within a project (an error occurs if two
+    or more published documents have the same <code>id</code> value).</li><li>If a document has no explicit <code>id</code> value then the default value is determined
+    by the <a href="#id-configuration-parameter"><code>id</code> configuration parameter</a>.</li></ul></dd><dt><code>layout</code></dt><dd>The name of the template used to render the document. <code>layout</code>
 defaults to the closest <code>layout.html</code> <a href="#html-templates">HTML template</a>.</dd><dt><code>permalink</code></dt><dd>Sets the document <a href="#configuration-parameters"><code>permalink</code></a> value.
 Defaults to the <a href="#configuration-parameters"><code>permalink</code></a> configuration parameter
 value.</dd><dt><code>tags</code></dt><dd>A list of tag keywords and phrases. Examples:<pre><code># TOML
@@ -402,7 +412,7 @@ templates</a>.</p>
 <a href="#front-matter-values"><code>description</code></a> front matter value.</dd><dt><code>.shortdate</code>, <code>.mediumdate</code>, <code>.longdate</code></dt><dd>The document publication date strings
 formatted using the <code>shortdate</code>, <code>mediumdate</code> and <code>longdate</code> <a href="#configuration-parameters">configuration
 parameters</a> respectively.</dd><dt><code>.date</code></dt><dd><a href="#front-matter-values"><code>date</code></a> front matter value.</dd><dt><code>.layout</code></dt><dd><a href="#front-matter-values"><code>layout</code></a> front matter value.</dd><dt><code>.modtime</code></dt><dd>Content file modification date and time.</dd><dt><code>.next</code>, <code>.prev</code></dt><dd>The next and previous document URLs in primary index order.</dd><dt><code>.permalink</code></dt><dd><a href="#front-matter-values"><code>permalink</code></a> front matter value.</dd><dt><code>.slug</code></dt><dd><a href="#front-matter-values"><code>slug</code></a> front matter value.</dd><dt><code>.url</code></dt><dd>Synthesized document <a href="#urls">URL</a>.</dd><dt><code>.tags</code></dt><dd>An iterable list of tags. Each item contains the variables <code>.tag</code> (the
-tag) and <code>.url</code> (the tag index URL).</dd><dt><code>.templates</code></dt><dd><a href="#front-matter-values"><code>templates</code></a> front matter value.</dd><dt><code>.title</code></dt><dd>Document title.</dd><dt><code>.urlprefix</code></dt><dd><a href="#configuration-parameters"><code>urlprefix</code></a> configuration value.</dd><dt><code>.user</code></dt><dd>This key/value map is synthesized by merging the (higher precedence)
+tag) and <code>.url</code> (the tag index URL).</dd><dt><code>.templates</code></dt><dd><a href="#front-matter-values"><code>templates</code></a> front matter value.</dd><dt><code>.title</code></dt><dd>Document title.</dd><dt><code>.urlprefix</code></dt><dd><a href="#urlprefix"><code>urlprefix</code></a> configuration value.</dd><dt><code>.user</code></dt><dd>This key/value map is synthesized by merging the (higher precedence)
 document <a href="#front-matter-values">front matter <code>user</code> value</a> with the document's <code>user</code>
 <a href="#configuration-parameters">configuration parameter</a>.</dd></dl><h2 id="templates">Templates</h2>
 <p><em>hindsite</em> uses Go templates to build webpages. There are two types of
@@ -436,10 +446,10 @@ directory is indexed.<p><code>docs.html</code> templates are rendered with the f
 <dl><dt><code>.docs</code></dt><dd>An iterable list of index page documents. Each list item contains a
 set of <a href="#document-template-variables">document template variables</a>.</dd><dt><code>.count</code></dt><dd>The total number of documents in the index.</dd><dt><code>.page</code></dt><dd>Document index page variables:<dl><dt><code>.number</code></dt><dd>The page number.</dd><dt><code>.url</code></dt><dd>The page URL.</dd><dt><code>.prev</code>, <code>.next</code>, <code>.first</code>, <code>.last</code></dt><dd>Each with the page <code>.number</code> and
        <code>.url</code> of the previous, next, first and last index pages. For example
-      <code>.page.prev.number</code> is the page number (1&hellip;) of the previous document index page.</dd></dl></dd><dt><code>.urlprefix</code></dt><dd>The <a href="#configuration-parameters"><code>urlprefix</code></a> configuration parameter value.</dd><dt><code>.user</code></dt><dd>The index configuration <a href="#configuration-parameters"><code>user</code></a> key/value map.</dd></dl>
+      <code>.page.prev.number</code> is the page number (1&hellip;) of the previous document index page.</dd></dl></dd><dt><code>.urlprefix</code></dt><dd>The <a href="#urlprefix"><code>urlprefix</code></a> configuration parameter value.</dd><dt><code>.user</code></dt><dd>The index configuration <a href="#configuration-parameters"><code>user</code></a> key/value map.</dd></dl>
 </dd><dt><code>tags.html</code></dt><dd>This optional index template is used to build a <code>tags.html</code> tags
 index webpage. If it is not present the tags index files are not built.
-<code>tags.html</code> templates are rendered with the following template variables:<dl><dt><code>.tags</code></dt><dd>An iterable list, each list item contains:<dl><dt><code>.tag</code></dt><dd>The tag.</dd><dt><code>.url</code></dt><dd>The URL of of the tag's document index.</dd><dt><code>.count</code></dt><dd>The number of documents with this tag.</dd></dl></dd><dt><code>.urlprefix</code></dt><dd>The <a href="#configuration-parameters"><code>urlprefix</code></a> configuration parameter value.</dd><dt><code>.user</code></dt><dd>The index configuration <a href="#configuration-parameters"><code>user</code></a> key/value map.</dd></dl>
+<code>tags.html</code> templates are rendered with the following template variables:<dl><dt><code>.tags</code></dt><dd>An iterable list, each list item contains:<dl><dt><code>.tag</code></dt><dd>The tag.</dd><dt><code>.url</code></dt><dd>The URL of of the tag's document index.</dd><dt><code>.count</code></dt><dd>The number of documents with this tag.</dd></dl></dd><dt><code>.urlprefix</code></dt><dd>The <a href="#urlprefix"><code>urlprefix</code></a> configuration parameter value.</dd><dt><code>.user</code></dt><dd>The index configuration <a href="#configuration-parameters"><code>user</code></a> key/value map.</dd></dl>
 </dd></dl><h3 id="text-templates">Text templates</h3>
 <p>Text template expansion is optional in <a href="#documents">documents</a> and <a href="#static-files">static
 files</a>. By default there is no document or static file expansion,
@@ -455,7 +465,7 @@ files</a>.</p>
 <h2 id="urls">URLs</h2>
 <p>hindsite synthesizes root-relative document and index page URLs. URLs are
 relative to the build directory and are prefixed with the
-<a href="#configuration-parameters"><code>urlprefix</code></a> configuration parameter. If a
+<a href="#urlprefix"><code>urlprefix</code></a> configuration parameter. If a
 <a href="#front-matter-values"><code>slug</code></a> front matter value is specified it replaces the
 document file name.</p>
 <p>For example, if the build directory is <code>/myproj/build</code> and the rendered document

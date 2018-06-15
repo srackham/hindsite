@@ -342,6 +342,24 @@ Parameter values have the same format as the `exclude` parameter. TOML example:
 
     include = ".htaccess"
 
+.#id-configuration-parameter
+`id`:: Specifies the default behavior of the [document `id` front matter
+ value](#document-id):
+..
+- If the `id` configuration parameter is `optional` then `id` front matter
+  values default to blank.
+- If the `id` configuration parameter is `urlpath` then document `id` front
+  matter values default to the document URL stripped of the
+  [`urlprefix`](#urlprefix).
+- If the `id` configuration parameter is `mandatory` then document front matter
+  `id`'s must have explicit non-blank values (an error is generated if a
+  document `id` is not specified).
+
+The `id` configuration parameter defaults to `optional`. TOML example:
+
+    id = "urlpath"
+..
+
 `shortdate`, `mediumdate`, `longdate`:: These are date formats for `shortdate`,
 `mediumdate` and `longdate` [document template
 variables](#document-template-variables) respectively. The values conform to the
@@ -414,6 +432,7 @@ TOML example:
   permalinks do not change if the `timezone` is changed.
 ..
 
+.#urlprefix
 `urlprefix` †:: This parameter is prepended to all synthesized document and index
 page [URLs](#urls). Its default value is a blank string. TOML examples:
 
@@ -609,6 +628,14 @@ line. The description is processed as Markdown.
 overridden with the [build](#build-command) and [serve](#serve-command) command
 `-drafts` option. Defaults to `false`.
 
+.#document-id
+`id`:: A unique document identifier.
+
+  - Non-blank `id` values must be unique within a project (an error occurs if two
+    or more published documents have the same `id` value).
+  - If a document has no explicit `id` value then the default value is determined
+    by the [`id` configuration parameter](#id-configuration-parameter).
+
 `layout`:: The name of the template used to render the document. `layout`
 defaults to the closest `layout.html` [HTML template](#html-templates).
 
@@ -684,7 +711,7 @@ tag) and `.url` (the tag index URL).
 
 `.title`:: Document title.
 
-`.urlprefix`:: [`urlprefix`](#configuration-parameters) configuration value.
+`.urlprefix`:: [`urlprefix`](#urlprefix) configuration value.
 
 `.user`:: This key/value map is synthesized by merging the (higher precedence)
 document [front matter `user` value](#front-matter-values) with the document's `user`
@@ -748,7 +775,7 @@ set of [document template variables](#document-template-variables).
        `.url` of the previous, next, first and last index pages. For example
       `.page.prev.number` is the page number (1...) of the previous document index page.
 
-`.urlprefix`:: The [`urlprefix`](#configuration-parameters) configuration parameter value.
+`.urlprefix`:: The [`urlprefix`](#urlprefix) configuration parameter value.
 
 `.user`:: The index configuration [`user`](#configuration-parameters) key/value map.
 ..
@@ -764,7 +791,7 @@ index webpage. If it is not present the tags index files are not built.
   `.url`::: The URL of of the tag's document index.
   `.count`::: The number of documents with this tag.
 
-`.urlprefix`:: The [`urlprefix`](#configuration-parameters) configuration parameter value.
+`.urlprefix`:: The [`urlprefix`](#urlprefix) configuration parameter value.
 
 `.user`:: The index configuration [`user`](#configuration-parameters) key/value map.
 ..
@@ -789,7 +816,7 @@ files](#documents).
 ## URLs
 hindsite synthesizes root-relative document and index page URLs. URLs are
 relative to the build directory and are prefixed with the
-[`urlprefix`](#configuration-parameters) configuration parameter. If a
+[`urlprefix`](#urlprefix) configuration parameter. If a
 [`slug`](#front-matter-values) front matter value is specified it replaces the
 document file name.
 
