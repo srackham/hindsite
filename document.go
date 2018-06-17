@@ -460,15 +460,14 @@ func newDocumentsLookup() documentsLookup {
 	return documentsLookup{map[string]*document{}, map[string]*document{}, map[string]*document{}}
 }
 
-// checkDups returns an error if another document exists with the same buildPath or id.
-func (lookup *documentsLookup) checkDups(doc *document) error {
+func (lookup *documentsLookup) add(doc *document) error {
 	d := lookup.byBuildPath[doc.buildPath]
 	if d != nil {
 		return fmt.Errorf("documents have same build path: " + d.contentPath + ": " + doc.contentPath)
 	}
 	d = lookup.byContentPath[doc.contentPath]
 	if d != nil {
-		panic("duplicate document: " + d.contentPath)
+		panic("duplicate document lookup: " + d.contentPath)
 	}
 	if doc.id != nil && *doc.id != "" {
 		d = lookup.byID[*doc.id]
@@ -476,39 +475,36 @@ func (lookup *documentsLookup) checkDups(doc *document) error {
 			return fmt.Errorf("documents have same id: " + d.contentPath + ": " + doc.contentPath)
 		}
 	}
-	return nil
-}
-
-func (lookup *documentsLookup) _add(doc *document) {
 	lookup.byBuildPath[doc.buildPath] = doc
 	lookup.byContentPath[doc.contentPath] = doc
 	if doc.id != nil && *doc.id != "" {
 		lookup.byID[*doc.id] = doc
 	}
-}
-
-func (lookup *documentsLookup) delete(doc *document) {
-	delete(lookup.byBuildPath, doc.buildPath)
-	delete(lookup.byContentPath, doc.contentPath)
-	if doc.id != nil && *doc.id != "" {
-		delete(lookup.byID, *doc.id)
-	}
-}
-func (lookup *documentsLookup) add(doc *document) error {
-	if err := lookup.checkDups(doc); err != nil {
-		return err
-	}
-	lookup._add(doc)
 	return nil
 }
 
+func (lookup *documentsLookup) delete(doc *document) {
+	deleteKey := func(keymap map[string]*document, key string, doc *document) {
+		d, ok := keymap[key]
+		if !ok || d != doc {
+			panic("corrupt document lookup: " + key)
+		}
+		delete(keymap, key)
+	}
+	deleteKey(lookup.byBuildPath, doc.buildPath, doc)
+	deleteKey(lookup.byContentPath, doc.contentPath, doc)
+	if doc.id != nil && *doc.id != "" {
+		deleteKey(lookup.byID, *doc.id, doc)
+	}
+}
+
 func (lookup *documentsLookup) update(doc *document, from document) error {
+	saved := *doc
 	lookup.delete(doc)
-	if err := lookup.checkDups(&from); err != nil {
-		lookup._add(doc) // Restore.
+	doc.updateFrom(from)
+	if err := lookup.add(doc); err != nil {
+		doc.updateFrom(saved)
 		return err
 	}
-	doc.updateFrom(from)
-	lookup._add(doc)
 	return nil
 }
