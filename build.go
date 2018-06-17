@@ -149,14 +149,15 @@ func (proj *project) build() error {
 	if err := proj.copyHomePage(); err != nil {
 		return err
 	}
-	// Report accumulated document parse errors.
-	if errCount > 0 {
-		return fmt.Errorf("document parse errors: %d", errCount)
-	}
+	// Print summary.
 	fmt.Printf("documents: %d\n", docsCount)
 	fmt.Printf("drafts: %d\n", draftsCount)
 	fmt.Printf("static: %d\n", staticCount)
 	fmt.Printf("time: %.2fs\n", time.Now().Sub(startTime).Seconds())
+	// Report accumulated document parse errors.
+	if errCount > 0 {
+		return fmt.Errorf("document parse errors: %d", errCount)
+	}
 	return nil
 }
 
