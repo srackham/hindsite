@@ -76,6 +76,7 @@ func (proj *project) build() error {
 	draftsCount := 0
 	docsCount := 0
 	staticCount := 0
+	errCount := 0
 	err = filepath.Walk(proj.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -97,7 +98,9 @@ func (proj *project) build() error {
 				// Parse document.
 				doc, err := newDocument(f, proj)
 				if err != nil {
-					return err
+					errCount++
+					proj.logerror(err.Error())
+					return nil
 				}
 				if doc.isDraft() {
 					draftsCount++
@@ -105,17 +108,27 @@ func (proj *project) build() error {
 					return nil
 				}
 				if err := proj.docs.add(&doc); err != nil {
-					return err
+					errCount++
+					proj.logerror(err.Error())
+					return nil
 				}
 			default:
 				staticCount++
-				proj.buildStaticFile(f)
+				if err := proj.buildStaticFile(f); err != nil {
+					errCount++
+					proj.logerror(err.Error())
+					return nil
+				}
 			}
 		}
-		return err
+		return nil
 	})
 	if err != nil {
 		return err
+	}
+	// Report accumulated document processing errors.
+	if errCount > 0 {
+		return fmt.Errorf("document parse errors: %d", errCount)
 	}
 	// Create indexes.
 	proj.idxs, err = newIndexes(proj)

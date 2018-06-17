@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"html/template"
 	"os"
@@ -222,12 +221,12 @@ func (doc *document) extractFrontMatter() error {
 	case "toml":
 		_, err := toml.Decode(header, &fm)
 		if err != nil {
-			return errors.New("TOML front matter: " + doc.contentPath + ": " + err.Error())
+			return fmt.Errorf("TOML front matter: %s: %s", doc.contentPath, err.Error())
 		}
 	case "yaml":
 		err := yaml.Unmarshal([]byte(header), &fm)
 		if err != nil {
-			return errors.New("YAML front matter: " + doc.contentPath + ": " + err.Error())
+			return fmt.Errorf("YAML front matter: %s: %s", doc.contentPath, err.Error())
 		}
 	}
 	// Merge parsed front matter.
@@ -461,7 +460,7 @@ func newDocumentsLookup() documentsLookup {
 	return documentsLookup{map[string]*document{}, map[string]*document{}, map[string]*document{}}
 }
 
-// checkDups returns an error if other documents exists with the same buildPath or id.
+// checkDups returns an error if another document exists with the same buildPath or id.
 func (lookup *documentsLookup) checkDups(doc *document) error {
 	d := lookup.byBuildPath[doc.buildPath]
 	if d != nil {
