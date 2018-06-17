@@ -309,9 +309,7 @@ func (proj *project) removeFile(f string) error {
 	case proj.isDocument(f):
 		doc := proj.docs.byContentPath[f]
 		if doc == nil {
-			// TODO: A "directory", really???
-			// The document may have been a directory or a draft so can't assume
-			// this is an error.
+			// The document may have been a draft so can't assume this is an error.
 			return nil
 		}
 		// Delete from documents.
@@ -369,10 +367,6 @@ func (proj *project) writeFile(f string) error {
 		}
 		oldDoc := *doc
 		if err = proj.docs.update(doc, newDoc); err != nil {
-			// TODO should we really delete the previous good built file? This is not consistent with above newDocument() error handling.
-			if err := proj.removeFile(f); err != nil {
-				return err
-			}
 			return err
 		}
 		// Rebuild affected document index pages.
