@@ -231,9 +231,7 @@ func (proj *project) serve() error {
 				if err != nil {
 					proj.logerror(err.Error())
 				}
-				if err == nil {
-					lr.Reload(webpage.path)
-				}
+				lr.Reload(webpage.path)
 				fmt.Printf("elapsed: %.3fs\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
 				proj.println("")
 			case err := <-watcher.Errors:
@@ -311,6 +309,7 @@ func (proj *project) removeFile(f string) error {
 	case proj.isDocument(f):
 		doc := proj.docs.byContentPath[f]
 		if doc == nil {
+			// TODO: A "directory", really???
 			// The document may have been a directory or a draft so can't assume
 			// this is an error.
 			return nil
@@ -362,13 +361,20 @@ func (proj *project) writeFile(f string) error {
 			// Document has just been created and written or was a draft and has changed to non-draft.
 			return proj.createFile(f)
 		}
+		// Arrive here if an existing published document has been updated.
 		if newDoc.isDraft() {
 			// Document changed to draft.
 			proj.verbose("skip draft: " + f)
 			return proj.removeFile(f)
 		}
 		oldDoc := *doc
-		doc.updateFrom(newDoc)
+		if err = proj.docs.update(doc, newDoc); err != nil {
+			// TODO should we really delete the previous good built file? This is not consistent with above newDocument() error handling.
+			if err := proj.removeFile(f); err != nil {
+				return err
+			}
+			return err
+		}
 		// Rebuild affected document index pages.
 		for _, idx := range proj.idxs {
 			if pathIsInDir(doc.templatePath, idx.templateDir) {

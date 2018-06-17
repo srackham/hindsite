@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"html/template"
 	"os"
@@ -54,13 +55,13 @@ func newDocument(contentfile string, proj *project) (document, error) {
 		panic("missing document: " + contentfile)
 	}
 	doc := document{}
+	doc.contentPath = contentfile
 	doc.proj = proj
 	info, err := os.Stat(contentfile)
 	if err != nil {
 		return doc, err
 	}
 	doc.modtime = info.ModTime()
-	doc.contentPath = contentfile
 	doc.conf = proj.configFor(doc.contentPath)
 	// Extract title and date from file name.
 	doc.title = fileName(contentfile)
@@ -221,12 +222,12 @@ func (doc *document) extractFrontMatter() error {
 	case "toml":
 		_, err := toml.Decode(header, &fm)
 		if err != nil {
-			return err
+			return errors.New("TOML front matter: " + doc.contentPath + ": " + err.Error())
 		}
 	case "yaml":
 		err := yaml.Unmarshal([]byte(header), &fm)
 		if err != nil {
-			return err
+			return errors.New("YAML front matter: " + doc.contentPath + ": " + err.Error())
 		}
 	}
 	// Merge parsed front matter.
@@ -376,7 +377,7 @@ func (doc *document) isDraft() bool {
 }
 
 /*
-	documentsList stores documentsList in an ordered list.
+	An ordered list of document pointers.
 */
 type documentsList []*document
 
@@ -447,33 +448,68 @@ func (docs documentsList) frontMatter() templateData {
 }
 
 /*
-	documentsLookup implements storage and retrieval of documents by contentPath and
-	buildPath
+	documentsLookup implements storage and retrieval of documents by contentPath,
+	buildPath and id.
 */
 type documentsLookup struct {
-	byContentPath map[string]*document // Documents keyed by contentPath.
 	byBuildPath   map[string]*document // Documents keyed by buildPath.
+	byContentPath map[string]*document // Documents keyed by contentPath.
+	byID          map[string]*document // Documents keyed by id.
 }
 
 func newDocumentsLookup() documentsLookup {
-	return documentsLookup{map[string]*document{}, map[string]*document{}}
+	return documentsLookup{map[string]*document{}, map[string]*document{}, map[string]*document{}}
 }
 
-func (lookup *documentsLookup) add(doc *document) error {
-	d := lookup.byContentPath[doc.contentPath]
-	if d != nil {
-		panic("duplicate document: " + d.contentPath)
-	}
-	d = lookup.byBuildPath[doc.buildPath]
+// checkDups returns an error if other documents exists with the same buildPath or id.
+func (lookup *documentsLookup) checkDups(doc *document) error {
+	d := lookup.byBuildPath[doc.buildPath]
 	if d != nil {
 		return fmt.Errorf("documents have same build path: " + d.contentPath + ": " + doc.contentPath)
 	}
-	lookup.byBuildPath[doc.buildPath] = doc
-	lookup.byContentPath[doc.contentPath] = doc
+	d = lookup.byContentPath[doc.contentPath]
+	if d != nil {
+		panic("duplicate document: " + d.contentPath)
+	}
+	if doc.id != nil && *doc.id != "" {
+		d = lookup.byID[*doc.id]
+		if d != nil {
+			return fmt.Errorf("documents have same id: " + d.contentPath + ": " + doc.contentPath)
+		}
+	}
 	return nil
 }
 
+func (lookup *documentsLookup) _add(doc *document) {
+	lookup.byBuildPath[doc.buildPath] = doc
+	lookup.byContentPath[doc.contentPath] = doc
+	if doc.id != nil && *doc.id != "" {
+		lookup.byID[*doc.id] = doc
+	}
+}
+
 func (lookup *documentsLookup) delete(doc *document) {
-	lookup.byBuildPath[doc.buildPath] = nil
-	lookup.byContentPath[doc.contentPath] = nil
+	delete(lookup.byBuildPath, doc.buildPath)
+	delete(lookup.byContentPath, doc.contentPath)
+	if doc.id != nil && *doc.id != "" {
+		delete(lookup.byID, *doc.id)
+	}
+}
+func (lookup *documentsLookup) add(doc *document) error {
+	if err := lookup.checkDups(doc); err != nil {
+		return err
+	}
+	lookup._add(doc)
+	return nil
+}
+
+func (lookup *documentsLookup) update(doc *document, from document) error {
+	lookup.delete(doc)
+	if err := lookup.checkDups(&from); err != nil {
+		lookup._add(doc) // Restore.
+		return err
+	}
+	doc.updateFrom(from)
+	lookup._add(doc)
+	return nil
 }
