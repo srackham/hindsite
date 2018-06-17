@@ -126,10 +126,6 @@ func (proj *project) build() error {
 	if err != nil {
 		return err
 	}
-	// Report accumulated document processing errors.
-	if errCount > 0 {
-		return fmt.Errorf("document parse errors: %d", errCount)
-	}
 	// Create indexes.
 	proj.idxs, err = newIndexes(proj)
 	if err != nil {
@@ -152,6 +148,10 @@ func (proj *project) build() error {
 	// Install home page.
 	if err := proj.copyHomePage(); err != nil {
 		return err
+	}
+	// Report accumulated document parse errors.
+	if errCount > 0 {
+		return fmt.Errorf("document parse errors: %d", errCount)
 	}
 	fmt.Printf("documents: %d\n", docsCount)
 	fmt.Printf("drafts: %d\n", draftsCount)

@@ -143,7 +143,7 @@ func (proj *project) serve() error {
 	rooturl := "http://localhost:" + proj.port + "/"
 	// Full rebuild to initialize document and index structures.
 	if err := proj.build(); err != nil {
-		return err
+		proj.logerror(err.Error())
 	}
 	// Create file system watcher.
 	watcher, err := fsnotify.NewWatcher()
@@ -206,7 +206,7 @@ func (proj *project) serve() error {
 					proj.println("rebuilding...")
 					err = proj.build()
 					if err != nil {
-						done <- err
+						proj.logerror(err.Error())
 					}
 					lr.Reload(webpage.path)
 					proj.println("")
