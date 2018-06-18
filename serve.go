@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/fsnotify/fsnotify"
 	"github.com/jaschaephraim/lrserver"
 )
@@ -230,10 +231,13 @@ func (proj *project) serve() error {
 				}
 				if err != nil {
 					proj.logerror(err.Error())
+				} else {
+					color.Set(color.FgGreen, color.Bold)
 				}
-				lr.Reload(webpage.path)
 				fmt.Printf("elapsed: %.3fs\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
 				proj.println("")
+				color.Unset()
+				lr.Reload(webpage.path)
 			case err := <-watcher.Errors:
 				done <- err
 			}

@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 // build implements the build command.
@@ -150,10 +152,14 @@ func (proj *project) build() error {
 		return err
 	}
 	// Print summary.
+	if errCount == 0 {
+		color.Set(color.FgGreen, color.Bold)
+	}
 	fmt.Printf("documents: %d\n", docsCount)
 	fmt.Printf("drafts: %d\n", draftsCount)
 	fmt.Printf("static: %d\n", staticCount)
 	fmt.Printf("time: %.2fs\n", time.Now().Sub(startTime).Seconds())
+	color.Unset()
 	// Report accumulated document parse errors.
 	if errCount > 0 {
 		return fmt.Errorf("document parse errors: %d", errCount)
