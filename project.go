@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 // Build ldflags.
@@ -63,7 +65,9 @@ func (proj *project) logconsole(verbosity int, msg string) {
 
 // logerror prints a message to stderr.
 func (proj *project) logerror(msg string) {
+	color.Set(color.FgRed, color.Bold)
 	fmt.Fprintln(os.Stderr, "error: "+proj.message(msg))
+	color.Unset()
 }
 
 // println unconditionally prints a message.
