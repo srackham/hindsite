@@ -2,5 +2,15 @@ homepage = "about.html"
 longdate = "Jan 2, 2006"
 exclude = "*~|4913"
 
+# Uncomment the id line to enable default document ids for published documents.
+# If you want to confine default ids to blog posts put it in `template/posts/config.toml`.
+#id = "urlpath"
+
+
 [user]
+# The banner is the page header text.
 banner = "hindsite | blog"
+
+# Set shortname to your site's Disqus short name then uncomment the line to enable Disqus comments.
+# See https://help.disqus.com/installation/whats-a-shortname
+#shortname = "disqus-shortname-goes-here"
