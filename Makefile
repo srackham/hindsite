@@ -47,12 +47,20 @@ serve-docs: install
 validate-docs: build-docs
 	for f in $$(find ./docs -name "*.html"); do echo $$f; html-validator --verbose --format text --file $$f; done
 
+# Set VERS environment variable to override default version (the latest tag value) e.g. VERS=v1.0.0 make build
 .PHONY: build
 build: build-docs
 	mkdir -p ./bin
 	BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)
 	COMMIT=$$(git rev-parse HEAD)
-	VERS=$$(git describe --tags --abbrev=0)
+	VERS=$${VERS:-}
+	if [ -z "$$VERS" ]; then
+		VERS=$$(git describe --tags --abbrev=0)
+		if [ -z "$$VERS" ]; then
+			echo "missing version tag"
+			exit 1
+		fi
+	fi
 	BUILD_FLAGS="-X main.BUILT=$$BUILT -X main.COMMIT=$$COMMIT -X main.VERS=$$VERS"
 	build () {
 		export GOOS=$$1
@@ -73,6 +81,10 @@ build: build-docs
 		zip $$ZIP $$NAME/*
 	}
 	cd bin
+	if [ $$(ls hindsite-$$VERS* 2>/dev/null | wc -w) -gt 0 ]; then
+		echo "built version $$VERS already exists"
+		exit 1
+	fi
 	build linux amd64
 	build darwin amd64
 	build windows amd64
