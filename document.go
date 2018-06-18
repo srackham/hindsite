@@ -47,6 +47,9 @@ type document struct {
 
 // Parse document content and front matter.
 func newDocument(contentfile string, proj *project) (document, error) {
+	parseError := func(err error) error {
+		return fmt.Errorf("%s: %s", contentfile, err.Error())
+	}
 	if !pathIsInDir(contentfile, proj.contentDir) {
 		panic("document is outside content directory: " + contentfile)
 	}
@@ -58,7 +61,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	doc.proj = proj
 	info, err := os.Stat(contentfile)
 	if err != nil {
-		return doc, err
+		return doc, parseError(err)
 	}
 	doc.modtime = info.ModTime()
 	doc.conf = proj.configFor(doc.contentPath)
@@ -67,7 +70,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
 		d, err := parseDate(doc.title[0:10], doc.conf.timezone)
 		if err != nil {
-			return doc, err
+			return doc, parseError(err)
 		}
 		doc.date = d
 		doc.title = doc.title[11:]
@@ -79,10 +82,10 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	doc.permalink = doc.conf.permalink // Default permalink.
 	doc.content, err = readFile(doc.contentPath)
 	if err != nil {
-		return doc, err
+		return doc, parseError(err)
 	}
 	if err := doc.extractFrontMatter(); err != nil {
-		return doc, err
+		return doc, parseError(fmt.Errorf("front matter: %s", err.Error()))
 	}
 	// Synthesize build path and URL according to content path, permalink and slug values.
 	rel, _ := filepath.Rel(proj.contentDir, doc.contentPath)
@@ -124,7 +127,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 			}
 		}
 		if layout == "" {
-			return doc, fmt.Errorf("missing layout.html template for: %s", doc.contentPath)
+			return doc, parseError(fmt.Errorf("missing layout.html template"))
 		}
 		doc.layout = proj.htmlTemplates.name(layout)
 	}
@@ -132,7 +135,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	case "optional":
 	case "mandatory":
 		if doc.id == nil || *doc.id == "" {
-			return doc, fmt.Errorf("missing document id for: %s", doc.contentPath)
+			return doc, parseError(fmt.Errorf("missing document id"))
 		}
 	case "urlpath":
 		if doc.id == nil {
@@ -187,7 +190,7 @@ func (doc *document) extractFrontMatter() error {
 		return err
 	}
 	if eof {
-		return fmt.Errorf("missing front matter closing delimiter: %s: %s", end, doc.contentPath)
+		return fmt.Errorf("missing closing delimiter: %s", end)
 	}
 	description, eof, err := readTo("<!--more-->", scanner)
 	if err != nil {
@@ -219,14 +222,12 @@ func (doc *document) extractFrontMatter() error {
 	}{}
 	switch format {
 	case "toml":
-		_, err := toml.Decode(header, &fm)
-		if err != nil {
-			return fmt.Errorf("TOML front matter: %s: %s", doc.contentPath, err.Error())
+		if _, err := toml.Decode(header, &fm); err != nil {
+			return err
 		}
 	case "yaml":
-		err := yaml.Unmarshal([]byte(header), &fm)
-		if err != nil {
-			return fmt.Errorf("YAML front matter: %s: %s", doc.contentPath, err.Error())
+		if err := yaml.Unmarshal([]byte(header), &fm); err != nil {
+			return err
 		}
 	}
 	// Merge parsed front matter.
@@ -447,7 +448,7 @@ func (docs documentsList) frontMatter() templateData {
 }
 
 /*
-	documentsLookup implements storage and retrieval of documents by contentPath,
+	documentsLookup implements fast indexed retrieval of documents by contentPath,
 	buildPath and id.
 */
 type documentsLookup struct {
@@ -463,16 +464,16 @@ func newDocumentsLookup() documentsLookup {
 func (lookup *documentsLookup) add(doc *document) error {
 	d := lookup.byBuildPath[doc.buildPath]
 	if d != nil {
-		return fmt.Errorf("documents have same build path: " + d.contentPath + ": " + doc.contentPath)
+		return fmt.Errorf("%s: duplicate document build path in: %s", doc.contentPath, d.contentPath)
 	}
 	d = lookup.byContentPath[doc.contentPath]
 	if d != nil {
-		panic("duplicate document lookup: " + d.contentPath)
+		panic(doc.contentPath + "%s: lookup already contains this document")
 	}
 	if doc.id != nil && *doc.id != "" {
 		d = lookup.byID[*doc.id]
 		if d != nil {
-			return fmt.Errorf("documents have same id: " + d.contentPath + ": " + doc.contentPath)
+			return fmt.Errorf("%s: duplicate document id in: %s", doc.contentPath, d.contentPath)
 		}
 	}
 	lookup.byBuildPath[doc.buildPath] = doc
