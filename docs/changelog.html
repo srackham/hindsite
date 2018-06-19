@@ -1,12 +1,12 @@
-{{define "header"}}
+
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-<title>{{or .title "Title"}}</title>
-<link type="text/css" rel="stylesheet" href="{{.urlprefix}}/main.css">
+<title>Changelog</title>
+<link type="text/css" rel="stylesheet" href="/hindsite/main.css">
 <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
 </head>
 <body>
@@ -16,26 +16,28 @@
 <div id="sidebar" class="no-print">
 <div id="toc" class="no-print">
   <h2>Links</h2>
-  <div class="h2"><a href="{{.urlprefix}}/index.html">Reference</a></div>
-  <div class="h2"><a href="{{.urlprefix}}/faq.html">FAQ</a></div>
-  <div class="h2"><a href="{{.urlprefix}}/changelog.html">Change Log</a></div>
+  <div class="h2"><a href="/hindsite/index.html">Reference</a></div>
+  <div class="h2"><a href="/hindsite/faq.html">FAQ</a></div>
+  <div class="h2"><a href="/hindsite/changelog.html">Change Log</a></div>
   <div class="h2"><a href="https://github.com/srackham/hindsite">Github</a></div>
   <div id="auto-toc"></div>
 </div>
 </div>
 <div id="main">
 <div id="article">
-{{end}}
 
-{{define "footer"}}
+<h1 id="hindsite-change-log">Hindsite Change Log</h1>
+<h2 id="version-1-0-0-2018-05-20">Version 1.0.0 (2018-05-20)</h2>
+<p>First public release.</p>
+
 </div>
 </div>
-<script src="{{.urlprefix}}/main.js"></script>
+<script src="/hindsite/main.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/go.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/typescript.min.js"></script>
 <script>
-hljs.configure({languages: []});  // Turn off automatic language detection.
+hljs.configure({languages: []});  
 hljs.initHighlightingOnLoad();
 window.onload = function() {
   var headings = [].slice.call(document.body.querySelectorAll('#article > h1, #article > h2, #article > h3'));
@@ -44,10 +46,9 @@ window.onload = function() {
     appendTocEntry(heading);
   });
   if (isSmallScreen()) {
-    toggleToc();  // Hide TOC.
+    toggleToc();  
   }
 }
 </script>
 </body>
 </html>
-{{end}}
