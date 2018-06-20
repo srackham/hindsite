@@ -18,6 +18,7 @@
   <h2>Links</h2>
   <div class="h2"><a href="/hindsite/index.html">Reference</a></div>
   <div class="h2"><a href="/hindsite/faq.html">FAQ</a></div>
+  <div class="h2"><a href="/hindsite/changelog.html">Change Log</a></div>
   <div class="h2"><a href="https://github.com/srackham/hindsite">Github</a></div>
   <div id="auto-toc"></div>
 </div>
@@ -30,7 +31,7 @@
 <p>hindsite is a fast, lightweight static website generator. It builds static
 websites with optional document and tag indexes from Markdown source documents
 (e.g. blogs posts, newsletters, articles). Features:</p>
-<ul><li><a href="/hindsite/faq.html#how-fast-is-hindsite">High performance</a>.</li><li>Stand-alone single-file executable.</li><li>Built-in development web server with Live Reload, file watcher and incremental
+<ul><li><a href="faq.html#how-fast-is-hindsite">High performance</a>.</li><li>Stand-alone single-file executable.</li><li>Built-in development web server with Live Reload, file watcher and incremental
   rebuilds.</li></ul><h2 id="quick-start">Quick Start</h2>
 <p>Create a fully functional blog and newsletter website with just two hindsite
 commands:</p>
@@ -38,7 +39,7 @@ commands:</p>
    page</a> and extract the
    <code>hindsite</code> executable (see <a href="#building-hindsite"><em>Building hindsite</em></a> if you
    prefer to build and install from source).</li><li>Create a new Hindsite project directory and install the builtin blog
-   template:<pre><code>mkdir myproj
+   template using the hindsite <a href="#init-command">init command</a>:<pre><code>mkdir myproj
 hindsite init myproj -builtin blog</code></pre>
 </li><li>Build the website, start the hindsite web server and open it in the browser:<pre><code>hindsite serve myproj -launch</code></pre>
 </li></ol><p>Include the <code>-v</code> (verbose) command option to see what's going on. The best way
@@ -237,18 +238,16 @@ separator to ensure cross-platform compatibility. TOML example:<pre><code>homepa
 </dd><dt><code>paginate</code></dt><dd>This parameter sets the number of documents per document index
 page. The default value is 5. Set to -1 to include all documents on a single
 document index page. TOML example:<pre><code>paginate = 10</code></pre>
-</dd><dt><code>permalink</code></dt><dd>An optional URL and build path template for built files. The
-file's URL and build path is computed by substituting the following <code>permalink</code>
-placeholders:<dl><dt><code>%y</code></dt><dd>Four digit publication date year.</dd><dt><code>%m</code></dt><dd>Two digit publication date month.</dd><dt><code>%d</code></dt><dd>Two digit publication date day of month.</dd><dt><code>%f</code></dt><dd>The build file name.</dd><dt><code>%p</code></dt><dd>The build file name minus the file name extension.</dd></dl><p>If the permalink ends with a trailing slash then hindsite creates &ldquo;pretty&rdquo; URLs
-by writing the build file to <code>index.html</code> in a directory with the page’s name.
-<code>permalink</code> can also be specified in the document <a href="#front-matter">front
-matter</a>.</p>
-<p>TOML examples:</p>
+</dd><dt id="permalink"><code>permalink</code></dt><dd>An optional template for customizing document <a href="#build-paths">build
+paths</a> and <a href="#urls">URLs</a>. A document's URL and build path is
+computed by substituting the following <code>permalink</code> placeholders:<dl><dt><code>%y</code></dt><dd>Four digit publication date year.</dd><dt><code>%m</code></dt><dd>Two digit publication date month.</dd><dt><code>%d</code></dt><dd>Two digit publication date day of month.</dd><dt><code>%f</code></dt><dd>The build file name.</dd><dt><code>%p</code></dt><dd>The build file name minus the file name extension.</dd></dl><ul><li>If the permalink ends with a trailing slash then hindsite creates &ldquo;pretty&rdquo;
+  URLs by writing the build file to <code>index.html</code> in a directory with the page’s
+  name. <code>permalink</code> can also be specified in the document <a href="#front-matter">front
+  matter</a>.</li><li>A permalink URL will not change provided the <code>permalink</code> parameter, the
+  document publication date and the document slug are not changed. Changing the
+  source document's content directory location does not change a permalink URL.</li><li>URLs are prefixed with the <a href="#urlprefix"><code>urlprefix</code></a> configuration parameter.</li></ul><p>TOML examples:</p>
 <pre><code>permalink = "/posts/%y/%m/%d/%f"
 permalink = "/posts/%y-%m-%d/%p/"</code></pre>
-<p>A permalink URL will not change provided the <code>permalink</code> parameter, the document
-publication date and the document slug are not changed. Changing the source
-document's content directory location does not change a permalink URL.</p>
 </dd><dt><code>templates</code></dt><dd>A <code>|</code> separated list of file name extensions specifying document
 and static files in the content directory that undergo <a href="#text-templates">text
 template</a> expansion. The file name extensions include the
@@ -384,9 +383,8 @@ overridden with the <a href="#build-command">build</a> and <a href="#serve-comma
 <code>-drafts</code> option. Defaults to <code>false</code>.</dd><dt id="document-id"><code>id</code></dt><dd>A unique document identifier.<ul><li>Non-blank <code>id</code> values must be unique within a project (an error occurs if two
     or more published documents have the same <code>id</code> value).</li><li>If a document has no explicit <code>id</code> value then the default value is determined
     by the <a href="#id-configuration-parameter"><code>id</code> configuration parameter</a>.</li></ul></dd><dt><code>layout</code></dt><dd>The name of the template used to render the document. <code>layout</code>
-defaults to the closest <code>layout.html</code> <a href="#html-templates">HTML template</a>.</dd><dt><code>permalink</code></dt><dd>Sets the document <a href="#configuration-parameters"><code>permalink</code></a> value.
-Defaults to the <a href="#configuration-parameters"><code>permalink</code></a> configuration parameter
-value.</dd><dt><code>tags</code></dt><dd>A list of tag keywords and phrases. Examples:<pre><code># TOML
+defaults to the closest <code>layout.html</code> <a href="#html-templates">HTML template</a>.</dd><dt><code>permalink</code></dt><dd>Sets the document <code>permalink</code> value. Defaults to the
+<a href="#permalink"><code>permalink</code></a> configuration parameter value.</dd><dt><code>tags</code></dt><dd>A list of tag keywords and phrases. Examples:<pre><code># TOML
 tags = ["foo foo valve", "qux", "baz"]
 
 # YAML
@@ -394,9 +392,9 @@ tags: [foo foo valve, qux, baz]</code></pre>
 </dd><dt><code>templates</code></dt><dd>Defaults to the <a href="#configuration-parameters"><code>templates</code></a>
 configuration value. The only sensible values in this context are a blank string
 (to disable text template expansion) or the document's file name extension (to
-enable text template expansion).</dd><dt><code>slug</code></dt><dd>The slug replaces the file name (minus file name extension) of the
-generated document webpage which also determines the last component of the
-document's URL.</dd><dt><code>title</code></dt><dd>The document title. If not specified <code>title</code> defaults the document
+enable text template expansion).</dd><dt id="slug"><code>slug</code></dt><dd>The slug replaces the file name (minus file name extension) of the
+generated document build file along with the last component of the document's
+URL (see also the <a href="#permalink"><code>peramlink</code></a> configuration parameter).</dd><dt><code>title</code></dt><dd>The document title. If not specified <code>title</code> defaults the document
 file name stripped of the date prefix (if there is one), with hyphens replaced
 by spaces, then capitalized.</dd><dt><code>user</code></dt><dd><code>user</code> is a user defined key/value map. It is merged with the lower
 precedence <a href="#configuration-parameters"><code>user</code> configuration parameter</a> to become
@@ -462,17 +460,23 @@ document file and static file template expansion.</p>
 <p><a href="#static-files">Static files</a> that are subject to template expansion can include
 the same <a href="#front-matter-header">front matter header</a> as <a href="#documents">document
 files</a>.</p>
-<h2 id="urls">URLs</h2>
-<p>hindsite synthesizes root-relative document and index page URLs. URLs are
-relative to the build directory and are prefixed with the
-<a href="#urlprefix"><code>urlprefix</code></a> configuration parameter. If a
-<a href="#front-matter-values"><code>slug</code></a> front matter value is specified it replaces the
-document file name.</p>
-<p>For example, if the build directory is <code>/myproj/build</code> and the rendered document
-is <code>/myproj/build/posts/foo.html</code> then:</p>
-<ul><li>The document URL will be <code>/posts/foo.html</code></li><li>If the <code>urlprefix</code> is <code>/blog</code> then the URL would be <code>/blog/posts/foo.html</code></li><li>If the document <code>slug</code> is <code>bar</code> the URL becomes <code>/blog/posts/bar.html</code></li></ul><p>The above default behavior can be customized using the <code>permalink</code>
-<a href="#configuration-parameters">configuration parameter</a>.</p>
-<p>To synthesize absolute URLs include the URL domain in the <code>urlprefix</code>.</p>
+<h2 id="build-paths">Build paths</h2>
+<p>A document's <em>build path</em> is the file path of its generated web page.</p>
+<ul><li>The <em>build path</em> will always be located in the project <a href="#projects">build
+  directory</a>.</li><li>By default the <em>build path</em> mirrors the document's <a href="#projects">content directory
+  path</a>.<p>For example, if the content directory is <code>/myproj/content</code>, the build directory
+is <code>/myproj/build</code> and the document path is <code>/myproj/content/posts/foo.md</code> then
+the build path will be <code>/myproj/build/posts/foo.html</code>.</p>
+</li><li>The <a href="#permalink"><code>permalink</code></a> configuration parameter can be used to customize
+  the <em>build path</em>.</li><li>If a <a href="#slug"><code>slug</code></a> front matter value is specified it
+   replaces the document file name (excluding file name extension).</li></ul><h2 id="urls">URLs</h2>
+<p>hindsite synthesizes document URLs by taking the document's <a href="#build-paths">build
+path</a> relative to the <a href="#projects">build directory</a> and prefixing
+it with the <a href="#urlprefix"><code>urlprefix</code></a> configuration parameter. File path
+separators are translated to slash characters.</p>
+<p>For example, if the build directory is <code>/myproj/build</code> and the generated web
+page is <code>/myproj/build/posts/foo.html</code> then:</p>
+<ul><li>The document URL will be <code>/posts/foo.html</code></li><li>If the <code>urlprefix</code> is <code>/blog</code> then the URL would be <code>/blog/posts/foo.html</code></li><li>If the document <code>slug</code> is <code>bar</code> the URL becomes <code>/blog/posts/bar.html</code></li></ul><p>To synthesize absolute URLs include the URL domain in the <code>urlprefix</code>.</p>
 <p>If you are deploying to a web server subdirectory then you need to set the
 <code>urlprefix</code> configuration parameter to ensure synthesized URLs are rooted
 correctly. For example, if are deploying to the server <code>http://example.com/blog</code>

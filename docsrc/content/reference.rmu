@@ -25,7 +25,7 @@ commands:
    prefer to build and install from source).
 
 2. Create a new Hindsite project directory and install the builtin blog
-   template:
+   template using the hindsite [init command](#init-command):
 
     mkdir myproj
     hindsite init myproj -builtin blog
@@ -383,9 +383,10 @@ document index page. TOML example:
 
     paginate = 10
 
-`permalink`:: An optional URL and build path template for built files. The
-file's URL and build path is computed by substituting the following `permalink`
-placeholders:
+.#permalink
+`permalink`:: An optional template for customizing document [build
+paths](#build-paths) and [URLs](#urls). A document's URL and build path is
+computed by substituting the following `permalink` placeholders:
 ..
 `%y`:: Four digit publication date year.
 `%m`:: Two digit publication date month.
@@ -393,19 +394,20 @@ placeholders:
 `%f`:: The build file name.
 `%p`:: The build file name minus the file name extension.
 
-If the permalink ends with a trailing slash then hindsite creates "pretty" URLs
-by writing the build file to `index.html` in a directory with the page’s name.
-`permalink` can also be specified in the document [front
-matter](#front-matter).
+
+- If the permalink ends with a trailing slash then hindsite creates "pretty"
+  URLs by writing the build file to `index.html` in a directory with the page’s
+  name. `permalink` can also be specified in the document [front
+  matter](#front-matter).
+- A permalink URL will not change provided the `permalink` parameter, the
+  document publication date and the document slug are not changed. Changing the
+  source document's content directory location does not change a permalink URL.
+- URLs are prefixed with the [`urlprefix`](#urlprefix) configuration parameter.
 
 TOML examples:
 
     permalink = "/posts/%y/%m/%d/%f"
     permalink = "/posts/%y-%m-%d/%p/"
-
-A permalink URL will not change provided the `permalink` parameter, the document
-publication date and the document slug are not changed. Changing the source
-document's content directory location does not change a permalink URL.
 ..
 
 `templates`:: A `|` separated list of file name extensions specifying document
@@ -639,9 +641,8 @@ overridden with the [build](#build-command) and [serve](#serve-command) command
 `layout`:: The name of the template used to render the document. `layout`
 defaults to the closest `layout.html` [HTML template](#html-templates).
 
-`permalink`:: Sets the document [`permalink`](#configuration-parameters) value.
-Defaults to the [`permalink`](#configuration-parameters) configuration parameter
-value.
+`permalink`:: Sets the document `permalink` value. Defaults to the
+[`permalink`](#permalink) configuration parameter value.
 
 `tags`:: A list of tag keywords and phrases. Examples:
 ```
@@ -657,9 +658,10 @@ configuration value. The only sensible values in this context are a blank string
 (to disable text template expansion) or the document's file name extension (to
 enable text template expansion).
 
+.#slug
 `slug`:: The slug replaces the file name (minus file name extension) of the
-generated document webpage which also determines the last component of the
-document's URL.
+generated document build file along with the last component of the document's
+URL (see also the [`peramlink`](#permalink) configuration parameter). 
 
 `title`:: The document title. If not specified `title` defaults the document
 file name stripped of the date prefix (if there is one), with hyphens replaced
@@ -813,22 +815,36 @@ the same [front matter header](#front-matter-header) as [document
 files](#documents).
 
 
-## URLs
-hindsite synthesizes root-relative document and index page URLs. URLs are
-relative to the build directory and are prefixed with the
-[`urlprefix`](#urlprefix) configuration parameter. If a
-[`slug`](#front-matter-values) front matter value is specified it replaces the
-document file name.
+## Build paths
+A document's _build path_ is the file path of its generated web page.
 
-For example, if the build directory is `/myproj/build` and the rendered document
-is `/myproj/build/posts/foo.html` then:
+- The _build path_ will always be located in the project [build
+  directory](#projects).
+- By default the _build path_ mirrors the document's [content directory
+  path](#projects).
+..
+For example, if the content directory is `/myproj/content`, the build directory
+is `/myproj/build` and the document path is `/myproj/content/posts/foo.md` then
+the build path will be `/myproj/build/posts/foo.html`.
+..
+- The [`permalink`](#permalink) configuration parameter can be used to customize
+  the _build path_.
+-  If a [`slug`](#slug) front matter value is specified it
+   replaces the document file name (excluding file name extension).
+
+
+## URLs
+hindsite synthesizes document URLs by taking the document's [build
+path](#build-paths) relative to the [build directory](#projects) and prefixing
+it with the [`urlprefix`](#urlprefix) configuration parameter. File path
+separators are translated to slash characters.
+
+For example, if the build directory is `/myproj/build` and the generated web
+page is `/myproj/build/posts/foo.html` then:
 
 - The document URL will be `/posts/foo.html`
 - If the `urlprefix` is `/blog` then the URL would be `/blog/posts/foo.html`
 - If the document `slug` is `bar` the URL becomes `/blog/posts/bar.html`
-
-The above default behavior can be customized using the `permalink`
-[configuration parameter](#configuration-parameters).
 
 To synthesize absolute URLs include the URL domain in the `urlprefix`.
 
