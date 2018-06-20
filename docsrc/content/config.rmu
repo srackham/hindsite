@@ -7,9 +7,11 @@
 */
 {--header-ids} = 'yes'
 {--header-links} = 'yes'
-{faq} = 'faq.html'
-{changelog} = 'changelog.html'
-{reference} = 'index.html'
+
+{urlprefix} = '/hindsite'
+{faq} = '{urlprefix}/faq.html'
+{changelog} = '{urlprefix}/changelog.html'
+{reference} = '{urlprefix}/index.html'
 {github} = 'https://github.com/srackham/hindsite'
 
 

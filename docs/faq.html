@@ -28,13 +28,13 @@
 
 <h1 id="hindsite-faq">Hindsite FAQ</h1>
 <h2 id="does-hindsite-support-themes">Does hindsite support themes?</h2>
-<p>Themes are baked in, every <a href="index.html#projects">project template directory</a>
-is a theme and the <a href="index.html#init-command">init command</a> is the &ldquo;theme&rdquo;
+<p>Themes are baked in, every <a href="/hindsite/index.html#projects">project template directory</a>
+is a theme and the <a href="/hindsite/index.html#init-command">init command</a> is the &ldquo;theme&rdquo;
 installer.</p>
 <h2 id="disqus-howto">How do I include Disqus comments in my website?</h2>
 <p>The recipe described below is taken from the hindsite <a href="https://github.com/srackham/hindsite/tree/master/builtin/blog/template">built-in <code>blog</code>
 project</a>.
-If you <a href="index.html#init-command">initialized your site</a> with the built-in
+If you <a href="/hindsite/index.html#init-command">initialized your site</a> with the built-in
 <code>blog</code> template then you already have the Disqus template and steps 3 and 4
 below are redundant.</p>
 <ol><li>If you don't already have one you need a <a href="https://disqus.com/">Disqus</a>
@@ -66,22 +66,22 @@ below are redundant.</p>
 {{end}}</code></pre>
 </li><li>Include the Disqus template in your web pages by adding this line to the end
    of the HTML body in your document footer template:<pre><code>{{template "disqus" .}}</code></pre>
-</li><li>Add a <code>user</code> <code>shortname</code> entry to the project <a href="index.html#configuration"><code>config</code>
-   file</a>.</li></ol><p>That's it, all published documents with a non-blank <a href="index.html#document-id">document
+</li><li>Add a <code>user</code> <code>shortname</code> entry to the project <a href="/hindsite/index.html#configuration"><code>config</code>
+   file</a>.</li></ol><p>That's it, all published documents with a non-blank <a href="/hindsite/index.html#document-id">document
 <code>id</code></a> will now include Disqus comments.</p>
 <ul><li>You can automatically assign document <code>id</code>s to all documents by setting the
-  <a href="index.html#id-configuration-parameter"><code>id</code> configuration parameter</a> to
+  <a href="/hindsite/index.html#id-configuration-parameter"><code>id</code> configuration parameter</a> to
   <code>urlpath</code>. To confine auto <code>id</code> assignment to a specific folder put the <code>id</code>
   parameter in that folder's configuration file.</li><li>To disable comments on specific pages explicitly set the document <code>id</code> front
   matter value to a blank string.</li></ul><h2 id="should-i-enable-document-and-static-file-text-template-expansion">Should I enable document and static file text template expansion?</h2>
-<p>As a performance consideration you should only enable <a href="index.html#text-templates">text
+<p>As a performance consideration you should only enable <a href="/hindsite/index.html#text-templates">text
 template</a> expansion if you need it. If performance
 is an issue, only enable it for those documents or directories that need it.</p>
 <h2 id="how-can-i-customize-date-and-modtime-template-variable-formats">How can I customize <code>.date</code> and <code>.modtime</code> template variable formats?</h2>
 <p>Use the Go <a href="https://golang.org/pkg/time/#Time.Format">Format function</a>. For
 example:</p>
 <pre><code>{{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}</code></pre>
-<p><i class="sans-font">NOTE</i>: The <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="index.html#document-template-variables">document template
+<p><i class="sans-font">NOTE</i>: The <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="/hindsite/index.html#document-template-variables">document template
 variables</a> are simpler and preferable
 to using <code>.date</code> directly.</p>
 <h2 id="how-do-you-configure-source-code-highlighting">How do you configure source code highlighting?</h2>
@@ -106,11 +106,11 @@ myHeading.textContent = 'Hello world!';
 <pre class="javascript"><code>var myHeading = document.querySelector('h1');
 myHeading.textContent = 'Hello world!';</code></pre>
 <h2 id="how-can-i-partition-documents-into-separate-categories">How can I partition documents into separate categories</h2>
-<p>Put them in separate indexes. <a href="index.html#indexes">Indexes</a> are similar to <a href="https://en.support.wordpress.com/posts/categories-vs-tags/">Wordpress
+<p>Put them in separate indexes. <a href="/hindsite/index.html#indexes">Indexes</a> are similar to <a href="https://en.support.wordpress.com/posts/categories-vs-tags/">Wordpress
 categories</a> but they
 are folder based so you do not have to assign them explicitly.</p>
 <h2 id="i-want-a-single-page-document-index">I want a single page document index</h2>
-<p>Set the <a href="index.html#configuration-parameters"><code>paginate</code> configuration
+<p>Set the <a href="/hindsite/index.html#configuration-parameters"><code>paginate</code> configuration
 parameter</a> to <code>-1</code> and all indexed
 documents will appear on the first page.</p>
 <h2 id="i-want-both-paginated-and-single-page-document-indexes">I want both paginated and single page document indexes</h2>
