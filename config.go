@@ -35,6 +35,15 @@ type config struct {
 
 type configs []config
 
+// checkTemplates returns an error if the templates configuration value is illegal.
+func checkTemplates(templates string) error {
+	re := regexp.MustCompile("^(\\.\\w+\\|)*(\\.\\w+)+$")
+	if templates != "" && !re.MatchString(templates) {
+		return fmt.Errorf("illegal templates: %s", templates)
+	}
+	return nil
+}
+
 // Return default configuration.
 func newConfig() config {
 	conf := config{
@@ -91,6 +100,9 @@ func (conf *config) parseFile(proj *project, f string) error {
 		conf.author = cf.Author
 	}
 	if cf.Templates != nil {
+		if err := checkTemplates(*cf.Templates); err != nil {
+			return err
+		}
 		conf.templates = cf.Templates
 	}
 	if cf.Permalink != "" {

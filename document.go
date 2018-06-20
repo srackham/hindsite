@@ -248,6 +248,9 @@ func (doc *document) extractFrontMatter() error {
 		doc.id = fm.ID
 	}
 	if fm.Templates != nil {
+		if err := checkTemplates(*fm.Templates); err != nil {
+			return err
+		}
 		doc.templates = fm.Templates
 	}
 	if fm.Permalink != "" {
