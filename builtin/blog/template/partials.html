@@ -81,7 +81,8 @@
 
 {{define "disqus"}}
 {{/*
-    If the user shortname variable is set and the document `id` is non-blank then Disqus comments are inserted.
+    If the user `shortname` variable is set and the document `id` is
+    non-blank then Disqus comments are inserted.
 */}}
 {{if and .id .user.shortname}}
 <div id="disqus_thread"></div>

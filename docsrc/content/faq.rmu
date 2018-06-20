@@ -1,15 +1,77 @@
 # Hindsite FAQ
 
 ## Does hindsite support themes?
-Themes are baked in, every [project template directory]({reference}/#projects)
-is a theme and the [init command]({reference}/#init-command) is the "theme"
+Themes are baked in, every [project template directory]({reference}#projects)
+is a theme and the [init command]({reference}#init-command) is the "theme"
 installer.
 
 
+.#disqus-howto
+## How do I include Disqus comments in my website?
+The recipe described below is taken from the hindsite [built-in `blog`
+project](https://github.com/srackham/hindsite/tree/master/builtin/blog/template).
+If you [initialized your site]({reference}#init-command) with the built-in
+`blog` template then you already have the Disqus template and steps 3 and 4
+below are redundant.
+
+1. If you don't already have one you need a [Disqus](https://disqus.com/)
+   account.
+
+2. Now log into to your Disqus account and register your site. Make a note of
+   your site's Disqus
+   [`shortname`](https://help.disqus.com/installation/whats-a-shortname), you
+   need to include it along with some Disqus JavaScript code to your site's
+   generated webpages.
+
+3. Copy this `disqus` template definition to a project template file:
+``` html
+{{define "disqus"}}
+{{/*
+    If the user `shortname` variable is set and the document `id` is
+    non-blank then Disqus comments are inserted.
+*/}}
+{{if and .id .user.shortname}}
+<div id="disqus_thread"></div>
+<script>
+    var disqus_config = function () {
+        this.page.url = '{{.url}}';
+        this.page.identifier = '{{.id}}';
+    };
+    (function() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://{{.user.shortname}}.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+{{end}}
+{{end}}
+```
+
+4. Include the Disqus template in your web pages by adding this line to the end
+   of the HTML body in your document footer template:
+
+   {{template "disqus" .}}
+
+5. Add a `user` `shortname` entry to the project [`config`
+   file]({reference}#configuration).
+
+That's it, all published documents with a non-blank [document
+`id`]({reference}#document-id) will now include Disqus comments.
+
+- You can automatically assign document `id`s to all documents by setting the
+  [`id` configuration parameter]({reference}#id-configuration-parameter) to
+  `urlpath`. To confine auto `id` assignment to a specific folder put the `id`
+  parameter in that folder's configuration file.
+- To disable comments on specific pages explicitly set the document `id` front
+  matter value to a blank string.
+
+
 ## Should I enable document and static file text template expansion?
-You should only enable [text template]({reference}/#text-templates) expansion if
-you need it. If performance is an issue, only enable it for those documents or
-directories that need it.
+As a performance consideration you should only enable [text
+template]({reference}#text-templates) expansion if you need it. If performance
+is an issue, only enable it for those documents or directories that need it.
 
 
 ## How can I customize `.date` and `.modtime` template variable formats?
@@ -19,12 +81,14 @@ example:
     {{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}
 
 NOTE: The `.shortdate`, `.mediumdate` and `.longdate` [document template
-variables]({reference}/#document-template-variables) are simpler and preferable
+variables]({reference}#document-template-variables) are simpler and preferable
 to using `.date` directly.
 
 
 ## How do you configure source code highlighting?
-By including [highlight.js](https://github.com/isagalaev/highlight.js) CSS and scripts:
+By including [highlight.js](https://github.com/isagalaev/highlight.js) CSS and
+scripts. For example, take a look at the [hindsite documentation
+templates](https://github.com/srackham/hindsite/blob/master/docsrc/template/partials.html).
 
 1. Include [highlighter CSS in the HTML
    header](https://github.com/srackham/hindsite/blob/master/docsrc/template/partials.html#L10).
@@ -58,14 +122,14 @@ myHeading.textContent = 'Hello world!';
 ```
 
 ## How can I partition documents into separate categories
-Put them in separate indexes. [Indexes]({reference}/#indexes) are similar to [Wordpress
+Put them in separate indexes. [Indexes]({reference}#indexes) are similar to [Wordpress
 categories](https://en.support.wordpress.com/posts/categories-vs-tags/) but they
 are folder based so you do not have to assign them explicitly.
 
 
 ## I want a single page document index
 Set the [`paginate` configuration
-parameter]({reference}/#configuration-parameters) to `-1` and all indexed
+parameter]({reference}#configuration-parameters) to `-1` and all indexed
 documents will appear on the first page.
 
 
