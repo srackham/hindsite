@@ -2,9 +2,11 @@
 
 
 ## Overview
-hindsite is a fast, lightweight static website generator. It builds static
-websites with optional document and tag indexes from Markdown source documents
-(e.g. blogs posts, newsletters, articles). Features:
+hindsite is an [very
+fast](https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite),
+lightweight static website generator. It builds static websites with optional
+document and tag indexes from Markdown source documents (e.g. blogs posts,
+newsletters, articles). Features:
 
 - [High performance](https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite).
 - Stand-alone single-file executable.
