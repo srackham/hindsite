@@ -129,7 +129,7 @@ func (conf *config) parseFile(proj *project, f string) error {
 		case "optional", "mandatory", "urlpath":
 			conf.id = cf.ID
 		default:
-			return fmt.Errorf("illegal id configuration parameter value: %s", cf.ID)
+			return fmt.Errorf("illegal id: %s", cf.ID)
 		}
 	}
 	if cf.Paginate != 0 {
@@ -139,7 +139,7 @@ func (conf *config) parseFile(proj *project, f string) error {
 		value := cf.URLPrefix
 		re := regexp.MustCompile(`^((http|/)\S+|)$`)
 		if !re.MatchString(value) {
-			return fmt.Errorf("illegal urlprefix value: %s", value)
+			return fmt.Errorf("illegal urlprefix: %s", value)
 		}
 		conf.urlprefix = strings.TrimSuffix(value, "/")
 	}

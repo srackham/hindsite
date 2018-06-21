@@ -381,7 +381,7 @@ func (proj *project) parseConfigs() error {
 				found = true
 				proj.verbose("read config: " + cf)
 				if err := conf.parseFile(proj, cf); err != nil {
-					return err
+					return fmt.Errorf("config file: %s: %s", cf, err.Error())
 				}
 			}
 		}
