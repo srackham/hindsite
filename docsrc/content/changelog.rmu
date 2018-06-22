@@ -3,11 +3,12 @@
 See the [Github commit logs]({github}/commits/master) for a full list of changes.
 
 
-## Version 1.1.0 (2018-06-TODO)
+## Version 1.1.0 (2018-06-23)
 - Added document `id` front matter value along with the related `id`
   configuration parameter.
 - Colorized console error and success messages.
-- Updated documentation: added change log and [Disqus FAQ]({faq}#disqus-howto).
+- Better error messages.
+- Added [Disqus FAQ]({faq}#disqus-howto).
 - The [`build` command]({reference}#build-command) now reports parse errors from
   all documents instead of quitting at the first error.
 

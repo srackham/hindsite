@@ -1,5 +1,6 @@
 homepage = "about.html"
 longdate = "Jan 2, 2006"
+# Exclude Vim backup and temp files.
 exclude = "*~|4913"
 
 # Uncomment the id line to enable default document ids for published documents.

@@ -6,6 +6,22 @@ is a theme and the [init command]({reference}#init-command) is the "theme"
 installer.
 
 
+## Why does the `serve` command sometimes fail a live reload?
+Some text editors create temporary and backup files when documents are saved and
+created, you need to exclude these files from document processing. Failure to do
+so can result in rebuild false positives and premature watcher reloads.
+
+For example, the Vim editor creates tilda prefixed backup files and temporary
+[`4913` files](https://github.com/neovim/neovim/issues/3460) so you need to add
+them to the [`exclude`]({reference}#configuration-parameters) configuration
+parameter in the templates directory root [configuration
+file]({reference}#configuration-files).
+
+TOML example:
+
+    exclude = "*~|4913"
+
+
 .#disqus-howto
 ## How do I include Disqus comments in my website?
 The recipe described below is taken from the hindsite [built-in `blog`
@@ -55,7 +71,12 @@ below are redundant.
    {{template "disqus" .}}
 
 5. Add a `user` `shortname` entry to the project [`config`
-   file]({reference}#configuration).
+   file]({reference}#configuration) and set it to your site's Disqus
+   [`shortname`](https://help.disqus.com/installation/whats-a-shortname). TOML
+   example:
+
+    [user]
+    shortname = "disqus-shortname-goes-here"
 
 That's it, all published documents with a non-blank [document
 `id`]({reference}#document-id) will now include Disqus comments.

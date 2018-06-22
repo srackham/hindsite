@@ -2,7 +2,7 @@
 
 
 ## Overview
-hindsite is an [very
+hindsite is a [very
 fast](https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite),
 lightweight static website generator. It builds static websites with optional
 document and tag indexes from Markdown source documents (e.g. blogs posts,
