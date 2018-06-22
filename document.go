@@ -131,6 +131,13 @@ func newDocument(contentfile string, proj *project) (document, error) {
 		}
 		doc.layout = proj.htmlTemplates.name(layout)
 	}
+	urlpath := func() *string {
+		s := strings.TrimPrefix(doc.url, doc.conf.urlprefix)
+		return &s
+	}
+	if doc.id != nil && *doc.id == "urlpath" {
+		doc.id = urlpath()
+	}
 	switch doc.conf.id {
 	case "optional":
 	case "mandatory":
@@ -139,8 +146,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 		}
 	case "urlpath":
 		if doc.id == nil {
-			s := strings.TrimPrefix(doc.url, doc.conf.urlprefix)
-			doc.id = &s
+			doc.id = urlpath()
 		}
 	default:
 		panic("illegal doc.conf.id for :" + doc.contentPath + ": " + doc.conf.id)
