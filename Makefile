@@ -20,12 +20,12 @@ bindata.go: $(BINDATA_FILES)
 bindata: bindata.go
 
 .PHONY: install
-install: test
+install:
 	go install ./...
 
 .PHONY: test
-test: bindata
-	go test ./...
+test: bindata install
+	go test -cover ./...
 
 .PHONY: clean
 clean:
