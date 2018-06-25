@@ -1,0 +1,16 @@
+{{template "header" .}}
+<h1>{{.tag}} Blog Posts</h1>
+<p> {{.count}} posts, page {{.page.number}} of {{.page.last.number}}</p>
+<ul class="docslist">
+    {{range .docs}}
+    <li>
+        <h2><a href="{{.url}}">{{.title}}</a></h2>
+        <span>{{.longdate}}</span>
+        {{template "doctags" .tags}}
+        {{.description}}
+        <p class="more"><a href="{{.url}}">Read more →</a></p>
+    </li>
+    {{end}}
+</ul>
+{{template "docsfooter" .page}}
+{{template "footer" .}}

@@ -1,0 +1,13 @@
+{{template "header" .}}
+<h1>Newsletters</h1>
+<p> {{.count}} newsletters, page {{.page.number}} of {{.page.last.number}}</p>
+<ul class="docslist">
+        {{range .docs}}
+        <li>
+            <h2><a href="{{.url}}">{{.title}}</a></h2>
+            <span>{{.longdate}}</span>
+        </li>
+        {{end}}
+    </ul>
+{{template "docsfooter" .page}}
+{{template "footer" .}}
