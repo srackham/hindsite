@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -26,6 +27,8 @@ var (
 type project struct {
 	command       string
 	executable    string
+	outlog        io.Writer
+	errlog        io.Writer
 	projectDir    string
 	contentDir    string
 	templateDir   string
@@ -46,51 +49,44 @@ type project struct {
 }
 
 func newProject() project {
-	return project{}
+	proj := project{}
+	proj.outlog = os.Stdout
+	proj.errlog = os.Stderr
+	return proj
 }
 
-// message strips leading project directory from path names to make the message
-// more readable.
-func (proj *project) message(msg string) string {
-	return strings.Replace(msg, proj.projectDir+string(filepath.Separator), "", -1)
-}
-
-// logconsole prints a message if `-v` option verbosity is equal to or greater than
-// verbosity.
-func (proj *project) logconsole(verbosity int, msg string) {
+// output prints a line to out writer if `-v` option verbosity is equal to or
+// greater than verbosity.
+func (proj *project) output(out io.Writer, verbosity int, format string, v ...interface{}) {
 	if proj.verbosity >= verbosity {
-		fmt.Println(proj.message(msg))
+		msg := fmt.Sprintf(format, v...)
+		// Strip leading project directory from path names to make message more readable.
+		msg = strings.Replace(msg, proj.projectDir+string(filepath.Separator), "", -1)
+		fmt.Fprintln(out, msg)
 	}
 }
 
-// logerror prints a message to stderr.
-func (proj *project) logerror(msg string) {
+// logconsole prints a line to logout.
+func (proj *project) logconsole(format string, v ...interface{}) {
+	proj.output(proj.outlog, 0, format, v...)
+}
+
+// verbose prints a line to logout if `-v` verbose option was specified.
+func (proj *project) verbose(format string, v ...interface{}) {
+	proj.output(proj.outlog, 1, format, v...)
+}
+
+// verbose2 prints a a line to logout the `-v` verbose option was specified more
+// than once.
+func (proj *project) verbose2(format string, v ...interface{}) {
+	proj.output(proj.outlog, 2, format, v...)
+}
+
+// logerror prints a line to logerr.
+func (proj *project) logerror(format string, v ...interface{}) {
 	color.Set(color.FgRed, color.Bold)
-	fmt.Fprintln(os.Stderr, "error: "+proj.message(msg))
+	proj.output(proj.errlog, 0, "error: "+format, v...)
 	color.Unset()
-}
-
-// println unconditionally prints a message.
-func (proj *project) println(msg string) {
-	proj.logconsole(0, msg)
-}
-
-// verbose prints a message if `-v` verbose option was specified.
-func (proj *project) verbose(msg string) {
-	proj.logconsole(1, msg)
-}
-
-// verbose2 prints a message if the `-v` verbose option was specified more than
-// once.
-func (proj *project) verbose2(msg string) {
-	proj.logconsole(2, msg)
-}
-
-func (proj *project) die(msg string) {
-	if msg != "" {
-		proj.logerror(msg)
-	}
-	os.Exit(1)
 }
 
 // parseArgs parses the hindsite command-line arguments.
@@ -239,7 +235,7 @@ func (proj *project) execute() error {
 
 // help implements the help command.
 func (proj *project) help() {
-	fmt.Println(`Hindsite is a static website generator.
+	proj.logconsole(`Hindsite is a static website generator.
 
 Usage:
 

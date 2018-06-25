@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"net/http"
 	"os"
 	"path"
@@ -189,7 +188,7 @@ func (proj *project) serve() error {
 	go lr.ListenAndServe()
 	// Start Web server.
 	go func() {
-		proj.println(fmt.Sprintf("\nServing build directory %s on %s\nPress Ctrl+C to stop\n", proj.buildDir, rooturl))
+		proj.logconsole("\nServing build directory %s on %s\nPress Ctrl+C to stop\n", proj.buildDir, rooturl)
 		done <- proj.startHTTPServer()
 	}()
 	// Start watcher event filter.
@@ -204,19 +203,19 @@ func (proj *project) serve() error {
 			select {
 			case c := <-kb:
 				if c == 'r' || c == 'R' {
-					proj.println("rebuilding...")
+					proj.logconsole("rebuilding...")
 					err = proj.build()
 					if err != nil {
 						proj.logerror(err.Error())
 					}
 					lr.Reload(webpage.path)
-					proj.println("")
+					proj.logconsole("")
 				}
 			case evt := <-fs:
 				start := time.Now()
 				switch evt.Op {
 				case fsnotify.Create, fsnotify.Write:
-					proj.println(start.Format("15:04:05") + ": updated: " + evt.Name)
+					proj.logconsole(start.Format("15:04:05") + ": updated: " + evt.Name)
 					t := fileModTime(proj.rootConf.homepage)
 					err = proj.writeFile(evt.Name)
 					if err == nil && t.Before(fileModTime(proj.rootConf.homepage)) {
@@ -224,7 +223,7 @@ func (proj *project) serve() error {
 						err = proj.copyHomePage()
 					}
 				case fsnotify.Remove, fsnotify.Rename:
-					proj.println(start.Format("15:04:05") + ": removed: " + evt.Name)
+					proj.logconsole(start.Format("15:04:05") + ": removed: " + evt.Name)
 					err = proj.removeFile(evt.Name)
 				default:
 					panic("unexpected event: " + evt.Op.String() + ": " + evt.Name)
@@ -234,8 +233,8 @@ func (proj *project) serve() error {
 				} else {
 					color.Set(color.FgGreen, color.Bold)
 				}
-				fmt.Printf("elapsed: %.3fs\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
-				proj.println("")
+				proj.logconsole("elapsed: %.3fs\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
+				proj.logconsole("")
 				color.Unset()
 				lr.Reload(webpage.path)
 			case err := <-watcher.Errors:

@@ -155,10 +155,10 @@ func (proj *project) build() error {
 	if errCount == 0 {
 		color.Set(color.FgGreen, color.Bold)
 	}
-	fmt.Printf("documents: %d\n", docsCount)
-	fmt.Printf("drafts: %d\n", draftsCount)
-	fmt.Printf("static: %d\n", staticCount)
-	fmt.Printf("time: %.2fs\n", time.Now().Sub(startTime).Seconds())
+	proj.logconsole("documents: %d", docsCount)
+	proj.logconsole("drafts: %d", draftsCount)
+	proj.logconsole("static: %d", staticCount)
+	proj.logconsole("time: %.2fs", time.Now().Sub(startTime).Seconds())
 	color.Unset()
 	// Report accumulated document parse errors.
 	if errCount > 0 {
