@@ -5,6 +5,8 @@ tags: [cras,hac,sagittis,penatibus,dolor,integer]
 slug: cursus-diam-cras-tincidunt
 ---
 
+{{template "text-template.txt"}}
+
 Sed montes lorem penatibus montes cursus dolor a a diam purus a
 parturient montes purus a dis cras sagittis sed parturient lorem in
 parturient nisi dolor a cras lorem cras in lectus ac sed diam purus
