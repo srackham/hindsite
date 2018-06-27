@@ -195,14 +195,15 @@ func (proj *project) serve() error {
 	fs := make(chan fsnotify.Event, 2)
 	go proj.watcherFilter(watcher, fs)
 	// Start keyboard monitor.
-	kb := make(chan rune)
+	kb := make(chan string)
 	go kbmonitor(kb)
 	// Start thread to monitor and execute build notifications.
 	go func() {
 		for {
 			select {
-			case c := <-kb:
-				if c == 'r' || c == 'R' {
+			case line := <-kb:
+				switch strings.ToUpper(strings.TrimSpace(line)) {
+				case "R": // Rebuild.
 					proj.logconsole("rebuilding...")
 					err = proj.build()
 					if err != nil {
@@ -255,15 +256,12 @@ func (proj *project) serve() error {
 	return <-done
 }
 
-// kbmonitor sends keyboard characters to the out channel. The input source is
-// buffered so characters are only received on a lin-by-line basis.
-func kbmonitor(out chan rune) {
+// kbmonitor sends lines of input to the out channel.
+func kbmonitor(out chan string) {
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		c, num, err := reader.ReadRune()
-		if num > 0 && err == nil {
-			out <- c
-		}
+		line, _ := reader.ReadString('\n')
+		out <- line
 	}
 }
 
