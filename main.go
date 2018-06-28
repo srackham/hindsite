@@ -5,11 +5,12 @@ import (
 )
 
 func main() {
-	os.Exit(execute(newProject(), os.Args))
+	proj := newProject()
+	os.Exit(execute(&proj, os.Args))
 }
 
 // execute runs a hindsite command and returns an exit code.
-func execute(proj project, args []string) int {
+func execute(proj *project, args []string) int {
 	if err := proj.parseArgs(args); err != nil {
 		proj.logerror(err.Error())
 		return 1

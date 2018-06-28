@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"os"
 	"path"
 	"strings"
@@ -42,24 +41,22 @@ func Test_execute(t *testing.T) {
 		{
 			"init builtin blog",
 			newProject(),
-			"hindsite init " + tmpdir + " -builtin blog",
+			"hindsite init " + tmpdir + " -builtin blog -v",
 			0,
-			"",
+			"installing builtin template: blog",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			os.RemoveAll(tmpdir)
 			mkMissingDir(tmpdir)
-			var outbuf bytes.Buffer
-			tt.proj.outlog = &outbuf
-			var errbuf bytes.Buffer
-			tt.proj.errlog = &errbuf
+			tt.proj.logger = make(chan string, 100)
 			args := strings.Split(tt.cmd, " ")
-			code := execute(tt.proj, args)
-			out := outbuf.String()
-			if code != 0 {
-				out = errbuf.String()
+			code := execute(&tt.proj, args)
+			close(tt.proj.logger)
+			var out string
+			for line := range tt.proj.logger {
+				out += line + "\n"
 			}
 			if code != tt.code {
 				t.Errorf("%s: exit code: got %v, want %v", tt.name, code, tt.code)

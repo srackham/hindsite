@@ -29,6 +29,8 @@ type project struct {
 	executable    string
 	outlog        io.Writer
 	errlog        io.Writer
+	logger        chan string
+	done          chan error
 	projectDir    string
 	contentDir    string
 	templateDir   string
@@ -62,7 +64,11 @@ func (proj *project) output(out io.Writer, verbosity int, format string, v ...in
 		msg := fmt.Sprintf(format, v...)
 		// Strip leading project directory from path names to make message more readable.
 		msg = strings.Replace(msg, proj.projectDir+string(filepath.Separator), "", -1)
-		fmt.Fprintln(out, msg)
+		if proj.logger == nil {
+			fmt.Fprintln(out, msg)
+		} else {
+			proj.logger <- msg
+		}
 	}
 }
 

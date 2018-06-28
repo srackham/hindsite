@@ -175,7 +175,7 @@ func (proj *project) serve() error {
 		return err
 	}
 	// Error channel to exit serve command.
-	done := make(chan error)
+	proj.done = make(chan error)
 	// Start LiveReload server.
 	lr := lrserver.New(lrserver.DefaultName, lrserver.DefaultPort)
 	lr.SetLiveCSS(true)
@@ -189,7 +189,7 @@ func (proj *project) serve() error {
 	// Start Web server.
 	go func() {
 		proj.logconsole("\nServing build directory %s on %s\nPress Ctrl+C to stop\n", proj.buildDir, rooturl)
-		done <- proj.startHTTPServer()
+		proj.done <- proj.startHTTPServer()
 	}()
 	// Start watcher event filter.
 	fs := make(chan fsnotify.Event, 2)
@@ -239,7 +239,7 @@ func (proj *project) serve() error {
 				color.Unset()
 				lr.Reload(webpage.path)
 			case err := <-watcher.Errors:
-				done <- err
+				proj.done <- err
 			}
 		}
 	}()
@@ -253,7 +253,7 @@ func (proj *project) serve() error {
 		}()
 	}
 	// Wait for error exit.
-	return <-done
+	return <-proj.done
 }
 
 // kbmonitor sends lines of input to the out channel.
