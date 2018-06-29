@@ -197,52 +197,6 @@ func (proj *project) serve() error {
 	// Start keyboard monitor.
 	kb := make(chan string)
 	go kbmonitor(kb)
-	// Start thread to monitor and execute build notifications.
-	go func() {
-		for {
-			select {
-			case line := <-kb:
-				switch strings.ToUpper(strings.TrimSpace(line)) {
-				case "R": // Rebuild.
-					proj.logconsole("rebuilding...")
-					err = proj.build()
-					if err != nil {
-						proj.logerror(err.Error())
-					}
-					lr.Reload(webpage.path)
-					proj.logconsole("")
-				}
-			case evt := <-fs:
-				start := time.Now()
-				switch evt.Op {
-				case fsnotify.Create, fsnotify.Write:
-					proj.logconsole(start.Format("15:04:05") + ": updated: " + evt.Name)
-					t := fileModTime(proj.rootConf.homepage)
-					err = proj.writeFile(evt.Name)
-					if err == nil && t.Before(fileModTime(proj.rootConf.homepage)) {
-						// homepage was modified by this event.
-						err = proj.copyHomePage()
-					}
-				case fsnotify.Remove, fsnotify.Rename:
-					proj.logconsole(start.Format("15:04:05") + ": removed: " + evt.Name)
-					err = proj.removeFile(evt.Name)
-				default:
-					panic("unexpected event: " + evt.Op.String() + ": " + evt.Name)
-				}
-				if err != nil {
-					proj.logerror(err.Error())
-				} else {
-					color.Set(color.FgGreen, color.Bold)
-				}
-				proj.logconsole("elapsed: %.3fs\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
-				proj.logconsole("")
-				color.Unset()
-				lr.Reload(webpage.path)
-			case err := <-watcher.Errors:
-				proj.done <- err
-			}
-		}
-	}()
 	// Launch browser.
 	if proj.launch {
 		go func() {
@@ -252,8 +206,53 @@ func (proj *project) serve() error {
 			}
 		}()
 	}
-	// Wait for error exit.
-	return <-proj.done
+	// Monitor and execute build notifications.
+	for {
+		select {
+		case line := <-kb:
+			switch strings.ToUpper(strings.TrimSpace(line)) {
+			case "R": // Rebuild.
+				proj.logconsole("rebuilding...")
+				err = proj.build()
+				if err != nil {
+					proj.logerror(err.Error())
+				}
+				lr.Reload(webpage.path)
+				proj.logconsole("")
+			}
+		case evt := <-fs:
+			start := time.Now()
+			switch evt.Op {
+			case fsnotify.Create, fsnotify.Write:
+				proj.logconsole(start.Format("15:04:05") + ": updated: " + evt.Name)
+				t := fileModTime(proj.rootConf.homepage)
+				err = proj.writeFile(evt.Name)
+				if err == nil && t.Before(fileModTime(proj.rootConf.homepage)) {
+					// homepage was modified by this event.
+					err = proj.copyHomePage()
+				}
+			case fsnotify.Remove, fsnotify.Rename:
+				proj.logconsole(start.Format("15:04:05") + ": removed: " + evt.Name)
+				err = proj.removeFile(evt.Name)
+			default:
+				panic("unexpected event: " + evt.Op.String() + ": " + evt.Name)
+			}
+			if err != nil {
+				proj.logerror(err.Error())
+			} else {
+				color.Set(color.FgGreen, color.Bold)
+			}
+			proj.logconsole("elapsed: %.3fs\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
+			proj.logconsole("")
+			color.Unset()
+			lr.Reload(webpage.path)
+		case err := <-watcher.Errors:
+			proj.done <- err
+		// Wait for exit signal.
+		case err := <-proj.done:
+			return err
+		}
+	}
 }
 
 // kbmonitor sends lines of input to the out channel.
