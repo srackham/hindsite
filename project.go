@@ -27,8 +27,8 @@ var (
 type project struct {
 	command       string
 	executable    string
-	out           chan string
 	in            chan string
+	out           chan string
 	quit          chan error
 	projectDir    string
 	contentDir    string

@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -15,7 +15,7 @@ func Test_execute(t *testing.T) {
 		code int
 		out  string
 	}
-	tmpdir := path.Join(os.TempDir(), "hindsite-tests")
+	tmpdir := filepath.Join(os.TempDir(), "hindsite-tests")
 	tests := []test{
 		{
 			"help command",
@@ -50,7 +50,7 @@ func Test_execute(t *testing.T) {
 			newProject(),
 			"hindsite build " + tmpdir + " -content ./testdata/blog/template/init -template ./testdata/blog/template",
 			0,
-			"documents: 11\ndrafts: 0\nstatic: 6",
+			"documents: 11\ndrafts: 1\nstatic: 6",
 		},
 	}
 	for _, tt := range tests {
