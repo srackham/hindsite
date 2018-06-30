@@ -34,7 +34,7 @@ func (proj *project) init() error {
 			return err
 		}
 		// Hoist the restored template files from the root of the restored
-		// builtin directery up one level into the root of the project template
+		// builtin directory up one level into the root of the project template
 		// directory.
 		files, _ := filepath.Glob(filepath.Join(proj.templateDir, proj.builtin, "template", "*"))
 		for _, f := range files {
@@ -75,28 +75,46 @@ func (proj *project) init() error {
 	if err != nil {
 		return err
 	}
-	// Copy the contents of the optional template init directory to the content directory.
-	if dirExists(proj.initDir) {
-		err = filepath.Walk(proj.initDir, func(f string, info os.FileInfo, err error) error {
+	copyDirContents := func(fromDir, toDir string) error {
+		err = filepath.Walk(fromDir, func(f string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
-			if f == proj.initDir {
+			if f == fromDir {
 				return nil
 			}
-			dst := pathTranslate(f, proj.initDir, proj.contentDir)
+			dst := pathTranslate(f, fromDir, toDir)
 			if info.IsDir() {
 				if !dirExists(dst) {
 					proj.verbose("make directory: " + dst)
 					err = mkMissingDir(dst)
 				}
 			} else {
-				proj.verbose2("copy init: " + f)
-				proj.verbose("write init: " + dst)
+				proj.verbose2("copy: " + f)
+				proj.verbose("write: " + dst)
 				err = copyFile(f, dst)
 			}
 			return err
 		})
+		return nil
 	}
-	return err
+	// Copy the contents of the optional template init directory to the content directory.
+	if dirExists(proj.initDir) {
+		if err := copyDirContents(proj.initDir, proj.contentDir); err != nil {
+			return err
+		}
+	}
+	// If the template directory is outside the project directory copy it to the
+	// default template directory (if it does not already exist).
+	defaultTemplateDir := filepath.Join(proj.projectDir, "template")
+	if !pathIsInDir(proj.templateDir, proj.projectDir) && !dirExists(defaultTemplateDir) {
+		proj.verbose("make directory: " + defaultTemplateDir)
+		if err := mkMissingDir(defaultTemplateDir); err != nil {
+			return err
+		}
+		if err := copyDirContents(proj.templateDir, defaultTemplateDir); err != nil {
+			return err
+		}
+	}
+	return nil
 }
