@@ -29,7 +29,7 @@ func Test_serve(t *testing.T) {
 		L:
 			for {
 				select {
-				case line := <-proj.logger:
+				case line := <-proj.out:
 					if strings.Contains(line, wanted) {
 						break L
 					}
@@ -46,8 +46,9 @@ func Test_serve(t *testing.T) {
 			}
 			waitFor(wanted)
 		}
-		proj.logger = make(chan string, 100)
-		proj.done = make(chan error)
+		proj.out = make(chan string, 100)
+		proj.in = make(chan string)
+		proj.quit = make(chan error)
 		// Start server.
 		go func() { proj.serve() }()
 		waitFor("Press Ctrl+C to stop")
@@ -74,6 +75,9 @@ func Test_serve(t *testing.T) {
 			t.Error(err)
 		}
 		waitFor("removed: content/posts/2016-10-18-sed-sed.md")
-		proj.done <- nil
+		// Rebuild.
+		proj.in <- "R\n"
+		waitFor("rebuilding...")
+		proj.quit <- nil
 	})
 }

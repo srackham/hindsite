@@ -175,7 +175,7 @@ func (proj *project) serve() error {
 		return err
 	}
 	// Error channel to exit serve command.
-	proj.done = make(chan error)
+	proj.quit = make(chan error)
 	// Start LiveReload server.
 	lr := lrserver.New(lrserver.DefaultName, lrserver.DefaultPort)
 	lr.SetLiveCSS(true)
@@ -189,14 +189,14 @@ func (proj *project) serve() error {
 	// Start Web server.
 	go func() {
 		proj.logconsole("\nServing build directory %s on %s\nPress Ctrl+C to stop\n", proj.buildDir, rooturl)
-		proj.done <- proj.startHTTPServer()
+		proj.quit <- proj.startHTTPServer()
 	}()
 	// Start watcher event filter.
 	fs := make(chan fsnotify.Event, 2)
 	go proj.watcherFilter(watcher, fs)
 	// Start keyboard monitor.
 	kb := make(chan string)
-	go kbmonitor(kb)
+	go kbmonitor(proj.in, kb)
 	// Launch browser.
 	if proj.launch {
 		go func() {
@@ -247,19 +247,24 @@ func (proj *project) serve() error {
 			color.Unset()
 			lr.Reload(webpage.path)
 		case err := <-watcher.Errors:
-			proj.done <- err
+			proj.quit <- err
 		// Wait for exit signal.
-		case err := <-proj.done:
+		case err := <-proj.quit:
 			return err
 		}
 	}
 }
 
 // kbmonitor sends lines of input to the out channel.
-func kbmonitor(out chan string) {
+func kbmonitor(in <-chan string, out chan<- string) {
 	reader := bufio.NewReader(os.Stdin)
+	var line string
 	for {
-		line, _ := reader.ReadString('\n')
+		if in == nil {
+			line, _ = reader.ReadString('\n')
+		} else {
+			line = <-in
+		}
 		out <- line
 	}
 }

@@ -38,24 +38,17 @@ func Test_execute(t *testing.T) {
 			0,
 			"documents: 11\ndrafts: 0\nstatic: 6",
 		},
-		{
-			"init builtin blog",
-			newProject(),
-			"hindsite init " + tmpdir + " -builtin blog -v",
-			0,
-			"installing builtin template: blog",
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			os.RemoveAll(tmpdir)
 			mkMissingDir(tmpdir)
-			tt.proj.logger = make(chan string, 100)
+			tt.proj.out = make(chan string, 100)
 			args := strings.Split(tt.cmd, " ")
 			code := execute(&tt.proj, args)
-			close(tt.proj.logger)
+			close(tt.proj.out)
 			var out string
-			for line := range tt.proj.logger {
+			for line := range tt.proj.out {
 				out += line + "\n"
 			}
 			if code != tt.code {

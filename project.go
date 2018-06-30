@@ -27,10 +27,9 @@ var (
 type project struct {
 	command       string
 	executable    string
-	outlog        io.Writer
-	errlog        io.Writer
-	logger        chan string
-	done          chan error
+	out           chan string
+	in            chan string
+	quit          chan error
 	projectDir    string
 	contentDir    string
 	templateDir   string
@@ -52,8 +51,6 @@ type project struct {
 
 func newProject() project {
 	proj := project{}
-	proj.outlog = os.Stdout
-	proj.errlog = os.Stderr
 	return proj
 }
 
@@ -64,34 +61,34 @@ func (proj *project) output(out io.Writer, verbosity int, format string, v ...in
 		msg := fmt.Sprintf(format, v...)
 		// Strip leading project directory from path names to make message more readable.
 		msg = strings.Replace(msg, proj.projectDir+string(filepath.Separator), "", -1)
-		if proj.logger == nil {
+		if proj.out == nil {
 			fmt.Fprintln(out, msg)
 		} else {
-			proj.logger <- msg
+			proj.out <- msg
 		}
 	}
 }
 
 // logconsole prints a line to logout.
 func (proj *project) logconsole(format string, v ...interface{}) {
-	proj.output(proj.outlog, 0, format, v...)
+	proj.output(os.Stdout, 0, format, v...)
 }
 
 // verbose prints a line to logout if `-v` verbose option was specified.
 func (proj *project) verbose(format string, v ...interface{}) {
-	proj.output(proj.outlog, 1, format, v...)
+	proj.output(os.Stdout, 1, format, v...)
 }
 
 // verbose2 prints a a line to logout the `-v` verbose option was specified more
 // than once.
 func (proj *project) verbose2(format string, v ...interface{}) {
-	proj.output(proj.outlog, 2, format, v...)
+	proj.output(os.Stdout, 2, format, v...)
 }
 
 // logerror prints a line to logerr.
 func (proj *project) logerror(format string, v ...interface{}) {
 	color.Set(color.FgRed, color.Bold)
-	proj.output(proj.errlog, 0, "error: "+format, v...)
+	proj.output(os.Stderr, 0, "error: "+format, v...)
 	color.Unset()
 }
 
