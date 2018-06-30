@@ -102,7 +102,10 @@ func (proj *project) watcherFilter(watcher *fsnotify.Watcher, out chan fsnotify.
 	timer.Stop()
 	for {
 		select {
-		case evt := <-watcher.Events:
+		case evt, ok := <-watcher.Events:
+			if !ok {
+				return // Watcher has closed.
+			}
 			accepted := false
 			var msg string
 			switch {
@@ -178,6 +181,7 @@ func (proj *project) serve() error {
 	proj.quit = make(chan error)
 	// Start LiveReload server.
 	lr := lrserver.New(lrserver.DefaultName, lrserver.DefaultPort)
+	defer lr.Close()
 	lr.SetLiveCSS(true)
 	lr.StatusLog().SetPrefix("reload: ")
 	lr.ErrorLog().SetPrefix("reload: ")
