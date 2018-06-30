@@ -1,6 +1,6 @@
 homepage = "about.html"
 longdate = "Jan 2, 2006"
-templates = ".md"
+templates = ".md|.txt"
 
 # Exclude Vim backup and temp files.
 exclude = "*~|4913"
