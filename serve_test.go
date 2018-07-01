@@ -29,6 +29,7 @@ func Test_serve(t *testing.T) {
 			for {
 				select {
 				case line := <-proj.out:
+					line = strings.Replace(line, "\\", "/", -1) // Normalize MS Windows path separators.
 					if strings.Contains(line, output) {
 						return
 					}
@@ -92,6 +93,6 @@ func Test_serve(t *testing.T) {
 		removeAndWait(newfile, "removed: content/newfile.txt")
 		// Stop serve command.
 		close(proj.quit)
-		time.Sleep(50 * time.Millisecond) // Allow time for serve goroutines to execute quit cleanup code.
+		time.Sleep(50 * time.Millisecond) // Allow time for serve goroutines to execute cleanup code.
 	})
 }
