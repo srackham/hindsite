@@ -1,6 +1,7 @@
 homepage = "about.html"
 longdate = "Jan 2, 2006"
 templates = ".md|.txt"
+urlprefix = "http://example.com"
 
 # Exclude Vim backup and temp files.
 exclude = "*~|4913"
