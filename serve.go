@@ -84,15 +84,6 @@ func htmlFilter(proj *project, h http.Handler) http.Handler {
 	})
 }
 
-// startHTTPServer registers server request handlers and starts the HTTP server.
-func (proj *project) startHTTPServer() error {
-	handler := http.FileServer(http.Dir(proj.buildDir))
-	handler = htmlFilter(proj, handler)
-	handler = setWebpage(proj, handler)
-	handler = logRequest(proj, handler)
-	return http.ListenAndServe(":"+proj.port, handler)
-}
-
 // watcherFilter filters and debounces fsnotify events. When there has been a
 // lull in file system events arriving on the in input channel then forward the
 // most recent accepted file system notification event to the output channel.
@@ -180,7 +171,7 @@ func (proj *project) serve() error {
 	if err := watcherAddDir(proj.templateDir); err != nil {
 		return err
 	}
-	// Shared goroutine synchronisation variables.
+	// Shared goroutine exit synchronization variables.
 	var serveError error
 	var mutex = &sync.Mutex{}
 	proj.quit = make(chan struct{})
@@ -198,11 +189,19 @@ func (proj *project) serve() error {
 	// Start Web server.
 	go func() {
 		proj.logconsole("\nServing build directory %s on %s\nPress Ctrl+C to stop\n", proj.buildDir, rooturl)
+		handler := http.FileServer(http.Dir(proj.buildDir))
+		handler = htmlFilter(proj, handler)
+		handler = setWebpage(proj, handler)
+		handler = logRequest(proj, handler)
+		srv := &http.Server{Addr: ":" + proj.port, Handler: handler}
 		select {
 		case <-proj.quit:
+			if err := srv.Shutdown(nil); err != nil {
+				panic(err) // Failed to shut down the server gracefully.
+			}
 			return
 		default:
-			err := proj.startHTTPServer()
+			err := srv.ListenAndServe()
 			mutex.Lock()
 			serveError = err
 			mutex.Unlock()
