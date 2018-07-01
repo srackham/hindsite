@@ -32,7 +32,7 @@ func Test_serve(t *testing.T) {
 					if strings.Contains(line, output) {
 						return
 					}
-				case <-time.After(300 * time.Millisecond):
+				case <-time.After(500 * time.Millisecond):
 					t.Fatalf("%s: timed out waiting for: %v", cmd, output)
 					return
 				}
@@ -92,5 +92,6 @@ func Test_serve(t *testing.T) {
 		removeAndWait(newfile, "removed: content/newfile.txt")
 		// Stop serve command.
 		close(proj.quit)
+		time.Sleep(50 * time.Millisecond) // Allow time for serve goroutines to execute quit cleanup code.
 	})
 }
