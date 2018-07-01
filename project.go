@@ -29,7 +29,7 @@ type project struct {
 	executable    string
 	in            chan string
 	out           chan string
-	quit          chan error
+	quit          chan struct{}
 	projectDir    string
 	contentDir    string
 	templateDir   string

@@ -102,6 +102,8 @@ func (proj *project) watcherFilter(watcher *fsnotify.Watcher, out chan fsnotify.
 	timer.Stop()
 	for {
 		select {
+		case <-proj.quit:
+			return
 		case evt, ok := <-watcher.Events:
 			if !ok {
 				return // Watcher has closed.
@@ -141,7 +143,8 @@ func (proj *project) watcherFilter(watcher *fsnotify.Watcher, out chan fsnotify.
 	}
 }
 
-// serve implements the serve comand.
+// serve implements the serve comand. Does not return unless and error occurs or
+// the project.quit channel is closed.
 func (proj *project) serve() error {
 	rooturl := "http://localhost:" + proj.port + "/"
 	// Full rebuild to initialize document and index structures.
@@ -177,8 +180,10 @@ func (proj *project) serve() error {
 	if err := watcherAddDir(proj.templateDir); err != nil {
 		return err
 	}
-	// Error channel to exit serve command.
-	proj.quit = make(chan error)
+	// Shared goroutine synchronisation variables.
+	var serveError error
+	var mutex = &sync.Mutex{}
+	proj.quit = make(chan struct{})
 	// Start LiveReload server.
 	lr := lrserver.New(lrserver.DefaultName, lrserver.DefaultPort)
 	defer lr.Close()
@@ -193,14 +198,39 @@ func (proj *project) serve() error {
 	// Start Web server.
 	go func() {
 		proj.logconsole("\nServing build directory %s on %s\nPress Ctrl+C to stop\n", proj.buildDir, rooturl)
-		proj.quit <- proj.startHTTPServer()
+		select {
+		case <-proj.quit:
+			return
+		default:
+			err := proj.startHTTPServer()
+			mutex.Lock()
+			serveError = err
+			mutex.Unlock()
+			close(proj.quit)
+		}
 	}()
 	// Start watcher event filter.
 	fs := make(chan fsnotify.Event, 2)
 	go proj.watcherFilter(watcher, fs)
 	// Start keyboard monitor.
 	kb := make(chan string)
-	go kbmonitor(proj.in, kb)
+	go func() {
+		select {
+		case <-proj.quit:
+			return
+		default:
+			reader := bufio.NewReader(os.Stdin)
+			var line string
+			for {
+				if proj.in == nil {
+					line, _ = reader.ReadString('\n')
+				} else {
+					line = <-proj.in
+				}
+				kb <- line
+			}
+		}
+	}()
 	// Launch browser.
 	if proj.launch {
 		go func() {
@@ -210,67 +240,58 @@ func (proj *project) serve() error {
 			}
 		}()
 	}
-	// Monitor and execute build notifications.
-	for {
-		select {
-		case line := <-kb:
-			switch strings.ToUpper(strings.TrimSpace(line)) {
-			case "R": // Rebuild.
-				proj.logconsole("rebuilding...")
-				err = proj.build()
+	// Monitor and execute build notifications from keyboard and file system.
+	go func() {
+		for {
+			select {
+			case <-proj.quit:
+				return
+			case line := <-kb:
+				switch strings.ToUpper(strings.TrimSpace(line)) {
+				case "R": // Rebuild.
+					proj.logconsole("rebuilding...")
+					err = proj.build()
+					if err != nil {
+						proj.logerror(err.Error())
+					}
+					lr.Reload(webpage.path)
+					proj.logconsole("")
+				}
+			case evt := <-fs:
+				start := time.Now()
+				switch evt.Op {
+				case fsnotify.Create, fsnotify.Write:
+					t := fileModTime(proj.rootConf.homepage)
+					err = proj.writeFile(evt.Name)
+					if err == nil && t.Before(fileModTime(proj.rootConf.homepage)) {
+						// homepage was modified by this event.
+						err = proj.copyHomePage()
+					}
+					proj.logconsole(start.Format("15:04:05") + ": updated: " + evt.Name)
+				case fsnotify.Remove, fsnotify.Rename:
+					err = proj.removeFile(evt.Name)
+					proj.logconsole(start.Format("15:04:05") + ": removed: " + evt.Name)
+				default:
+					panic("unexpected event: " + evt.Op.String() + ": " + evt.Name)
+				}
 				if err != nil {
 					proj.logerror(err.Error())
+				} else {
+					color.Set(color.FgGreen, color.Bold)
 				}
+				proj.logconsole("elapsed: %.3fs\n\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
+				color.Unset()
 				lr.Reload(webpage.path)
-				proj.logconsole("")
+			case err := <-watcher.Errors:
+				mutex.Lock()
+				serveError = err
+				mutex.Unlock()
+				close(proj.quit)
 			}
-		case evt := <-fs:
-			start := time.Now()
-			switch evt.Op {
-			case fsnotify.Create, fsnotify.Write:
-				proj.logconsole(start.Format("15:04:05") + ": updated: " + evt.Name)
-				t := fileModTime(proj.rootConf.homepage)
-				err = proj.writeFile(evt.Name)
-				if err == nil && t.Before(fileModTime(proj.rootConf.homepage)) {
-					// homepage was modified by this event.
-					err = proj.copyHomePage()
-				}
-			case fsnotify.Remove, fsnotify.Rename:
-				proj.logconsole(start.Format("15:04:05") + ": removed: " + evt.Name)
-				err = proj.removeFile(evt.Name)
-			default:
-				panic("unexpected event: " + evt.Op.String() + ": " + evt.Name)
-			}
-			if err != nil {
-				proj.logerror(err.Error())
-			} else {
-				color.Set(color.FgGreen, color.Bold)
-			}
-			proj.logconsole("elapsed: %.3fs\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
-			proj.logconsole("")
-			color.Unset()
-			lr.Reload(webpage.path)
-		case err := <-watcher.Errors:
-			proj.quit <- err
-		// Wait for exit signal.
-		case err := <-proj.quit:
-			return err
 		}
-	}
-}
-
-// kbmonitor sends lines of input to the out channel.
-func kbmonitor(in <-chan string, out chan<- string) {
-	reader := bufio.NewReader(os.Stdin)
-	var line string
-	for {
-		if in == nil {
-			line, _ = reader.ReadString('\n')
-		} else {
-			line = <-in
-		}
-		out <- line
-	}
+	}()
+	<-proj.quit
+	return serveError
 }
 
 // createFile handles the fsnotify Create event and adds the file to the build
