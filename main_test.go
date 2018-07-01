@@ -66,10 +66,10 @@ func Test_execute(t *testing.T) {
 				out += line + "\n"
 			}
 			if code != tt.code {
-				t.Errorf("%s: exit code: got %v, want %v", tt.name, code, tt.code)
+				t.Fatalf("%s: exit code: got %v, want %v", tt.name, code, tt.code)
 			}
 			if !strings.Contains(out, tt.out) {
-				t.Errorf("%s: output does not contain: %v", tt.name, tt.out)
+				t.Fatalf("%s: output does not contain: %v", tt.name, tt.out)
 			}
 		})
 	}
