@@ -20,6 +20,9 @@ func Test_serve(t *testing.T) {
 		if code != 0 {
 			t.Fatalf("%s", cmd)
 		}
+		if dirCount(path.Join(tmpdir, "template")) != 8 {
+			t.Fatalf("%s: unexpected number of riles in template directory", cmd)
+		}
 		cmd = "hindsite serve " + tmpdir
 		args = strings.Split(cmd, " ")
 		if err := proj.parseArgs(args); err != nil {
