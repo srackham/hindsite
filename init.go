@@ -20,14 +20,8 @@ func (proj *project) init() error {
 	}
 	if proj.builtin != "" {
 		// Load template directory from the built-in project.
-		if dirExists(proj.templateDir) {
-			files, err := ioutil.ReadDir(proj.templateDir)
-			if err != nil {
-				return err
-			}
-			if len(files) > 0 {
-				return fmt.Errorf("non-empty template directory: " + proj.templateDir)
-			}
+		if dirCount(proj.templateDir) > 0 {
+			return fmt.Errorf("non-empty template directory: " + proj.templateDir)
 		}
 		proj.verbose("installing builtin template: " + proj.builtin)
 		if err := RestoreAssets(proj.templateDir, proj.builtin+"/template"); err != nil {
@@ -105,9 +99,9 @@ func (proj *project) init() error {
 		}
 	}
 	// If the template directory is outside the project directory copy it to the
-	// default template directory (if it does not already exist).
+	// default template directory (if it does not already exist or is empty).
 	defaultTemplateDir := filepath.Join(proj.projectDir, "template")
-	if !pathIsInDir(proj.templateDir, proj.projectDir) && !dirExists(defaultTemplateDir) {
+	if !pathIsInDir(proj.templateDir, proj.projectDir) && dirCount(defaultTemplateDir) == 0 {
 		proj.verbose("make directory: " + defaultTemplateDir)
 		if err := mkMissingDir(defaultTemplateDir); err != nil {
 			return err

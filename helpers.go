@@ -160,6 +160,18 @@ func fileModTime(f string) time.Time {
 	return info.ModTime()
 }
 
+// dirCount returns the number of files and folders in a directory. Returns zero if directory does not exist.
+func dirCount(dir string) int {
+	if !dirExists(dir) {
+		return 0
+	}
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		panic(err)
+	}
+	return len(files)
+}
+
 /*
 Date/time functions.
 */
