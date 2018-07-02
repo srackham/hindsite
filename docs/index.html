@@ -29,9 +29,9 @@
 <h1 id="hindsite-reference">Hindsite Reference</h1>
 <p>hindsite is a <a href="/hindsite/faq.html#how-fast-is-hindsite">fast</a>, lightweight static website
 generator. It builds static websites with optional document and tag indexes from
-Markdown source documents (e.g. blogs posts, newsletters, articles). The
-hindsite stand-alone executable includes a built-in development web server with
-Live Reload, a file watcher and incremental rebuilds.</p>
+Markdown source documents (e.g. blogs posts, newsletters, articles).</p>
+<p>The hindsite stand-alone executable includes a built-in development web server
+with Live Reload, a file watcher and incremental rebuilds.</p>
 <h2 id="quick-start">Quick Start</h2>
 <p>Create a fully functional blog and newsletter website with just two hindsite
 commands:</p>
@@ -40,9 +40,9 @@ commands:</p>
    <code>hindsite</code> executable (see <a href="#building-hindsite"><em>Building hindsite</em></a> if you
    prefer to build and install from source).</li><li>Create a new Hindsite project directory and install the <a href="https://github.com/srackham/hindsite/tree/master/builtin/blog/template">builtin <code>blog</code>
    template</a>
-   using the hindsite <a href="#init-command">init command</a>:<pre><code>mkdir myproj
-hindsite init myproj -builtin blog</code></pre>
-</li><li>Build the website, start the hindsite web server and open it in the browser:<pre><code>hindsite serve myproj -launch</code></pre>
+   using the hindsite <a href="#init-command">init command</a>:<pre><code>mkdir myproject
+hindsite init myproject -builtin blog</code></pre>
+</li><li>Build the website, start the hindsite web server and open it in the browser:<pre><code>hindsite serve myproject -launch</code></pre>
 </li></ol><p>Include the <code>-v</code> (verbose) command option to see what's going on. The best way
 to start learning hindsite is to browse the blog <a href="#projects">project directory</a>.</p>
 <p>If you are familiar with Jekyll or Hugo you'll be right a home (hindsite can
@@ -114,8 +114,8 @@ version information.</p>
 <pre><code>hindsite help</code></pre>
 <p><code>hindsite</code>, <code>hindsite -h</code> and <code>hindsite --help</code> are all aliases for <code>hindsite help</code>.</p>
 <h3 id="init-command">init command</h3>
-<p>The <em>init</em> command initializes a project <em>content</em> directory from a <em>template</em>
-directory or from one ot the built-in templates.</p>
+<p>The <em>init</em> command initializes project <em>content</em> and <em>template</em> directories from
+another <em>template</em> directory or from one of the built-in templates.</p>
 <p>Usage:</p>
 <pre><code>hindsite init  PROJECT_DIR [OPTIONS]</code></pre>
 <p>Applicable options:</p>
@@ -123,12 +123,13 @@ directory or from one ot the built-in templates.</p>
 -template TEMPLATE_DIR
 -builtin NAME
 -v</code></pre>
-<ul><li>The <code>CONTENT_DIR</code> must be empty.</li><li>If the <code>-builtin</code> option is specified the <code>TEMPLATE_DIR</code> must also be empty.</li><li>The <code>-builtin</code> option <code>NAME</code> is one of the following:<dl><dt><code>blog</code></dt><dd>A blog and newsletter project.</dd><dt><code>minimal</code></dt><dd>A minimal project.</dd></dl></li></ul><p>Command execution:</p>
+<ul><li>If the <code>-builtin</code> option is specified the <code>TEMPLATE_DIR</code> must also be empty.</li><li>The <code>-builtin</code> option <code>NAME</code> is one of the following:<dl><dt><code>blog</code></dt><dd>A blog and newsletter project.</dd><dt><code>minimal</code></dt><dd>A minimal project.</dd></dl></li><li>The <code>CONTENT_DIR</code> must be empty.</li></ul><p>Command execution:</p>
 <ol><li>If the <code>-builtin</code> option is specified then the selected builtin template is
    copied to the <code>TEMPLATE_DIR</code>.</li><li>The template directory structure is recreated in the content directory.</li><li>If the <code>TEMPLATE_DIR/init</code> directory exists its contents is copied to the
-   content directory.</li></ol><p>The following example installs the builtin <code>blog</code> template to <code>./template</code> then
-copies the contents of the <code>./template/init</code> directory to the <code>./content</code>
-directory:</p>
+   content directory.</li><li>If the <code>-template TEMPLATE_DIR</code> option specifies a location outside the
+   project directory and the <code>PROJECT_DIR/template</code> directory does not exist or
+   is empty the <code>TEMPLATE_DIR</code> is copied to <code>PROJECT_DIR/template</code>.</li></ol><p>The following example installs the builtin <code>blog</code> template to <code>./template</code> and
+initializes the <code>./contents</code> directory:</p>
 <pre><code>hindsite init . -builtin blog</code></pre>
 <h3 id="build-command">build command</h3>
 <p>The <em>build</em> command generates a static website in the <em>build</em> directory using
@@ -147,8 +148,7 @@ files from the <em>content</em> and <em>template</em> directories.</p>
   the content directory can be <code>TEMPLATE_DIR/init</code> (this is handy for testing
   template initialization content).</li></ul><p>Command execution:</p>
 <ol><li>Configuration files in the template directories are parsed.</li><li>All files and folders in the <em>build</em> directory are deleted.</li><li>Templates from templates directories are parsed.</li><li>The content directory is recursively scanned and:<ul><li>Document front matter is parsed.</li><li>Static files are processed and copied to the corresponding build
-     directories.</li></ul></li><li>Document indexes are built.</li><li>Document bodies are rendered with their corresponding layout templates.</li><li>If a <a href="#configuration-parameters">homepage</a> is specified it is copied to
-   <code>index.html</code>.</li></ol><h4 id="build-summary">Build summary</h4>
+     directories.</li></ul></li><li>Document indexes are built.</li><li>Document bodies are rendered with their corresponding layout templates.</li><li>If a <a href="#homepage">homepage</a> is specified it is copied to <code>index.html</code>.</li></ol><h4 id="build-summary">Build summary</h4>
 <p>The printed build summary includes:</p>
 <dl><dt><em>documents</em></dt><dd>The total number of Markdown documents (including skipped drafts).</dd><dt><em>static</em></dt><dd>The total number of static files.</dd><dt><em>drafts</em></dt><dd>The number of skipped draft documents. If the <code>-drafts</code> option is
 specified this will be zero.</dd><dt><em>time</em></dt><dd>The execution time in seconds.</dd></dl><p>The build summary does not include <a href="#configuration-parameters">excluded</a> files.</p>
@@ -233,7 +233,7 @@ layouts supported by Go <a href="https://golang.org/pkg/time/#Time.Format">time.
 function</a>. The default values are:<pre><code>shortdate = "2006-01-02",
 mediumdate = "2-Jan-2006",
 longdate = "Mon Jan 2, 2006",</code></pre>
-</dd><dt><code>homepage</code> †</dt><dd>The <code>homepage</code> parameter is the name of a file, relative to the
+</dd><dt id="homepage"><code>homepage</code> †</dt><dd>The <code>homepage</code> parameter is the name of a file, relative to the
 build directory, that is copied by the <code>build</code> command to the root of the build
 directory and named <code>index.html</code>. Use the slash (<code>/</code>) character as the path
 separator to ensure cross-platform compatibility. TOML example:<pre><code>homepage = "indexes/posts/docs-1.html"</code></pre>
@@ -471,9 +471,10 @@ header</a>.</p>
 <p>A document's <em>build path</em> is the file path of its generated web page.</p>
 <ul><li>The <em>build path</em> will always be located in the project <a href="#projects">build
   directory</a>.</li><li>By default the <em>build path</em> mirrors the document's <a href="#projects">content directory
-  path</a>.<p>For example, if the content directory is <code>/myproj/content</code>, the build directory
-is <code>/myproj/build</code> and the document path is <code>/myproj/content/posts/foo.md</code> then
-the build path will be <code>/myproj/build/posts/foo.html</code>.</p>
+  path</a>.<p>For example, if the content directory is <code>/myproject/content</code>, the build
+directory is <code>/myproject/build</code> and the document path is
+<code>/myproject/content/posts/foo.md</code> then the build path will be
+<code>/myproject/build/posts/foo.html</code>.</p>
 </li><li>The <a href="#permalink"><code>permalink</code></a> configuration parameter can be used to customize
   the <em>build path</em>.</li><li>If a <a href="#slug"><code>slug</code></a> front matter value is specified it
    replaces the document file name (excluding file name extension).</li></ul><h2 id="urls">URLs</h2>
@@ -481,8 +482,8 @@ the build path will be <code>/myproj/build/posts/foo.html</code>.</p>
 path</a> relative to the <a href="#projects">build directory</a> and prefixing
 it with the <a href="#urlprefix"><code>urlprefix</code></a> configuration parameter. File path
 separators are translated to slash characters.</p>
-<p>For example, if the build directory is <code>/myproj/build</code> and the generated web
-page is <code>/myproj/build/posts/foo.html</code> then:</p>
+<p>For example, if the build directory is <code>/myproject/build</code> and the generated web
+page is <code>/myproject/build/posts/foo.html</code> then:</p>
 <ul><li>The document URL will be <code>/posts/foo.html</code></li><li>If the <code>urlprefix</code> is <code>/blog</code> then the URL would be <code>/blog/posts/foo.html</code></li><li>If the document <code>slug</code> is <code>bar</code> the URL becomes <code>/blog/posts/bar.html</code></li></ul><p>To synthesize absolute URLs include the URL domain in the <code>urlprefix</code>.</p>
 <p>If you are deploying to a web server subdirectory then you need to set the
 <code>urlprefix</code> configuration parameter to ensure synthesized URLs are rooted

@@ -3,6 +3,16 @@
 See the [Github commit logs]({github}/commits/master) for a full list of changes.
 
 
+## Version 1.2.0 (2018-07-03)
+- The `serve` command now displays a sensible error message if the server port
+  is already in use.
+- `init` command behavioral change: If the `-template TEMPLATE_DIR` option
+  specifies a location outside the project directory and the default
+  `PROJECT_DIR/template` directory does not exist or is empty then the
+  `TEMPLATE_DIR` is copied to `PROJECT_DIR/template`.
+- Implemented code coverage tests.
+
+
 ## Version 1.1.0 (2018-06-23)
 - Added document `id` front matter value along with the related `id`
   configuration parameter.

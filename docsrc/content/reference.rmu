@@ -7,9 +7,10 @@ permalink: /index.html
 
 hindsite is a [fast]({faq}#how-fast-is-hindsite), lightweight static website
 generator. It builds static websites with optional document and tag indexes from
-Markdown source documents (e.g. blogs posts, newsletters, articles). The
-hindsite stand-alone executable includes a built-in development web server with
-Live Reload, a file watcher and incremental rebuilds.
+Markdown source documents (e.g. blogs posts, newsletters, articles).
+
+The hindsite stand-alone executable includes a built-in development web server
+with Live Reload, a file watcher and incremental rebuilds.
 
 
 ## Quick Start
@@ -25,12 +26,12 @@ commands:
    template](https://github.com/srackham/hindsite/tree/master/builtin/blog/template)
    using the hindsite [init command](#init-command):
 
-    mkdir myproj
-    hindsite init myproj -builtin blog
+    mkdir myproject
+    hindsite init myproject -builtin blog
 
 3. Build the website, start the hindsite web server and open it in the browser:
 
-    hindsite serve myproj -launch
+    hindsite serve myproject -launch
 
 Include the `-v` (verbose) command option to see what's going on. The best way
 to start learning hindsite is to browse the blog [project directory](#projects).
@@ -142,8 +143,8 @@ Usage:
 
 
 ### init command
-The _init_ command initializes a project _content_ directory from a _template_
-directory or from one ot the built-in templates.
+The _init_ command initializes project _content_ and _template_ directories from
+another _template_ directory or from one of the built-in templates.
 
 Usage:
 
@@ -156,11 +157,11 @@ Applicable options:
     -builtin NAME
     -v
 
-- The `CONTENT_DIR` must be empty.
 - If the `-builtin` option is specified the `TEMPLATE_DIR` must also be empty.
 - The `-builtin` option `NAME` is one of the following:
    `blog`:: A blog and newsletter project.
    `minimal`:: A minimal project.
+- The `CONTENT_DIR` must be empty.
 
 Command execution:
 
@@ -169,10 +170,12 @@ Command execution:
 2. The template directory structure is recreated in the content directory.
 3. If the `TEMPLATE_DIR/init` directory exists its contents is copied to the
    content directory.
+4. If the `-template TEMPLATE_DIR` option specifies a location outside the
+   project directory and the `PROJECT_DIR/template` directory does not exist or
+   is empty the `TEMPLATE_DIR` is copied to `PROJECT_DIR/template`.
 
-The following example installs the builtin `blog` template to `./template` then
-copies the contents of the `./template/init` directory to the `./content`
-directory:
+The following example installs the builtin `blog` template to `./template` and
+initializes the `./contents` directory:
 
     hindsite init . -builtin blog
 
@@ -212,8 +215,7 @@ Command execution:
      directories.
 5. Document indexes are built.
 6. Document bodies are rendered with their corresponding layout templates.
-7. If a [homepage](#configuration-parameters) is specified it is copied to
-   `index.html`.
+7. If a [homepage](#homepage) is specified it is copied to `index.html`.
 
 #### Build summary
 The printed build summary includes:
@@ -369,6 +371,7 @@ function](https://golang.org/pkg/time/#Time.Format). The default values are:
     mediumdate = "2-Jan-2006",
     longdate = "Mon Jan 2, 2006",
 
+.#homepage
 `homepage` †:: The `homepage` parameter is the name of a file, relative to the
 build directory, that is copied by the `build` command to the root of the build
 directory and named `index.html`. Use the slash (`/`) character as the path
@@ -837,9 +840,10 @@ A document's _build path_ is the file path of its generated web page.
 - By default the _build path_ mirrors the document's [content directory
   path](#projects).
 ..
-For example, if the content directory is `/myproj/content`, the build directory
-is `/myproj/build` and the document path is `/myproj/content/posts/foo.md` then
-the build path will be `/myproj/build/posts/foo.html`.
+For example, if the content directory is `/myproject/content`, the build
+directory is `/myproject/build` and the document path is
+`/myproject/content/posts/foo.md` then the build path will be
+`/myproject/build/posts/foo.html`.
 ..
 - The [`permalink`](#permalink) configuration parameter can be used to customize
   the _build path_.
@@ -853,8 +857,8 @@ path](#build-paths) relative to the [build directory](#projects) and prefixing
 it with the [`urlprefix`](#urlprefix) configuration parameter. File path
 separators are translated to slash characters.
 
-For example, if the build directory is `/myproj/build` and the generated web
-page is `/myproj/build/posts/foo.html` then:
+For example, if the build directory is `/myproject/build` and the generated web
+page is `/myproject/build/posts/foo.html` then:
 
 - The document URL will be `/posts/foo.html`
 - If the `urlprefix` is `/blog` then the URL would be `/blog/posts/foo.html`

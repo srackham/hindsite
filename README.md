@@ -18,6 +18,9 @@ newsletters, articles). Features:
 Create a fully functional blog and newsletter website with just [two hindsite
 commands](https://srackham.github.io/hindsite/#quick-start).
 
+    mkdir myproject
+    hindsite init myproject -builtin blog
+    hindsite serve myproject -launch
 
 ## Links
 Documentation: https://srackham.github.io/hindsite

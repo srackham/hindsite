@@ -28,7 +28,12 @@
 
 <h1 id="hindsite-change-log">Hindsite Change Log</h1>
 <p>See the <a href="https://github.com/srackham/hindsite/commits/master">Github commit logs</a> for a full list of changes.</p>
-<h2 id="version-1-1-0-2018-06-23">Version 1.1.0 (2018-06-23)</h2>
+<h2 id="version-1-2-0-2018-07-03">Version 1.2.0 (2018-07-03)</h2>
+<ul><li>The <code>serve</code> command now displays a sensible error message if the server port
+  is already in use.</li><li><code>init</code> command behavioral change: If the <code>-template TEMPLATE_DIR</code> option
+  specifies a location outside the project directory and the default
+  <code>PROJECT_DIR/template</code> directory does not exist or is empty then the
+  <code>TEMPLATE_DIR</code> is copied to <code>PROJECT_DIR/template</code>.</li><li>Implemented code coverage tests.</li></ul><h2 id="version-1-1-0-2018-06-23">Version 1.1.0 (2018-06-23)</h2>
 <ul><li>Added document <code>id</code> front matter value along with the related <code>id</code>
   configuration parameter.</li><li>Colorized console error and success messages.</li><li>Better error messages.</li><li>Added <a href="/hindsite/faq.html#disqus-howto">Disqus FAQ</a>.</li><li>The <a href="/hindsite/index.html#build-command"><code>build</code> command</a> now reports parse errors from
   all documents instead of quitting at the first error.</li></ul><h2 id="version-1-0-0-2018-05-20">Version 1.0.0 (2018-05-20)</h2>

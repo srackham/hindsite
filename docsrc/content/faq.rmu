@@ -11,7 +11,7 @@ Some text editors create temporary and backup files when documents are saved and
 created, you need to exclude these files from document processing. Failure to do
 so can result in rebuild false positives and premature watcher reloads.
 
-For example, the Vim editor creates tilda prefixed backup files and temporary
+For example, the Vim editor creates tilda suffixed backup files and temporary
 [`4913` files](https://github.com/neovim/neovim/issues/3460) so you need to add
 them to the [`exclude`]({reference}#configuration-parameters) configuration
 parameter in the templates directory root [configuration
