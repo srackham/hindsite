@@ -87,7 +87,7 @@ func htmlFilter(proj *project, h http.Handler) http.Handler {
 // watcherFilter filters and debounces fsnotify events. When there has been a
 // lull in file system events arriving on the in input channel then forward the
 // most recent accepted file system notification event to the output channel.
-func (proj *project) watcherFilter(watcher *fsnotify.Watcher, out chan fsnotify.Event) {
+func (proj *project) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotify.Event) {
 	var prev fsnotify.Event
 	timer := time.NewTimer(watcherLullTime)
 	timer.Stop()
@@ -209,8 +209,8 @@ func (proj *project) serve() error {
 		}
 	}()
 	// Start watcher event filter.
-	fs := make(chan fsnotify.Event, 2)
-	go proj.watcherFilter(watcher, fs)
+	fsevent := make(chan fsnotify.Event, 2)
+	go proj.watcherFilter(watcher, fsevent)
 	// Start keyboard monitor.
 	kb := make(chan string)
 	go func() {
@@ -256,7 +256,7 @@ func (proj *project) serve() error {
 					lr.Reload(webpage.path)
 					proj.logconsole("")
 				}
-			case evt := <-fs:
+			case evt := <-fsevent:
 				start := time.Now()
 				switch evt.Op {
 				case fsnotify.Create, fsnotify.Write:
