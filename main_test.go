@@ -59,7 +59,7 @@ func Test_execute(t *testing.T) {
 			mkMissingDir(tmpdir)
 			tt.proj.out = make(chan string, 100)
 			args := strings.Split(tt.cmd, " ")
-			code := execute(&tt.proj, args)
+			code := tt.proj.executeArgs(args)
 			close(tt.proj.out)
 			var out string
 			for line := range tt.proj.out {

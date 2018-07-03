@@ -16,17 +16,12 @@ func Test_serve(t *testing.T) {
 		proj := newProject()
 		cmd := "hindsite init " + tmpdir + " -template ./testdata/blog/template"
 		args := strings.Split(cmd, " ")
-		code := execute(&proj, args)
+		code := proj.executeArgs(args)
 		if code != 0 {
 			t.Fatalf("%s", cmd)
 		}
 		if dirCount(path.Join(tmpdir, "template")) != 8 {
 			t.Fatalf("%s: unexpected number of riles in template directory", cmd)
-		}
-		cmd = "hindsite serve " + tmpdir
-		args = strings.Split(cmd, " ")
-		if err := proj.parseArgs(args); err != nil {
-			t.Fatalf("%s: %v", cmd, err)
 		}
 		waitFor := func(output string) {
 			for {
@@ -56,12 +51,15 @@ func Test_serve(t *testing.T) {
 			}
 			waitFor(output)
 		}
+		// Start server.
+		proj = newProject()
 		proj.out = make(chan string, 100)
 		proj.in = make(chan string, 1)
-		// Start server.
+		cmd = "hindsite serve " + tmpdir
+		args = strings.Split(cmd, " ")
 		go func() {
-			if err := proj.serve(); err != nil {
-				t.Fatalf("serve start error: %v", err.Error())
+			if code := proj.executeArgs(args); code != 0 {
+				t.Fatalf("serve start error: %v", <-proj.out)
 			}
 		}()
 		waitFor("Press Ctrl+C to stop")
