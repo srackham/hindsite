@@ -218,22 +218,30 @@ func isCommand(name string) bool {
 	return stringlist{"build", "help", "init", "serve"}.Contains(name)
 }
 
-func (proj *project) execute() error {
-	// Execute command.
+// executeArgs runs a hindsite command specified by CLI args and returns a
+// non-zero exit code if an error occurred.
+func (proj *project) executeArgs(args []string) int {
 	var err error
-	switch proj.command {
-	case "build":
-		err = proj.build()
-	case "help":
-		proj.help()
-	case "init":
-		err = proj.init()
-	case "serve":
-		err = proj.serve()
-	default:
-		panic("illegal command: " + proj.command)
+	err = proj.parseArgs(args)
+	if err == nil {
+		switch proj.command {
+		case "build":
+			err = proj.build()
+		case "help":
+			proj.help()
+		case "init":
+			err = proj.init()
+		case "serve":
+			err = proj.serve()
+		default:
+			panic("illegal command: " + proj.command)
+		}
 	}
-	return err
+	if err != nil {
+		proj.logerror(err.Error())
+		return 1
+	}
+	return 0
 }
 
 // help implements the help command.
