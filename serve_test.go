@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path"
 	"strings"
@@ -96,4 +98,47 @@ func Test_serve(t *testing.T) {
 		close(proj.quit)
 		time.Sleep(50 * time.Millisecond) // Allow time for serve goroutines to execute cleanup code.
 	})
+}
+
+// Based onhttps://blog.questionable.services/article/testing-http-handlers-go/
+func Test_httpHandlers(t *testing.T) {
+	proj := newProject()
+	proj.buildDir = "./testdata/blog/build"
+	proj.rootConf = newConfig()
+	proj.rootConf.urlprefix = "http:/example.com"
+
+	// Create a request to pass to our handler. We don't have any query parameters for now, so we'll
+	// pass 'nil' as the third parameter.
+	req, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
+	rr := httptest.NewRecorder()
+	handler := http.FileServer(http.Dir(proj.buildDir))
+	handler = htmlFilter(&proj, handler)
+	handler = setWebpage(&proj, handler)
+
+	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
+	// directly and pass in our Request and ResponseRecorder.
+	handler.ServeHTTP(rr, req)
+
+	// Check the status code is what we expect.
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+
+	// Check the response body is what we expect.
+	if webpage.path != "/" {
+		t.Errorf("setWebpage handler: webpage: got %v want %v", webpage.path, "/")
+	}
+	wanted := "<script src=\"http://localhost:35729/livereload.js\"></script>\n</body>"
+	got := rr.Body.String()
+	if !strings.Contains(got, wanted) {
+		t.Errorf("htmlFilter handler: response did not contain: %#v", wanted)
+	}
+	if strings.Contains(got, proj.rootConf.urlprefix) {
+		t.Errorf("htmlFilter handler: response contains urlprefix: %#v", proj.rootConf.urlprefix)
+	}
 }
