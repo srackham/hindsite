@@ -22,7 +22,7 @@ func Test_serve(t *testing.T) {
 		if code != 0 {
 			t.Fatalf("%s", cmd)
 		}
-		if dirCount(path.Join(tmpdir, "template")) != 8 {
+		if dirCount(path.Join(tmpdir, "template")) != 9 {
 			t.Fatalf("%s: unexpected number of riles in template directory", cmd)
 		}
 		waitFor := func(output string) {

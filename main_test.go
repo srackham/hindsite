@@ -50,7 +50,7 @@ func Test_execute(t *testing.T) {
 			newProject(),
 			"hindsite build " + tmpdir + " -content ./testdata/blog/template/init -template ./testdata/blog/template",
 			0,
-			"documents: 11\ndrafts: 1\nstatic: 6",
+			"documents: 11\ndrafts: 1\nstatic: 7",
 		},
 	}
 	for _, tt := range tests {

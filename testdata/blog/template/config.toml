@@ -1,14 +1,17 @@
+author = "Joe Bloggs"
 homepage = "about.html"
 longdate = "Jan 2, 2006"
 templates = ".md|.txt"
 urlprefix = "http://example.com"
+timezone = "Pacific/Auckland"
 
 # Exclude Vim backup and temp files.
-exclude = "*~|4913"
+exclude = "*~|4913|*.tmp"
+include = ".htaccess|include.tmp"
 
 # Uncomment the id line to enable default document ids for published documents.
 # If you want to confine default ids to blog posts put it in `template/posts/config.toml`.
-#id = "urlpath"
+id = "urlpath"
 
 
 [user]
