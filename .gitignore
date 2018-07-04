@@ -5,6 +5,7 @@ gitignore
 examples/minimal/index.html
 bin/
 build/
+!testdata/blog/build/
 doc/index.md
 .vscode/
 builtin/blog/content/
