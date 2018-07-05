@@ -61,7 +61,7 @@ func Test_serve(t *testing.T) {
 		args = strings.Split(cmd, " ")
 		go func() {
 			if code := proj.executeArgs(args); code != 0 {
-				t.Fatalf("serve start error: %v", <-proj.out)
+				t.Fatalf("serve error: %v", <-proj.out)
 			}
 		}()
 		waitFor("Press Ctrl+C to stop")
@@ -118,7 +118,7 @@ func Test_httpHandlers(t *testing.T) {
 	rr := httptest.NewRecorder()
 	handler := http.FileServer(http.Dir(proj.buildDir))
 	handler = htmlFilter(&proj, handler)
-	handler = setWebpage(&proj, handler)
+	handler = saveBrowserPage(&proj, handler)
 
 	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
 	// directly and pass in our Request and ResponseRecorder.
@@ -130,8 +130,8 @@ func Test_httpHandlers(t *testing.T) {
 	}
 
 	// Check the response body is what we expect.
-	if webpage.path != "/" {
-		t.Errorf("setWebpage handler: webpage: got %v want %v", webpage.path, "/")
+	if browserPage.url != "/" {
+		t.Errorf("saveBrowserPage handler: url: got %v want %v", browserPage.url, "/")
 	}
 	wanted := "<script src=\"http://localhost:35729/livereload.js\"></script>\n</body>"
 	got := rr.Body.String()

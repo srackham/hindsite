@@ -21,10 +21,10 @@ const (
 )
 
 var (
-	// webpage shared variable contains the path name of the most recently requested HTML webpage.
-	webpage struct {
+	// browserPage shared variable contains the path name of the most recently requested HTML web page.
+	browserPage struct {
 		sync.Mutex
-		path string
+		url string
 	}
 )
 
@@ -36,14 +36,14 @@ func logRequest(proj *project, h http.Handler) http.Handler {
 	})
 }
 
-// setWebpage server request handler sets the shared webpage variable.
-func setWebpage(proj *project, h http.Handler) http.Handler {
+// saveBrowserPage server request handler sets the shared webpage variable.
+func saveBrowserPage(proj *project, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := r.URL.Path
 		if strings.HasSuffix(p, "/") || path.Ext(p) == ".html" {
-			webpage.Lock()
-			webpage.path = p
-			webpage.Unlock()
+			browserPage.Lock()
+			browserPage.url = p
+			browserPage.Unlock()
 		}
 		h.ServeHTTP(w, r)
 	})
@@ -175,6 +175,12 @@ func (proj *project) serve() error {
 	var serveError error
 	var mutex = &sync.Mutex{}
 	proj.quit = make(chan struct{})
+	quit := func(err error) {
+		mutex.Lock()
+		serveError = err
+		mutex.Unlock()
+		close(proj.quit)
+	}
 	// Start LiveReload server.
 	lr := lrserver.New(lrserver.DefaultName, lrserver.DefaultPort)
 	defer lr.Close()
@@ -191,7 +197,7 @@ func (proj *project) serve() error {
 		proj.logconsole("\nServing build directory %s on %s\nPress Ctrl+C to stop\n", proj.buildDir, rooturl)
 		handler := http.FileServer(http.Dir(proj.buildDir))
 		handler = htmlFilter(proj, handler)
-		handler = setWebpage(proj, handler)
+		handler = saveBrowserPage(proj, handler)
 		handler = logRequest(proj, handler)
 		srv := &http.Server{Addr: ":" + proj.port, Handler: handler}
 		select {
@@ -202,10 +208,7 @@ func (proj *project) serve() error {
 			return
 		default:
 			err := srv.ListenAndServe()
-			mutex.Lock()
-			serveError = err
-			mutex.Unlock()
-			close(proj.quit)
+			quit(err)
 		}
 	}()
 	// Start watcher event filter.
@@ -253,7 +256,7 @@ func (proj *project) serve() error {
 					if err != nil {
 						proj.logerror(err.Error())
 					}
-					lr.Reload(webpage.path)
+					lr.Reload(browserPage.url)
 					proj.logconsole("")
 				}
 			case evt := <-fsevent:
@@ -280,12 +283,9 @@ func (proj *project) serve() error {
 				}
 				proj.logconsole("elapsed: %.3fs\n\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
 				color.Unset()
-				lr.Reload(webpage.path)
+				lr.Reload(browserPage.url)
 			case err := <-watcher.Errors:
-				mutex.Lock()
-				serveError = err
-				mutex.Unlock()
-				close(proj.quit)
+				quit(err)
 			}
 		}
 	}()
