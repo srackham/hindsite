@@ -29,7 +29,6 @@ type project struct {
 	executable    string
 	in            chan string
 	out           chan string
-	quit          chan struct{}
 	projectDir    string
 	contentDir    string
 	templateDir   string
@@ -232,7 +231,8 @@ func (proj *project) executeArgs(args []string) int {
 		case "init":
 			err = proj.init()
 		case "serve":
-			err = proj.serve()
+			svr := newServer(proj)
+			err = svr.serve()
 		default:
 			panic("illegal command: " + proj.command)
 		}

@@ -20,30 +20,47 @@ const (
 	watcherLullTime time.Duration = 50 * time.Millisecond
 )
 
-var (
-	// browserPage shared variable contains the path name of the most recently requested HTML web page.
-	browserPage struct {
-		sync.Mutex
-		url string
+// server is a project plus server specific fields and methods.
+type server struct {
+	*project
+	mutex      *sync.Mutex
+	browserURL string
+	quit       chan struct{}
+	err        error
+}
+
+func newServer(proj *project) server {
+	return server{
+		project: proj,
+		mutex:   &sync.Mutex{},
+		quit:    make(chan struct{}),
 	}
-)
+}
+
+func (svr *server) close(err error) {
+	svr.mutex.Lock()
+	svr.err = err
+	svr.mutex.Unlock()
+	close(svr.quit)
+}
 
 // logRequest server request handler logs browser requests.
-func logRequest(proj *project, h http.Handler) http.Handler {
+func (svr *server) logRequest(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		proj.verbose("request: " + r.URL.Path)
+		svr.verbose("request: " + r.URL.Path)
 		h.ServeHTTP(w, r)
 	})
 }
 
-// saveBrowserPage server request handler sets the shared webpage variable.
-func saveBrowserPage(proj *project, h http.Handler) http.Handler {
+// saveBrowserURL server request handler sets the server browserURL field to the
+// requested HTML page.
+func (svr *server) saveBrowserURL(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := r.URL.Path
 		if strings.HasSuffix(p, "/") || path.Ext(p) == ".html" {
-			browserPage.Lock()
-			browserPage.url = p
-			browserPage.Unlock()
+			svr.mutex.Lock()
+			svr.browserURL = p
+			svr.mutex.Unlock()
 		}
 		h.ServeHTTP(w, r)
 	})
@@ -51,14 +68,14 @@ func saveBrowserPage(proj *project, h http.Handler) http.Handler {
 
 // htmlFilter server request handler injects the LiveReload script tag into the
 // body and strips the urlprefix from href URLs.
-func htmlFilter(proj *project, h http.Handler) http.Handler {
+func (svr *server) htmlFilter(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := r.URL.Path
 		if strings.HasSuffix(p, "/") {
 			p += "index.html"
 		}
 		if path.Ext(p) == ".html" {
-			p = filepath.Join(proj.buildDir, filepath.FromSlash(p[1:])) // Convert URL path to file path.
+			p = filepath.Join(svr.buildDir, filepath.FromSlash(p[1:])) // Convert URL path to file path.
 			if !fileExists(p) {
 				http.Error(w, "404: file not found: "+p, 404)
 				return
@@ -71,10 +88,10 @@ func htmlFilter(proj *project, h http.Handler) http.Handler {
 			}
 			// Inject LiveReload script tag.
 			content = strings.Replace(content, "</body>", "<script src=\"http://localhost:35729/livereload.js\"></script>\n</body>", 1)
-			if proj.rootConf.urlprefix != "" {
+			if svr.rootConf.urlprefix != "" {
 				// Strip urlprefix from URLs.
-				content = strings.Replace(content, "href=\""+proj.rootConf.urlprefix, "href=\"", -1)
-				content = strings.Replace(content, "src=\""+proj.rootConf.urlprefix, "src=\"", -1)
+				content = strings.Replace(content, "href=\""+svr.rootConf.urlprefix, "href=\"", -1)
+				content = strings.Replace(content, "src=\""+svr.rootConf.urlprefix, "src=\"", -1)
 			}
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.Write([]byte(content))
@@ -87,13 +104,13 @@ func htmlFilter(proj *project, h http.Handler) http.Handler {
 // watcherFilter filters and debounces fsnotify events. When there has been a
 // lull in file system events arriving on the in input channel then forward the
 // most recent accepted file system notification event to the output channel.
-func (proj *project) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotify.Event) {
+func (svr *server) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotify.Event) {
 	var prev fsnotify.Event
 	timer := time.NewTimer(watcherLullTime)
 	timer.Stop()
 	for {
 		select {
-		case <-proj.quit:
+		case <-svr.quit:
 			return
 		case evt, ok := <-watcher.Events:
 			if !ok {
@@ -104,7 +121,7 @@ func (proj *project) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotif
 			switch {
 			case evt.Op == fsnotify.Chmod:
 				msg = "ignored"
-			case proj.exclude(evt.Name):
+			case svr.exclude(evt.Name):
 				msg = "excluded"
 			case dirExists(evt.Name):
 				msg = "ignored"
@@ -115,7 +132,7 @@ func (proj *project) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotif
 				msg = "accepted"
 				accepted = true
 			}
-			proj.verbose("fsnotify: " + time.Now().Format("15:04:05.000") + ": " + msg + ": " + evt.Op.String() + ": " + evt.Name)
+			svr.verbose("fsnotify: " + time.Now().Format("15:04:05.000") + ": " + msg + ": " + evt.Op.String() + ": " + evt.Name)
 			if accepted {
 				if prev.Op == fsnotify.Rename && prev.Name != evt.Name {
 					// A rename has occurred within the watched directories
@@ -135,12 +152,12 @@ func (proj *project) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotif
 }
 
 // serve implements the serve comand. Does not return unless and error occurs or
-// the project.quit channel is closed.
-func (proj *project) serve() error {
-	rooturl := "http://localhost:" + proj.port + "/"
+// the server quit channel is closed.
+func (svr *server) serve() error {
+	rooturl := "http://localhost:" + svr.port + "/"
 	// Full rebuild to initialize document and index structures.
-	if err := proj.build(); err != nil {
-		proj.logerror(err.Error())
+	if err := svr.build(); err != nil {
+		svr.logerror(err.Error())
 	}
 	// Create file system watcher.
 	watcher, err := fsnotify.NewWatcher()
@@ -150,13 +167,13 @@ func (proj *project) serve() error {
 	defer watcher.Close()
 	// Watch content and template directories.
 	watcherAddDir := func(dir string) error {
-		proj.verbose("watching: " + dir)
+		svr.verbose("watching: " + dir)
 		return filepath.Walk(dir, func(f string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
 			if info.IsDir() {
-				if f == proj.initDir && dir == proj.templateDir {
+				if f == svr.initDir && dir == svr.templateDir {
 					// Skip init directory when adding template directory watchers.
 					return filepath.SkipDir
 				}
@@ -165,21 +182,11 @@ func (proj *project) serve() error {
 			return nil
 		})
 	}
-	if err := watcherAddDir(proj.contentDir); err != nil {
+	if err := watcherAddDir(svr.contentDir); err != nil {
 		return err
 	}
-	if err := watcherAddDir(proj.templateDir); err != nil {
+	if err := watcherAddDir(svr.templateDir); err != nil {
 		return err
-	}
-	// Shared goroutine exit synchronization variables.
-	var serveError error
-	var mutex = &sync.Mutex{}
-	proj.quit = make(chan struct{})
-	quit := func(err error) {
-		mutex.Lock()
-		serveError = err
-		mutex.Unlock()
-		close(proj.quit)
 	}
 	// Start LiveReload server.
 	lr := lrserver.New(lrserver.DefaultName, lrserver.DefaultPort)
@@ -187,58 +194,58 @@ func (proj *project) serve() error {
 	lr.SetLiveCSS(true)
 	lr.StatusLog().SetPrefix("reload: ")
 	lr.ErrorLog().SetPrefix("reload: ")
-	if proj.verbosity == 0 {
+	if svr.verbosity == 0 {
 		lr.SetStatusLog(nil)
 		lr.SetErrorLog(nil)
 	}
 	go lr.ListenAndServe()
 	// Start Web server.
 	go func() {
-		proj.logconsole("\nServing build directory %s on %s\nPress Ctrl+C to stop\n", proj.buildDir, rooturl)
-		handler := http.FileServer(http.Dir(proj.buildDir))
-		handler = htmlFilter(proj, handler)
-		handler = saveBrowserPage(proj, handler)
-		handler = logRequest(proj, handler)
-		srv := &http.Server{Addr: ":" + proj.port, Handler: handler}
+		svr.logconsole("\nServing build directory %s on %s\nPress Ctrl+C to stop\n", svr.buildDir, rooturl)
+		handler := http.FileServer(http.Dir(svr.buildDir))
+		handler = svr.htmlFilter(handler)
+		handler = svr.saveBrowserURL(handler)
+		handler = svr.logRequest(handler)
+		httpsvr := &http.Server{Addr: ":" + svr.port, Handler: handler}
 		select {
-		case <-proj.quit:
-			if err := srv.Shutdown(nil); err != nil {
+		case <-svr.quit:
+			if err := httpsvr.Shutdown(nil); err != nil {
 				panic(err) // Failed to shut down the server gracefully.
 			}
 			return
 		default:
-			err := srv.ListenAndServe()
-			quit(err)
+			err := httpsvr.ListenAndServe()
+			svr.close(err)
 		}
 	}()
 	// Start watcher event filter.
 	fsevent := make(chan fsnotify.Event, 2)
-	go proj.watcherFilter(watcher, fsevent)
+	go svr.watcherFilter(watcher, fsevent)
 	// Start keyboard monitor.
 	kb := make(chan string)
 	go func() {
 		select {
-		case <-proj.quit:
+		case <-svr.quit:
 			return
 		default:
 			reader := bufio.NewReader(os.Stdin)
-			var line string
 			for {
-				if proj.in == nil {
+				var line string
+				if svr.in == nil {
 					line, _ = reader.ReadString('\n')
 				} else {
-					line = <-proj.in
+					line = <-svr.in
 				}
 				kb <- line
 			}
 		}
 	}()
 	// Launch browser.
-	if proj.launch {
+	if svr.launch {
 		go func() {
-			proj.verbose("launching browser: " + rooturl)
+			svr.verbose("launching browser: " + rooturl)
 			if err := launchBrowser(rooturl); err != nil {
-				proj.logerror(err.Error())
+				svr.logerror(err.Error())
 			}
 		}()
 	}
@@ -246,86 +253,86 @@ func (proj *project) serve() error {
 	go func() {
 		for {
 			select {
-			case <-proj.quit:
+			case <-svr.quit:
 				return
 			case line := <-kb:
 				switch strings.ToUpper(strings.TrimSpace(line)) {
 				case "R": // Rebuild.
-					proj.logconsole("rebuilding...")
-					err = proj.build()
+					svr.logconsole("rebuilding...")
+					err = svr.build()
 					if err != nil {
-						proj.logerror(err.Error())
+						svr.logerror(err.Error())
 					}
-					lr.Reload(browserPage.url)
-					proj.logconsole("")
+					lr.Reload(svr.browserURL)
+					svr.logconsole("")
 				}
 			case evt := <-fsevent:
 				start := time.Now()
 				switch evt.Op {
 				case fsnotify.Create, fsnotify.Write:
-					t := fileModTime(proj.rootConf.homepage)
-					err = proj.writeFile(evt.Name)
-					if err == nil && t.Before(fileModTime(proj.rootConf.homepage)) {
+					t := fileModTime(svr.rootConf.homepage)
+					err = svr.writeFile(evt.Name)
+					if err == nil && t.Before(fileModTime(svr.rootConf.homepage)) {
 						// homepage was modified by this event.
-						err = proj.copyHomePage()
+						err = svr.copyHomePage()
 					}
-					proj.logconsole(start.Format("15:04:05") + ": updated: " + evt.Name)
+					svr.logconsole(start.Format("15:04:05") + ": updated: " + evt.Name)
 				case fsnotify.Remove, fsnotify.Rename:
-					err = proj.removeFile(evt.Name)
-					proj.logconsole(start.Format("15:04:05") + ": removed: " + evt.Name)
+					err = svr.removeFile(evt.Name)
+					svr.logconsole(start.Format("15:04:05") + ": removed: " + evt.Name)
 				default:
 					panic("unexpected event: " + evt.Op.String() + ": " + evt.Name)
 				}
 				if err != nil {
-					proj.logerror(err.Error())
+					svr.logerror(err.Error())
 				} else {
 					color.Set(color.FgGreen, color.Bold)
 				}
-				proj.logconsole("elapsed: %.3fs\n\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
+				svr.logconsole("elapsed: %.3fs\n\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
 				color.Unset()
-				lr.Reload(browserPage.url)
+				lr.Reload(svr.browserURL)
 			case err := <-watcher.Errors:
-				quit(err)
+				svr.close(err)
 			}
 		}
 	}()
-	<-proj.quit
-	return serveError
+	<-svr.quit
+	return svr.err
 }
 
 // createFile handles the fsnotify Create event and adds the file to the build
 // set.
-func (proj *project) createFile(f string) error {
+func (svr *server) createFile(f string) error {
 	switch {
-	case proj.isDocument(f):
-		if proj.docs.byContentPath[f] != nil {
+	case svr.isDocument(f):
+		if svr.docs.byContentPath[f] != nil {
 			panic("document already exists")
 		}
-		doc, err := newDocument(f, proj)
+		doc, err := newDocument(f, svr.project)
 		if err != nil {
 			return err
 		}
 		if doc.isDraft() {
-			proj.verbose("skip draft: " + f)
+			svr.verbose("skip draft: " + f)
 			return nil
 		}
-		if err := proj.docs.add(&doc); err != nil {
+		if err := svr.docs.add(&doc); err != nil {
 			return err
 		}
-		proj.idxs.addDocument(&doc)
+		svr.idxs.addDocument(&doc)
 		// Rebuild indexes containing the new document.
-		for _, idx := range proj.idxs {
+		for _, idx := range svr.idxs {
 			if pathIsInDir(doc.templatePath, idx.templateDir) {
 				if err := idx.build(nil); err != nil {
 					return err
 				}
 			}
 		}
-		return proj.renderDocument(&doc)
-	case pathIsInDir(f, proj.contentDir):
-		return proj.buildStaticFile(f)
-	case pathIsInDir(f, proj.templateDir):
-		return proj.build()
+		return svr.renderDocument(&doc)
+	case pathIsInDir(f, svr.contentDir):
+		return svr.buildStaticFile(f)
+	case pathIsInDir(f, svr.templateDir):
+		return svr.build()
 	default:
 		panic("file is not in watched directories: " + f)
 	}
@@ -333,18 +340,18 @@ func (proj *project) createFile(f string) error {
 
 // removeFile handles fsnotify Remove events and removes the document from the
 // build set.
-func (proj *project) removeFile(f string) error {
+func (svr *server) removeFile(f string) error {
 	switch {
-	case proj.isDocument(f):
-		doc := proj.docs.byContentPath[f]
+	case svr.isDocument(f):
+		doc := svr.docs.byContentPath[f]
 		if doc == nil {
 			// The document may have been a draft so can't assume this is an error.
 			return nil
 		}
 		// Delete from documents.
-		proj.docs.delete(doc)
+		svr.docs.delete(doc)
 		// Rebuild indexes containing the removed document.
-		for _, idx := range proj.idxs {
+		for _, idx := range svr.idxs {
 			if pathIsInDir(doc.templatePath, idx.templateDir) {
 				idx.docs = idx.docs.delete(doc)
 				if err := idx.build(nil); err != nil {
@@ -352,18 +359,18 @@ func (proj *project) removeFile(f string) error {
 				}
 			}
 		}
-		proj.verbose("delete document: " + doc.buildPath)
+		svr.verbose("delete document: " + doc.buildPath)
 		return os.Remove(doc.buildPath)
-	case pathIsInDir(f, proj.contentDir):
-		f := pathTranslate(f, proj.contentDir, proj.buildDir)
+	case pathIsInDir(f, svr.contentDir):
+		f := pathTranslate(f, svr.contentDir, svr.buildDir)
 		// The deleted content may have been a directory.
 		if fileExists(f) {
-			proj.verbose("delete static: " + f)
+			svr.verbose("delete static: " + f)
 			return os.Remove(f)
 		}
 		return nil
-	case pathIsInDir(f, proj.templateDir):
-		return proj.build()
+	case pathIsInDir(f, svr.templateDir):
+		return svr.build()
 	default:
 		panic("file is not in watched directories: " + f)
 	}
@@ -371,35 +378,35 @@ func (proj *project) removeFile(f string) error {
 
 // writeFile handles document creation an update events. If the document is
 // changed to a draft it is removed from the build set.
-func (proj *project) writeFile(f string) error {
+func (svr *server) writeFile(f string) error {
 	switch {
-	case proj.isDocument(f):
-		newDoc, err := newDocument(f, proj)
+	case svr.isDocument(f):
+		newDoc, err := newDocument(f, svr.project)
 		if err != nil {
 			return err
 		}
-		doc := proj.docs.byContentPath[f]
+		doc := svr.docs.byContentPath[f]
 		if doc == nil {
 			if newDoc.isDraft() {
 				// Draft document updated, don't do anything.
-				proj.verbose("skip draft: " + f)
+				svr.verbose("skip draft: " + f)
 				return nil
 			}
 			// Document has just been created and written or was a draft and has changed to non-draft.
-			return proj.createFile(f)
+			return svr.createFile(f)
 		}
 		// Arrive here if an existing published document has been updated.
 		if newDoc.isDraft() {
 			// Document changed to draft.
-			proj.verbose("skip draft: " + f)
-			return proj.removeFile(f)
+			svr.verbose("skip draft: " + f)
+			return svr.removeFile(f)
 		}
 		oldDoc := *doc
-		if err = proj.docs.update(doc, newDoc); err != nil {
+		if err = svr.docs.update(doc, newDoc); err != nil {
 			return err
 		}
 		// Rebuild affected document index pages.
-		for _, idx := range proj.idxs {
+		for _, idx := range svr.idxs {
 			if pathIsInDir(doc.templatePath, idx.templateDir) {
 				if oldDoc.date.Equal(doc.date) && strings.Join(oldDoc.tags, ",") == strings.Join(doc.tags, ",") {
 					// Neither date ordering or tags have changed so only rebuild document index pages containing doc.
@@ -414,11 +421,11 @@ func (proj *project) writeFile(f string) error {
 				}
 			}
 		}
-		return proj.renderDocument(doc)
-	case pathIsInDir(f, proj.contentDir):
-		return proj.buildStaticFile(f)
-	case pathIsInDir(f, proj.templateDir):
-		return proj.build()
+		return svr.renderDocument(doc)
+	case pathIsInDir(f, svr.contentDir):
+		return svr.buildStaticFile(f)
+	case pathIsInDir(f, svr.templateDir):
+		return svr.build()
 	default:
 		panic("file is not in watched directories: " + f)
 	}
