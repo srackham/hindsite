@@ -13,6 +13,7 @@ import (
 func Test_serve(t *testing.T) {
 	t.Run("serve", func(t *testing.T) {
 		tmpdir := path.Join(os.TempDir(), "hindsite-tests")
+		// Initialize temporary directory with test blog.
 		os.RemoveAll(tmpdir)
 		mkMissingDir(tmpdir)
 		proj := newProject()
@@ -25,10 +26,25 @@ func Test_serve(t *testing.T) {
 		if dirCount(path.Join(tmpdir, "template")) != 9 {
 			t.Fatalf("%s: unexpected number of riles in template directory", cmd)
 		}
+		// Start server.
+		proj = newProject()
+		proj.out = make(chan string, 100)
+		proj.in = make(chan string, 1)
+		cmd = "hindsite serve " + tmpdir
+		args = strings.Split(cmd, " ")
+		if err := proj.parseArgs(args); err != nil {
+			t.Fatalf("serve error: %v", err.Error())
+		}
+		svr := newServer(&proj)
+		go func() {
+			if err := svr.serve(); err != nil {
+				t.Fatalf("serve error: %v", err.Error())
+			}
+		}()
 		waitFor := func(output string) {
 			for {
 				select {
-				case line := <-proj.out:
+				case line := <-svr.out:
 					line = strings.Replace(line, "\\", "/", -1) // Normalize MS Windows path separators.
 					if strings.Contains(line, output) {
 						return
@@ -53,17 +69,6 @@ func Test_serve(t *testing.T) {
 			}
 			waitFor(output)
 		}
-		// Start server.
-		proj = newProject()
-		proj.out = make(chan string, 100)
-		proj.in = make(chan string, 1)
-		cmd = "hindsite serve " + tmpdir
-		args = strings.Split(cmd, " ")
-		go func() {
-			if code := proj.executeArgs(args); code != 0 {
-				t.Fatalf("serve error: %v", <-proj.out)
-			}
-		}()
 		waitFor("Press Ctrl+C to stop")
 		// Create new post with copy of existing post.
 		existingfile := path.Join(tmpdir, "content", "posts", "2016-10-18-sed-sed.md")
@@ -85,7 +90,7 @@ func Test_serve(t *testing.T) {
 		// Remove post.
 		removeAndWait(existingfile, "removed: content/posts/2016-10-18-sed-sed.md")
 		// Rebuild.
-		proj.in <- "R\n"
+		svr.in <- "R\n"
 		waitFor("rebuilding...")
 		waitFor("documents: 11")
 		// New static file.
@@ -95,7 +100,7 @@ func Test_serve(t *testing.T) {
 		// Remove static file.
 		removeAndWait(newfile, "removed: content/newfile.txt")
 		// Stop serve command.
-		close(proj.quit)
+		svr.close(nil)
 		time.Sleep(50 * time.Millisecond) // Allow time for serve goroutines to execute cleanup code.
 	})
 }
@@ -106,6 +111,7 @@ func Test_httpHandlers(t *testing.T) {
 	proj.buildDir = "./testdata/blog/build"
 	proj.rootConf = newConfig()
 	proj.rootConf.urlprefix = "http:/example.com"
+	svr := newServer(&proj)
 
 	// Create a request to pass to our handler. We don't have any query parameters for now, so we'll
 	// pass 'nil' as the third parameter.
@@ -117,8 +123,8 @@ func Test_httpHandlers(t *testing.T) {
 	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
 	rr := httptest.NewRecorder()
 	handler := http.FileServer(http.Dir(proj.buildDir))
-	handler = htmlFilter(&proj, handler)
-	handler = saveBrowserPage(&proj, handler)
+	handler = svr.htmlFilter(handler)
+	handler = svr.saveBrowserURL(handler)
 
 	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
 	// directly and pass in our Request and ResponseRecorder.
@@ -130,8 +136,8 @@ func Test_httpHandlers(t *testing.T) {
 	}
 
 	// Check the response body is what we expect.
-	if browserPage.url != "/" {
-		t.Errorf("saveBrowserPage handler: url: got %v want %v", browserPage.url, "/")
+	if svr.browserURL != "/" {
+		t.Errorf("saveBrowserURL handler: url: got %v want %v", svr.browserURL, "/")
 	}
 	wanted := "<script src=\"http://localhost:35729/livereload.js\"></script>\n</body>"
 	got := rr.Body.String()
