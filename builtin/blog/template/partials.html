@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width"/>
-<title>{{or .title "Title"}}</title>
+<title>{{or .title .user.title}}</title>
 <link type="text/css" rel="stylesheet" href="{{.urlprefix}}/main.css">
 </head>
 <body>

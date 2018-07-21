@@ -9,8 +9,11 @@ exclude = "*~|4913"
 
 
 [user]
-# The banner is the page header text.
+# Header text at the top of each page.
 banner = "hindsite | blog"
+
+# Default HTML title element text.
+title = "hindsite blog"
 
 # Set shortname to your site's Disqus short name then uncomment the line to enable Disqus comments.
 # See https://help.disqus.com/installation/whats-a-shortname
