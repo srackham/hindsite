@@ -9,7 +9,7 @@ require (
 	github.com/mattn/go-colorable v0.0.9
 	github.com/mattn/go-isatty v0.0.3
 	github.com/shurcooL/sanitized_anchor_name v0.0.0-20170918181015-86672fcb3f95
-	github.com/srackham/go-rimu v11.0.0+incompatible
+	github.com/srackham/go-rimu v0.0.0-20180908051741-dd5d77ba1ece
 	golang.org/x/sys v0.0.0-20180417080122-b126b21c05a9
 	gopkg.in/russross/blackfriday.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.2.1
