@@ -877,31 +877,8 @@ HTML responses before sending them to the browser.
 
 
 ## Building hindsite
-If you have the [Go language](https://golang.org/) installed and want to compile
-hindsite from source code then run the following command to download, compile
-and install hindsite:
+If you have the [Go language](https://golang.org/) (version 1.11 or better)
+installed and want to compile hindsite from source code then run the following
+command to download, compile and install hindsite:
 
     go get github.com/srackham/hindsite  
-
-NOTE:
-
-- `go get` downloads the _HEAD_ from the _master_ branch which may not be the
-  same as the latest tagged release.
--  `go get` does not (yet) install vendored packages, it installs the latest
-   dependent packages globally which may not be the same as the vendored
-   versions.
-
-Use [dep](https://github.com/golang/dep) to install vendored packages in the `vendor` directory:
-
-    cd <hindsite-source-directory>
-    dep ensure
-
-To build a specific tagged release you need to run:
-
-    cd <hindsite-source-directory>
-    git checkout tags/<tag-name>
-    dep ensure
-    make build            # Writes built releases to ./bin directory.
-    git checkout master   # Reinstate master branch.
-
-NOTE: You need GNU Make and the bash shell installed to build a tagged release.
