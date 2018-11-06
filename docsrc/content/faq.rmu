@@ -277,6 +277,27 @@ hugo server       # Build and serve.
 /*
 DRAFT FAQS THAT DID NOT MAKE THE GRADE.
 
+## Why did you write hindsite?
+The short answer is programmers hubris; the longer answer has it's genesis in
+Hugo's complexity:
+
+Prior to writing hindsite I was using [Hugo](https://gohugo.io/) for blogging.
+Hugo is an outstanding program, it's chock full of features and has the
+flexibility needed to build complex static web sites. But features and
+flexibility come at the price of complexity and a steeper learning curve.
+
+My frustration was not with hugo but with my brain's ability to retain hard won
+working knowledge of hugo across 6 months or more between casual use. The
+relearning necessitated by my occasional reconfiguration and theme tweak is what
+motivated me to write hindsite.
+
+Hindsite designed to be easy to learn and use, it was not designed to compete
+with hugo's massive feature set.
+
+The casual use-case is is the same reason my go-to choice of drawing program
+is Microsoft Paint or KolorPaint and not The Gimp or Adobe Photoshop.
+
+
 ## Why not tests?
 There are no automated tests yet, the project has been subjected to fairly
 extensive manual testing (I've built 4 websites with the application).
