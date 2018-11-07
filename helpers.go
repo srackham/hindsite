@@ -180,6 +180,7 @@ func parseDate(text string, loc *time.Location) (time.Time, error) {
 	if loc == nil {
 		loc, _ = time.LoadLocation("Local")
 	}
+	text = strings.TrimSpace(text)
 	d, err := time.Parse(time.RFC3339, text)
 	if err != nil {
 		if d, err = time.Parse("2006-01-02 15:04:05-07:00", text); err != nil {

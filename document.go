@@ -228,6 +228,8 @@ func (doc *document) extractFrontMatter() error {
 	}{}
 	switch format {
 	case "toml":
+		re := regexp.MustCompile(`(?m)^[ \t]*date[ \t]*=[ \t]*([^" \t][^#\n\r]*)`)
+		header = re.ReplaceAllString(header, `date="$1"`) // Convert unquoted TOML date/times to quoted string.
 		if _, err := toml.Decode(header, &fm); err != nil {
 			return err
 		}

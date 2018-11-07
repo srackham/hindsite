@@ -634,6 +634,9 @@ Examples with `timezone = "+13:00"`:
     1979-05-27T07:32:00         # 1979-05-27T07:32:00+13:00
     1979-05-27 07:32:00         # 1979-05-27T07:32:00+13:00
     1979-05-27                  # 1979-05-27T00:00:00+13:00
+
+In TOML headers the date can be specified as a quoted string or an unquoted
+date/time.
 ..
 
 `description`:: A brief summary of the document. If not specified `description`
