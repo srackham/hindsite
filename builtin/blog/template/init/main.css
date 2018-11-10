@@ -45,7 +45,7 @@ h1, h2, h3, h4, h5, h6 {
 h2 {
     border-bottom: var(--border);
 }
-#main img {
+p > img:only-child {
     max-width: 90%;
     margin-top: 1rem;
     margin-bottom: 1rem;
@@ -54,7 +54,6 @@ h2 {
 }
 table {
     border-collapse: collapse;
-    table-layout: fixed;
     width: 100%;
 }
 td, th {
@@ -335,7 +334,7 @@ ul > li {
     .banner {
         padding-left: 10px;
     }
-    #main img {
+    p > img:only-child {
         max-width: 100%;
     }
 }

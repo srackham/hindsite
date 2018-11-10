@@ -139,4 +139,10 @@ serve-blog: install
 
 .PHONY: validate-blog
 validate-blog: build-blog
-	for f in $$(find $(BLOG_DIR)/build -name "*.html"); do echo $$f; html-validator --verbose --format text --file $$f; done
+	for f in $$(find $(BLOG_DIR)/build -name "*.html"); do
+		# Skip page (it has custom Google CSE elements that fail validation).
+		if [ "$$f" != "$(BLOG_DIR)/build/search.html" ]; then
+			echo $$f
+			html-validator --verbose --format=text --file=$$f
+		fi	
+	done
