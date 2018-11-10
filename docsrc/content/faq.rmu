@@ -22,6 +22,33 @@ TOML example:
     exclude = "*~|4913"
 
 
+.#search-howto
+## How can I add site search to my website?
+An easy way to add a site search feature is to use a [Google Custom Search Engine
+(CSE)](https://cse.google.com). For example, the hindsite built-in [`blog`
+project](https://github.com/srackham/hindsite/tree/master/builtin/blog/template)
+includes a Google CSE search page. To customize it for your website you need to:
+
+1. Create a [Google Custom Search Engine (CSE)](https://cse.google.com) for your
+   site.
+2. Paste your site's CSE code into the
+   [`search.md`](https://github.com/srackham/hindsite/tree/master/builtin/blog/template/init/search.md)
+   content page.
+
+Google CSE tips:
+
+- You can choose [which
+  portions](https://support.google.com/customsearch/answer/4513886) of your site
+  you want to be included in search results.
+- Use the [Google Search
+  Console](https://search.google.com/search-console/about) to check search
+  performance and coverage.
+
+_NOTE_: Google can take days to index new and updated Web pages and there's no
+guarantee that they will be indexed. See [Get your website on
+Google](https://support.google.com/webmasters/answer/34397).
+
+
 .#disqus-howto
 ## How do I include Disqus comments in my website?
 The recipe described below is taken from the hindsite [built-in `blog`
@@ -194,6 +221,7 @@ The `urlprefix` and `permalink` parameters do not tend to change much so this
 is probably just something to be aware of. Although you could enable document template
 expansion and prefix root-relative URLs with `{{.urlprefix}}`.
 
+
 ## How fast is hindsite?
 hindsite compares favorably with [Hugo](https://gohugo.io/) (which bills
 itself as "The world’s fastest framework for building websites").
@@ -274,10 +302,7 @@ hugo              # Build.
 hugo server       # Build and serve.
 ```
 
-/*
-DRAFT FAQS THAT DID NOT MAKE THE GRADE.
-
-## Why did you write hindsite?
+## Why did you create hindsite?
 The short answer is programmers hubris; the longer answer has it's genesis in
 Hugo's complexity:
 
@@ -287,16 +312,19 @@ flexibility needed to build complex static web sites. But features and
 flexibility come at the price of complexity and a steeper learning curve.
 
 My frustration was not with hugo but with my brain's ability to retain hard won
-working knowledge of hugo across 6 months or more between casual use. The
-relearning necessitated by my occasional reconfiguration and theme tweak is what
-motivated me to write hindsite.
+working knowledge of hugo across 6 months or more between casual use. The amount
+of time spend relearning (necessitated by my occasional reconfiguration and
+theme tweak) motivated me to write hindsite.
 
-Hindsite designed to be easy to learn and use, it was not designed to compete
-with hugo's massive feature set.
+Hindsite was designed to be easy to learn and use, it was not designed to
+compete with hugo's massive feature set.
 
-The casual use-case is is the same reason my go-to choice of drawing program
-is Microsoft Paint or KolorPaint and not The Gimp or Adobe Photoshop.
+The casual use-case argument is the same reason my go-to drawing program is
+Microsoft Paint or KolorPaint and not The Gimp or Adobe Photoshop.
 
+
+/*
+DRAFT FAQS THAT DID NOT MAKE THE GRADE.
 
 ## Why not tests?
 There are no automated tests yet, the project has been subjected to fairly
