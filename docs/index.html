@@ -381,6 +381,8 @@ to Jan 1 0001. The <code>date</code> format is RFC 3339 with the following relax
 1979-05-27T07:32:00         # 1979-05-27T07:32:00+13:00
 1979-05-27 07:32:00         # 1979-05-27T07:32:00+13:00
 1979-05-27                  # 1979-05-27T00:00:00+13:00</code></pre>
+<p>In TOML headers the date can be specified as a quoted string or an unquoted
+date/time.</p>
 </dd><dt><code>description</code></dt><dd>A brief summary of the document. If not specified <code>description</code>
 defaults to the content up to the first <code>&lt;!--more--&gt;</code> tag or blank if there is
 no <code>&lt;!--more--&gt;</code> tag. The <code>&lt;!--more--&gt;</code> tag must appear alone on a separate
@@ -493,24 +495,10 @@ root-relative URLs) or <code>http://example.com/blog</code> (to generate absolut
 <p><i class="sans-font">NOTE</i>: The hindsite <a href="#serve-command">serve command</a> strips the <code>urlprefix</code> from
 HTML responses before sending them to the browser.</p>
 <h2 id="building-hindsite">Building hindsite</h2>
-<p>If you have the <a href="https://golang.org/">Go language</a> installed and want to compile
-hindsite from source code then run the following command to download, compile
-and install hindsite:</p>
+<p>If you have the <a href="https://golang.org/">Go language</a> (version 1.11 or better)
+installed and want to compile hindsite from source code then run the following
+command to download, compile and install hindsite:</p>
 <pre><code>go get github.com/srackham/hindsite  </code></pre>
-<p><i class="sans-font">NOTE</i>:</p>
-<ul><li><code>go get</code> downloads the <em>HEAD</em> from the <em>master</em> branch which may not be the
-  same as the latest tagged release.</li><li><code>go get</code> does not (yet) install vendored packages, it installs the latest
-   dependent packages globally which may not be the same as the vendored
-   versions.</li></ul><p>Use <a href="https://github.com/golang/dep">dep</a> to install vendored packages in the <code>vendor</code> directory:</p>
-<pre><code>cd &lt;hindsite-source-directory&gt;
-dep ensure</code></pre>
-<p>To build a specific tagged release you need to run:</p>
-<pre><code>cd &lt;hindsite-source-directory&gt;
-git checkout tags/&lt;tag-name&gt;
-dep ensure
-make build            # Writes built releases to ./bin directory.
-git checkout master   # Reinstate master branch.</code></pre>
-<p><i class="sans-font">NOTE</i>: You need GNU Make and the bash shell installed to build a tagged release.</p>
 
 </div>
 </div>

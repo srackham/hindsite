@@ -42,6 +42,22 @@ parameter in the templates directory root <a href="/hindsite/index.html#configur
 file</a>.</p>
 <p>TOML example:</p>
 <pre><code>exclude = "*~|4913"</code></pre>
+<h2 id="search-howto">How can I add site search to my website?</h2>
+<p>An easy way to add a site search feature is to use a <a href="https://cse.google.com">Google Custom Search Engine
+(CSE)</a>. For example, the hindsite built-in <a href="https://github.com/srackham/hindsite/tree/master/builtin/blog/template"><code>blog</code>
+project</a>
+includes a Google CSE search page. To customize it for your website you need to:</p>
+<ol><li>Create a <a href="https://cse.google.com">Google Custom Search Engine (CSE)</a> for your
+   site.</li><li>Paste your site's CSE code into the
+   <a href="https://github.com/srackham/hindsite/tree/master/builtin/blog/template/init/search.md"><code>search.md</code></a>
+   content page.</li></ol><p>Google CSE tips:</p>
+<ul><li>You can choose <a href="https://support.google.com/customsearch/answer/4513886">which
+  portions</a> of your site
+  you want to be included in search results.</li><li>Use the <a href="https://search.google.com/search-console/about">Google Search
+  Console</a> to check search
+  performance and coverage.</li></ul><p><em>NOTE</em>: Google can take days to index new and updated Web pages and there's no
+guarantee that they will be indexed. See <a href="https://support.google.com/webmasters/answer/34397">Get your website on
+Google</a>.</p>
 <h2 id="disqus-howto">How do I include Disqus comments in my website?</h2>
 <p>The recipe described below is taken from the hindsite <a href="https://github.com/srackham/hindsite/tree/master/builtin/blog/template">built-in <code>blog</code>
 project</a>.
@@ -200,6 +216,21 @@ hindsite serve .  # Build and serve.
 cd hugo
 hugo              # Build.
 hugo server       # Build and serve.</code></pre>
+<h2 id="why-did-you-create-hindsite">Why did you create hindsite?</h2>
+<p>The short answer is programmers hubris; the longer answer has it's genesis in
+Hugo's complexity:</p>
+<p>Prior to writing hindsite I was using <a href="https://gohugo.io/">Hugo</a> for blogging.
+Hugo is an outstanding program, it's chock full of features and has the
+flexibility needed to build complex static web sites. But features and
+flexibility come at the price of complexity and a steeper learning curve.</p>
+<p>My frustration was not with hugo but with my brain's ability to retain hard won
+working knowledge of hugo across 6 months or more between casual use. The amount
+of time spend relearning (necessitated by my occasional reconfiguration and
+theme tweak) motivated me to write hindsite.</p>
+<p>Hindsite was designed to be easy to learn and use, it was not designed to
+compete with hugo's massive feature set.</p>
+<p>The casual use-case argument is the same reason my go-to drawing program is
+Microsoft Paint or KolorPaint and not The Gimp or Adobe Photoshop.</p>
 
 
 </div>
