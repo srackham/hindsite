@@ -495,10 +495,15 @@ root-relative URLs) or <code>http://example.com/blog</code> (to generate absolut
 <p><i class="sans-font">NOTE</i>: The hindsite <a href="#serve-command">serve command</a> strips the <code>urlprefix</code> from
 HTML responses before sending them to the browser.</p>
 <h2 id="building-hindsite">Building hindsite</h2>
-<p>If you have the <a href="https://golang.org/">Go language</a> (version 1.11 or better)
-installed and want to compile hindsite from source code then run the following
-command to download, compile and install hindsite:</p>
-<pre><code>go get github.com/srackham/hindsite  </code></pre>
+<p>To compile hindsite from source code run the following commands to download,
+compile and install hindsite:</p>
+<p><strong>NOTE</strong>: Requires Go 1.11 or better.</p>
+<pre><code>git clone git@github.com:srackham/hindsite.git
+cd hindsite
+go install ./...</code></pre>
+<p>This will build the latest commit (<code>master</code> branch). If you want a specific
+version checkout the version before running <code>go install ./...</code> e.g. <code>git
+checkout tags/v1.3.0</code>.</p>
 
 </div>
 </div>
