@@ -885,7 +885,7 @@ compile and install hindsite:
 
 **NOTE**: Requires Go 1.11 or better.
 
-    git clone git@github.com:srackham/hindsite.git
+    git clone https://github.com/srackham/hindsite.git
     cd hindsite
     go install ./...
 
