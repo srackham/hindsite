@@ -1,7 +1,6 @@
 # Hindsite website generator
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/srackham/hindsite)](https://goreportcard.com/report/github.com/srackham/hindsite)
-[![cover.run](https://cover.run/go/github.com/srackham/hindsite.svg?style=flat&tag=golang-1.10)](https://cover.run/go?tag=golang-1.10&repo=github.com%2Fsrackham%2Fhindsite)
 
 
 ## Overview
