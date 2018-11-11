@@ -880,8 +880,15 @@ HTML responses before sending them to the browser.
 
 
 ## Building hindsite
-If you have the [Go language](https://golang.org/) (version 1.11 or better)
-installed and want to compile hindsite from source code then run the following
-command to download, compile and install hindsite:
+To compile hindsite from source code run the following commands to download,
+compile and install hindsite:
 
-    go get github.com/srackham/hindsite  
+**NOTE**: Requires Go 1.11 or better.
+
+    git clone git@github.com:srackham/hindsite.git
+    cd hindsite
+    go install ./...
+
+This will build the latest commit (`master` branch). If you want a specific
+version checkout the version before running `go install ./...` e.g. `git
+checkout tags/v1.3.0`.
