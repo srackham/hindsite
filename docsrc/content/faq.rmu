@@ -44,8 +44,8 @@ Google CSE tips:
   Console](https://search.google.com/search-console/about) to check search
   performance and coverage.
 
-_NOTE_: Google can take days to index new and updated Web pages and there's no
-guarantee that they will be indexed. See [Get your website on
+_NOTE_: Google can take many days to index new and updated Web pages and even
+then there's no guarantee that they will be indexed. See [Get your website on
 Google](https://support.google.com/webmasters/answer/34397).
 
 
@@ -226,7 +226,7 @@ expansion and prefix root-relative URLs with `{{.urlprefix}}`.
 hindsite compares favorably with [Hugo](https://gohugo.io/) (which bills
 itself as "The world’s fastest framework for building websites").
 
-In informal measurements carried out on a site with 5000 Markdown posjs (20MB
+In informal measurements carried out on a site with 5000 Markdown posts (20MB
 total) hindsite was four to five times faster than Hugo on full rebuilds. On
 subsequent incremental rebuilds hindsite ranges from six times faster than Hugo
 (if related indexes pages are rebuilt) to around ten times slower than Hugo (if
@@ -303,8 +303,8 @@ hugo server       # Build and serve.
 ```
 
 ## Why did you create hindsite?
-The short answer is programmers hubris; the longer answer has it's genesis in
-Hugo's complexity:
+The short answer is programmer's hubris; the longer answer has it's genesis in
+Hugo's complexity.
 
 Prior to writing hindsite I was using [Hugo](https://gohugo.io/) for blogging.
 Hugo is an outstanding program, it's chock full of features and has the
@@ -313,14 +313,14 @@ flexibility come at the price of complexity and a steeper learning curve.
 
 My frustration was not with hugo but with my brain's ability to retain hard won
 working knowledge of hugo across 6 months or more between casual use. The amount
-of time spend relearning (necessitated by my occasional reconfiguration and
+of time spent relearning (necessitated by my occasional reconfiguration and
 theme tweak) motivated me to write hindsite.
 
 Hindsite was designed to be easy to learn and use, it was not designed to
 compete with hugo's massive feature set.
 
 The casual use-case argument is the same reason my go-to drawing program is
-Microsoft Paint or KolorPaint and not The Gimp or Adobe Photoshop.
+Microsoft Paint or KolorPaint and not Adobe Photoshop or The Gimp.
 
 
 /*
