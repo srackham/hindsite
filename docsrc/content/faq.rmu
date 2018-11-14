@@ -32,7 +32,7 @@ includes a Google CSE search page. To customize it for your website you need to:
 1. Create a [Google Custom Search Engine (CSE)](https://cse.google.com) for your
    site.
 2. Paste your site's CSE code into the
-   [`search.md`](https://github.com/srackham/hindsite/tree/master/builtin/blog/template/init/search.md)
+   [`search.md`](https://raw.githubusercontent.com/srackham/hindsite/master/builtin/blog/template/init/search.md)
    content page.
 
 Google CSE tips:
