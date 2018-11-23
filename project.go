@@ -93,6 +93,7 @@ func (proj *project) logerror(format string, v ...interface{}) {
 
 // parseArgs parses the hindsite command-line arguments.
 func (proj *project) parseArgs(args []string) error {
+	proj.projectDir = "."
 	proj.port = "1212"
 	skip := false
 	for i, opt := range args {
@@ -113,14 +114,8 @@ func (proj *project) parseArgs(args []string) error {
 			if !isCommand(opt) {
 				return fmt.Errorf("illegal command: %s", opt)
 			}
-			if len(args) == 2 && opt != "help" {
-				return fmt.Errorf("project directory not specified")
-			}
 			proj.command = opt
-		case i == 2:
-			if !dirExists(opt) && strings.HasPrefix(opt, "-") {
-				return fmt.Errorf("project directory not specified")
-			}
+		case i == 2 && !strings.HasPrefix(opt, "-"):
 			proj.projectDir = opt
 		case opt == "-drafts":
 			proj.drafts = true
