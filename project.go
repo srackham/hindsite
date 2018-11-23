@@ -93,7 +93,6 @@ func (proj *project) logerror(format string, v ...interface{}) {
 
 // parseArgs parses the hindsite command-line arguments.
 func (proj *project) parseArgs(args []string) error {
-	proj.projectDir = "."
 	proj.port = "1212"
 	skip := false
 	for i, opt := range args {
