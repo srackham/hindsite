@@ -40,10 +40,6 @@ func (proj *project) init() error {
 		if err := os.RemoveAll(filepath.Join(proj.templateDir, proj.builtin)); err != nil {
 			return err
 		}
-	} else {
-		if !dirExists(proj.templateDir) {
-			return fmt.Errorf("missing template directory: " + proj.templateDir)
-		}
 	}
 	// Create the template directory structure in the content directory.
 	if err := mkMissingDir(proj.contentDir); err != nil {

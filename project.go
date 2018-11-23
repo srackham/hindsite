@@ -149,6 +149,9 @@ func (proj *project) parseArgs(args []string) error {
 			return fmt.Errorf("illegal option: %s", opt)
 		}
 	}
+	if proj.command == "help" {
+		return nil
+	}
 	// Clean and convert directories to absolute paths.
 	// Internally all file paths are absolute.
 	getPath := func(path, defaultPath string) (string, error) {
@@ -170,11 +173,17 @@ func (proj *project) parseArgs(args []string) error {
 		return err
 	}
 	proj.verbose2("content directory: " + proj.contentDir)
+	if proj.command != "init" && !dirExists(proj.contentDir) {
+		return fmt.Errorf("missing content directory: " + proj.contentDir)
+	}
 	proj.templateDir, err = getPath(proj.templateDir, filepath.Join(proj.projectDir, "template"))
 	if err != nil {
 		return err
 	}
 	proj.verbose2("template directory: " + proj.templateDir)
+	if !(proj.command == "init" && proj.builtin != "") && !dirExists(proj.templateDir) {
+		return fmt.Errorf("missing template directory: " + proj.templateDir)
+	}
 	proj.buildDir, err = getPath(proj.buildDir, filepath.Join(proj.projectDir, "build"))
 	if err != nil {
 		return err
@@ -361,9 +370,6 @@ func (proj *project) configFor(p string) config {
 // directory to project `confs`.
 func (proj *project) parseConfigs() error {
 	proj.confs = configs{}
-	if !dirExists(proj.templateDir) {
-		return fmt.Errorf("missing template directory: " + proj.templateDir)
-	}
 	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
