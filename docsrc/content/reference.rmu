@@ -102,9 +102,9 @@ characters.
 ## Commands
 Usage:
 
-    hindsite init  PROJECT_DIR [OPTIONS]
-    hindsite build PROJECT_DIR [OPTIONS]
-    hindsite serve PROJECT_DIR [OPTIONS]
+    hindsite init  [PROJECT_DIR] [OPTIONS]
+    hindsite build [PROJECT_DIR] [OPTIONS]
+    hindsite serve [PROJECT_DIR] [OPTIONS]
     hindsite help
 
 Commands:
@@ -116,10 +116,10 @@ Commands:
 
 Common command options:
 
-`PROJECT_DIR`:: the hindsite project directory.
-`-content CONTENT_DIR`:: the project content directory (defaults to `PROJECT_DIR/content`).
-`-build BUILD_DIR`:: the project build directory (defaults to `PROJECT_DIR/build`).
-`-template TEMPLATE_DIR`:: the project template directory (defaults to `PROJECT_DIR/template`).
+`PROJECT_DIR`:: The hindsite project directory (defaults to the current directory).
+`-content CONTENT_DIR`:: The project content directory (defaults to `PROJECT_DIR/content`).
+`-build BUILD_DIR`:: The project build directory (defaults to `PROJECT_DIR/build`).
+`-template TEMPLATE_DIR`:: The project template directory (defaults to `PROJECT_DIR/template`).
 `-v`:: Increase verbosity. `-vv` is an alias for `-v -v`.
 
 
@@ -148,7 +148,7 @@ another _template_ directory or from one of the built-in templates.
 
 Usage:
 
-    hindsite init  PROJECT_DIR [OPTIONS]
+    hindsite init  [PROJECT_DIR] [OPTIONS]
 
 Applicable options:
 
@@ -177,7 +177,7 @@ Command execution:
 The following example installs the builtin `blog` template to `./template` and
 initializes the `./contents` directory:
 
-    hindsite init . -builtin blog
+    hindsite init -builtin blog
 
 
 ### build command
@@ -186,7 +186,7 @@ files from the _content_ and _template_ directories.
 
 Usage:
 
-    hindsite build PROJECT_DIR [OPTIONS]
+    hindsite build [PROJECT_DIR] [OPTIONS]
 
 Applicable options:
 
@@ -241,7 +241,7 @@ live reloading.
 
 Usage:
 
-    hindsite serve PROJECT_DIR [OPTIONS]
+    hindsite serve [PROJECT_DIR] [OPTIONS]
 
 Applicable options:
 
@@ -386,7 +386,7 @@ document index page. TOML example:
     paginate = 10
 
 .#permalink
-`permalink`:: An optional template for customizing document [build
+`permalink`:: An optional parameter for customizing document [build
 paths](#build-paths) and [URLs](#urls). A document's URL and build path is
 computed by substituting the following `permalink` placeholders:
 ..
@@ -398,8 +398,8 @@ computed by substituting the following `permalink` placeholders:
 
 
 - If the permalink ends with a trailing slash then hindsite creates "pretty"
-  URLs by writing the build file to `index.html` in a directory with the page’s
-  name.
+  URLs (the expanded permalink is the build file directory path; the build file
+  is named `index.html`).
 - A document specific `permalink` can be specified in the document [front
   matter](#front-matter) taking precedence over `permalink` configuration
   parameters.
@@ -602,7 +602,7 @@ Example TOML front matter:
 +++
 title = "Foo Bar"
 description = "A brief history of the origins of the foofoo valve."
-date = "2018-02-16"
+date = 2018-02-16
 tags = ["foo foo valve", "qux", "baz"]
 slug = "foofoo-valve-history"
 draft = "true"

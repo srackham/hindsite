@@ -251,7 +251,7 @@ _Execution times_::
 
   _Memory consumption_::
   - `hindsite build` command: 34MB
-  - `hindsite server` command: 62MB
+  - `hindsite serve` command: 62MB
 
 #### Hugo v0.40.3 (windows/amd64) running on Dell XPS27 PC under Windows 10
 Hugo setup as per the [Hugo _Quick Start_
@@ -294,8 +294,8 @@ project directories:
 
 ```
 cd hindsite
-hindsite build .  # Build.
-hindsite serve .  # Build and serve.
+hindsite build    # Build.
+hindsite serve    # Build and serve.
 
 cd hugo
 hugo              # Build.
