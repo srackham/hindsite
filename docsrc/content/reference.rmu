@@ -658,7 +658,7 @@ description = "A brief history of the origins of the foofoo valve."
 date = 2018-02-16
 tags = ["foo foo valve", "qux", "baz"]
 slug = "foofoo-valve-history"
-draft = "true"
+draft = true
 +++
 ```
 
