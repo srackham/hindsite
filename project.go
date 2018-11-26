@@ -35,6 +35,7 @@ type project struct {
 	buildDir      string
 	indexDir      string
 	initDir       string
+	newFile       string
 	drafts        bool
 	port          string
 	launch        bool
@@ -59,7 +60,9 @@ func (proj *project) output(out io.Writer, verbosity int, format string, v ...in
 	if proj.verbosity >= verbosity {
 		msg := fmt.Sprintf(format, v...)
 		// Strip leading project directory from path names to make message more readable.
-		msg = strings.Replace(msg, proj.projectDir+string(filepath.Separator), "", -1)
+		if filepath.IsAbs(proj.projectDir) {
+			msg = strings.Replace(msg, " "+proj.projectDir+string(filepath.Separator), " ", -1)
+		}
 		if proj.out == nil {
 			fmt.Fprintln(out, msg)
 		} else {
@@ -114,6 +117,14 @@ func (proj *project) parseArgs(args []string) error {
 				return fmt.Errorf("illegal command: %s", opt)
 			}
 			proj.command = opt
+		case i == 2 && proj.command == "new":
+			if strings.HasPrefix(opt, "-") {
+				return fmt.Errorf("illegal document file name: %s", opt)
+			}
+			proj.newFile = opt
+		case i == 3 && proj.command == "new" && !strings.HasPrefix(opt, "-"):
+			proj.projectDir = args[2]
+			proj.newFile = opt
 		case i == 2 && !strings.HasPrefix(opt, "-"):
 			proj.projectDir = opt
 		case opt == "-drafts":
@@ -150,6 +161,20 @@ func (proj *project) parseArgs(args []string) error {
 	}
 	if proj.command == "help" {
 		return nil
+	}
+	if proj.command == "new" {
+		if proj.newFile == "" {
+			return fmt.Errorf("document has not been specified")
+		}
+		if dirExists(proj.newFile) {
+			return fmt.Errorf("document is a directory: %s", proj.newFile)
+		}
+		if d := filepath.Dir(proj.newFile); !dirExists(d) {
+			return fmt.Errorf("missing document directory: %s", d)
+		}
+		if fileExists(proj.newFile) {
+			return fmt.Errorf("document already exists: %s", proj.newFile)
+		}
 	}
 	// Clean and convert directories to absolute paths.
 	// Internally all file paths are absolute.
@@ -213,11 +238,23 @@ func (proj *project) parseArgs(args []string) error {
 	if err := checkOverlap("build", proj.buildDir, "content", proj.contentDir); err != nil {
 		return err
 	}
-	return checkOverlap("build", proj.buildDir, "template", proj.templateDir)
+	if err := checkOverlap("build", proj.buildDir, "template", proj.templateDir); err != nil {
+		return err
+	}
+	if proj.command == "new" {
+		proj.newFile, err = filepath.Abs(proj.newFile)
+		if err != nil {
+			return err
+		}
+		if !pathIsInDir(proj.newFile, proj.contentDir) {
+			return fmt.Errorf("document must reside in %s directory", proj.contentDir)
+		}
+	}
+	return nil
 }
 
 func isCommand(name string) bool {
-	return stringlist{"build", "help", "init", "serve"}.Contains(name)
+	return stringlist{"build", "help", "init", "new", "serve"}.Contains(name)
 }
 
 // executeArgs runs a hindsite command specified by CLI args and returns a
@@ -233,6 +270,8 @@ func (proj *project) executeArgs(args []string) int {
 			proj.help()
 		case "init":
 			err = proj.init()
+		case "new":
+			err = proj.new()
 		case "serve":
 			svr := newServer(proj)
 			err = svr.serve()
@@ -253,19 +292,21 @@ func (proj *project) help() {
 
 Usage:
 
-    hindsite init  PROJECT_DIR [OPTIONS]
-    hindsite build PROJECT_DIR [OPTIONS]
-    hindsite serve PROJECT_DIR [OPTIONS]
+    hindsite init  [PROJECT_DIR] [OPTIONS]
+    hindsite build [PROJECT_DIR] [OPTIONS]
+    hindsite serve [PROJECT_DIR] [OPTIONS]
+    hindsite new   [PROJECT_DIR] DOCUMENT [OPTIONS]
     hindsite help
 
-The commands are:
+Commands:
 
     init    initialize a new project
     build   build the website
     serve   start development webserver
+    new     create a new content document
     help    display usage summary
 
-The options are:
+Options:
 
     -content  CONTENT_DIR
     -template TEMPLATE_DIR
