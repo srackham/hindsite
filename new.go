@@ -30,7 +30,7 @@ func (proj *project) new() (err error) {
 		}
 	}
 	data := templateData{}
-	data["date"] = date.Format("2006-01-02T15:04:05-0700")
+	data["date"] = date.Format("2006-01-02T15:04:05-07:00")
 	data["title"] = title
 	proj.verbose("document title: %s\ndocument date: %s", data["title"], data["date"])
 	// Search up the corresponding template directory path for the closest new.md template file.
