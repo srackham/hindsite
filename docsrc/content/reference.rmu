@@ -105,6 +105,7 @@ Usage:
     hindsite init  [PROJECT_DIR] [OPTIONS]
     hindsite build [PROJECT_DIR] [OPTIONS]
     hindsite serve [PROJECT_DIR] [OPTIONS]
+    hindsite new   [PROJECT_DIR] DOCUMENT [OPTIONS]
     hindsite help
 
 Commands:
@@ -112,6 +113,7 @@ Commands:
     init    initialize a new project
     build   generate the website
     serve   start development webserver
+	new     create a new content document
     help    display usage summary
 
 Common command options:
@@ -281,6 +283,57 @@ IMPORTANT: To ensure build integrity you should always perform a complete
 rebuild before deployment and after project structural changes (the serve
 command does not automatically process changes to the project directory
 structure).
+
+
+### new command
+The _new_ command creates a new [document](#documents) file and automatically
+sets the [front matter](#front-matter) `date` and `title`.
+
+Usage:
+
+    hindsite new [PROJECT_DIR] DOCUMENT [OPTIONS]
+
+Applicable options:
+
+    -content CONTENT_DIR
+    -template TEMPLATE_DIR
+    -v
+
+- `DOCUMENT` is the path of the new file which must reside in the _content
+  directory_.
+- The _new_ command searches along the corresponding _template directory_ path
+  for the first template named `new.md`  and uses it to create the new
+  `DOCUMENT` file in the _content directory_ i.e. it is the _content directory_
+  `DOCUMENT` path that determines which `new.md` template is chosen from the
+  _template directory_ tree.
+- If a `new.md` template is not found the default built-in template is
+  used.
+
+The following template variables are available to the new template:
+
+date:: The publication date is extracted from the file name `YYYY-MM-DD-` date
+prefix and formatted according to RFC 3339. If there is no prefix it defaults to
+the current date and time.
+
+title:: The document title is set to the `DOCUMENT` file name stripped of the
+date prefix (if there is one) and the file name extension; hyphens replaced by
+spaces; then capitalized. For example, the following _new_ command will set the
+title to `"Foofoo Valve History"`:
+
+    hindsite new ./content/posts/foofoo-valve-history.md
+
+Example `new.md` template (this is the default built-in template):
+
+```
+---
+title: {{.title}}
+date:  {{.date}}
+tags:
+draft: true
+---
+
+Document content goes here.
+```
 
 
 ## Configuration
