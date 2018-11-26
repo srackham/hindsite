@@ -66,16 +66,13 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	doc.modtime = info.ModTime()
 	doc.conf = proj.configFor(doc.contentPath)
 	// Extract title and date from file name.
-	doc.title = fileName(contentfile)
-	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(doc.title) {
-		d, err := parseDate(doc.title[0:10], doc.conf.timezone)
-		if err != nil {
+	var d string
+	d, doc.title = extractDateTitle(contentfile)
+	if d != "" {
+		if doc.date, err = parseDate(d, doc.conf.timezone); err != nil {
 			return doc, parseError(err)
 		}
-		doc.date = d
-		doc.title = doc.title[11:]
 	}
-	doc.title = strings.Title(strings.Replace(doc.title, "-", " ", -1))
 	// Parse embedded front matter.
 	doc.author = doc.conf.author       // Default author.
 	doc.templates = doc.conf.templates // Default templates.

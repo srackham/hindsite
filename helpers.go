@@ -62,6 +62,17 @@ func launchBrowser(url string) error {
 	return exec.Command(cmd, args...).Run()
 }
 
+// extractDateTitle extracts the date and title strings from file name.
+func extractDateTitle(name string) (date string, title string) {
+	title = fileName(name)
+	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(title) {
+		date = title[0:10]
+		title = title[11:]
+	}
+	title = strings.Title(strings.Replace(title, "-", " ", -1))
+	return date, title
+}
+
 /*
 String lists.
 */

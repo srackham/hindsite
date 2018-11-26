@@ -37,7 +37,7 @@ type configs []config
 
 // checkTemplates returns an error if the templates configuration value is illegal.
 func checkTemplates(templates string) error {
-	re := regexp.MustCompile("^(\\.\\w+\\|)*(\\.\\w+)+$")
+	re := regexp.MustCompile(`^(\.\w+\|)*(\.\w+)+$`)
 	if templates != "" && !re.MatchString(templates) {
 		return fmt.Errorf("illegal templates: %s", templates)
 	}
@@ -181,7 +181,7 @@ func (conf *config) parseFile(proj *project, f string) error {
 	return nil
 }
 
-// Return configuration as YAML formatted string.
+// Return configuration as a map keyed by parameter name.
 func (conf *config) data() templateData {
 	data := templateData{}
 	data["author"] = nz(conf.author)
