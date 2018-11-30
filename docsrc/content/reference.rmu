@@ -236,7 +236,7 @@ The build summary does not include [excluded](#configuration-parameters) files.
 
 ### serve command
 The _serve_ command rebuilds the project then starts the built-in webserver on
-the project _build_ directory. If files in the _content_ or _template
+the project _build directory_. If files in the _content_ or _template
 directories_ changed the _serve_ command automatically
 [rebuilds](#partial-rebuilds) affected webpages. The server also handles browser
 live reloading.
@@ -257,6 +257,8 @@ Applicable options:
 
 - `-port` sets the server port number to `PORT` (defaults to 1212).
 - The `-launch` option opens the project home page in the default web browser.
+- If the `-drafts` option is specified [draft documents](#documents) are included
+  in the built website.
 - Press the _R_ key followed by the _Enter_ key to force a complete rebuild.
 - The server strips the `urlprefix` from URLs in HTML files before sending them
   to the browser. This allows the build to be tested irrespective of the
@@ -328,7 +330,6 @@ Example `new.md` template (this is the default built-in template):
 ---
 title: {{.title}}
 date:  {{.date}}
-tags:
 draft: true
 ---
 
