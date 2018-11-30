@@ -252,13 +252,16 @@ Applicable options:
     -build BUILD_DIR
     -drafts
     -launch
+    -navigate
     -port PORT
     -v
 
 - `-port` sets the server port number to `PORT` (defaults to 1212).
-- The `-launch` option opens the project home page in the default web browser.
 - If the `-drafts` option is specified [draft documents](#documents) are included
   in the built website.
+- The `-launch` option opens the project home page in the default web browser.
+- The `-navigate` option causes the browser to automatically navigate to new and
+  updated [documents](#documents).
 - Press the _R_ key followed by the _Enter_ key to force a complete rebuild.
 - The server strips the `urlprefix` from URLs in HTML files before sending them
   to the browser. This allows the build to be tested irrespective of the
