@@ -139,7 +139,7 @@ func Test_httpHandlers(t *testing.T) {
 	if svr.browserURL != "/" {
 		t.Errorf("saveBrowserURL handler: url: got %v want %v", svr.browserURL, "/")
 	}
-	wanted := "<script src=\"http://localhost:35729/livereload.js\"></script>\n</body>"
+	wanted := "<script src=\"http://localhost:35729/livereload.js\"></script>"
 	got := rr.Body.String()
 	if !strings.Contains(got, wanted) {
 		t.Errorf("htmlFilter handler: response did not contain: %#v", wanted)

@@ -18,6 +18,25 @@ import (
 const (
 	// watcherLullTime is the watcherFilter debounce time.
 	watcherLullTime time.Duration = 50 * time.Millisecond
+	// -navigate option LiveReload navigation plugin.
+	navigatePrefix = "__hindsite_navigate:"
+	navigatePlugin = `function HindsitePlugin() {}
+HindsitePlugin.identifier = 'hindsitePlugin';
+HindsitePlugin.version = '0.1';
+HindsitePlugin.prototype.reload = function(path) {
+   	var prefix = "` + navigatePrefix + `";
+	if (path.lastIndexOf(prefix, 0) !== 0) {
+		return false
+	}
+	path = path.substring(prefix.length);
+    if (window.location.pathname === path) {
+		window.location.reload();
+	} else {
+        window.location.pathname = path;
+    }
+    return true;
+};
+LiveReload.addPlugin(HindsitePlugin);`
 )
 
 // server is a project plus server specific fields and methods.
@@ -42,6 +61,20 @@ func (svr *server) close(err error) {
 	svr.err = err
 	svr.mutex.Unlock()
 	close(svr.quit)
+}
+
+// setNavigateURL sets the document navigation URL that will be processed by the
+// hindsite plugin in the browser LiveReload client. Does nothing if the
+// -navigate option was not specified.
+func (svr *server) setNavigateURL(url string) {
+	if !svr.navigate {
+		return
+	}
+	path := strings.TrimPrefix(url, svr.rootConf.urlprefix)
+	svr.verbose("navigate to: " + path)
+	svr.mutex.Lock()
+	svr.browserURL = navigatePrefix + path
+	svr.mutex.Unlock()
 }
 
 // logRequest server request handler logs browser requests.
@@ -88,8 +121,12 @@ func (svr *server) htmlFilter(h http.Handler) http.Handler {
 			}
 			// Inject LiveReload script tag.
 			content = strings.Replace(content, "</body>", "<script src=\"http://localhost:35729/livereload.js\"></script>\n</body>", 1)
+			// Inject navigation plugin.
+			if svr.navigate {
+				content = strings.Replace(content, "</body>", "<script>\n"+navigatePlugin+"\n</script>\n</body>", 1)
+			}
+			// Strip urlprefix from URLs.
 			if svr.rootConf.urlprefix != "" {
-				// Strip urlprefix from URLs.
 				content = strings.Replace(content, "href=\""+svr.rootConf.urlprefix, "href=\"", -1)
 				content = strings.Replace(content, "src=\""+svr.rootConf.urlprefix, "src=\"", -1)
 			}
@@ -328,6 +365,7 @@ func (svr *server) createFile(f string) error {
 				}
 			}
 		}
+		svr.setNavigateURL(doc.url)
 		return svr.renderDocument(&doc)
 	case pathIsInDir(f, svr.contentDir):
 		return svr.buildStaticFile(f)
@@ -421,6 +459,7 @@ func (svr *server) writeFile(f string) error {
 				}
 			}
 		}
+		svr.setNavigateURL(doc.url)
 		return svr.renderDocument(doc)
 	case pathIsInDir(f, svr.contentDir):
 		return svr.buildStaticFile(f)

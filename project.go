@@ -39,6 +39,7 @@ type project struct {
 	drafts        bool
 	port          string
 	launch        bool
+	navigate      bool
 	builtin       string
 	verbosity     int
 	rootConf      config
@@ -131,6 +132,8 @@ func (proj *project) parseArgs(args []string) error {
 			proj.drafts = true
 		case opt == "-launch":
 			proj.launch = true
+		case opt == "-navigate":
+			proj.navigate = true
 		case opt == "-v":
 			proj.verbosity++
 		case opt == "-vv":
@@ -315,6 +318,7 @@ Options:
     -builtin  NAME
     -drafts
     -launch
+    -navigate
     -v
 
 Version:    ` + VERS + " (" + OS + ")" + `
