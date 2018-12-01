@@ -12,7 +12,7 @@ newsletters, articles). Features:
 
 - [High performance](https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite).
 - Stand-alone single-file executable.
-- Built-in development web server with Live Reload, file watcher and incremental
+- Built-in development web server with browser live reload, file watcher and incremental
   rebuilds.
 
 

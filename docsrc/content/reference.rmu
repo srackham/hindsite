@@ -253,16 +253,25 @@ Applicable options:
     -drafts
     -launch
     -navigate
-    -port PORT
+    -port [HTTP_PORT][:LR_PORT]
     -v
 
-- `-port` sets the server port number to `PORT` (defaults to 1212).
 - If the `-drafts` option is specified [draft documents](#documents) are included
   in the built website.
 - The `-launch` option opens the project home page in the default web browser.
 - The `-navigate` option causes the browser to automatically navigate to new and
   updated [documents](#documents).
-- Press the _R_ key followed by the _Enter_ key to force a complete rebuild.
+- The `-port` option sets the server HTTP port number (`HTTP_PORT`) and/or the
+  LiveReload port number (`LR_PORT`):
+  * `HTTP_PORT` defaults to `1212`.
+  * `LR_PORT` defaults to `35729`.
+  * Setting `LR_PORT` to `-1` disables browser live reloads.
+  * The port numbers must be unique across all running server instances.
+  * Examples: `-port 1213`, `-port 1213:35730`, `-port :-1`.
+- While the server is runing you can enter the following keyboard commands:
+  * Press the _R_ key followed by the _Enter_ key to force a complete site rebuild.
+  * Press the _D_ key followed by the _Enter_ key to toggle the server `-drafts` option.
+  * Press the _N_ key followed by the _Enter_ key to toggle the server `-navigate` option.
 - The server strips the `urlprefix` from URLs in HTML files before sending them
   to the browser. This allows the build to be tested irrespective of the
   `urlprefix` value.
