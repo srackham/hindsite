@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/fatih/color"
@@ -36,11 +37,13 @@ type project struct {
 	indexDir      string
 	initDir       string
 	newFile       string
-	drafts        bool
-	port          string
-	launch        bool
-	navigate      bool
 	builtin       string
+	drafts        bool
+	launch        bool
+	httpport      uint16
+	lrport        uint16
+	livereload    bool
+	navigate      bool
 	verbosity     int
 	rootConf      config
 	confs         configs
@@ -51,7 +54,11 @@ type project struct {
 }
 
 func newProject() project {
-	proj := project{}
+	proj := project{
+		httpport:   1212,
+		lrport:     35729,
+		livereload: true,
+	}
 	return proj
 }
 
@@ -97,7 +104,6 @@ func (proj *project) logerror(format string, v ...interface{}) {
 
 // parseArgs parses the hindsite command-line arguments.
 func (proj *project) parseArgs(args []string) error {
-	proj.port = "1212"
 	skip := false
 	for i, opt := range args {
 		if skip {
@@ -153,7 +159,25 @@ func (proj *project) parseArgs(args []string) error {
 			case "-builtin":
 				proj.builtin = arg
 			case "-port":
-				proj.port = arg
+				ports := strings.SplitN(arg, ":", 2)
+				if len(ports) > 0 && ports[0] != "" {
+					i, err := strconv.ParseUint(ports[0], 10, 16)
+					if err != nil {
+						return fmt.Errorf("illegal -port: %s", arg)
+					}
+					proj.httpport = uint16(i)
+				}
+				if len(ports) > 1 && ports[1] != "" {
+					if ports[1] == "-1" {
+						proj.livereload = false
+					} else {
+						i, err := strconv.ParseUint(ports[1], 10, 16)
+						if err != nil {
+							return fmt.Errorf("illegal -port: %s", arg)
+						}
+						proj.lrport = uint16(i)
+					}
+				}
 			default:
 				panic("illegal argument: " + opt)
 			}
@@ -314,7 +338,7 @@ Options:
     -content  CONTENT_DIR
     -template TEMPLATE_DIR
     -build    BUILD_DIR
-    -port     PORT
+    -port     [HTTP_PORT][:LR_PORT]
     -builtin  NAME
     -drafts
     -launch

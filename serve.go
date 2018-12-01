@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"net/http"
 	"os"
 	"path"
@@ -65,9 +66,9 @@ func (svr *server) close(err error) {
 
 // setNavigateURL sets the document navigation URL that will be processed by the
 // hindsite plugin in the browser LiveReload client. Does nothing if the
-// -navigate option was not specified.
+// -navigate option was not specified or live reload is disabled.
 func (svr *server) setNavigateURL(url string) {
-	if !svr.navigate {
+	if !svr.livereload || !svr.navigate {
 		return
 	}
 	path := strings.TrimPrefix(url, svr.rootConf.urlprefix)
@@ -119,11 +120,13 @@ func (svr *server) htmlFilter(h http.Handler) http.Handler {
 				http.Error(w, "500: "+err.Error(), 500)
 				return
 			}
-			// Inject LiveReload script tag.
-			content = strings.Replace(content, "</body>", "<script src=\"http://localhost:35729/livereload.js\"></script>\n</body>", 1)
-			// Inject navigation plugin.
-			if svr.navigate {
-				content = strings.Replace(content, "</body>", "<script>\n"+navigatePlugin+"\n</script>\n</body>", 1)
+			if svr.livereload {
+				// Inject LiveReload script tag.
+				content = strings.Replace(content, "</body>", "<script src=\"http://localhost:"+fmt.Sprintf("%d", svr.lrport)+"/livereload.js\"></script>\n</body>", 1)
+				// Inject navigation plugin.
+				if svr.navigate {
+					content = strings.Replace(content, "</body>", "<script>\n"+navigatePlugin+"\n</script>\n</body>", 1)
+				}
 			}
 			// Strip urlprefix from URLs.
 			if svr.rootConf.urlprefix != "" {
@@ -191,7 +194,7 @@ func (svr *server) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotify.
 // serve implements the serve comand. Does not return unless and error occurs or
 // the server quit channel is closed.
 func (svr *server) serve() error {
-	rooturl := "http://localhost:" + svr.port + "/"
+	rooturl := "http://localhost:" + fmt.Sprintf("%d", svr.httpport) + "/"
 	// Full rebuild to initialize document and index structures.
 	if err := svr.build(); err != nil {
 		svr.logerror(err.Error())
@@ -226,7 +229,7 @@ func (svr *server) serve() error {
 		return err
 	}
 	// Start LiveReload server.
-	lr := lrserver.New(lrserver.DefaultName, lrserver.DefaultPort)
+	lr := lrserver.New(lrserver.DefaultName, svr.lrport)
 	defer lr.Close()
 	lr.SetLiveCSS(true)
 	lr.StatusLog().SetPrefix("reload: ")
@@ -235,7 +238,9 @@ func (svr *server) serve() error {
 		lr.SetStatusLog(nil)
 		lr.SetErrorLog(nil)
 	}
-	go lr.ListenAndServe()
+	if svr.livereload {
+		go lr.ListenAndServe()
+	}
 	// Start Web server.
 	go func() {
 		svr.logconsole("\nServing build directory %s on %s\nPress Ctrl+C to stop\n", svr.buildDir, rooturl)
@@ -243,7 +248,7 @@ func (svr *server) serve() error {
 		handler = svr.htmlFilter(handler)
 		handler = svr.saveBrowserURL(handler)
 		handler = svr.logRequest(handler)
-		httpsvr := &http.Server{Addr: ":" + svr.port, Handler: handler}
+		httpsvr := &http.Server{Addr: ":" + fmt.Sprintf("%d", svr.httpport), Handler: handler}
 		select {
 		case <-svr.quit:
 			if err := httpsvr.Shutdown(nil); err != nil {
@@ -300,7 +305,9 @@ func (svr *server) serve() error {
 					if err != nil {
 						svr.logerror(err.Error())
 					}
-					lr.Reload(svr.browserURL)
+					if svr.livereload {
+						lr.Reload(svr.browserURL)
+					}
 					svr.logconsole("")
 				}
 			case evt := <-fsevent:
@@ -327,7 +334,9 @@ func (svr *server) serve() error {
 				}
 				svr.logconsole("elapsed: %.3fs\n\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
 				color.Unset()
-				lr.Reload(svr.browserURL)
+				if svr.livereload {
+					lr.Reload(svr.browserURL)
+				}
 			case err := <-watcher.Errors:
 				svr.close(err)
 			}
