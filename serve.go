@@ -309,6 +309,12 @@ func (svr *server) serve() error {
 						lr.Reload(svr.browserURL)
 					}
 					svr.logconsole("")
+				case "D": // Toggle -drafts option.
+					svr.drafts = !svr.drafts
+					svr.logconsole("drafts: %t", svr.drafts)
+				case "N": // Toggle -navigate option.
+					svr.navigate = !svr.navigate
+					svr.logconsole("navigation: %t", svr.navigate)
 				}
 			case evt := <-fsevent:
 				start := time.Now()
