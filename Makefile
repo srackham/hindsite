@@ -41,7 +41,7 @@ build-docs: install
 
 .PHONY: serve-docs
 serve-docs: install
-	hindsite serve docsrc -build docs -launch -v
+	hindsite serve docsrc -build docs -launch -navigate -v
 
 .PHONY: validate-docs
 validate-docs: build-docs
@@ -135,7 +135,7 @@ build-blog: install
 
 .PHONY: serve-blog
 serve-blog: install
-	hindsite serve $(BLOG_DIR) -content $(BLOG_DIR)/template/init -launch -v
+	hindsite serve $(BLOG_DIR) -content $(BLOG_DIR)/template/init -launch -navigate -v
 
 .PHONY: validate-blog
 validate-blog: build-blog
