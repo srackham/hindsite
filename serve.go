@@ -311,10 +311,10 @@ func (svr *server) serve() error {
 					svr.logconsole("")
 				case "D": // Toggle -drafts option.
 					svr.drafts = !svr.drafts
-					svr.logconsole("drafts: %t", svr.drafts)
+					svr.logconsole("drafts: %t\n", svr.drafts)
 				case "N": // Toggle -navigate option.
 					svr.navigate = !svr.navigate
-					svr.logconsole("navigation: %t", svr.navigate)
+					svr.logconsole("navigation: %t\n", svr.navigate)
 				}
 			case evt := <-fsevent:
 				start := time.Now()
@@ -338,7 +338,7 @@ func (svr *server) serve() error {
 				} else {
 					color.Set(color.FgGreen, color.Bold)
 				}
-				svr.logconsole("elapsed: %.3fs\n\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
+				svr.logconsole("time: %.3fs\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
 				color.Unset()
 				if svr.livereload {
 					lr.Reload(svr.browserURL)
