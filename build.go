@@ -36,7 +36,7 @@ func (proj *project) build() error {
 		}
 	}
 	// Parse all template files.
-	proj.htmlTemplates = newHtmlTemplates(proj.templateDir)
+	proj.htmlTemplates = newHTMLTemplates(proj.templateDir)
 	proj.textTemplates = newTextTemplates(proj.templateDir)
 	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {

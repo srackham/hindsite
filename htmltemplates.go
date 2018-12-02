@@ -21,7 +21,7 @@ type htmlTemplates struct {
 	templates   *template.Template
 }
 
-func newHtmlTemplates(templateDir string) htmlTemplates {
+func newHTMLTemplates(templateDir string) htmlTemplates {
 	tmpls := htmlTemplates{}
 	tmpls.templateDir = templateDir
 	tmpls.templates = template.New("")
