@@ -14,6 +14,7 @@ require (
 	github.com/smartystreets/assertions v0.0.0-20180820201707-7c9eb446e3cf // indirect
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
 	github.com/srackham/go-rimu/v11 v11.1.2
+	github.com/stretchr/testify v1.2.2
 	golang.org/x/sys v0.0.0-20180417080122-b126b21c05a9 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/russross/blackfriday.v2 v2.0.0
