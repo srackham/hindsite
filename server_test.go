@@ -44,7 +44,7 @@ func Test_server(t *testing.T) {
 		for {
 			select {
 			case line := <-svr.out:
-				line = strings.Replace(line, "\\", "/", -1) // Normalize MS Windows path separators.
+				line = strings.Replace(line, `\`, `/`, -1) // Normalize MS Windows path separators.
 				if strings.Contains(line, output) {
 					return
 				}

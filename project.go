@@ -70,7 +70,6 @@ func (proj *project) output(out io.Writer, verbosity int, format string, v ...in
 		// Strip leading project directory from path names to make message more readable.
 		if filepath.IsAbs(proj.projectDir) {
 			msg = strings.Replace(msg, " "+proj.projectDir+string(filepath.Separator), " ", -1)
-			msg = filepath.ToSlash(msg) // Normalize separators so automated tests pass.
 		}
 		if proj.out == nil {
 			fmt.Fprintln(out, msg)

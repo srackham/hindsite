@@ -22,6 +22,7 @@ func Test_execute(t *testing.T) {
 		for line := range proj.out {
 			out += line + "\n"
 		}
+		out = strings.Replace(out, `\`, `/`, -1) // Normalize MS Windows path separators.
 		return out, code
 	}
 
