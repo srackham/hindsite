@@ -49,7 +49,11 @@ func Test_execute(t *testing.T) {
 	assert.Equal(0, code)
 	assert.Contains(out, "")
 
-	out, code = exec("hindsite build " + tmpdir)
+	wd, _ := os.Getwd()
+	defer os.Chdir(wd)
+	os.Chdir(tmpdir)
+
+	out, code = exec("hindsite build")
 	assert.Equal(0, code)
 	assert.Contains(out, "documents: 11\ndrafts: 1\nstatic: 7")
 
@@ -63,12 +67,12 @@ func Test_execute(t *testing.T) {
 	assert.Contains(text, "date:  "+time.Now().Format("2006-01-02"))
 	assert.Contains(text, "Document content goes here.")
 
-	out, code = exec("hindsite build " + tmpdir)
+	out, code = exec("hindsite build")
 	assert.Equal(0, code)
 	assert.Contains(out, "documents: 12\ndrafts: 2\nstatic: 7")
 
-	f = filepath.Join(tmpdir, "content", "posts", "2018-12-01-new-test-file-two.md")
-	out, code = exec("hindsite new " + tmpdir + " " + f)
+	f = filepath.Join("content", "posts", "2018-12-01-new-test-file-two.md")
+	out, code = exec("hindsite new " + f)
 	assert.Equal(0, code)
 	assert.Contains(out, "")
 	assert.True(fileExists(f))
@@ -77,11 +81,11 @@ func Test_execute(t *testing.T) {
 	assert.Contains(text, "date:  2018-12-01")
 	assert.Contains(text, "Test new template.")
 
-	out, code = exec("hindsite new " + tmpdir + " " + f)
+	out, code = exec("hindsite new " + f)
 	assert.Equal(1, code)
 	assert.Contains(out, "error: document already exists: content/posts/2018-12-01-new-test-file-two.md")
 
-	out, code = exec("hindsite build " + tmpdir + " -drafts")
+	out, code = exec("hindsite build -drafts")
 	assert.Equal(0, code)
 	assert.Contains(out, "documents: 13\ndrafts: 0\nstatic: 7")
 
