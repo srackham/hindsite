@@ -45,9 +45,9 @@ func Test_execute(t *testing.T) {
 
 	os.RemoveAll(tmpdir)
 	mkMissingDir(tmpdir)
-	out, code = exec("hindsite init " + tmpdir + " -template ./testdata/blog/template")
+	out, code = exec("hindsite init " + tmpdir + " -template ./testdata/blog/template -v")
 	assert.Equal(0, code)
-	assert.Contains(out, "")
+	assert.Contains(out, "make directory: content/newsletters")
 
 	wd, _ := os.Getwd()
 	defer os.Chdir(wd)
