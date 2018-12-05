@@ -10,7 +10,7 @@ import (
 )
 
 type index struct {
-	proj        *project                 // Context.
+	site        *site                 // Context.
 	conf        config                   // Merged configuration for this index.
 	contentDir  string                   // The directory that contains the indexed documents.
 	templateDir string                   // The directory that contains the index templates.
@@ -36,36 +36,36 @@ type page struct {
 	docs   documentsList
 }
 
-func newIndex(proj *project) index {
+func newIndex(site *site) index {
 	idx := index{}
-	idx.proj = proj
+	idx.site = site
 	return idx
 }
 
 // Search templateDir directory for indexed directories and add them to indexes.
-func newIndexes(proj *project) (indexes, error) {
+func newIndexes(site *site) (indexes, error) {
 	idxs := indexes{}
-	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
+	err := filepath.Walk(site.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if info.IsDir() && fileExists(filepath.Join(f, "docs.html")) {
-			idx := newIndex(proj)
+			idx := newIndex(site)
 			idx.templateDir = f
-			p, err := filepath.Rel(proj.templateDir, f)
+			p, err := filepath.Rel(site.templateDir, f)
 			if err != nil {
 				return err
 			}
-			idx.contentDir = filepath.Join(proj.contentDir, p)
+			idx.contentDir = filepath.Join(site.contentDir, p)
 			if !dirExists(idx.contentDir) {
 				return fmt.Errorf("missing indexed content directory: %s", idx.contentDir)
 			}
-			idx.indexDir = filepath.Join(proj.indexDir, p)
-			p, err = filepath.Rel(proj.buildDir, idx.indexDir)
+			idx.indexDir = filepath.Join(site.indexDir, p)
+			p, err = filepath.Rel(site.buildDir, idx.indexDir)
 			if err != nil {
 				return err
 			}
-			idx.conf = proj.configFor(idx.contentDir)
+			idx.conf = site.configFor(idx.contentDir)
 			idx.url = filepath.ToSlash(p)
 			idxs = append(idxs, &idx)
 		}
@@ -115,9 +115,9 @@ func (idxs indexes) build() error {
 // If doc is not nil then only those document index pages containing doc are rendered.
 func (idx *index) build(doc *document) error {
 	if doc == nil {
-		idx.proj.verbose("build index: " + idx.indexDir)
+		idx.site.verbose("build index: " + idx.indexDir)
 	}
-	tmpls := &idx.proj.htmlTemplates // Lexical shortcut.
+	tmpls := &idx.site.htmlTemplates // Lexical shortcut.
 	// renderPages renders paginated document pages with named template.
 	// Additional template data is included.
 	renderPages := func(pgs []page, tmpl string, data templateData) error {
@@ -138,9 +138,9 @@ func (idx *index) build(doc *document) error {
 			fm["user"] = idx.conf.user
 			err := tmpls.render(tmpl, fm, pg.file)
 			if doc != nil {
-				idx.proj.verbose("write index: " + pg.file)
+				idx.site.verbose("write index: " + pg.file)
 			} else {
-				idx.proj.verbose2("write index: " + pg.file)
+				idx.site.verbose2("write index: " + pg.file)
 			}
 			if err != nil {
 				return err
@@ -183,7 +183,7 @@ func (idx *index) build(doc *document) error {
 			data["user"] = idx.conf.user
 			outfile := filepath.Join(idx.indexDir, "tags.html")
 			err := tmpls.render(tagsTemplate, data, outfile)
-			idx.proj.verbose2("write index: " + outfile)
+			idx.site.verbose2("write index: " + outfile)
 			if err != nil {
 				return err
 			}

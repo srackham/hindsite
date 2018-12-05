@@ -8,56 +8,56 @@ import (
 )
 
 // init implements the init command.
-func (proj *project) init() error {
-	if dirExists(proj.contentDir) {
-		files, err := ioutil.ReadDir(proj.contentDir)
+func (site *site) init() error {
+	if dirExists(site.contentDir) {
+		files, err := ioutil.ReadDir(site.contentDir)
 		if err != nil {
 			return err
 		}
 		if len(files) > 0 {
-			return fmt.Errorf("non-empty content directory: " + proj.contentDir)
+			return fmt.Errorf("non-empty content directory: " + site.contentDir)
 		}
 	}
-	if proj.builtin != "" {
-		// Load template directory from the built-in project.
-		if dirCount(proj.templateDir) > 0 {
-			return fmt.Errorf("non-empty template directory: " + proj.templateDir)
+	if site.builtin != "" {
+		// Load template directory from the built-in site.
+		if dirCount(site.templateDir) > 0 {
+			return fmt.Errorf("non-empty template directory: " + site.templateDir)
 		}
-		proj.verbose("installing builtin template: " + proj.builtin)
-		if err := RestoreAssets(proj.templateDir, proj.builtin+"/template"); err != nil {
+		site.verbose("installing builtin template: " + site.builtin)
+		if err := RestoreAssets(site.templateDir, site.builtin+"/template"); err != nil {
 			return err
 		}
 		// Hoist the restored template files from the root of the restored
-		// builtin directory up one level into the root of the project template
+		// builtin directory up one level into the root of the site template
 		// directory.
-		files, _ := filepath.Glob(filepath.Join(proj.templateDir, proj.builtin, "template", "*"))
+		files, _ := filepath.Glob(filepath.Join(site.templateDir, site.builtin, "template", "*"))
 		for _, f := range files {
-			if err := os.Rename(f, filepath.Join(proj.templateDir, filepath.Base(f))); err != nil {
+			if err := os.Rename(f, filepath.Join(site.templateDir, filepath.Base(f))); err != nil {
 				return err
 			}
 		}
 		// Remove the now empty restored path.
-		if err := os.RemoveAll(filepath.Join(proj.templateDir, proj.builtin)); err != nil {
+		if err := os.RemoveAll(filepath.Join(site.templateDir, site.builtin)); err != nil {
 			return err
 		}
 	}
 	// Create the template directory structure in the content directory.
-	if err := mkMissingDir(proj.contentDir); err != nil {
+	if err := mkMissingDir(site.contentDir); err != nil {
 		return err
 	}
-	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
+	err := filepath.Walk(site.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if f == proj.templateDir {
+		if f == site.templateDir {
 			return nil
 		}
-		if info.IsDir() && f == proj.initDir {
+		if info.IsDir() && f == site.initDir {
 			return filepath.SkipDir
 		}
 		if info.IsDir() {
-			dst := pathTranslate(f, proj.templateDir, proj.contentDir)
-			proj.verbose("make directory: " + dst)
+			dst := pathTranslate(f, site.templateDir, site.contentDir)
+			site.verbose("make directory: " + dst)
 			err = mkMissingDir(dst)
 		}
 		return err
@@ -76,12 +76,12 @@ func (proj *project) init() error {
 			dst := pathTranslate(f, fromDir, toDir)
 			if info.IsDir() {
 				if !dirExists(dst) {
-					proj.verbose("make directory: " + dst)
+					site.verbose("make directory: " + dst)
 					err = mkMissingDir(dst)
 				}
 			} else {
-				proj.verbose2("copy: " + f)
-				proj.verbose("write: " + dst)
+				site.verbose2("copy: " + f)
+				site.verbose("write: " + dst)
 				err = copyFile(f, dst)
 			}
 			return err
@@ -89,20 +89,20 @@ func (proj *project) init() error {
 		return nil
 	}
 	// Copy the contents of the optional template init directory to the content directory.
-	if dirExists(proj.initDir) {
-		if err := copyDirContents(proj.initDir, proj.contentDir); err != nil {
+	if dirExists(site.initDir) {
+		if err := copyDirContents(site.initDir, site.contentDir); err != nil {
 			return err
 		}
 	}
-	// If the template directory is outside the project directory copy it to the
+	// If the template directory is outside the site directory copy it to the
 	// default template directory (if it does not already exist or is empty).
-	defaultTemplateDir := filepath.Join(proj.projectDir, "template")
-	if !pathIsInDir(proj.templateDir, proj.projectDir) && dirCount(defaultTemplateDir) == 0 {
-		proj.verbose("make directory: " + defaultTemplateDir)
+	defaultTemplateDir := filepath.Join(site.siteDir, "template")
+	if !pathIsInDir(site.templateDir, site.siteDir) && dirCount(defaultTemplateDir) == 0 {
+		site.verbose("make directory: " + defaultTemplateDir)
 		if err := mkMissingDir(defaultTemplateDir); err != nil {
 			return err
 		}
-		if err := copyDirContents(proj.templateDir, defaultTemplateDir); err != nil {
+		if err := copyDirContents(site.templateDir, defaultTemplateDir); err != nil {
 			return err
 		}
 	}

@@ -14,12 +14,12 @@ func Test_execute(t *testing.T) {
 	tmpdir := filepath.Join(os.TempDir(), "hindsite-tests")
 	assert := assert.New(t)
 	exec := func(cmd string) (out string, code int) {
-		proj := newProject()
-		proj.out = make(chan string, 100)
+		site := newSite()
+		site.out = make(chan string, 100)
 		args := strings.Split(cmd, " ")
-		code = proj.executeArgs(args)
-		close(proj.out)
-		for line := range proj.out {
+		code = site.executeArgs(args)
+		close(site.out)
+		for line := range site.out {
 			out += line + "\n"
 		}
 		out = strings.Replace(out, `\`, `/`, -1) // Normalize MS Windows path separators.
@@ -32,7 +32,7 @@ func Test_execute(t *testing.T) {
 
 	out, code = exec("hindsite build missing")
 	assert.Equal(1, code)
-	assert.Contains(out, "error: missing project directory")
+	assert.Contains(out, "error: missing site directory")
 
 	os.RemoveAll(tmpdir)
 	mkMissingDir(tmpdir)

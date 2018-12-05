@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-	proj := newProject()
-	os.Exit(proj.executeArgs(os.Args))
+	site := newSite()
+	os.Exit(site.executeArgs(os.Args))
 }

@@ -10,46 +10,46 @@ import (
 )
 
 // build implements the build command.
-func (proj *project) build() error {
+func (site *site) build() error {
 	startTime := time.Now()
 	// Parse configuration files.
-	if err := proj.parseConfigs(); err != nil {
+	if err := site.parseConfigs(); err != nil {
 		return err
 	}
 	// Synthesize root config.
-	proj.rootConf = newConfig()
-	if len(proj.confs) > 0 && proj.confs[0].origin == proj.templateDir {
-		proj.rootConf.merge(proj.confs[0])
+	site.rootConf = newConfig()
+	if len(site.confs) > 0 && site.confs[0].origin == site.templateDir {
+		site.rootConf.merge(site.confs[0])
 	}
-	proj.verbose2("root config: \n" + proj.rootConf.String())
-	if !dirExists(proj.buildDir) {
-		if err := os.Mkdir(proj.buildDir, 0775); err != nil {
+	site.verbose2("root config: \n" + site.rootConf.String())
+	if !dirExists(site.buildDir) {
+		if err := os.Mkdir(site.buildDir, 0775); err != nil {
 			return err
 		}
 	}
-	proj.docs = newDocumentsLookup()
+	site.docs = newDocumentsLookup()
 	// Delete everything in the build directory forcing a complete site rebuild.
-	files, _ := filepath.Glob(filepath.Join(proj.buildDir, "*"))
+	files, _ := filepath.Glob(filepath.Join(site.buildDir, "*"))
 	for _, f := range files {
 		if err := os.RemoveAll(f); err != nil {
 			return err
 		}
 	}
 	// Parse all template files.
-	proj.htmlTemplates = newHTMLTemplates(proj.templateDir)
-	proj.textTemplates = newTextTemplates(proj.templateDir)
-	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
+	site.htmlTemplates = newHTMLTemplates(site.templateDir)
+	site.textTemplates = newTextTemplates(site.templateDir)
+	err := filepath.Walk(site.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if f == proj.templateDir {
+		if f == site.templateDir {
 			return nil
 		}
-		if info.IsDir() && f == proj.initDir {
+		if info.IsDir() && f == site.initDir {
 			return filepath.SkipDir
 		}
-		if proj.exclude(f) {
-			proj.verbose("exclude: " + f)
+		if site.exclude(f) {
+			site.verbose("exclude: " + f)
 			if info.IsDir() {
 				return filepath.SkipDir
 			}
@@ -61,12 +61,12 @@ func (proj *project) build() error {
 				// Skip configuration file.
 			case ".html":
 				// Compile HTML template.
-				proj.verbose("parse template: " + f)
-				err = proj.htmlTemplates.add(f)
+				site.verbose("parse template: " + f)
+				err = site.htmlTemplates.add(f)
 			case ".txt":
 				// Compile text template.
-				proj.verbose("parse template: " + f)
-				err = proj.textTemplates.add(f)
+				site.verbose("parse template: " + f)
+				err = site.textTemplates.add(f)
 			}
 		}
 		return err
@@ -79,15 +79,15 @@ func (proj *project) build() error {
 	docsCount := 0
 	staticCount := 0
 	errCount := 0
-	err = filepath.Walk(proj.contentDir, func(f string, info os.FileInfo, err error) error {
+	err = filepath.Walk(site.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if f == proj.contentDir {
+		if f == site.contentDir {
 			return nil
 		}
-		if proj.exclude(f) {
-			proj.verbose("exclude: " + f)
+		if site.exclude(f) {
+			site.verbose("exclude: " + f)
 			if info.IsDir() {
 				return filepath.SkipDir
 			}
@@ -98,27 +98,27 @@ func (proj *project) build() error {
 			case ".md", ".rmu":
 				docsCount++
 				// Parse document.
-				doc, err := newDocument(f, proj)
+				doc, err := newDocument(f, site)
 				if err != nil {
 					errCount++
-					proj.logerror(err.Error())
+					site.logerror(err.Error())
 					return nil
 				}
 				if doc.isDraft() {
 					draftsCount++
-					proj.verbose("skip draft: " + f)
+					site.verbose("skip draft: " + f)
 					return nil
 				}
-				if err := proj.docs.add(&doc); err != nil {
+				if err := site.docs.add(&doc); err != nil {
 					errCount++
-					proj.logerror(err.Error())
+					site.logerror(err.Error())
 					return nil
 				}
 			default:
 				staticCount++
-				if err := proj.buildStaticFile(f); err != nil {
+				if err := site.buildStaticFile(f); err != nil {
 					errCount++
-					proj.logerror(err.Error())
+					site.logerror(err.Error())
 					return nil
 				}
 			}
@@ -129,36 +129,36 @@ func (proj *project) build() error {
 		return err
 	}
 	// Create indexes.
-	proj.idxs, err = newIndexes(proj)
+	site.idxs, err = newIndexes(site)
 	if err != nil {
 		return err
 	}
-	for _, doc := range proj.docs.byContentPath {
-		proj.idxs.addDocument(doc)
+	for _, doc := range site.docs.byContentPath {
+		site.idxs.addDocument(doc)
 	}
 	// Build index pages.
-	err = proj.idxs.build()
+	err = site.idxs.build()
 	if err != nil {
 		return err
 	}
 	// Render documents.
-	for _, doc := range proj.docs.byContentPath {
-		if err = proj.renderDocument(doc); err != nil {
+	for _, doc := range site.docs.byContentPath {
+		if err = site.renderDocument(doc); err != nil {
 			return err
 		}
 	}
 	// Install home page.
-	if err := proj.copyHomePage(); err != nil {
+	if err := site.copyHomePage(); err != nil {
 		return err
 	}
 	// Print summary.
 	if errCount == 0 {
 		color.Set(color.FgGreen, color.Bold)
 	}
-	proj.logconsole("documents: %d", docsCount)
-	proj.logconsole("drafts: %d", draftsCount)
-	proj.logconsole("static: %d", staticCount)
-	proj.logconsole("time: %.2fs", time.Now().Sub(startTime).Seconds())
+	site.logconsole("documents: %d", docsCount)
+	site.logconsole("drafts: %d", draftsCount)
+	site.logconsole("static: %d", staticCount)
+	site.logconsole("time: %.2fs", time.Now().Sub(startTime).Seconds())
 	color.Unset()
 	// Report accumulated document parse errors.
 	if errCount > 0 {
@@ -167,15 +167,15 @@ func (proj *project) build() error {
 	return nil
 }
 
-func (proj *project) copyHomePage() error {
-	if proj.rootConf.homepage != "" {
-		src := proj.rootConf.homepage
+func (site *site) copyHomePage() error {
+	if site.rootConf.homepage != "" {
+		src := site.rootConf.homepage
 		if !fileExists(src) {
 			return fmt.Errorf("homepage file missing: %s", src)
 		}
-		dst := filepath.Join(proj.buildDir, "index.html")
-		proj.verbose2("copy homepage: " + src)
-		proj.verbose("write homepage: " + dst)
+		dst := filepath.Join(site.buildDir, "index.html")
+		site.verbose2("copy homepage: " + src)
+		site.verbose("write homepage: " + dst)
 		if err := copyFile(src, dst); err != nil {
 			return err
 		}
@@ -183,22 +183,22 @@ func (proj *project) copyHomePage() error {
 	return nil
 }
 
-func (proj *project) buildStaticFile(f string) error {
-	conf := proj.configFor(f)
+func (site *site) buildStaticFile(f string) error {
+	conf := site.configFor(f)
 	if isTemplate(f, conf.templates) {
-		return proj.renderStaticFile(f)
+		return site.renderStaticFile(f)
 	}
-	return proj.copyStaticFile(f)
+	return site.copyStaticFile(f)
 }
 
 // copyStaticFile copies the content directory srcFile to corresponding build
 // directory. Creates missing destination directories.
-func (proj *project) copyStaticFile(srcFile string) error {
-	if !pathIsInDir(srcFile, proj.contentDir) {
+func (site *site) copyStaticFile(srcFile string) error {
+	if !pathIsInDir(srcFile, site.contentDir) {
 		panic("static file is outside content directory: " + srcFile)
 	}
-	dstFile := pathTranslate(srcFile, proj.contentDir, proj.buildDir)
-	proj.verbose("copy static:  " + srcFile)
+	dstFile := pathTranslate(srcFile, site.contentDir, site.buildDir)
+	site.verbose("copy static:  " + srcFile)
 	err := mkMissingDir(filepath.Dir(dstFile))
 	if err != nil {
 		return err
@@ -207,31 +207,31 @@ func (proj *project) copyStaticFile(srcFile string) error {
 	if err != nil {
 		return err
 	}
-	proj.verbose2("write static: " + dstFile)
+	site.verbose2("write static: " + dstFile)
 	return nil
 }
 
 // renderStaticFile renders file f from the content directory as a text template
 // and writes it to the corresponding build directory. Creates missing
 // destination directories.
-func (proj *project) renderStaticFile(f string) error {
+func (site *site) renderStaticFile(f string) error {
 	// Parse document.
-	doc, err := newDocument(f, proj)
+	doc, err := newDocument(f, site)
 	if err != nil {
 		return err
 	}
 	// Render document markup as a text template.
-	proj.verbose2("render static: " + doc.contentPath)
-	proj.verbose2(doc.String())
+	site.verbose2("render static: " + doc.contentPath)
+	site.verbose2(doc.String())
 	markup := doc.content
 	if isTemplate(doc.contentPath, doc.templates) {
 		data := doc.frontMatter()
-		markup, err = proj.textTemplates.renderText("staticFile", markup, data)
+		markup, err = site.textTemplates.renderText("staticFile", markup, data)
 		if err != nil {
 			return err
 		}
 	}
-	proj.verbose("write static: " + doc.buildPath)
+	site.verbose("write static: " + doc.buildPath)
 	err = mkMissingDir(filepath.Dir(doc.buildPath))
 	if err != nil {
 		return err
@@ -239,26 +239,26 @@ func (proj *project) renderStaticFile(f string) error {
 	return writeFile(doc.buildPath, markup)
 }
 
-func (proj *project) renderDocument(doc *document) error {
+func (site *site) renderDocument(doc *document) error {
 	var err error
 	data := doc.frontMatter()
 	markup := doc.content
 	// Render document markup as a text template.
 	if isTemplate(doc.contentPath, doc.templates) {
-		proj.verbose2("render template: " + doc.contentPath)
-		markup, err = proj.textTemplates.renderText("documentMarkup", markup, data)
+		site.verbose2("render template: " + doc.contentPath)
+		markup, err = site.textTemplates.renderText("documentMarkup", markup, data)
 		if err != nil {
 			return err
 		}
 	}
 	// Convert markup to HTML then render document layout to build directory.
-	proj.verbose2("render document: " + doc.contentPath)
+	site.verbose2("render document: " + doc.contentPath)
 	data["body"] = doc.render(markup)
-	err = proj.htmlTemplates.render(doc.layout, data, doc.buildPath)
+	err = site.htmlTemplates.render(doc.layout, data, doc.buildPath)
 	if err != nil {
 		return err
 	}
-	proj.verbose("write document: " + doc.buildPath)
-	proj.verbose2(doc.String())
+	site.verbose("write document: " + doc.buildPath)
+	site.verbose2(doc.String())
 	return nil
 }

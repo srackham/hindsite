@@ -22,41 +22,41 @@ commands:
    `hindsite` executable (see [_Building hindsite_](#building-hindsite) if you
    prefer to build and install from source).
 
-2. Create a new Hindsite project directory and install the [builtin `blog`
+2. Create a new Hindsite site directory and install the [builtin `blog`
    template](https://github.com/srackham/hindsite/tree/master/builtin/blog/template)
    using the hindsite [init command](#init-command):
 
-    mkdir myproject
-    hindsite init myproject -builtin blog
+    mkdir mysite
+    hindsite init mysite -builtin blog
 
 3. Build the website, start the hindsite web server and open it in the browser:
 
-    hindsite serve myproject -launch
+    hindsite serve mysite -launch
 
 Include the `-v` (verbose) command option to see what's going on. The best way
-to start learning hindsite is to browse the blog [project directory](#projects).
+to start learning hindsite is to browse the blog [site directory](#sites).
 
 If you are familiar with Jekyll or Hugo you'll be right a home (hindsite can
 read Jekyll and Hugo Markdown document [front matter](#front-matter)).
 
 
-## Projects
-A hindsite project consists of three separate directories:
+## Sites
+A hindsite site consists of three separate directories:
 
 - A _content directory_ containing Markdown [documents](#documents) and
   [static resource files](#static-files).
-- A _template directory_ containing [templates](#templates) and project
+- A _template directory_ containing [templates](#templates) and site
   [configuration files](#configuration).
 - A _build directory_ containing the generated website.
 
-By default these directories reside in the _project directory_ and are named
+By default these directories reside in the _site directory_ and are named
 _content_, _template_ and _build_, all three must be mutually exclusive (not
 contained within one another). These directories normally reside in the same
 folder, but this convention is not enforced: a single template can process
 multiple content directories just as a single content directory can be processed
 by multiple templates.
 
-For example, here's the builtin blog project structure:
+For example, here's the builtin blog site structure:
 
 ```
 ├── build
@@ -89,7 +89,7 @@ The `build/indexes` directory contains the generated document and tag index
 pages.
 
 The `template/init` directory is optional, it contains static resources and
-example documents which serve as a starting point for new projects (see the
+example documents which serve as a starting point for new sites (see the
 [init command](#init-command)). In all other respects it is just another content
 directory.
 
@@ -102,15 +102,15 @@ characters.
 ## Commands
 Usage:
 
-    hindsite init  [PROJECT_DIR] [OPTIONS]
-    hindsite build [PROJECT_DIR] [OPTIONS]
-    hindsite serve [PROJECT_DIR] [OPTIONS]
-    hindsite new   [PROJECT_DIR] DOCUMENT [OPTIONS]
+    hindsite init  [SITE_DIR] [OPTIONS]
+    hindsite build [SITE_DIR] [OPTIONS]
+    hindsite serve [SITE_DIR] [OPTIONS]
+    hindsite new   [SITE_DIR] DOCUMENT [OPTIONS]
     hindsite help
 
 Commands:
 
-    init    initialize a new project
+    init    initialize a new site
     build   generate the website
     serve   start development webserver
 	new     create a new content document
@@ -118,17 +118,17 @@ Commands:
 
 Common command options:
 
-`PROJECT_DIR`:: The hindsite project directory (defaults to the current directory).
-`-content CONTENT_DIR`:: The project content directory (defaults to `PROJECT_DIR/content`).
-`-build BUILD_DIR`:: The project build directory (defaults to `PROJECT_DIR/build`).
-`-template TEMPLATE_DIR`:: The project template directory (defaults to `PROJECT_DIR/template`).
+`SITE_DIR`:: The hindsite site directory (defaults to the current directory).
+`-content CONTENT_DIR`:: The site content directory (defaults to `SITE_DIR/content`).
+`-build BUILD_DIR`:: The site build directory (defaults to `SITE_DIR/build`).
+`-template TEMPLATE_DIR`:: The site template directory (defaults to `SITE_DIR/template`).
 `-v`:: Increase verbosity. `-vv` is an alias for `-v -v`.
 
 
 - Content, build and template directories cannot overlap, with one exception:
   the content directory can be `TEMPLATE_DIR/init`. This is handy for testing
   template initialization content.
-- Projects are not restricted to a single content, template and build directory.
+- Sites are not restricted to a single content, template and build directory.
   The `-content`, `-template` and `-build` options allow separate builds from
   differing combinations of content and template directories.
 
@@ -145,12 +145,12 @@ Usage:
 
 
 ### init command
-The _init_ command initializes project _content directory_ from the _template
+The _init_ command initializes site _content directory_ from the _template
 directory_ or from a built-in template.
 
 Usage:
 
-    hindsite init  [PROJECT_DIR] [OPTIONS]
+    hindsite init  [SITE_DIR] [OPTIONS]
 
 Applicable options:
 
@@ -162,8 +162,8 @@ Applicable options:
 - The `CONTENT_DIR` must be empty.
 - If the `-builtin NAME` option is specified the contents and template
   directories are initialized from one of the named built-in templates:
-   `blog`:: A blog and newsletter project.
-   `minimal`:: A minimal project.
+   `blog`:: A blog and newsletter site.
+   `minimal`:: A minimal site.
 - If the `-builtin` option is specified the `TEMPLATE_DIR` must be empty.
 
 #### Command execution
@@ -174,8 +174,8 @@ Applicable options:
 3. If the `TEMPLATE_DIR/init` directory exists its contents is copied to the
    content directory.
 4. If the `-template TEMPLATE_DIR` option specifies a location outside the
-   project directory and the `PROJECT_DIR/template` directory does not exist or
-   is empty the `TEMPLATE_DIR` is copied to `PROJECT_DIR/template`.
+   site directory and the `SITE_DIR/template` directory does not exist or
+   is empty the `TEMPLATE_DIR` is copied to `SITE_DIR/template`.
 
 The following example installs the builtin `blog` template to `./template` and
 initializes the `./contents` directory:
@@ -189,7 +189,7 @@ files from the _content_ and _template_ directories.
 
 Usage:
 
-    hindsite build [PROJECT_DIR] [OPTIONS]
+    hindsite build [SITE_DIR] [OPTIONS]
 
 Applicable options:
 
@@ -237,15 +237,15 @@ The build summary does not include [excluded](#configuration-parameters) files.
 
 
 ### serve command
-The _serve_ command rebuilds the project then starts the built-in webserver on
-the project _build directory_. If files in the _content_ or _template
+The _serve_ command rebuilds the site then starts the built-in webserver on
+the site _build directory_. If files in the _content_ or _template
 directories_ changed the _serve_ command automatically
 [rebuilds](#partial-rebuilds) affected webpages. The server also handles browser
 live reloading.
 
 Usage:
 
-    hindsite serve [PROJECT_DIR] [OPTIONS]
+    hindsite serve [SITE_DIR] [OPTIONS]
 
 Applicable options:
 
@@ -260,7 +260,7 @@ Applicable options:
 
 - If the `-drafts` option is specified [draft documents](#documents) are included
   in the built website.
-- The `-launch` option opens the project home page in the default web browser.
+- The `-launch` option opens the site home page in the default web browser.
 - The `-navigate` option causes the browser to automatically navigate to new and
   updated [documents](#documents).
 - The `-port` option sets the server HTTP port number (`HTTP_PORT`) and/or the
@@ -296,8 +296,8 @@ if:
   (necessitating a full site rebuild).
 
 IMPORTANT: To ensure build integrity you should always perform a complete
-rebuild before deployment and after project structural changes (the serve
-command does not automatically process changes to the project directory
+rebuild before deployment and after site structural changes (the serve
+command does not automatically process changes to the site directory
 structure).
 
 
@@ -307,7 +307,7 @@ sets the [front matter](#front-matter) `date` and `title`.
 
 Usage:
 
-    hindsite new [PROJECT_DIR] DOCUMENT [OPTIONS]
+    hindsite new [SITE_DIR] DOCUMENT [OPTIONS]
 
 Applicable options:
 
@@ -359,7 +359,7 @@ configuration files.
 
 ### Configuration files
 Configuration files are TOML and YAML markup files named `config.toml` and
-`config.yaml` respectively in the project _template directory_.
+`config.yaml` respectively in the site _template directory_.
 
 - Configuration files can located anywhere in the _template directory
   tree_ (except the _init_ directory).
@@ -369,7 +369,7 @@ Configuration files are TOML and YAML markup files named `config.toml` and
   configuration files lying on the corresponding _template directory_ path.
   Configuration files closer to the document have higher precedence than those
   further up the directory path.
-- Configuration files are optional, though most projects will have at least one
+- Configuration files are optional, though most sites will have at least one
   at the root of the template directory.
 
 ### Configuration parameters
@@ -381,7 +381,7 @@ document's [`author` front matter value](#front-matter-values). TOML example:
     author = "Joe Bloggs"
 
 `exclude` †:: A `|` separated list of file and directory paths specifying files
-from the project _content_ and _template_ directories that are excluded from
+from the site _content_ and _template_ directories that are excluded from
 processing. TOML example:
 ..
     exclude = "config.rmu|*~|4913"
@@ -557,7 +557,7 @@ configuration i.e. they can only be specified in the template root configuration
 
 ## Documents
 _Documents_ are [Markdown](https://daringfireball.net/projects/markdown/)
-(`.md`) files in the project [_content directory_](#projects). Each document is
+(`.md`) files in the site [_content directory_](#sites). Each document is
 generates a wepage e.g. a blog post, a newsletter or an article. The [build
 command](#build-command) combines the document with its [layout
 template](#html-templates) and writes the resulting HTML webpage to the
@@ -586,7 +586,7 @@ Rimu.
 
 ## Static files
 Static files are non-document (non-Markdown) files in the [_content
-directory_](#projects). These include website resources such as CSS, JavaScript
+directory_](#sites). These include website resources such as CSS, JavaScript
 and image files. The [build command](#build-command) copies static files to the
 corresponding location in the _build directory_.
 
@@ -605,7 +605,7 @@ The hindsite build command generates paginated document and tag indexes.
   also present then tag indexes are generated.
 - Documents from the indexed content directory and all subdirectories contribute
   to the index.
-- A project can contain any number of indexed content directories.
+- A site can contain any number of indexed content directories.
 - Indexes can be nested. This allows categorized document subdirectories to have
   separate indexes along with aggregated parent directory indexes.
 - A _primary index_ is an index that is not nested (has no parent index). A
@@ -718,7 +718,7 @@ overridden with the [build](#build-command) and [serve](#serve-command) command
 .#document-id
 `id`:: A unique document identifier.
 
-  - Non-blank `id` values must be unique within a project (an error occurs if two
+  - Non-blank `id` values must be unique within a site (an error occurs if two
     or more published documents have the same `id` value).
   - If a document has no explicit `id` value then the default value is determined
     by the [`id` configuration parameter](#id-configuration-parameter).
@@ -808,7 +808,7 @@ document [front matter `user` value](#front-matter-values) with the document's
 
 
 ## Templates
-_hindsite_ uses Go templates from the project [_template directory_](#projects)
+_hindsite_ uses Go templates from the site [_template directory_](#sites)
 to build webpages. There are two types of templates:
 
 - [HTML templates](#html-templates) which are used to build index and document
@@ -829,7 +829,7 @@ syntax](https://golang.org/pkg/text/template/).
 
 ### HTML templates
 HTML layout and index templates are used to build HTML webpages and document
-indexes. All the `.html` files in the project _template directory_ (excluding
+indexes. All the `.html` files in the site _template directory_ (excluding
 the `init` directory) contribute to the set of named HTML templates made
 available to the layout and index templates. All HTML templates share the same
 namespace.
@@ -837,7 +837,7 @@ namespace.
 The following template files have special significance:
 
 `layout.html`:: Templates with the file name `layout.html` are used to generate
-content document webpages. A project can have one or more layout templates. The
+content document webpages. A site can have one or more layout templates. The
 selected layout template is the one closest to the content document on the
 corresponding _template directory_ path (but this can be overridden using the
 document [front matter `layout` value](#front-matter-values)). These conventions
@@ -889,7 +889,7 @@ index webpage. If it is not present the tags index files are not built.
 
 
 ### Text templates
-All `.txt` files in the project _template directory_ (excluding the `init`
+All `.txt` files in the site _template directory_ (excluding the `init`
 directory) contribute to the set of named text templates available during
 [document file](#documents) and [static file](#static-files) template expansion.
 All text templates share the same namespace.
@@ -905,15 +905,15 @@ header](#front-matter-header).
 ## Build paths
 A document's _build path_ is the file path of its generated web page.
 
-- The _build path_ will always be located in the project [build
-  directory](#projects).
+- The _build path_ will always be located in the site [build
+  directory](#sites).
 - By default the _build path_ mirrors the document's [content directory
-  path](#projects).
+  path](#sites).
 ..
-For example, if the content directory is `/myproject/content`, the build
-directory is `/myproject/build` and the document path is
-`/myproject/content/posts/foo.md` then the build path will be
-`/myproject/build/posts/foo.html`.
+For example, if the content directory is `/mysite/content`, the build
+directory is `/mysite/build` and the document path is
+`/mysite/content/posts/foo.md` then the build path will be
+`/mysite/build/posts/foo.html`.
 ..
 - The [`permalink`](#permalink) configuration parameter can be used to customize
   the _build path_.
@@ -923,12 +923,12 @@ directory is `/myproject/build` and the document path is
 
 ## URLs
 hindsite synthesizes document URLs by taking the document's [build
-path](#build-paths) relative to the [build directory](#projects) and prefixing
+path](#build-paths) relative to the [build directory](#sites) and prefixing
 it with the [`urlprefix`](#urlprefix) configuration parameter. File path
 separators are translated to slash characters.
 
-For example, if the build directory is `/myproject/build` and the generated web
-page is `/myproject/build/posts/foo.html` then:
+For example, if the build directory is `/mysite/build` and the generated web
+page is `/mysite/build/posts/foo.html` then:
 
 - The document URL will be `/posts/foo.html`
 - If the `urlprefix` is `/blog` then the URL would be `/blog/posts/foo.html`

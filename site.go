@@ -25,12 +25,12 @@ var (
 	COMMIT = "-"
 )
 
-type project struct {
+type site struct {
 	command       string
 	executable    string
 	in            chan string
 	out           chan string
-	projectDir    string
+	siteDir       string
 	contentDir    string
 	templateDir   string
 	buildDir      string
@@ -53,57 +53,57 @@ type project struct {
 	textTemplates textTemplates
 }
 
-func newProject() project {
-	proj := project{
+func newSite() site {
+	site := site{
 		httpport:   1212,
 		lrport:     35729,
 		livereload: true,
 	}
-	return proj
+	return site
 }
 
 // output prints a line to out writer if `-v` option verbosity is equal to or
 // greater than verbosity.
-func (proj *project) output(out io.Writer, verbosity int, format string, v ...interface{}) {
-	if proj.verbosity >= verbosity {
+func (site *site) output(out io.Writer, verbosity int, format string, v ...interface{}) {
+	if site.verbosity >= verbosity {
 		msg := fmt.Sprintf(format, v...)
-		// Strip leading project directory from path names to make message more readable.
-		if filepath.IsAbs(proj.projectDir) {
-			msg = strings.Replace(msg, " "+proj.projectDir+string(filepath.Separator), " ", -1)
+		// Strip leading site directory from path names to make message more readable.
+		if filepath.IsAbs(site.siteDir) {
+			msg = strings.Replace(msg, " "+site.siteDir+string(filepath.Separator), " ", -1)
 		}
-		if proj.out == nil {
+		if site.out == nil {
 			fmt.Fprintln(out, msg)
 		} else {
-			proj.out <- msg
+			site.out <- msg
 		}
 	}
 }
 
 // logconsole prints a line to logout.
-func (proj *project) logconsole(format string, v ...interface{}) {
-	proj.output(os.Stdout, 0, format, v...)
+func (site *site) logconsole(format string, v ...interface{}) {
+	site.output(os.Stdout, 0, format, v...)
 }
 
 // verbose prints a line to logout if `-v` verbose option was specified.
-func (proj *project) verbose(format string, v ...interface{}) {
-	proj.output(os.Stdout, 1, format, v...)
+func (site *site) verbose(format string, v ...interface{}) {
+	site.output(os.Stdout, 1, format, v...)
 }
 
 // verbose2 prints a a line to logout the `-v` verbose option was specified more
 // than once.
-func (proj *project) verbose2(format string, v ...interface{}) {
-	proj.output(os.Stdout, 2, format, v...)
+func (site *site) verbose2(format string, v ...interface{}) {
+	site.output(os.Stdout, 2, format, v...)
 }
 
 // logerror prints a line to logerr.
-func (proj *project) logerror(format string, v ...interface{}) {
+func (site *site) logerror(format string, v ...interface{}) {
 	color.Set(color.FgRed, color.Bold)
-	proj.output(os.Stderr, 0, "error: "+format, v...)
+	site.output(os.Stderr, 0, "error: "+format, v...)
 	color.Unset()
 }
 
 // parseArgs parses the hindsite command-line arguments.
-func (proj *project) parseArgs(args []string) error {
+func (site *site) parseArgs(args []string) error {
 	skip := false
 	for i, opt := range args {
 		if skip {
@@ -112,9 +112,9 @@ func (proj *project) parseArgs(args []string) error {
 		}
 		switch {
 		case i == 0:
-			proj.executable = opt
+			site.executable = opt
 			if len(args) == 1 {
-				proj.command = "help"
+				site.command = "help"
 			}
 		case i == 1:
 			if opt == "-h" || opt == "--help" {
@@ -123,27 +123,27 @@ func (proj *project) parseArgs(args []string) error {
 			if !isCommand(opt) {
 				return fmt.Errorf("illegal command: %s", opt)
 			}
-			proj.command = opt
-		case i == 2 && proj.command == "new":
+			site.command = opt
+		case i == 2 && site.command == "new":
 			if strings.HasPrefix(opt, "-") {
 				return fmt.Errorf("illegal document file name: %s", opt)
 			}
-			proj.newFile = opt
-		case i == 3 && proj.command == "new" && !strings.HasPrefix(opt, "-"):
-			proj.projectDir = args[2]
-			proj.newFile = opt
+			site.newFile = opt
+		case i == 3 && site.command == "new" && !strings.HasPrefix(opt, "-"):
+			site.siteDir = args[2]
+			site.newFile = opt
 		case i == 2 && !strings.HasPrefix(opt, "-"):
-			proj.projectDir = opt
+			site.siteDir = opt
 		case opt == "-drafts":
-			proj.drafts = true
+			site.drafts = true
 		case opt == "-launch":
-			proj.launch = true
+			site.launch = true
 		case opt == "-navigate":
-			proj.navigate = true
+			site.navigate = true
 		case opt == "-v":
-			proj.verbosity++
+			site.verbosity++
 		case opt == "-vv":
-			proj.verbosity += 2
+			site.verbosity += 2
 		case stringlist{"-content", "-template", "-build", "-builtin", "-port"}.Contains(opt):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
@@ -151,13 +151,13 @@ func (proj *project) parseArgs(args []string) error {
 			arg := args[i+1]
 			switch opt {
 			case "-content":
-				proj.contentDir = arg
+				site.contentDir = arg
 			case "-template":
-				proj.templateDir = arg
+				site.templateDir = arg
 			case "-build":
-				proj.buildDir = arg
+				site.buildDir = arg
 			case "-builtin":
-				proj.builtin = arg
+				site.builtin = arg
 			case "-port":
 				ports := strings.SplitN(arg, ":", 2)
 				if len(ports) > 0 && ports[0] != "" {
@@ -165,17 +165,17 @@ func (proj *project) parseArgs(args []string) error {
 					if err != nil {
 						return fmt.Errorf("illegal -port: %s", arg)
 					}
-					proj.httpport = uint16(i)
+					site.httpport = uint16(i)
 				}
 				if len(ports) > 1 && ports[1] != "" {
 					if ports[1] == "-1" {
-						proj.livereload = false
+						site.livereload = false
 					} else {
 						i, err := strconv.ParseUint(ports[1], 10, 16)
 						if err != nil {
 							return fmt.Errorf("illegal -port: %s", arg)
 						}
-						proj.lrport = uint16(i)
+						site.lrport = uint16(i)
 					}
 				}
 			default:
@@ -186,21 +186,21 @@ func (proj *project) parseArgs(args []string) error {
 			return fmt.Errorf("illegal option: %s", opt)
 		}
 	}
-	if proj.command == "help" {
+	if site.command == "help" {
 		return nil
 	}
-	if proj.command == "new" {
-		if proj.newFile == "" {
+	if site.command == "new" {
+		if site.newFile == "" {
 			return fmt.Errorf("document has not been specified")
 		}
-		if dirExists(proj.newFile) {
-			return fmt.Errorf("document is a directory: %s", proj.newFile)
+		if dirExists(site.newFile) {
+			return fmt.Errorf("document is a directory: %s", site.newFile)
 		}
-		if d := filepath.Dir(proj.newFile); !dirExists(d) {
+		if d := filepath.Dir(site.newFile); !dirExists(d) {
 			return fmt.Errorf("missing document directory: %s", d)
 		}
-		if fileExists(proj.newFile) {
-			return fmt.Errorf("document already exists: %s", proj.newFile)
+		if fileExists(site.newFile) {
+			return fmt.Errorf("document already exists: %s", site.newFile)
 		}
 	}
 	// Clean and convert directories to absolute paths.
@@ -212,37 +212,37 @@ func (proj *project) parseArgs(args []string) error {
 		return filepath.Abs(path)
 	}
 	var err error
-	proj.projectDir, err = getPath(proj.projectDir, ".")
+	site.siteDir, err = getPath(site.siteDir, ".")
 	if err != nil {
 		return err
 	}
-	if !dirExists(proj.projectDir) {
-		return fmt.Errorf("missing project directory: " + proj.projectDir)
+	if !dirExists(site.siteDir) {
+		return fmt.Errorf("missing site directory: " + site.siteDir)
 	}
-	proj.contentDir, err = getPath(proj.contentDir, filepath.Join(proj.projectDir, "content"))
+	site.contentDir, err = getPath(site.contentDir, filepath.Join(site.siteDir, "content"))
 	if err != nil {
 		return err
 	}
-	proj.verbose2("content directory: " + proj.contentDir)
-	if proj.command != "init" && !dirExists(proj.contentDir) {
-		return fmt.Errorf("missing content directory: " + proj.contentDir)
+	site.verbose2("content directory: " + site.contentDir)
+	if site.command != "init" && !dirExists(site.contentDir) {
+		return fmt.Errorf("missing content directory: " + site.contentDir)
 	}
-	proj.templateDir, err = getPath(proj.templateDir, filepath.Join(proj.projectDir, "template"))
+	site.templateDir, err = getPath(site.templateDir, filepath.Join(site.siteDir, "template"))
 	if err != nil {
 		return err
 	}
-	proj.verbose2("template directory: " + proj.templateDir)
-	if !(proj.command == "init" && proj.builtin != "") && !dirExists(proj.templateDir) {
-		return fmt.Errorf("missing template directory: " + proj.templateDir)
+	site.verbose2("template directory: " + site.templateDir)
+	if !(site.command == "init" && site.builtin != "") && !dirExists(site.templateDir) {
+		return fmt.Errorf("missing template directory: " + site.templateDir)
 	}
-	proj.buildDir, err = getPath(proj.buildDir, filepath.Join(proj.projectDir, "build"))
+	site.buildDir, err = getPath(site.buildDir, filepath.Join(site.siteDir, "build"))
 	if err != nil {
 		return err
 	}
-	proj.verbose2("build directory: " + proj.buildDir)
+	site.verbose2("build directory: " + site.buildDir)
 	// init and indexes directories are hardwired.
-	proj.indexDir = filepath.Join(proj.buildDir, "indexes")
-	proj.initDir = filepath.Join(proj.templateDir, "init")
+	site.indexDir = filepath.Join(site.buildDir, "indexes")
+	site.initDir = filepath.Join(site.templateDir, "init")
 	// Content, template and build directories cannot be nested.
 	checkOverlap := func(name1, dir1, name2, dir2 string) error {
 		if dir1 == dir2 {
@@ -256,25 +256,25 @@ func (proj *project) parseArgs(args []string) error {
 		}
 		return nil
 	}
-	if err := checkOverlap("content", proj.contentDir, "template", proj.templateDir); err != nil {
+	if err := checkOverlap("content", site.contentDir, "template", site.templateDir); err != nil {
 		// It's OK for the content directory to be the the template init directory.
-		if proj.contentDir != proj.initDir {
+		if site.contentDir != site.initDir {
 			return err
 		}
 	}
-	if err := checkOverlap("build", proj.buildDir, "content", proj.contentDir); err != nil {
+	if err := checkOverlap("build", site.buildDir, "content", site.contentDir); err != nil {
 		return err
 	}
-	if err := checkOverlap("build", proj.buildDir, "template", proj.templateDir); err != nil {
+	if err := checkOverlap("build", site.buildDir, "template", site.templateDir); err != nil {
 		return err
 	}
-	if proj.command == "new" {
-		proj.newFile, err = filepath.Abs(proj.newFile)
+	if site.command == "new" {
+		site.newFile, err = filepath.Abs(site.newFile)
 		if err != nil {
 			return err
 		}
-		if !pathIsInDir(proj.newFile, proj.contentDir) {
-			return fmt.Errorf("document must reside in %s directory", proj.contentDir)
+		if !pathIsInDir(site.newFile, site.contentDir) {
+			return fmt.Errorf("document must reside in %s directory", site.contentDir)
 		}
 	}
 	return nil
@@ -286,48 +286,48 @@ func isCommand(name string) bool {
 
 // executeArgs runs a hindsite command specified by CLI args and returns a
 // non-zero exit code if an error occurred.
-func (proj *project) executeArgs(args []string) int {
+func (site *site) executeArgs(args []string) int {
 	var err error
-	err = proj.parseArgs(args)
+	err = site.parseArgs(args)
 	if err == nil {
-		switch proj.command {
+		switch site.command {
 		case "build":
-			err = proj.build()
+			err = site.build()
 		case "help":
-			proj.help()
+			site.help()
 		case "init":
-			err = proj.init()
+			err = site.init()
 		case "new":
-			err = proj.new()
+			err = site.new()
 		case "serve":
-			svr := newServer(proj)
+			svr := newServer(site)
 			err = svr.serve()
 		default:
-			panic("illegal command: " + proj.command)
+			panic("illegal command: " + site.command)
 		}
 	}
 	if err != nil {
-		proj.logerror(err.Error())
+		site.logerror(err.Error())
 		return 1
 	}
 	return 0
 }
 
 // help implements the help command.
-func (proj *project) help() {
-	proj.logconsole(`Hindsite is a static website generator.
+func (site *site) help() {
+	site.logconsole(`Hindsite is a static website generator.
 
 Usage:
 
-    hindsite init  [PROJECT_DIR] [OPTIONS]
-    hindsite build [PROJECT_DIR] [OPTIONS]
-    hindsite serve [PROJECT_DIR] [OPTIONS]
-    hindsite new   [PROJECT_DIR] DOCUMENT [OPTIONS]
+    hindsite init  [SITE_DIR] [OPTIONS]
+    hindsite build [SITE_DIR] [OPTIONS]
+    hindsite serve [SITE_DIR] [OPTIONS]
+    hindsite new   [SITE_DIR] DOCUMENT [OPTIONS]
     hindsite help
 
 Commands:
 
-    init    initialize a new project
+    init    initialize a new site
     build   build the website
     serve   start development webserver
     new     create a new content document
@@ -357,19 +357,19 @@ func isTemplate(f string, templates *string) bool {
 	return strings.Contains("|"+nz(templates)+"|", "|"+filepath.Ext(f)+"|")
 }
 
-func (proj *project) isDocument(f string) bool {
+func (site *site) isDocument(f string) bool {
 	ext := filepath.Ext(f)
-	return (ext == ".md" || ext == ".rmu") && pathIsInDir(f, proj.contentDir)
+	return (ext == ".md" || ext == ".rmu") && pathIsInDir(f, site.contentDir)
 }
 
 // match returns true if path name f matches one of the patterns.
 // The match is purely lexical.
-func (proj *project) match(f string, patterns []string) bool {
+func (site *site) match(f string, patterns []string) bool {
 	switch {
-	case pathIsInDir(f, proj.contentDir):
-		f, _ = filepath.Rel(proj.contentDir, f)
-	case pathIsInDir(f, proj.templateDir):
-		f, _ = filepath.Rel(proj.templateDir, f)
+	case pathIsInDir(f, site.contentDir):
+		f, _ = filepath.Rel(site.contentDir, f)
+	case pathIsInDir(f, site.templateDir):
+		f, _ = filepath.Rel(site.templateDir, f)
 	default:
 		panic("matched path must reside in content or template directories: " + f)
 	}
@@ -397,8 +397,8 @@ func (proj *project) match(f string, patterns []string) bool {
 }
 
 // exclude returns true if path name f is excluded.
-func (proj *project) exclude(f string) bool {
-	return proj.match(f, proj.rootConf.exclude) && !proj.match(f, proj.rootConf.include)
+func (site *site) exclude(f string) bool {
+	return site.match(f, site.rootConf.exclude) && !site.match(f, site.rootConf.include)
 }
 
 // configFor returns the merged configuration for content directory path p.
@@ -410,39 +410,39 @@ func (proj *project) exclude(f string) bool {
 // `template/posts/james` with configuration entries from `template` having
 // lowest precedence.
 //
-// The `proj.confs` have been sorted by configuration `origin` in ascending
+// The `site.confs` have been sorted by configuration `origin` in ascending
 // order to ensure the directory precedence.
-func (proj *project) configFor(p string) config {
-	if !pathIsInDir(p, proj.contentDir) {
+func (site *site) configFor(p string) config {
+	if !pathIsInDir(p, site.contentDir) {
 		panic("path outside content directory: " + p)
 	}
-	dir := pathTranslate(p, proj.contentDir, proj.templateDir)
+	dir := pathTranslate(p, site.contentDir, site.templateDir)
 	if fileExists(p) {
 		dir = filepath.Dir(dir)
 	}
 	result := newConfig()
-	for _, conf := range proj.confs {
+	for _, conf := range site.confs {
 		if pathIsInDir(dir, conf.origin) {
 			result.merge(conf)
 		}
 	}
 	// Global root configuration values.
-	result.exclude = proj.rootConf.exclude
-	result.include = proj.rootConf.include
-	result.homepage = proj.rootConf.homepage
-	result.urlprefix = proj.rootConf.urlprefix
+	result.exclude = site.rootConf.exclude
+	result.include = site.rootConf.include
+	result.homepage = site.rootConf.homepage
+	result.urlprefix = site.rootConf.urlprefix
 	return result
 }
 
-// parseConfig parses all configuration files from the project template
-// directory to project `confs`.
-func (proj *project) parseConfigs() error {
-	proj.confs = configs{}
-	err := filepath.Walk(proj.templateDir, func(f string, info os.FileInfo, err error) error {
+// parseConfig parses all configuration files from the site template
+// directory to site `confs`.
+func (site *site) parseConfigs() error {
+	site.confs = configs{}
+	err := filepath.Walk(site.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() && f == proj.initDir {
+		if info.IsDir() && f == site.initDir {
 			return filepath.SkipDir
 		}
 		if !info.IsDir() {
@@ -455,15 +455,15 @@ func (proj *project) parseConfigs() error {
 			cf := filepath.Join(f, v)
 			if fileExists(cf) {
 				found = true
-				proj.verbose("read config: " + cf)
-				if err := conf.parseFile(proj, cf); err != nil {
+				site.verbose("read config: " + cf)
+				if err := conf.parseFile(site, cf); err != nil {
 					return fmt.Errorf("config file: %s: %s", cf, err.Error())
 				}
 			}
 		}
 		if found {
-			proj.confs = append(proj.confs, conf)
-			proj.verbose2(conf.String())
+			site.confs = append(site.confs, conf)
+			site.verbose2(conf.String())
 		}
 		return nil
 	})
@@ -472,8 +472,8 @@ func (proj *project) parseConfigs() error {
 	}
 	// Sort configurations by ascending origin directory to ensure deeper
 	// configurations have precedence.
-	sort.Slice(proj.confs, func(i, j int) bool {
-		return proj.confs[i].origin < proj.confs[j].origin
+	sort.Slice(site.confs, func(i, j int) bool {
+		return site.confs[i].origin < site.confs[j].origin
 	})
 	return nil
 }

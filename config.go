@@ -60,7 +60,7 @@ func newConfig() config {
 }
 
 // parseFile parses a configuration file.
-func (conf *config) parseFile(proj *project, f string) error {
+func (conf *config) parseFile(site *site, f string) error {
 	text, err := ioutil.ReadFile(f)
 	if err != nil {
 		return err
@@ -112,12 +112,12 @@ func (conf *config) parseFile(proj *project, f string) error {
 		home := cf.Homepage
 		home = filepath.FromSlash(home)
 		if !filepath.IsAbs(home) {
-			home = filepath.Join(proj.buildDir, home)
+			home = filepath.Join(site.buildDir, home)
 		} else {
-			return fmt.Errorf("homepage must be relative to the build directory: %s", proj.buildDir)
+			return fmt.Errorf("homepage must be relative to the build directory: %s", site.buildDir)
 		}
-		if !pathIsInDir(home, proj.buildDir) {
-			return fmt.Errorf("homepage must reside in build directory: %s", proj.buildDir)
+		if !pathIsInDir(home, site.buildDir) {
+			return fmt.Errorf("homepage must reside in build directory: %s", site.buildDir)
 		}
 		if dirExists(home) {
 			return fmt.Errorf("homepage cannot be a directory: %s", home)

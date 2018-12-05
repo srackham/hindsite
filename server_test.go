@@ -15,10 +15,10 @@ func Test_server(t *testing.T) {
 	// Initialize temporary directory with test blog.
 	os.RemoveAll(tmpdir)
 	mkMissingDir(tmpdir)
-	proj := newProject()
+	site := newSite()
 	cmd := "hindsite init " + tmpdir + " -template ./testdata/blog/template"
 	args := strings.Split(cmd, " ")
-	code := proj.executeArgs(args)
+	code := site.executeArgs(args)
 	if code != 0 {
 		t.Fatalf("%s", cmd)
 	}
@@ -26,15 +26,15 @@ func Test_server(t *testing.T) {
 		t.Fatalf("%s: unexpected number of riles in template directory", cmd)
 	}
 	// Start server.
-	proj = newProject()
-	proj.out = make(chan string, 100)
-	proj.in = make(chan string, 1)
+	site = newSite()
+	site.out = make(chan string, 100)
+	site.in = make(chan string, 1)
 	cmd = "hindsite serve " + tmpdir
 	args = strings.Split(cmd, " ")
-	if err := proj.parseArgs(args); err != nil {
+	if err := site.parseArgs(args); err != nil {
 		t.Fatalf("serve error: %v", err.Error())
 	}
-	svr := newServer(&proj)
+	svr := newServer(&site)
 	go func() {
 		if err := svr.serve(); err != nil {
 			t.Fatalf("serve error: %v", err.Error())
@@ -105,11 +105,11 @@ func Test_server(t *testing.T) {
 
 // Based onhttps://blog.questionable.services/article/testing-http-handlers-go/
 func Test_httpHandlers(t *testing.T) {
-	proj := newProject()
-	proj.buildDir = "./testdata/blog/build"
-	proj.rootConf = newConfig()
-	proj.rootConf.urlprefix = "http:/example.com"
-	svr := newServer(&proj)
+	site := newSite()
+	site.buildDir = "./testdata/blog/build"
+	site.rootConf = newConfig()
+	site.rootConf.urlprefix = "http:/example.com"
+	svr := newServer(&site)
 
 	// Create a request to pass to our handler. We don't have any query parameters for now, so we'll
 	// pass 'nil' as the third parameter.
@@ -120,7 +120,7 @@ func Test_httpHandlers(t *testing.T) {
 
 	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
 	rr := httptest.NewRecorder()
-	handler := http.FileServer(http.Dir(proj.buildDir))
+	handler := http.FileServer(http.Dir(site.buildDir))
 	handler = svr.htmlFilter(handler)
 	handler = svr.saveBrowserURL(handler)
 
@@ -142,7 +142,7 @@ func Test_httpHandlers(t *testing.T) {
 	if !strings.Contains(got, wanted) {
 		t.Errorf("htmlFilter handler: response did not contain: %#v", wanted)
 	}
-	if strings.Contains(got, proj.rootConf.urlprefix) {
-		t.Errorf("htmlFilter handler: response contains urlprefix: %#v", proj.rootConf.urlprefix)
+	if strings.Contains(got, site.rootConf.urlprefix) {
+		t.Errorf("htmlFilter handler: response contains urlprefix: %#v", site.rootConf.urlprefix)
 	}
 }

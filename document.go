@@ -19,7 +19,7 @@ import (
 )
 
 type document struct {
-	proj         *project // Context.
+	site         *site // Context.
 	conf         config   // Merged configuration for this document.
 	contentPath  string
 	buildPath    string
@@ -46,11 +46,11 @@ type document struct {
 }
 
 // Parse document content and front matter.
-func newDocument(contentfile string, proj *project) (document, error) {
+func newDocument(contentfile string, site *site) (document, error) {
 	parseError := func(err error) error {
 		return fmt.Errorf("%s: %s", contentfile, err.Error())
 	}
-	if !pathIsInDir(contentfile, proj.contentDir) {
+	if !pathIsInDir(contentfile, site.contentDir) {
 		panic("document is outside content directory: " + contentfile)
 	}
 	if !fileExists(contentfile) {
@@ -58,13 +58,13 @@ func newDocument(contentfile string, proj *project) (document, error) {
 	}
 	doc := document{}
 	doc.contentPath = contentfile
-	doc.proj = proj
+	doc.site = site
 	info, err := os.Stat(contentfile)
 	if err != nil {
 		return doc, parseError(err)
 	}
 	doc.modtime = info.ModTime()
-	doc.conf = proj.configFor(doc.contentPath)
+	doc.conf = site.configFor(doc.contentPath)
 	// Extract title and date from file name.
 	var d string
 	d, doc.title = extractDateTitle(contentfile)
@@ -85,8 +85,8 @@ func newDocument(contentfile string, proj *project) (document, error) {
 		return doc, parseError(fmt.Errorf("front matter: %s", err.Error()))
 	}
 	// Synthesize build path and URL according to content path, permalink and slug values.
-	rel, _ := filepath.Rel(proj.contentDir, doc.contentPath)
-	doc.templatePath = filepath.Join(proj.templateDir, rel)
+	rel, _ := filepath.Rel(site.contentDir, doc.contentPath)
+	doc.templatePath = filepath.Join(site.templateDir, rel)
 	f := filepath.Base(rel)
 	switch filepath.Ext(f) {
 	case ".md", ".rmu":
@@ -105,20 +105,20 @@ func newDocument(contentfile string, proj *project) (document, error) {
 		link = strings.TrimPrefix(link, "/")
 		if strings.HasSuffix(link, "/") {
 			// "Pretty" URLs.
-			doc.buildPath = filepath.Join(proj.buildDir, filepath.FromSlash(link), "index.html")
+			doc.buildPath = filepath.Join(site.buildDir, filepath.FromSlash(link), "index.html")
 			doc.url = doc.conf.joinPrefix(link) + "/"
 		} else {
-			doc.buildPath = filepath.Join(proj.buildDir, filepath.FromSlash(link))
+			doc.buildPath = filepath.Join(site.buildDir, filepath.FromSlash(link))
 			doc.url = doc.conf.joinPrefix(link)
 		}
 	} else {
-		doc.buildPath = filepath.Join(proj.buildDir, filepath.Dir(rel), f)
+		doc.buildPath = filepath.Join(site.buildDir, filepath.Dir(rel), f)
 		doc.url = doc.conf.joinPrefix(path.Dir(filepath.ToSlash(rel)), f)
 	}
 	if doc.layout == "" {
 		// Find nearest document layout template file.
 		layout := ""
-		for _, l := range proj.htmlTemplates.layouts {
+		for _, l := range site.htmlTemplates.layouts {
 			if len(l) > len(layout) && pathIsInDir(doc.templatePath, filepath.Dir(l)) {
 				layout = l
 			}
@@ -126,7 +126,7 @@ func newDocument(contentfile string, proj *project) (document, error) {
 		if layout == "" {
 			return doc, parseError(fmt.Errorf("missing layout.html template"))
 		}
-		doc.layout = proj.htmlTemplates.name(layout)
+		doc.layout = site.htmlTemplates.name(layout)
 	}
 	urlpath := func() *string {
 		s := strings.TrimPrefix(doc.url, doc.conf.urlprefix)
@@ -326,7 +326,7 @@ func (doc *document) frontMatter() templateData {
 	// Process description as a text template before rendering to HTML.
 	description := doc.description
 	if isTemplate(doc.contentPath, doc.templates) {
-		description, _ = doc.proj.textTemplates.renderText("documentDescription", description, data)
+		description, _ = doc.site.textTemplates.renderText("documentDescription", description, data)
 	}
 	data["description"] = doc.render(description)
 	return data
@@ -346,7 +346,7 @@ func (doc *document) render(text string) template.HTML {
 	case ".md":
 		html = string(blackfriday.Run([]byte(text)))
 	case ".rmu":
-		conf, err := readFile(filepath.Join(doc.proj.contentDir, "config.rmu"))
+		conf, err := readFile(filepath.Join(doc.site.contentDir, "config.rmu"))
 		if err == nil {
 			text = conf + "\n\n" + text
 		}
@@ -357,7 +357,7 @@ func (doc *document) render(text string) template.HTML {
 
 // updateFrom copies fields set by newDocument from src document.
 func (doc *document) updateFrom(src document) {
-	doc.proj = src.proj
+	doc.site = src.site
 	doc.conf = src.conf
 	doc.contentPath = src.contentPath
 	doc.buildPath = src.buildPath
@@ -381,7 +381,7 @@ func (doc *document) updateFrom(src document) {
 
 // isDraft returns true if document is a draft and the drafts option is not true.
 func (doc *document) isDraft() bool {
-	return doc.draft && !doc.proj.drafts
+	return doc.draft && !doc.site.drafts
 }
 
 /*

@@ -6,7 +6,7 @@ See the [Github commit logs]({github}/commits/master) for a full list of changes
 ## Version 1.4.0 (2018-12-??)
 - Added the [`new` command]({reference}#new-command) which is used to create new
   content documents.
-- The hindsite project directory command argument (`PROJECT_DIR`) is optional
+- The hindsite site directory command argument (`SITE_DIR`) is optional
   and defaults to the current directory.
 - Added [`serve` command]({reference}#serve-command) `-navigate` option to
   automatically navigate to new and updated documents.
@@ -28,9 +28,9 @@ See the [Github commit logs]({github}/commits/master) for a full list of changes
 - The `serve` command now displays a sensible error message if the server port
   is already in use.
 - `init` command behavioral change: If the `-template TEMPLATE_DIR` option
-  specifies a location outside the project directory and the default
-  `PROJECT_DIR/template` directory does not exist or is empty then the
-  `TEMPLATE_DIR` is copied to `PROJECT_DIR/template`.
+  specifies a location outside the site directory and the default
+  `SITE_DIR/template` directory does not exist or is empty then the
+  `TEMPLATE_DIR` is copied to `SITE_DIR/template`.
 - Implemented code coverage tests.
 
 

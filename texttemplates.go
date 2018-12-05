@@ -19,7 +19,7 @@ func newTextTemplates(templateDir string) textTemplates {
 }
 
 // name joins template file name elements and converts them to template name.
-// The template name is relative to the project template directory and is
+// The template name is relative to the site template directory and is
 // slash-separated (platform independent).
 func (tmpls textTemplates) name(elem ...string) string {
 	name, err := filepath.Rel(tmpls.templateDir, filepath.Join(elem...))

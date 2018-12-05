@@ -40,18 +40,18 @@ HindsitePlugin.prototype.reload = function(path) {
 LiveReload.addPlugin(HindsitePlugin);`
 )
 
-// server is a project plus server specific fields and methods.
+// server is a site plus server specific fields and methods.
 type server struct {
-	*project
+	*site
 	mutex      *sync.Mutex
 	browserURL string
 	quit       chan struct{}
 	err        error
 }
 
-func newServer(proj *project) server {
+func newServer(site *site) server {
 	return server{
-		project: proj,
+		site: site,
 		mutex:   &sync.Mutex{},
 		quit:    make(chan struct{}),
 	}
@@ -360,7 +360,7 @@ func (svr *server) createFile(f string) error {
 		if svr.docs.byContentPath[f] != nil {
 			panic("document already exists")
 		}
-		doc, err := newDocument(f, svr.project)
+		doc, err := newDocument(f, svr.site)
 		if err != nil {
 			return err
 		}
@@ -434,7 +434,7 @@ func (svr *server) removeFile(f string) error {
 func (svr *server) writeFile(f string) error {
 	switch {
 	case svr.isDocument(f):
-		newDoc, err := newDocument(f, svr.project)
+		newDoc, err := newDocument(f, svr.site)
 		if err != nil {
 			return err
 		}
