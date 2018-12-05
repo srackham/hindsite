@@ -319,44 +319,12 @@ theme tweak) motivated me to write hindsite.
 Hindsite was designed to be easy to learn and use, it was not designed to
 compete with hugo's massive feature set.
 
-The casual use-case argument is the same reason my go-to drawing program is
-Microsoft Paint or KolorPaint and not Adobe Photoshop or The Gimp.
+The casual use argument is the same reason my go-to drawing program is Microsoft
+Paint or KolorPaint and not Adobe Photoshop or The Gimp.
 
 
 /*
 DRAFT FAQS THAT DID NOT MAKE THE GRADE.
-
-## Why not tests?
-There are no automated tests yet, the project has been subjected to fairly
-extensive manual testing (I've built 4 websites with the application).
-
-I've nothing against automated tests (my Rimu Markup project has 386 tests), but
-for this CLI project manual testing was more effective for bug squashing (plus
-it provided valuable use-case feedback for improvement, something that automated
-testing does not).
-
-100% automated code coverage says very little about code quality and nothing at
-all about useablility or specification compliance -- all it says is that all of
-the code has been executed at least once so it's a very low bar for code quality
-and one that's not difficult to satisfy.
-
-The pursuit of 100% coverage will probably uncover some latent bugs,
-but the real issue is whether or not manual use-case testing would be a
-more productive use of resources.
-
-Also, CLI apps are not the same as library packages:
-
-- Libraries are API centric and predominantly single-threaded so they are
-  inherently easier to test.
-- Library bugs are viral -- they infect client applications.
-- Library usability is less of an issue an easier to accomplish.
-
-The 100% code coverage mantra makes sense in a process driven corporate
-environment because code often created by many programmers with varying degrees
-of commitment, motivation and ability. So writing coverage tests at least makes
-someone read and think about the code. It creates new management and hiring
-opportunities, but it seldom creates great software.
-
 
 ## How do I escape template expansion in content files?
 Quote the template variable as a raw string. For example, to render this:

@@ -145,8 +145,8 @@ Usage:
 
 
 ### init command
-The _init_ command initializes project _content_ and _template_ directories from
-another _template_ directory or from one of the built-in templates.
+The _init_ command initializes project _content directory_ from the _template
+directory_ or from a built-in template.
 
 Usage:
 
@@ -159,13 +159,14 @@ Applicable options:
     -builtin NAME
     -v
 
-- If the `-builtin` option is specified the `TEMPLATE_DIR` must also be empty.
-- The `-builtin` option `NAME` is one of the following:
+- The `CONTENT_DIR` must be empty.
+- If the `-builtin NAME` option is specified the contents and template
+  directories are initialized from one of the named built-in templates:
    `blog`:: A blog and newsletter project.
    `minimal`:: A minimal project.
-- The `CONTENT_DIR` must be empty.
+- If the `-builtin` option is specified the `TEMPLATE_DIR` must be empty.
 
-Command execution:
+#### Command execution
 
 1. If the `-builtin` option is specified then the selected builtin template is
    copied to the `TEMPLATE_DIR`.
@@ -206,18 +207,19 @@ Applicable options:
   the content directory can be `TEMPLATE_DIR/init` (this is handy for testing
   template initialization content).
 
-Command execution:
+#### Command execution
 
 1. Configuration files in the template directories are parsed.
 2. All files and folders in the _build_ directory are deleted.
 3. Templates from templates directories are parsed.
-4. The content directory is recursively scanned and:
-   * Document front matter is parsed.
-   * Static files are processed and copied to the corresponding build
+4. The content directory is recursively scanned:
+   * [Document files](#documents) are read and front matter is parsed.
+   * [Static files](#static-files) are copied to the corresponding build
      directories.
 5. Document indexes are built.
 6. Document bodies are rendered with their corresponding layout templates.
-7. If a [homepage](#homepage) is specified it is copied to `index.html`.
+7. If a [homepage](#homepage) is specified it is copied to the root of the build
+   directory and named `index.html`.
 
 #### Build summary
 The printed build summary includes:
@@ -265,7 +267,7 @@ Applicable options:
   LiveReload port number (`LR_PORT`):
   * `HTTP_PORT` defaults to `1212`.
   * `LR_PORT` defaults to `35729`.
-  * Setting `LR_PORT` to `-1` disables browser live reloads.
+  * Setting `LR_PORT` to `-1` disables live reloads.
   * The port numbers must be unique across all running server instances.
   * Examples: `-port 1213`, `-port 1213:35730`, `-port :-1`.
 - While the server is runing you can enter the following keyboard commands:
@@ -275,14 +277,14 @@ Applicable options:
 - The server strips the `urlprefix` from URLs in HTML files before sending them
   to the browser. This allows the build to be tested irrespective of the
   `urlprefix` value.
-- To enable browser live reloads the server inserts the
-  [LiveReload script](https://github.com/livereload/livereload-js) tag into HTML
-  files prior to sending them to the browser.
+- To enable browser live reloads the server injects the
+  [LiveReload](http://livereload.com/) script into HTML files prior to sending
+  them to the browser.
 
 
 #### Partial rebuilds
 To speed up live reloads and to make the content creation process easier and
-more responsive the _serve command_ automatically performs partial builds when
+more responsive the _serve_ command automatically performs partial builds when
 content files are modified, added or deleted.
 
 The amount of processing required will depend on the size of your site and the
@@ -325,18 +327,20 @@ Applicable options:
 
 The following template variables are available to the new template:
 
-date:: The publication date is extracted from the file name `YYYY-MM-DD-` date
+`.date`:: The publication date is extracted from the file name `YYYY-MM-DD-` date
 prefix and formatted according to RFC 3339. If there is no prefix it defaults to
 the current date and time.
 
-title:: The document title is set to the `DOCUMENT` file name stripped of the
+`.title`:: The document title is set to the `DOCUMENT` file name stripped of the
 date prefix (if there is one) and the file name extension; hyphens replaced by
-spaces; then capitalized. For example, the following _new_ command will set the
-title to `"Foofoo Valve History"`:
+spaces; then capitalized.
+
+For example, the following _new_ command will set the
+title to `"Foofoo Valve History"` and the date to the current date and time:
 
     hindsite new ./content/posts/foofoo-valve-history.md
 
-Example `new.md` template (this is the default built-in template):
+The default new template:
 
 ```
 ---
@@ -535,7 +539,7 @@ byline = "Ac eros etiam enim pellentesque proin"
 # YAML
 user:
   banner: News & Views
-  byline: Ac eros etiam enim pellentesque proin, tincidunt augue
+  byline: Ac eros etiam enim pellentesque proin
 ```
 
 Are available as these template variables:
@@ -549,9 +553,6 @@ Are available as these template variables:
 † The `exclude`, `include`, `homepage` and `urlprefix` configuration parameters
 are site-wide and are always taken from the template directory root
 configuration i.e. they can only be specified in the template root configuration file.
-
-Some configuration parameters are merged into the [document template
-variables](#document-template-variables).
 
 
 ## Documents
@@ -754,10 +755,10 @@ file name stripped of the date prefix (if there is one), with hyphens replaced
 by spaces, then capitalized.
 
 `user`:: `user` is a user defined key/value map. It is merged with the lower
-precedence [`user` configuration parameter](#configuration-parameters) and
-assigned to the `.user` [template variable](#document-template-variables). If
-`user` is not specified in the document front matter it defaults to the `user`
-configuration parameter value.
+precedence [`user` configuration parameter](#user) and assigned to the `.user`
+[template variable](#document-template-variables). If `user` is not specified in
+the document front matter it defaults to the `user` configuration parameter
+value.
 
 
 ## Document template variables
@@ -802,8 +803,8 @@ tag) and `.url` (the tag index URL).
 `.urlprefix`:: [`urlprefix`](#urlprefix) configuration value.
 
 `.user`:: This key/value map is synthesized by merging the (higher precedence)
-document [front matter `user` value](#front-matter-values) with the document's `user`
-[configuration parameter](#user).
+document [front matter `user` value](#front-matter-values) with the document's
+[`user` configuration parameter](#user).
 
 
 ## Templates
@@ -867,7 +868,7 @@ set of [document template variables](#document-template-variables).
 
 `.urlprefix`:: The [`urlprefix`](#urlprefix) configuration parameter value.
 
-`.user`:: The index configuration [`user`](#configuration-parameters) key/value map.
+`.user`:: The index configuration [`user`](#user) key/value map.
 ..
 
 `tags.html`:: This optional index template is used to build a `tags.html` tags
@@ -883,7 +884,7 @@ index webpage. If it is not present the tags index files are not built.
 
 `.urlprefix`:: The [`urlprefix`](#urlprefix) configuration parameter value.
 
-`.user`:: The index configuration [`user`](#configuration-parameters) key/value map.
+`.user`:: The index configuration [`user`](#user) key/value map.
 ..
 
 
