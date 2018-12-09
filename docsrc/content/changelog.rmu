@@ -3,16 +3,18 @@
 See the [Github commit logs]({github}/commits/master) for a full list of changes.
 
 
-## Version 1.4.0 (2018-12-??)
+## Version 1.4.0 (2018-12-10)
+- Hindsite projects are now called _sites_. The word _site_ is more descriptive
+  and less generic than _project_.
 - Added the [`new` command]({reference}#new-command) which is used to create new
   content documents.
-- The hindsite site directory command argument (`SITE_DIR`) is optional
-  and defaults to the current directory.
+- The hindsite [_site directory_ command argument]({reference}#commands)
+  (`SITE_DIR`) is optional and defaults to the current directory.
 - Added [`serve` command]({reference}#serve-command) `-navigate` option to
   automatically navigate to new and updated documents.
 - Extended [`serve` command]({reference}#serve-command) `-port
-  [HTTP_PORT][:LR_PORT]` option to allow LiveReload port to be specified and
-  LiveReload to be disabled.
+  [HTTP_PORT][:LR_PORT]` option to allow LiveReload port to be specified as well
+  as LiveReload to be disabled.
 - Added [`serve` command]({reference}#serve-command) `D` and `N` interactive
   commands to toggle server `-drafts` and `-navigate` options respectively.
 

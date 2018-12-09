@@ -41,7 +41,7 @@ read Jekyll and Hugo Markdown document [front matter](#front-matter)).
 
 
 ## Sites
-A hindsite site consists of three separate directories:
+A hindsite _site_ consists of three separate directories:
 
 - A _content directory_ containing Markdown [documents](#documents) and
   [static resource files](#static-files).
@@ -51,10 +51,12 @@ A hindsite site consists of three separate directories:
 
 By default these directories reside in the _site directory_ and are named
 _content_, _template_ and _build_, all three must be mutually exclusive (not
-contained within one another). These directories normally reside in the same
-folder, but this convention is not enforced: a single template can process
-multiple content directories just as a single content directory can be processed
-by multiple templates.
+contained within one another).
+
+- The _build_, _content_ and _template_ directories normally reside in the _site
+  directory_ folder but this convention is not enforced.
+- A template directory can process multiple content directories just as a
+  content directory can be processed by multiple template directories.
 
 For example, here's the builtin blog site structure:
 
@@ -80,11 +82,6 @@ For example, here's the builtin blog site structure:
     └── posts
 ```
 
-Notice that, if we disregard the `build/indexes` and `template/init`
-directories, all three directories share the same base directory structure.
-Specifically, all three contain the template directory structure and the build
-directory is a one-to-one reconstruction of the content directory.
-
 The `build/indexes` directory contains the generated document and tag index
 pages.
 
@@ -97,6 +94,11 @@ File and directory names should only contain lower case alpha numeric and hyphen
 characters. This convention is not enforced but is recommended because it
 ensures consistent, readable URLs without ugly encodings for illegal URL
 characters.
+
+Notice that, if we exclude the `build/indexes` and `template/init`
+directories, all three directories share the same base directory structure.
+Specifically, all three contain the template directory structure and the build
+directory is a one-to-one reconstruction of the content directory.
 
 
 ## Commands
@@ -408,7 +410,7 @@ processing. TOML example:
 
 `include` †:: A `|` separated list of file and directory paths specifying files
 that are processed unconditionally i.e. irrespective of the `exclude` parameter.
-`include` parameter values have the same format as the `exclude` parameter. TOML
+`include` parameter values have the same syntax as the `exclude` parameter. TOML
 example:
 
     include = ".htaccess"
@@ -570,9 +572,9 @@ extensions](https://github.com/russross/blackfriday#extensions).
 
 Documents can include an optional [front matter header](#front-matter-header).
 
-A documents with the [draft](#front-matter-values) front matter value set will
-not be included in the built website unless the `-drafts` command option is
-specified.
+A documents with the [draft](#front-matter-values) front matter value set to
+`true` will not be included in the built website unless the `-drafts` command
+option is specified.
 
 If the document is classified as a template (see the
 [`templates`](#templates-conf) configuration parameter) then it is
@@ -603,7 +605,7 @@ The hindsite build command generates paginated document and tag indexes.
   contains a [`docs.html` template](#html-templates). The `docs.html` template
   generates document indexes, if a [`tags.html` template](#html-templates) is
   also present then tag indexes are generated.
-- Documents from the indexed content directory and all subdirectories contribute
+- Documents from the indexed content directory and its subdirectories contribute
   to the index.
 - A site can contain any number of indexed content directories.
 - Indexes can be nested. This allows categorized document subdirectories to have
@@ -612,7 +614,7 @@ The hindsite build command generates paginated document and tag indexes.
   document can only belong to one primary index.
 - Generated index pages are written to a directory named `indexes` located at
   the root of the _build directory_.
-- The `indexes` directory structure mirrors the _templates_ directory.
+- The `indexes` directory structure mirrors the _templates_ directory structure.
 
 The following HTML index files are built for each index:
 
@@ -722,8 +724,6 @@ overridden with the [build](#build-command) and [serve](#serve-command) command
     or more published documents have the same `id` value).
   - If a document has no explicit `id` value then the default value is determined
     by the [`id` configuration parameter](#id-configuration-parameter).
-  - The special document `id` value `urlpath` is translated to the document's
-    URL minus the [`urlprefix`](#urlprefix).
 
 `layout`:: The name of the template used to render the document. `layout`
 defaults to the closest `layout.html` [HTML template](#html-templates).
@@ -746,9 +746,9 @@ configuration value. The only sensible values in this context are a blank string
 enable text template expansion).
 
 .#slug
-`slug`:: The slug replaces the file name (minus file name extension) of the
-generated document build file along with the last component of the document's
-URL (see also the [`peramlink`](#permalink) configuration parameter). 
+`slug`:: The slug replaces the document file name (minus file name extension) in
+generated [build paths](#build-paths) and [URLs](#urls).
+
 
 `title`:: The document title. If not specified `title` defaults the document
 file name stripped of the date prefix (if there is one), with hyphens replaced
@@ -786,6 +786,7 @@ parameters](#configuration-parameters) respectively.
 `.modtime`:: Document content file modification date and time.
 
 `.next`, `.prev`:: The next and previous document URLs in primary index order.
+`.prev` is `nil` in the first document, `.next` is `nil` in the last document.
 
 `.permalink`:: [`permalink`](#front-matter-values) front matter value.
 
@@ -811,27 +812,27 @@ document [front matter `user` value](#front-matter-values) with the document's
 _hindsite_ uses Go templates from the site [_template directory_](#sites)
 to build webpages. There are two types of templates:
 
-- [HTML templates](#html-templates) which are used to build index and document
+- [HTML templates](#html-templates) which are used to build indexes and document
   HTML webpages.
-- Optional [Text templates](#text-templates) are used in Markdown documents and
-  static files.
+- Optional [Text templates](#text-templates) are used to preprocess Markdown
+  documents and static files.
 
-There are two template name spaces, one for HTML template and the other for Text
-templates. Each template file contributes one or more named templates: the file
-itself plus any explicitly declared templates within the file. The implicit
-template name is its file name relative to the _template directory_ using the
-slash (`/`) path separator character. For example the
+There are two template name spaces, one for _HTML templates_ and the other for
+_Text templates_. Each template file contributes one or more named templates
+(the file itself plus any explicitly declared templates within the file). The
+implicit template name is its file name relative to the _template directory_
+using the slash (`/`) path separator character. For example the
 `/blog/template/posts/layout.html` template in the `/blog/template` directory is
 assigned the name `posts/layout.html`.
 
-Both HTML and text templates share the common [Go template
+Both HTML and text templates use the [Go template
 syntax](https://golang.org/pkg/text/template/).
 
 ### HTML templates
 HTML layout and index templates are used to build HTML webpages and document
 indexes. All the `.html` files in the site _template directory_ (excluding
 the `init` directory) contribute to the set of named HTML templates made
-available to the layout and index templates. All HTML templates share the same
+available to layout and index templates. All HTML templates share the same
 namespace.
 
 The following template files have special significance:
@@ -865,6 +866,7 @@ set of [document template variables](#document-template-variables).
       `.prev`, `.next`, `.first`, `.last`::: These items include the page `.number` and
        `.url` of the previous, next, first and last index pages. For example
       `.page.prev.number` is the page number (1...) of the previous document index page.
+      `.prev` is `nil` on the first last index page, `.next` is `nil` on the last last index page.
 
 `.urlprefix`:: The [`urlprefix`](#urlprefix) configuration parameter value.
 
@@ -889,7 +891,7 @@ index webpage. If it is not present the tags index files are not built.
 
 
 ### Text templates
-All `.txt` files in the site _template directory_ (excluding the `init`
+All `.txt` files in the _template directory_ (excluding the `init`
 directory) contribute to the set of named text templates available during
 [document file](#documents) and [static file](#static-files) template expansion.
 All text templates share the same namespace.
@@ -898,8 +900,8 @@ Text template expansion is optional. By default there is no document or static
 file expansion, it is enabled by the [`templates`](#templates-conf)
 configuration parameter.
 
-[Static files](#static-files) can include a [front matter
-header](#front-matter-header).
+[Static files](#static-files) that undergo template expansion can include a
+[front matter header](#front-matter-header).
 
 
 ## Build paths
@@ -924,8 +926,10 @@ directory is `/mysite/build` and the document path is
 ## URLs
 hindsite synthesizes document URLs by taking the document's [build
 path](#build-paths) relative to the [build directory](#sites) and prefixing
-it with the [`urlprefix`](#urlprefix) configuration parameter. File path
-separators are translated to slash characters.
+it with the [`urlprefix`](#urlprefix) configuration parameter.
+
+- File path separators are translated to slash characters.
+- URLs are root-relative by default.
 
 For example, if the build directory is `/mysite/build` and the generated web
 page is `/mysite/build/posts/foo.html` then:
@@ -941,9 +945,6 @@ If you are deploying to a web server subdirectory then you need to set the
 correctly. For example, if are deploying to the server `http://example.com/blog`
 directory you need to set `urlprefix` to either `/blog` (to generate
 root-relative URLs) or `http://example.com/blog` (to generate absolute URLs).
-
-NOTE: The hindsite [serve command](#serve-command) strips the `urlprefix` from
-HTML responses before sending them to the browser.
 
 
 ## Building hindsite
