@@ -28,13 +28,21 @@
 
 <h1 id="hindsite-change-log">Hindsite Change Log</h1>
 <p>See the <a href="https://github.com/srackham/hindsite/commits/master">Github commit logs</a> for a full list of changes.</p>
-<h2 id="version-1-3-0-2018-11-11">Version 1.3.0 (2018-11-11)</h2>
+<h2 id="version-1-4-0-2018-12-10">Version 1.4.0 (2018-12-10)</h2>
+<ul><li>Hindsite projects are now called <em>sites</em>. The word <em>site</em> is more descriptive
+  and less generic than <em>project</em>.</li><li>Added the <a href="/hindsite/index.html#new-command"><code>new</code> command</a> which is used to create new
+  content documents.</li><li>The hindsite <a href="/hindsite/index.html#commands"><em>site directory</em> command argument</a>
+  (<code>SITE_DIR</code>) is optional and defaults to the current directory.</li><li>Added <a href="/hindsite/index.html#serve-command"><code>serve</code> command</a> <code>-navigate</code> option to
+  automatically navigate to new and updated documents.</li><li>Extended <a href="/hindsite/index.html#serve-command"><code>serve</code> command</a> <code>-port
+  [HTTP_PORT][:LR_PORT]</code> option to allow LiveReload port to be specified as well
+  as LiveReload to be disabled.</li><li>Added <a href="/hindsite/index.html#serve-command"><code>serve</code> command</a> <code>D</code> and <code>N</code> interactive
+  commands to toggle server <code>-drafts</code> and <code>-navigate</code> options respectively.</li></ul><h2 id="version-1-3-0-2018-11-11">Version 1.3.0 (2018-11-11)</h2>
 <ul><li>Allow unquoted date/time front matter <code>date</code> values in TOML headers.</li><li>Added site search to built-in <em>blog</em> template.</li><li>Additional tests (80.3% coverage).</li><li>Migrated to Go 1.11 modules.</li></ul><h2 id="version-1-2-0-2018-07-03">Version 1.2.0 (2018-07-03)</h2>
 <ul><li>The <code>serve</code> command now displays a sensible error message if the server port
   is already in use.</li><li><code>init</code> command behavioral change: If the <code>-template TEMPLATE_DIR</code> option
-  specifies a location outside the project directory and the default
-  <code>PROJECT_DIR/template</code> directory does not exist or is empty then the
-  <code>TEMPLATE_DIR</code> is copied to <code>PROJECT_DIR/template</code>.</li><li>Implemented code coverage tests.</li></ul><h2 id="version-1-1-0-2018-06-23">Version 1.1.0 (2018-06-23)</h2>
+  specifies a location outside the site directory and the default
+  <code>SITE_DIR/template</code> directory does not exist or is empty then the
+  <code>TEMPLATE_DIR</code> is copied to <code>SITE_DIR/template</code>.</li><li>Implemented code coverage tests.</li></ul><h2 id="version-1-1-0-2018-06-23">Version 1.1.0 (2018-06-23)</h2>
 <ul><li>Added document <code>id</code> front matter value along with the related <code>id</code>
   configuration parameter.</li><li>Colorized console error and success messages.</li><li>Better error messages.</li><li>Added <a href="/hindsite/faq.html#disqus-howto">Disqus FAQ</a>.</li><li>The <a href="/hindsite/index.html#build-command"><code>build</code> command</a> now reports parse errors from
   all documents instead of quitting at the first error.</li></ul><h2 id="version-1-0-0-2018-05-20">Version 1.0.0 (2018-05-20)</h2>
