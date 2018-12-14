@@ -51,9 +51,9 @@ type server struct {
 
 func newServer(site *site) server {
 	return server{
-		site: site,
-		mutex:   &sync.Mutex{},
-		quit:    make(chan struct{}),
+		site:  site,
+		mutex: &sync.Mutex{},
+		quit:  make(chan struct{}),
 	}
 }
 

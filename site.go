@@ -346,8 +346,8 @@ Options:
     -v
 
 Version:    ` + VERS + " (" + OS + ")" + `
-Built:      ` + BUILT + `
 Git commit: ` + COMMIT + `
+Built:      ` + BUILT + `
 Github:     https://github.com/srackham/hindsite
 Docs:       https://srackham.github.io/hindsite`)
 }
