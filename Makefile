@@ -21,7 +21,7 @@ bindata: bindata.go
 
 .PHONY: install
 install:
-	go install ./...
+	go install -ldflags  "-X main.BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)" ./...
 
 .PHONY: test
 test: bindata install
@@ -48,8 +48,8 @@ validate-docs: build-docs
 	for f in $$(find ./docs -name "*.html"); do echo $$f; html-validator --verbose --format text --file $$f; done
 
 # Set VERS environment variable to override default version (the latest tag value) e.g. VERS=v1.0.0 make build
-.PHONY: build
-build: build-docs
+.PHONY: build-dist
+build-dist: build-docs
 	mkdir -p ./bin
 	BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)
 	COMMIT=$$(git rev-parse HEAD)
