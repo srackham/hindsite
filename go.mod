@@ -13,7 +13,7 @@ require (
 	github.com/shurcooL/sanitized_anchor_name v0.0.0-20170918181015-86672fcb3f95 // indirect
 	github.com/smartystreets/assertions v0.0.0-20180820201707-7c9eb446e3cf // indirect
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
-	github.com/srackham/go-rimu/v11 v11.1.3
+	github.com/srackham/go-rimu/v11 v11.1.4
 	github.com/stretchr/testify v1.2.2
 	golang.org/x/sys v0.0.0-20180417080122-b126b21c05a9 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
