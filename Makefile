@@ -8,6 +8,7 @@ SHELL := bash
 .DELETE_ON_ERROR:
 .SUFFIXES:
 .ONESHELL:
+# .SILENT:
 
 GOFLAGS ?=
 
@@ -32,7 +33,7 @@ clean:
 	go clean -i ./...
 
 .PHONY: push
-push:
+push: test
 	git push -u --tags origin master
 
 .PHONY: build-docs
