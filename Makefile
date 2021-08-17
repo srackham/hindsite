@@ -30,7 +30,13 @@ test: bindata install
 
 .PHONY: clean
 clean:
+	go mod verify
+	go mod tidy
 	go clean -i ./...
+
+.PHONY: fmt
+fmt:
+	gofmt -w -s $$(find . -name '*.go' -not -name bindata.go)
 
 .PHONY: push
 push: test
