@@ -1,7 +1,7 @@
 debug
 *.test
 *.out
-gitignore
+tmp/
 examples/minimal/index.html
 bin/
 build/
@@ -13,4 +13,3 @@ builtin/blog/build/
 builtin/minimal/content/
 builtin/minimal/build/
 hindsite-benchmark*
-vendor/
