@@ -1,7 +1,7 @@
 # Hindsite FAQ
 
 ## Does hindsite support themes?
-Themes are baked in, every [site template directory]({reference}#sites)
+Themes are baked in. Every [site template directory]({reference}#sites)
 is a theme and the [init command]({reference}#init-command) is the "theme"
 installer.
 
