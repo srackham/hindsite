@@ -13,14 +13,14 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	blackfriday "github.com/russross/blackfriday/v2"
 	"github.com/srackham/go-rimu/v11/rimu"
-	blackfriday "gopkg.in/russross/blackfriday.v2"
-	yaml "gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v3"
 )
 
 type document struct {
-	site         *site // Context.
-	conf         config   // Merged configuration for this document.
+	site         *site  // Context.
+	conf         config // Merged configuration for this document.
 	contentPath  string
 	buildPath    string
 	templatePath string    // Virtual path used to find document related templates.
