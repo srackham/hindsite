@@ -10,7 +10,7 @@ import (
 )
 
 type index struct {
-	site        *site                 // Context.
+	site        *site                    // Context.
 	conf        config                   // Merged configuration for this index.
 	contentDir  string                   // The directory that contains the indexed documents.
 	templateDir string                   // The directory that contains the index templates.
