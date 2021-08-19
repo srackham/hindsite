@@ -36,15 +36,16 @@ push: test
 
 .PHONY: build-docs
 build-docs: install
-	hindsite build docsrc -build docs
+	hindsite build docs
+	cp docs/build/* docs	# Github pages serves from the ./docs folder
 
 .PHONY: serve-docs
 serve-docs: install
-	hindsite serve docsrc -build docs -launch -navigate -v
+	hindsite serve docs -launch -navigate -v
 
 .PHONY: validate-docs
 validate-docs: build-docs
-	for f in $$(find ./docs -name "*.html"); do echo $$f; html-validator --verbose --format text --file $$f; done
+	for f in $$(ls ./docs/*.html); do echo $$f; html-validator --verbose --format text --file $$f; done
 
 # Set VERS environment variable to override default version (the latest tag value) e.g. VERS=v1.0.0 make build
 .PHONY: build-dist

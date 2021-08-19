@@ -3,7 +3,6 @@ debug
 *.out
 .vscode/
 tmp/
-doc/index.md
 bin/
 build/
 !cmd/testdata/blog/build/

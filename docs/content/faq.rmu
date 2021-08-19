@@ -136,22 +136,22 @@ to using `.date` directly.
 ## How do you configure source code highlighting?
 By including [highlight.js](https://github.com/isagalaev/highlight.js) CSS and
 scripts. For example, take a look at the [hindsite documentation
-templates](https://github.com/srackham/hindsite/blob/master/docsrc/template/partials.html).
+templates](https://github.com/srackham/hindsite/blob/master/docs/template/partials.html).
 
 1. Include [highlighter CSS in the HTML
-   header](https://github.com/srackham/hindsite/blob/master/docsrc/template/partials.html#L10).
+   header](https://github.com/srackham/hindsite/blob/master/docs/template/partials.html#L10).
 2. Include the [highlighter scripts at the end of the HTML
-   body](https://github.com/srackham/hindsite/blob/master/docsrc/template/partials.html#L33).
+   body](https://github.com/srackham/hindsite/blob/master/docs/template/partials.html#L33).
    Languages which are not in the default library can be inluded separately.
 3. Include [highlighter
-   initialization code](https://github.com/srackham/hindsite/blob/master/docsrc/template/partials.html#L37)
+   initialization code](https://github.com/srackham/hindsite/blob/master/docs/template/partials.html#L37)
    at the end of the HTML body:
 ``` javascript
 hljs.configure({languages: []});  // Turn off automatic language detection.
 hljs.initHighlightingOnLoad();
 ```
 4. You may also need to [tweak `.hljs` CSS class
-   properties](https://github.com/srackham/hindsite/blob/master/docsrc/content/main.css#L94).
+   properties](https://github.com/srackham/hindsite/blob/master/docs/content/main.css#L94).
 
 Now when you annotate Markdown _fenced blocks_ with the language name the source
 will be highlighted, for example:
