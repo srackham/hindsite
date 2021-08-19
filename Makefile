@@ -12,20 +12,12 @@ SHELL := bash
 
 GOFLAGS ?=
 
-BINDATA_FILES = $(shell find ./builtin/minimal/template) $(shell find ./builtin/blog/template)
-
-bindata.go: $(BINDATA_FILES)
-	go-bindata -prefix ./builtin/ -ignore '/(build|content)/' ./builtin/...
-
-.PHONY: bindata
-bindata: bindata.go
-
 .PHONY: install
 install:
 	go install -ldflags  "-X main.BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)" ./...
 
 .PHONY: test
-test: bindata install
+test: install
 	go test -cover ./...
 
 .PHONY: clean
@@ -36,7 +28,7 @@ clean:
 
 .PHONY: fmt
 fmt:
-	gofmt -w -s $$(find . -name '*.go' -not -name bindata.go)
+	gofmt -w -s $$(find . -name '*.go')
 
 .PHONY: push
 push: test

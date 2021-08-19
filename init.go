@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -24,7 +25,7 @@ func (site *site) init() error {
 			return fmt.Errorf("non-empty template directory: " + site.templateDir)
 		}
 		site.verbose("installing builtin template: " + site.builtin)
-		if err := RestoreAssets(site.templateDir, site.builtin+"/template"); err != nil {
+		if err := restoreEmbeddedFS(embeddedFS, "builtin/"+site.builtin+"/template", site.templateDir); err != nil {
 			return err
 		}
 		// Hoist the restored template files from the root of the restored
@@ -104,6 +105,38 @@ func (site *site) init() error {
 		}
 		if err := copyDirContents(site.templateDir, defaultTemplateDir); err != nil {
 			return err
+		}
+	}
+	return nil
+}
+
+//go:embed builtin/blog/template/** builtin/minimal/template/**
+var embeddedFS embed.FS
+
+// Recursively restore embedded file system directory srcDir to disk dstDir.
+func restoreEmbeddedFS(srcFS embed.FS, srcDir string, dstDir string) error {
+	entries, err := srcFS.ReadDir(srcDir)
+	if err != nil {
+		panic(err)
+	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			if err := restoreEmbeddedFS(srcFS, srcDir+"/"+entry.Name(), dstDir+"/"+entry.Name()); err != nil {
+				return err
+			}
+		} else {
+			if err := mkMissingDir(dstDir); err != nil {
+				return err
+			}
+			srcFile := srcDir + "/" + entry.Name()
+			contents, err := srcFS.ReadFile(srcFile)
+			if err != nil {
+				return err
+			}
+			dstFile := dstDir + "/" + entry.Name()
+			if err := writeFile(dstFile, string(contents)); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
