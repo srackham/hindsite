@@ -125,7 +125,7 @@ release:
 		--name $$SUMS \
 		--file $$SUMS
 
-BLOG_DIR = ./builtin/blog
+BLOG_DIR = ./cmd/builtin/blog
 
 # Built the builtin blog's init directory.
 .PHONY: build-blog
