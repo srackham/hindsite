@@ -117,7 +117,7 @@ var embeddedFS embed.FS
 func restoreEmbeddedFS(srcFS embed.FS, srcDir string, dstDir string) error {
 	entries, err := srcFS.ReadDir(srcDir)
 	if err != nil {
-		panic(err)
+		panic("failed to read embedded directory: " + srcDir)
 	}
 	for _, entry := range entries {
 		if entry.IsDir() {
@@ -131,7 +131,7 @@ func restoreEmbeddedFS(srcFS embed.FS, srcDir string, dstDir string) error {
 			srcFile := srcDir + "/" + entry.Name()
 			contents, err := srcFS.ReadFile(srcFile)
 			if err != nil {
-				return err
+				panic("failed to read embedded file: " + srcFile)
 			}
 			dstFile := dstDir + "/" + entry.Name()
 			if err := writeFile(dstFile, string(contents)); err != nil {
