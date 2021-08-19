@@ -4,16 +4,17 @@
 
 
 ## Overview
-hindsite is a [very
-fast](https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite),
-lightweight static website generator. It builds static websites with optional
-document and tag indexes from Markdown source documents (e.g. blogs posts,
-newsletters, articles). Features:
+hindsite is a [fast](https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite),
+lightweight static website
+generator. It builds static websites with optional document and tag indexes from
+Markdown source documents (e.g. blogs posts, newsletters, articles).
 
-- [High performance](https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite).
-- Stand-alone single-file executable.
-- Built-in development web server with browser live reload, file watcher and incremental
-  rebuilds.
+The hindsite stand-alone executable includes a built-in development web server
+with Live Reload, a file watcher and incremental rebuilds.
+
+- [Documentation](https://srackham.github.io/hindsite)
+- [Downloads](https://github.com/srackham/hindsite/releases)
+- [Github repository](https://github.com/srackham/hindsite)
 
 
 ## Quick Start
@@ -23,10 +24,3 @@ commands](https://srackham.github.io/hindsite/#quick-start).
     mkdir mysite
     hindsite init mysite -builtin blog
     hindsite serve mysite -launch
-
-## Links
-Documentation: https://srackham.github.io/hindsite
-
-Download page: https://github.com/srackham/hindsite/releases
-
-Github: https://github.com/srackham/hindsite

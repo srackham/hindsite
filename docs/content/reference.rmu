@@ -276,13 +276,17 @@ Applicable options:
   * Press the _R_ key followed by the _Enter_ key to force a complete site rebuild.
   * Press the _D_ key followed by the _Enter_ key to toggle the server `-drafts` option.
   * Press the _N_ key followed by the _Enter_ key to toggle the server `-navigate` option.
+- The _serve command_ monitors keyboard input, if you want to run it in the
+  background you need to close stdin by passing it `/dev/null`. For example:
+
+  hindsite serve mysite < /dev/null &
+
 - The server strips the `urlprefix` from URLs in HTML files before sending them
   to the browser. This allows the build to be tested irrespective of the
   `urlprefix` value.
 - To enable browser live reloads the server injects the
   [LiveReload](http://livereload.com/) script into HTML files prior to sending
   them to the browser.
-
 
 #### Partial rebuilds
 To speed up live reloads and to make the content creation process easier and
@@ -951,7 +955,7 @@ root-relative URLs) or `http://example.com/blog` (to generate absolute URLs).
 To compile hindsite from source code run the following commands to download,
 compile and install hindsite:
 
-**NOTE**: Requires Go 1.11 or better.
+**NOTE**: Requires Go 1.16 or better.
 
     git clone https://github.com/srackham/hindsite.git
     cd hindsite
