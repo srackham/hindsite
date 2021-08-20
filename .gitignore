@@ -5,7 +5,7 @@ debug
 tmp/
 bin/
 build/
-!cmd/testdata/blog/build/
-cmd/builtin/blog/content/
-cmd/builtin/minimal/content/
+!cmd/hindsite/testdata/blog/build/
+cmd/hindsite/builtin/blog/content/
+cmd/hindsite/builtin/minimal/content/
 hindsite-benchmark*

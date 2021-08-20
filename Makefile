@@ -14,7 +14,14 @@ GOFLAGS ?=
 
 .PHONY: install
 install:
-	go install -ldflags  "-X main.BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)" ./...
+	# Set VERS environment variable to set the executable version number displayed by the `hindsite help` command..
+	LDFLAGS="-X main.BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)"
+	VERS=$${VERS:=}
+	if [ -n "$$VERS" ]; then
+		LDFLAGS="$$LDFLAGS -X main.VERS=$$VERS"
+	fi
+	LDFLAGS="$$LDFLAGS -X main.OS=$$(go env GOOS)/$$(go env GOARCH)"
+	go install -ldflags "$$LDFLAGS" ./...
 
 .PHONY: test
 test: install
@@ -47,13 +54,13 @@ serve-docs: install
 validate-docs: build-docs
 	for f in $$(ls ./docs/*.html); do echo $$f; html-validator --verbose --format text --file $$f; done
 
-# Set VERS environment variable to override default version (the latest tag value) e.g. VERS=v1.0.0 make build
 .PHONY: build-dist
 build-dist: build-docs
+	# Set VERS environment variable to override default version (the latest tag value) e.g. VERS=v1.0.0 make build
 	mkdir -p ./bin
 	BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)
 	COMMIT=$$(git rev-parse HEAD)
-	VERS=$${VERS:-}
+	VERS=$${VERS:=}
 	if [ -z "$$VERS" ]; then
 		VERS=$$(git describe --tags --abbrev=0)
 		if [ -z "$$VERS" ]; then
@@ -126,7 +133,7 @@ release:
 		--name $$SUMS \
 		--file $$SUMS
 
-BLOG_DIR = ./cmd/builtin/blog
+BLOG_DIR = ./cmd/hindsite/builtin/blog
 
 # Built the builtin blog's init directory.
 .PHONY: build-blog

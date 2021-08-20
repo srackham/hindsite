@@ -26,13 +26,13 @@ TOML example:
 ## How can I add site search to my website?
 An easy way to add a site search feature is to use a [Google Custom Search Engine
 (CSE)](https://cse.google.com). For example, the hindsite built-in [`blog`
-site](https://github.com/srackham/hindsite/tree/master/cmd/builtin/blog/template)
+site](https://github.com/srackham/hindsite/tree/master/cmd/hindsite/builtin/blog/template)
 includes a Google CSE search page. To customize it for your website you need to:
 
 1. Create a [Google Custom Search Engine (CSE)](https://cse.google.com) for your
    site.
 2. Paste your site's CSE code into the
-   [`search.md`](https://raw.githubusercontent.com/srackham/hindsite/master/cmd/builtin/blog/template/init/search.md)
+   [`search.md`](https://raw.githubusercontent.com/srackham/hindsite/master/cmd/hindsite/builtin/blog/template/init/search.md)
    content page.
 
 Google CSE tips:
@@ -52,7 +52,7 @@ Google](https://support.google.com/webmasters/answer/34397).
 .#disqus-howto
 ## How do I include Disqus comments in my website?
 The recipe described below is taken from the hindsite [built-in `blog`
-site](https://github.com/srackham/hindsite/tree/master/cmd/builtin/blog/template).
+site](https://github.com/srackham/hindsite/tree/master/cmd/hindsite/builtin/blog/template).
 If you [initialized your site]({reference}#init-command) with the built-in
 `blog` template then you already have the Disqus template and steps 3 and 4
 below are redundant.
@@ -227,12 +227,17 @@ hindsite compares favorably with [Hugo](https://gohugo.io/) (which bills
 itself as "The world’s fastest framework for building websites").
 
 In informal measurements carried out on a site with 5000 Markdown posts (20MB
-total) hindsite was four to five times faster than Hugo on full rebuilds. On
+total):
+
+- hindsite was twenty times faster than Hugo on full rebuilds.
+- On
 subsequent incremental rebuilds hindsite ranges from six times faster than Hugo
 (if related indexes pages are rebuilt) to around ten times slower than Hugo (if
-all index pages have to be rebuilt). The `hugo` build command uses approximately
+all index pages have to be rebuilt).
+
+- The `hugo` build command uses approximately
 ten times more memory than the `hindsite build` command; the `hugo server`
-command consumed a whopping 11.2GB (around 180 times the `hindsite serve`
+command consumed a whopping 13GB (around 180 times the `hindsite serve`
 command).
 
 IMPORTANT: This is not an "apples with apples" comparison, Hugo is more complex
@@ -240,7 +245,7 @@ and has more features than hindsite. Differences between the respective themes
 is also a factor -- the Hugo theme is heavier than the hindsite theme. As always,
 benchmarks are irrelevant if they do not address your specific use cases.
 
-#### hindsite v1.0.0 (windows/amd64) running on Dell XPS27 PC under Windows 10.
+#### hindsite v1.4.1 (windows/amd64) running on Dell Optiplex 7080 PC under Windows 10.
 _Execution times_::
 - `hindsite build` command: 27.72s (full build, average of 5).
 - `hindsite serve` command: 29.64s (full rebuild, average of 5).

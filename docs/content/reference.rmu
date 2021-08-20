@@ -23,7 +23,7 @@ commands:
    prefer to build and install from source).
 
 2. Create a new Hindsite site directory and install the [builtin `blog`
-   template](https://github.com/srackham/hindsite/tree/master/cmd/builtin/blog/template)
+   template](https://github.com/srackham/hindsite/tree/master/cmd/hindsite/builtin/blog/template)
    using the hindsite [init command](#init-command):
 
     mkdir mysite
