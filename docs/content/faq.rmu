@@ -223,57 +223,37 @@ expansion and prefix root-relative URLs with `{{.urlprefix}}`.
 
 
 ## How fast is hindsite?
-hindsite compares favorably with [Hugo](https://gohugo.io/) (which bills
-itself as "The world’s fastest framework for building websites").
+hindsite compares more than favorably with [Hugo](https://gohugo.io/) (which
+bills itself as "The world’s fastest framework for building websites").
 
-In informal measurements carried out on a site with 5000 Markdown posts (20MB
-total):
+Informal measurements on a blog site with 5000 Markdown posts (20MB of Markdown
+source) revealed that hindsite is an order of magnitude faster and uses and
+order of magnitude less memory than hugo:
 
-- hindsite was twenty times faster than Hugo on full rebuilds.
-- On
-subsequent incremental rebuilds hindsite ranges from six times faster than Hugo
-(if related indexes pages are rebuilt) to around ten times slower than Hugo (if
-all index pages have to be rebuilt).
+- hindsite was around fifteen times faster than Hugo for full rebuilds (hindsite
+  5.2s vs hugo 77.8s).
 
-- The `hugo` build command uses approximately
-ten times more memory than the `hindsite build` command; the `hugo server`
-command consumed a whopping 13GB (around 180 times the `hindsite serve`
-command).
+- On subsequent [partial rebuilds](index.html#partial-rebuilds) rebuilds
+  hindsite was around ten times faster to four times slower than hugo depending
+  on wether hindsite has to rebuild index pages or not. hindsite took 0.06s (2.15s if
+  indexes rebuilt) vs hugo's 0.505s.
+
+- The `hindsite build` command uses approximately ten times less memory than the
+  `hugo` build command (hindsite 46KB vs hugo 524KB). The `hugo server` command
+  consumed a whopping 13GB.
+
+The tests were run under Ubuntu 20.04. The differences were not as marked under
+Windows 10 (hindsite builds were around eight times faster).
 
 IMPORTANT: This is not an "apples with apples" comparison, Hugo is more complex
 and has more features than hindsite. Differences between the respective themes
-is also a factor -- the Hugo theme is heavier than the hindsite theme. As always,
-benchmarks are irrelevant if they do not address your specific use cases.
-
-#### hindsite v1.4.1 (windows/amd64) running on Dell Optiplex 7080 PC under Windows 10.
-_Execution times_::
-- `hindsite build` command: 27.72s (full build, average of 5).
-- `hindsite serve` command: 29.64s (full rebuild, average of 5).
-- `hindsite serve` command: 4.91s (partial build, one document and
-  entire index, average of 5).
-- `hindsite serve` command: 0.07s (partial build, one document and related index
-  pages, average of 5).
-
-  _Memory consumption_::
-  - `hindsite build` command: 34MB
-  - `hindsite serve` command: 62MB
-
-#### Hugo v0.40.3 (windows/amd64) running on Dell XPS27 PC under Windows 10
-Hugo setup as per the [Hugo _Quick Start_
-instructions](https://gohugo.io/getting-started/quick-start/).
-
-_Execution times_::
-- `hugo` command: 162.92s (full build, average of 5).
-- `hugo server` command: 128.64s (initial full build).
-- `hugo server` command: 0.47s (partial rebuild).
-
-  _Memory consumption_::
-  - `hugo` command: 337MB
-  - `hugo server` command: 11.2GB
+is also a factor -- the Hugo theme is heavier than the hindsite theme. As
+always, benchmarks are irrelevant if they do not address your specific use
+cases.
 
 NOTE: Exclude the site folders from Windows Defender anti-virus real-time
-protection (not doing this imposed a 4x performance decrease for both hindsite
-and Hugo).
+protection (not doing this imposed a performance hit for both hindsite and
+Hugo).
 
 The benchmarked hindsite and Hugo projects are available in the downloadable
 [hindsite-benchmark.zip](https://drive.google.com/uc?export=download&id=1vm1542RE3W7s9qIYfyYsiTvuwXFZaMP_)

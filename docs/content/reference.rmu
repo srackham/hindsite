@@ -532,7 +532,7 @@ page [URLs](#urls). Its default value is a blank string. TOML examples:
 .#user
 `user`:: This is a user defined key/value map and provides a mechanism for
 defining custom template variables. Both keys and values are strings and the
-keys must be legal [Go identifier](https://golang.org/ref/spec#Identifiers). For
+keys must be legal [Go identifiers](https://golang.org/ref/spec#Identifiers). For
 example:
 ..
 
