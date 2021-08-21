@@ -18,6 +18,7 @@ install:
 	LDFLAGS="-X main.BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)"
 	VERS=$${VERS:=}
 	if [ -n "$$VERS" ]; then
+		[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "illegal VERS=$$VERS " && exit 1
 		LDFLAGS="$$LDFLAGS -X main.VERS=$$VERS"
 	fi
 	LDFLAGS="$$LDFLAGS -X main.OS=$$(go env GOOS)/$$(go env GOARCH)"
@@ -37,6 +38,11 @@ clean:
 fmt:
 	gofmt -w -s $$(find . -name '*.go')
 
+.PHONY: tag
+tag:
+	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "illegal VERS=$$VERS " && exit 1
+	git tag -a -m "$$VERS" $$VERS
+
 .PHONY: push
 push: test
 	git push -u --tags origin master
@@ -55,7 +61,7 @@ validate-docs: build-docs
 	for f in $$(ls ./docs/*.html); do echo $$f; html-validator --verbose --format text --file $$f; done
 
 .PHONY: build-dist
-# Set VERS environment variable to override default version (the latest tag value) e.g. VERS=v1.0.0 make build
+# Set VERS environment variable to override default version (the latest tag value) e.g. make build VERS=v1.0.0
 build-dist: build-docs
 	mkdir -p ./bin
 	BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)
@@ -68,6 +74,7 @@ build-dist: build-docs
 			exit 1
 		fi
 	fi
+	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "illegal VERS=$$VERS " && exit 1
 	BUILD_FLAGS="-X main.BUILT=$$BUILT -X main.COMMIT=$$COMMIT -X main.VERS=$$VERS"
 	build () {
 		export GOOS=$$1
@@ -99,10 +106,12 @@ build-dist: build-docs
 	sha1sum hindsite-$$VERS*.zip > hindsite-$$VERS-checksums-sha1.txt
 
 .PHONY: release
+# Compile and upload release binaries for the latest version tag
 release:
 	REPO=hindsite
 	USER=srackham
 	VERS=$$(git describe --tags --abbrev=0)
+	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "illegal VERS=$$VERS " && exit 1
 	upload () {
 		export GOOS=$$1
 		export GOARCH=$$2
