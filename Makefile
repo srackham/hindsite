@@ -13,10 +13,10 @@ SHELL := bash
 GOFLAGS ?=
 
 .PHONY: install
-# Set VERS environment variable to set the executable version number displayed by the `hindsite help` command
 install:
 	LDFLAGS="-X main.BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)"
-	VERS=$${VERS:=}
+	# The version number is set to the tag of latest commit
+	VERS="$$(git tag --points-at HEAD)"
 	if [ -n "$$VERS" ]; then
 		[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "illegal VERS=$$VERS " && exit 1
 		LDFLAGS="$$LDFLAGS -X main.VERS=$$VERS"
@@ -70,7 +70,7 @@ build-dist:
 	VERS="$$(git tag --points-at HEAD)"
 	[[ -z "$$VERS" ]] && echo "error: the latest commit has not been tagged" && exit 1
 	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "error: illegal version tag: $$VERS " && exit 1
-	[ $$(ls hindsite-$$VERS* 2>/dev/null | wc -w) -gt 0 ] && echo "error: built version $$VERS already exists" && exit 1
+	[[ $$(ls ./bin/hindsite-$$VERS* 2>/dev/null | wc -w) -gt 0 ]] && echo "error: built version $$VERS already exists" && exit 1
 	mkdir -p ./bin
 	BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)
 	COMMIT=$$(git rev-parse HEAD)
