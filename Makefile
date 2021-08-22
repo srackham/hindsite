@@ -29,7 +29,7 @@ test: install
 	go test -cover ./...
 
 .PHONY: clean
-clean:
+clean: fmt
 	go mod verify
 	go mod tidy
 	go clean -i ./...
@@ -45,7 +45,7 @@ tag:
 	git tag -a -m "$$VERS" $$VERS
 
 .PHONY: push
-push: test
+push: test validate-docs
 	git push -u --tags origin master
 
 .PHONY: build-docs
@@ -65,8 +65,8 @@ validate-docs: build-docs
 # Build executables for all supported platforms in the ./bin directory and compress them to Zip files.
 # Because the distribution is built from the working directory the working directory cannot contain
 # uncommitted changes and the latest commit must be tagged with a release version number.
-build-dist:
-	[[ -n "$$(git status --porcelain)" ]] && echo "error: there are uncommitted changes in working directory" && exit 1
+build-dist: clean test validate-docs
+	[[ -n "$$(git status --porcelain)" ]] && echo "error: there are uncommitted changes in the working directory" && exit 1
 	VERS="$$(git tag --points-at HEAD)"
 	[[ -z "$$VERS" ]] && echo "error: the latest commit has not been tagged" && exit 1
 	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "error: illegal version tag: $$VERS " && exit 1
