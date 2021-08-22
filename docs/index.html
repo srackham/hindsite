@@ -38,7 +38,7 @@ commands:</p>
 <ol><li>Download the binary for your platform from the <a href="https://github.com/srackham/hindsite/releases">releases
    page</a> and extract the
    <code>hindsite</code> executable (see <a href="#building-hindsite"><em>Building hindsite</em></a> if you
-   prefer to build and install from source).</li><li>Create a new Hindsite site directory and install the <a href="https://github.com/srackham/hindsite/tree/master/cmd/builtin/blog/template">builtin <code>blog</code>
+   prefer to build and install from source).</li><li>Create a new Hindsite site directory and install the <a href="https://github.com/srackham/hindsite/tree/master/cmd/hindsite/builtin/blog/template">builtin <code>blog</code>
    template</a>
    using the hindsite <a href="#init-command">init command</a>:<pre><code>mkdir mysite
 hindsite init mysite -builtin blog</code></pre>
@@ -175,7 +175,9 @@ live reloading.</p>
 <ul><li>If the <code>-drafts</code> option is specified <a href="#documents">draft documents</a> are included
   in the built website.</li><li>The <code>-launch</code> option opens the site home page in the default web browser.</li><li>The <code>-navigate</code> option causes the browser to automatically navigate to new and
   updated <a href="#documents">documents</a>.</li><li>The <code>-port</code> option sets the server HTTP port number (<code>HTTP_PORT</code>) and/or the
-  LiveReload port number (<code>LR_PORT</code>):<ul><li><code>HTTP_PORT</code> defaults to <code>1212</code>.</li><li><code>LR_PORT</code> defaults to <code>35729</code>.</li><li>Setting <code>LR_PORT</code> to <code>-1</code> disables live reloads.</li><li>The port numbers must be unique across all running server instances.</li><li>Examples: <code>-port 1213</code>, <code>-port 1213:35730</code>, <code>-port :-1</code>.</li></ul></li><li>While the server is runing you can enter the following keyboard commands:<ul><li>Press the <em>R</em> key followed by the <em>Enter</em> key to force a complete site rebuild.</li><li>Press the <em>D</em> key followed by the <em>Enter</em> key to toggle the server <code>-drafts</code> option.</li><li>Press the <em>N</em> key followed by the <em>Enter</em> key to toggle the server <code>-navigate</code> option.</li></ul></li><li>The server strips the <code>urlprefix</code> from URLs in HTML files before sending them
+  LiveReload port number (<code>LR_PORT</code>):<ul><li><code>HTTP_PORT</code> defaults to <code>1212</code>.</li><li><code>LR_PORT</code> defaults to <code>35729</code>.</li><li>Setting <code>LR_PORT</code> to <code>-1</code> disables live reloads.</li><li>The port numbers must be unique across all running server instances.</li><li>Examples: <code>-port 1213</code>, <code>-port 1213:35730</code>, <code>-port :-1</code>.</li></ul></li><li>While the server is runing you can enter the following keyboard commands:<ul><li>Press the <em>R</em> key followed by the <em>Enter</em> key to force a complete site rebuild.</li><li>Press the <em>D</em> key followed by the <em>Enter</em> key to toggle the server <code>-drafts</code> option.</li><li>Press the <em>N</em> key followed by the <em>Enter</em> key to toggle the server <code>-navigate</code> option.</li></ul></li><li>The <em>serve command</em> monitors keyboard input, if you want to run it in the
+  background you need to close stdin by passing it <code>/dev/null</code>. For example:<pre><code>hindsite serve mysite &lt; /dev/null &amp;</code></pre>
+</li><li>The server strips the <code>urlprefix</code> from URLs in HTML files before sending them
   to the browser. This allows the build to be tested irrespective of the
   <code>urlprefix</code> value.</li><li>To enable browser live reloads the server injects the
   <a href="http://livereload.com/">LiveReload</a> script into HTML files prior to sending
@@ -308,7 +310,7 @@ page <a href="#urls">URLs</a>. Its default value is a blank string. TOML example
 urlprefix = "https://www.example.com"   # Absolute URL prefix.</code></pre>
 </dd><dt id="user"><code>user</code></dt><dd>This is a user defined key/value map and provides a mechanism for
 defining custom template variables. Both keys and values are strings and the
-keys must be legal <a href="https://golang.org/ref/spec#Identifiers">Go identifier</a>. For
+keys must be legal <a href="https://golang.org/ref/spec#Identifiers">Go identifiers</a>. For
 example:<pre><code># TOML
 [user]
 banner = "News &amp; Views"
@@ -530,7 +532,7 @@ root-relative URLs) or <code>http://example.com/blog</code> (to generate absolut
 <h2 id="building-hindsite">Building hindsite</h2>
 <p>To compile hindsite from source code run the following commands to download,
 compile and install hindsite:</p>
-<p><strong>NOTE</strong>: Requires Go 1.11 or better.</p>
+<p><strong>NOTE</strong>: Requires Go 1.16 or better.</p>
 <pre><code>git clone https://github.com/srackham/hindsite.git
 cd hindsite
 go install ./...</code></pre>

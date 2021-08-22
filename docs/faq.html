@@ -44,12 +44,12 @@ file</a>.</p>
 <pre><code>exclude = "*~|4913"</code></pre>
 <h2 id="search-howto">How can I add site search to my website?</h2>
 <p>An easy way to add a site search feature is to use a <a href="https://cse.google.com">Google Custom Search Engine
-(CSE)</a>. For example, the hindsite built-in <a href="https://github.com/srackham/hindsite/tree/master/cmd/builtin/blog/template"><code>blog</code>
+(CSE)</a>. For example, the hindsite built-in <a href="https://github.com/srackham/hindsite/tree/master/cmd/hindsite/builtin/blog/template"><code>blog</code>
 site</a>
 includes a Google CSE search page. To customize it for your website you need to:</p>
 <ol><li>Create a <a href="https://cse.google.com">Google Custom Search Engine (CSE)</a> for your
    site.</li><li>Paste your site's CSE code into the
-   <a href="https://raw.githubusercontent.com/srackham/hindsite/master/cmd/builtin/blog/template/init/search.md"><code>search.md</code></a>
+   <a href="https://raw.githubusercontent.com/srackham/hindsite/master/cmd/hindsite/builtin/blog/template/init/search.md"><code>search.md</code></a>
    content page.</li></ol><p>Google CSE tips:</p>
 <ul><li>You can choose <a href="https://support.google.com/customsearch/answer/4513886">which
   portions</a> of your site
@@ -59,7 +59,7 @@ includes a Google CSE search page. To customize it for your website you need to:
 then there's no guarantee that they will be indexed. See <a href="https://support.google.com/webmasters/answer/34397">Get your website on
 Google</a>.</p>
 <h2 id="disqus-howto">How do I include Disqus comments in my website?</h2>
-<p>The recipe described below is taken from the hindsite <a href="https://github.com/srackham/hindsite/tree/master/cmd/builtin/blog/template">built-in <code>blog</code>
+<p>The recipe described below is taken from the hindsite <a href="https://github.com/srackham/hindsite/tree/master/cmd/hindsite/builtin/blog/template">built-in <code>blog</code>
 site</a>.
 If you <a href="/hindsite/index.html#init-command">initialized your site</a> with the built-in
 <code>blog</code> template then you already have the Disqus template and steps 3 and 4
@@ -117,16 +117,16 @@ variables</a> are simpler and preferable
 to using <code>.date</code> directly.</p>
 <h2 id="how-do-you-configure-source-code-highlighting">How do you configure source code highlighting?</h2>
 <p>By including <a href="https://github.com/isagalaev/highlight.js">highlight.js</a> CSS and
-scripts. For example, take a look at the <a href="https://github.com/srackham/hindsite/blob/master/docsrc/template/partials.html">hindsite documentation
+scripts. For example, take a look at the <a href="https://github.com/srackham/hindsite/blob/master/docs/template/partials.html">hindsite documentation
 templates</a>.</p>
-<ol><li>Include <a href="https://github.com/srackham/hindsite/blob/master/docsrc/template/partials.html#L10">highlighter CSS in the HTML
-   header</a>.</li><li>Include the <a href="https://github.com/srackham/hindsite/blob/master/docsrc/template/partials.html#L33">highlighter scripts at the end of the HTML
+<ol><li>Include <a href="https://github.com/srackham/hindsite/blob/master/docs/template/partials.html#L10">highlighter CSS in the HTML
+   header</a>.</li><li>Include the <a href="https://github.com/srackham/hindsite/blob/master/docs/template/partials.html#L33">highlighter scripts at the end of the HTML
    body</a>.
-   Languages which are not in the default library can be inluded separately.</li><li>Include <a href="https://github.com/srackham/hindsite/blob/master/docsrc/template/partials.html#L37">highlighter
+   Languages which are not in the default library can be inluded separately.</li><li>Include <a href="https://github.com/srackham/hindsite/blob/master/docs/template/partials.html#L37">highlighter
    initialization code</a>
    at the end of the HTML body:<pre class="javascript"><code>hljs.configure({languages: []});  // Turn off automatic language detection.
 hljs.initHighlightingOnLoad();</code></pre>
-</li><li>You may also need to <a href="https://github.com/srackham/hindsite/blob/master/docsrc/content/main.css#L94">tweak <code>.hljs</code> CSS class
+</li><li>You may also need to <a href="https://github.com/srackham/hindsite/blob/master/docs/content/main.css#L94">tweak <code>.hljs</code> CSS class
    properties</a>.</li></ol><p>Now when you annotate Markdown <em>fenced blocks</em> with the language name the source
 will be highlighted, for example:</p>
 <pre><code>``` javascript
@@ -169,29 +169,27 @@ begins with a slash e.g. <code>/images/beach.jpg</code>.</p>
 is probably just something to be aware of. Although you could enable document template
 expansion and prefix root-relative URLs with <code>{{.urlprefix}}</code>.</p>
 <h2 id="how-fast-is-hindsite">How fast is hindsite?</h2>
-<p>hindsite compares favorably with <a href="https://gohugo.io/">Hugo</a> (which bills
-itself as &ldquo;The world’s fastest framework for building websites&rdquo;).</p>
-<p>In informal measurements carried out on a site with 5000 Markdown posts (20MB
-total) hindsite was four to five times faster than Hugo on full rebuilds. On
-subsequent incremental rebuilds hindsite ranges from six times faster than Hugo
-(if related indexes pages are rebuilt) to around ten times slower than Hugo (if
-all index pages have to be rebuilt). The <code>hugo</code> build command uses approximately
-ten times more memory than the <code>hindsite build</code> command; the <code>hugo server</code>
-command consumed a whopping 11.2GB (around 180 times the <code>hindsite serve</code>
-command).</p>
+<p>hindsite compares more than favorably with <a href="https://gohugo.io/">Hugo</a> (which
+bills itself as &ldquo;The world’s fastest framework for building websites&rdquo;).</p>
+<p>Informal measurements on a blog site with 5000 Markdown posts (20MB of Markdown
+source) revealed that hindsite is an order of magnitude faster and uses and
+order of magnitude less memory than hugo:</p>
+<ul><li>hindsite was around fifteen times faster than Hugo for full rebuilds (hindsite
+  5.2s vs hugo 77.8s).</li><li>On subsequent <a href="index.html#partial-rebuilds">partial rebuilds</a> rebuilds
+  hindsite was around ten times faster to four times slower than hugo depending
+  on wether hindsite has to rebuild index pages or not. hindsite took 0.06s (2.15s if
+  indexes rebuilt) vs hugo's 0.505s.</li><li>The <code>hindsite build</code> command uses approximately ten times less memory than the
+  <code>hugo</code> build command (hindsite 46KB vs hugo 524KB). The <code>hugo server</code> command
+  consumed a whopping 13GB.</li></ul><p>The tests were run under Ubuntu 20.04. The differences were not as marked under
+Windows 10 (hindsite builds were around eight times faster).</p>
 <p><i class="sans-font">IMPORTANT</i>: This is not an &ldquo;apples with apples&rdquo; comparison, Hugo is more complex
 and has more features than hindsite. Differences between the respective themes
-is also a factor &mdash; the Hugo theme is heavier than the hindsite theme. As always,
-benchmarks are irrelevant if they do not address your specific use cases.</p>
-<h4 id="hindsite-v1-0-0-windows-amd64-running-on-dell-xps27-pc-under-windows-10">hindsite v1.0.0 (windows/amd64) running on Dell XPS27 PC under Windows 10.</h4>
-<dl><dt><em>Execution times</em></dt><dd><ul><li><code>hindsite build</code> command: 27.72s (full build, average of 5).</li><li><code>hindsite serve</code> command: 29.64s (full rebuild, average of 5).</li><li><code>hindsite serve</code> command: 4.91s (partial build, one document and
-  entire index, average of 5).</li><li><code>hindsite serve</code> command: 0.07s (partial build, one document and related index
-  pages, average of 5).</li></ul></dd><dt><em>Memory consumption</em></dt><dd><ul><li><code>hindsite build</code> command: 34MB</li><li><code>hindsite serve</code> command: 62MB</li></ul></dd></dl><h4 id="hugo-v0-40-3-windows-amd64-running-on-dell-xps27-pc-under-windows-10">Hugo v0.40.3 (windows/amd64) running on Dell XPS27 PC under Windows 10</h4>
-<p>Hugo setup as per the <a href="https://gohugo.io/getting-started/quick-start/">Hugo <em>Quick Start</em>
-instructions</a>.</p>
-<dl><dt><em>Execution times</em></dt><dd><ul><li><code>hugo</code> command: 162.92s (full build, average of 5).</li><li><code>hugo server</code> command: 128.64s (initial full build).</li><li><code>hugo server</code> command: 0.47s (partial rebuild).</li></ul></dd><dt><em>Memory consumption</em></dt><dd><ul><li><code>hugo</code> command: 337MB</li><li><code>hugo server</code> command: 11.2GB</li></ul></dd></dl><p><i class="sans-font">NOTE</i>: Exclude the site folders from Windows Defender anti-virus real-time
-protection (not doing this imposed a 4x performance decrease for both hindsite
-and Hugo).</p>
+is also a factor &mdash; the Hugo theme is heavier than the hindsite theme. As
+always, benchmarks are irrelevant if they do not address your specific use
+cases.</p>
+<p><i class="sans-font">NOTE</i>: Exclude the site folders from Windows Defender anti-virus real-time
+protection (not doing this imposed a performance hit for both hindsite and
+Hugo).</p>
 <p>The benchmarked hindsite and Hugo projects are available in the downloadable
 <a href="https://drive.google.com/uc?export=download&amp;id=1vm1542RE3W7s9qIYfyYsiTvuwXFZaMP_">hindsite-benchmark.zip</a>
 file (7.4MB):</p>
