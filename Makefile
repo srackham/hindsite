@@ -79,6 +79,7 @@ build-dist: clean test validate-docs
 		export GOOS=$$1
 		export GOARCH=$$2
 		LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
+		LDFLAGS="$$LDFLAGS -s -w"	# Strip symbols to decrease executable size
 		NAME=hindsite-$$VERS-$$GOOS-$$GOARCH
 		EXE=$$NAME/hindsite
 		if [ "$$1" = "windows" ]; then
