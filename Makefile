@@ -39,8 +39,9 @@ fmt:
 	gofmt -w -s $$(find . -name '*.go')
 
 .PHONY: tag
+# Tag the latest commit with the VERS environment variable e.g. make tag VERS=v1.0.0
 tag:
-	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "illegal VERS=$$VERS " && exit 1
+	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "error: illegal VERS=$$VERS " && exit 1
 	git tag -a -m "$$VERS" $$VERS
 
 .PHONY: push
@@ -61,20 +62,18 @@ validate-docs: build-docs
 	for f in $$(ls ./docs/*.html); do echo $$f; html-validator --verbose --format text --file $$f; done
 
 .PHONY: build-dist
-# Set VERS environment variable to override default version (the latest tag value) e.g. make build VERS=v1.0.0
-build-dist: build-docs
+# Build executables for all supported platforms in the ./bin directory and compress them to Zip files.
+# Because the distribution is built from the working directory the working directory cannot contain
+# uncommitted changes and the latest commit must be tagged with a release version number.
+build-dist:
+	[[ -n "$$(git status --porcelain)" ]] && echo "error: there are uncommitted changes in working directory" && exit 1
+	VERS="$$(git tag --points-at HEAD)"
+	[[ -z "$$VERS" ]] && echo "error: the latest commit has not been tagged" && exit 1
+	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "error: illegal version tag: $$VERS " && exit 1
+	[ $$(ls hindsite-$$VERS* 2>/dev/null | wc -w) -gt 0 ] && echo "error: built version $$VERS already exists" && exit 1
 	mkdir -p ./bin
 	BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)
 	COMMIT=$$(git rev-parse HEAD)
-	VERS=$${VERS:=}
-	if [ -z "$$VERS" ]; then
-		VERS=$$(git describe --tags --abbrev=0)
-		if [ -z "$$VERS" ]; then
-			echo "missing version tag"
-			exit 1
-		fi
-	fi
-	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "illegal VERS=$$VERS " && exit 1
 	BUILD_FLAGS="-X main.BUILT=$$BUILT -X main.COMMIT=$$COMMIT -X main.VERS=$$VERS"
 	build () {
 		export GOOS=$$1
@@ -95,10 +94,6 @@ build-dist: build-docs
 		zip $$ZIP $$NAME/*
 	}
 	cd bin
-	if [ $$(ls hindsite-$$VERS* 2>/dev/null | wc -w) -gt 0 ]; then
-		echo "built version $$VERS already exists"
-		exit 1
-	fi
 	build linux amd64
 	build darwin amd64
 	build windows amd64
@@ -106,12 +101,11 @@ build-dist: build-docs
 	sha1sum hindsite-$$VERS*.zip > hindsite-$$VERS-checksums-sha1.txt
 
 .PHONY: release
-# Compile and upload release binaries for the latest version tag
+# Upload release binary distributions for the version assigned to the VERS environment variable e.g. make release VERS=v1.0.0
 release:
 	REPO=hindsite
 	USER=srackham
-	VERS=$$(git describe --tags --abbrev=0)
-	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "illegal VERS=$$VERS " && exit 1
+	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "error: illegal VERS=$$VERS " && exit 1
 	upload () {
 		export GOOS=$$1
 		export GOARCH=$$2
