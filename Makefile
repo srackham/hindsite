@@ -61,8 +61,10 @@ serve-docs: install
 validate-docs: build-docs
 	for f in $$(ls ./docs/*.html); do echo $$f; html-validator --verbose --format text --file $$f; done
 
+DIST_DIR := ./dist
+
 .PHONY: build-dist
-# Build executables for all supported platforms in the ./bin directory and compress them to Zip files.
+# Build executable distributions and compress them to Zip files.
 # Because the distribution is built from the working directory the working directory cannot contain
 # uncommitted changes and the latest commit must be tagged with a release version number.
 build-dist: clean test validate-docs
@@ -70,8 +72,8 @@ build-dist: clean test validate-docs
 	VERS="$$(git tag --points-at HEAD)"
 	[[ -z "$$VERS" ]] && echo "error: the latest commit has not been tagged" && exit 1
 	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "error: illegal version tag: $$VERS " && exit 1
-	[[ $$(ls ./bin/hindsite-$$VERS* 2>/dev/null | wc -w) -gt 0 ]] && echo "error: built version $$VERS already exists" && exit 1
-	mkdir -p ./bin
+	[[ $$(ls $(DIST_DIR)/hindsite-$$VERS* 2>/dev/null | wc -w) -gt 0 ]] && echo "error: built version $$VERS already exists" && exit 1
+	mkdir -p $(DIST_DIR)
 	BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)
 	COMMIT=$$(git rev-parse HEAD)
 	BUILD_FLAGS="-X main.BUILT=$$BUILT -X main.COMMIT=$$COMMIT -X main.VERS=$$VERS"
@@ -94,7 +96,7 @@ build-dist: clean test validate-docs
 		go build -ldflags "$$LDFLAGS" -o $$EXE ../...
 		zip $$ZIP $$NAME/*
 	}
-	cd bin
+	cd $(DIST_DIR)
 	build linux amd64
 	build darwin amd64
 	build windows amd64
@@ -124,7 +126,7 @@ release:
 		--tag $$VERS \
 		--name "hindsite $$VERS" \
 		--description "hindsite is a fast, lightweight static website generator."
-	cd bin
+	cd $(DIST_DIR)
 	upload linux amd64
 	upload darwin amd64
 	upload windows amd64
