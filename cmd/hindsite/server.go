@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -251,7 +252,7 @@ func (svr *server) serve() error {
 		httpsvr := &http.Server{Addr: ":" + fmt.Sprintf("%d", svr.httpport), Handler: handler}
 		select {
 		case <-svr.quit:
-			if err := httpsvr.Shutdown(nil); err != nil {
+			if err := httpsvr.Shutdown(context.TODO()); err != nil {
 				panic(err) // Failed to shut down the server gracefully.
 			}
 			return
@@ -338,7 +339,7 @@ func (svr *server) serve() error {
 				} else {
 					color.Set(color.FgGreen, color.Bold)
 				}
-				svr.logconsole("time: %.3fs\n", (time.Now().Sub(start) + watcherLullTime).Seconds())
+				svr.logconsole("time: %.3fs\n", (time.Since(start) + watcherLullTime).Seconds())
 				color.Unset()
 				if svr.livereload {
 					lr.Reload(svr.browserURL)

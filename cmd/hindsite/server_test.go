@@ -37,7 +37,7 @@ func Test_server(t *testing.T) {
 	svr := newServer(&site)
 	go func() {
 		if err := svr.serve(); err != nil {
-			t.Fatalf("serve error: %v", err.Error())
+			t.Errorf("serve error: %v", err.Error())
 		}
 	}()
 	waitFor := func(output string) {

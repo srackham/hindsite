@@ -158,7 +158,7 @@ func (site *site) build() error {
 	site.logconsole("documents: %d", docsCount)
 	site.logconsole("drafts: %d", draftsCount)
 	site.logconsole("static: %d", staticCount)
-	site.logconsole("time: %.2fs", time.Now().Sub(startTime).Seconds())
+	site.logconsole("time: %.2fs", time.Since(startTime).Seconds())
 	color.Unset()
 	// Report accumulated document parse errors.
 	if errCount > 0 {
