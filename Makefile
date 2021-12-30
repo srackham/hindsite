@@ -26,6 +26,7 @@ install:
 
 .PHONY: test
 test: install
+	go vet ./...
 	go test -cover ./...
 
 .PHONY: clean
