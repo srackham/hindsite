@@ -8,7 +8,7 @@ SHELL := bash
 .DELETE_ON_ERROR:
 .SUFFIXES:
 .ONESHELL:
-# .SILENT:
+ .SILENT:
 
 GOFLAGS ?=
 
@@ -18,7 +18,7 @@ install:
 	# The version number is set to the tag of latest commit
 	VERS="$$(git tag --points-at HEAD)"
 	if [ -n "$$VERS" ]; then
-		[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "illegal VERS=$$VERS " && exit 1
+		[[ ! $$VERS =~ ^v[0-9]+\.[0-9]+\.[0-9]+$$ ]] && echo "illegal VERS=$$VERS " && exit 1
 		LDFLAGS="$$LDFLAGS -X main.VERS=$$VERS"
 	fi
 	LDFLAGS="$$LDFLAGS -X main.OS=$$(go env GOOS)/$$(go env GOARCH)"
@@ -41,7 +41,7 @@ fmt:
 .PHONY: tag
 # Tag the latest commit with the VERS environment variable e.g. make tag VERS=v1.0.0
 tag:
-	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "error: illegal VERS=$$VERS " && exit 1
+	[[ ! $$VERS =~ ^v[0-9]+\.[0-9]+\.[0-9]+$$ ]] && echo "error: illegal VERS=$$VERS " && exit 1
 	git tag -a -m "$$VERS" $$VERS
 
 .PHONY: push
@@ -71,7 +71,7 @@ build-dist: clean test validate-docs
 	[[ -n "$$(git status --porcelain)" ]] && echo "error: there are uncommitted changes in the working directory" && exit 1
 	VERS="$$(git tag --points-at HEAD)"
 	[[ -z "$$VERS" ]] && echo "error: the latest commit has not been tagged" && exit 1
-	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "error: illegal version tag: $$VERS " && exit 1
+	[[ ! $$VERS =~ ^v[0-9]+\.[0-9]+\.[0-9]+$$ ]] && echo "error: illegal version tag: $$VERS " && exit 1
 	[[ $$(ls $(DIST_DIR)/hindsite-$$VERS* 2>/dev/null | wc -w) -gt 0 ]] && echo "error: built version $$VERS already exists" && exit 1
 	mkdir -p $(DIST_DIR)
 	BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)
@@ -108,7 +108,7 @@ build-dist: clean test validate-docs
 release:
 	REPO=hindsite
 	USER=srackham
-	[[ ! $$VERS =~ v[0-9]+\.[0-9]+\.[0-9]+ ]] && echo "error: illegal VERS=$$VERS " && exit 1
+	[[ ! $$VERS =~ ^v[0-9]+\.[0-9]+\.[0-9]+$$ ]] && echo "error: illegal VERS=$$VERS " && exit 1
 	upload () {
 		export GOOS=$$1
 		export GOARCH=$$2
