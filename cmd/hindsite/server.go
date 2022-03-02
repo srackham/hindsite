@@ -244,7 +244,7 @@ func (svr *server) serve() error {
 	}
 	// Start Web server.
 	go func() {
-		svr.logconsole("\nServing build directory %s on %s\nPress Ctrl+C to stop\n", svr.buildDir, rooturl)
+		svr.logconsole("\nServing build directory %q on %q\nPress Ctrl+C to exit\n", svr.buildDir, rooturl)
 		handler := http.FileServer(http.Dir(svr.buildDir))
 		handler = svr.htmlFilter(handler)
 		handler = svr.saveBrowserURL(handler)
@@ -316,6 +316,14 @@ func (svr *server) serve() error {
 				case "N": // Toggle -navigate option.
 					svr.navigate = !svr.navigate
 					svr.logconsole("navigation: %t\n", svr.navigate)
+				default:
+					svr.logconsole(`Serving build directory %q on %q
+Press the R key followed by the Enter key to force a complete site rebuild
+Press the D key followed by the Enter key to toggle the server -drafts option
+Press the N key followed by the Enter key to toggle the server -navigate option
+Press the Enter key to print help
+Press Ctrl+C to exit
+`, svr.buildDir, rooturl)
 				}
 			case evt := <-fsevent:
 				start := time.Now()
