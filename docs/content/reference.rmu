@@ -276,6 +276,7 @@ Applicable options:
   * Press the _R_ key followed by the _Enter_ key to force a complete site rebuild.
   * Press the _D_ key followed by the _Enter_ key to toggle the server `-drafts` option.
   * Press the _N_ key followed by the _Enter_ key to toggle the server `-navigate` option.
+  * Press the _Enter_ key to print help.
 - The _serve command_ monitors keyboard input, if you want to run it in the
   background you need to close stdin by passing it `/dev/null`. For example:
 
