@@ -301,7 +301,8 @@ if:
 - A configuration file or template file is added, changed or removed
   (necessitating a full site rebuild).
 
-IMPORTANT: To ensure build integrity you should always perform a complete
+.important
+To ensure build integrity you should always perform a complete
 rebuild before deployment and after site structural changes (the serve
 command does not automatically process changes to the site directory
 structure).
@@ -585,7 +586,8 @@ If the document is classified as a template (see the
 rendered as a [text template](#text-templates) prior to layout template
 processing.
 
-NOTE: In addition to Markdown, _hindsite_ can also process [Rimu
+.note
+In addition to Markdown, _hindsite_ can also process [Rimu
 markup](https://srackham.github.io/rimu/). This documentation is written in
 Rimu.
 
@@ -952,10 +954,11 @@ root-relative URLs) or `http://example.com/blog` (to generate absolute URLs).
 
 
 ## Building hindsite
+.note
+Requires Go 1.16 or better.
+
 To compile hindsite from source code run the following commands to download,
 compile and install hindsite:
-
-**NOTE**: Requires Go 1.16 or better.
 
     git clone https://github.com/srackham/hindsite.git
     cd hindsite

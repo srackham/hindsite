@@ -27,10 +27,6 @@
 /\\?\((tm|TM)\)/ = '&trade;'
 /\\?\+-/ = '&plusmn;'
 
-// Admonishments.
-/\\?\bTODO\b/ = '<b style="color: red; background-color: yellow;">TODO</b>'
-/^\\?(NOTES?|IMPORTANT|WARNINGS?|TIPS?):/ = '<i class="sans-font">$1</i>:'
-
 
 /*
   Quotes

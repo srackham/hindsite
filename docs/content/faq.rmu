@@ -44,7 +44,8 @@ Google CSE tips:
   Console](https://search.google.com/search-console/about) to check search
   performance and coverage.
 
-_NOTE_: Google can take many days to index new and updated Web pages and even
+.note
+Google can take many days to index new and updated Web pages and even
 then there's no guarantee that they will be indexed. See [Get your website on
 Google](https://support.google.com/webmasters/answer/34397).
 
@@ -128,7 +129,8 @@ example:
 
     {{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}
 
-NOTE: The `.shortdate`, `.mediumdate` and `.longdate` [document template
+.note
+The `.shortdate`, `.mediumdate` and `.longdate` [document template
 variables]({reference}#document-template-variables) are simpler and preferable
 to using `.date` directly.
 
@@ -245,13 +247,15 @@ order of magnitude less memory than hugo:
 The tests were run under Ubuntu 20.04. The differences were not as marked under
 Windows 10 (hindsite builds were around eight times faster).
 
-IMPORTANT: This is not an "apples with apples" comparison, Hugo is more complex
+.important
+This is not an "apples with apples" comparison, Hugo is more complex
 and has more features than hindsite. Differences between the respective themes
 is also a factor -- the Hugo theme is heavier than the hindsite theme. As
 always, benchmarks are irrelevant if they do not address your specific use
 cases.
 
-NOTE: Exclude the site folders from Windows Defender anti-virus real-time
+.note
+Exclude the site folders from Windows Defender anti-virus real-time
 protection (not doing this imposed a performance hit for both hindsite and
 Hugo).
 
