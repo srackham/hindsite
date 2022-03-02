@@ -68,7 +68,7 @@ func Test_server(t *testing.T) {
 		}
 		waitFor(output)
 	}
-	waitFor("Press Ctrl+C to stop")
+	waitFor("Press Ctrl+C to exit")
 	// Create new post with copy of existing post.
 	existingfile := path.Join(tmpdir, "content", "posts", "2016-10-18-sed-sed.md")
 	text, err := readFile(existingfile)
