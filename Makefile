@@ -140,23 +140,32 @@ release:
 		--name $$SUMS \
 		--file $$SUMS
 
-BLOG_DIR = ./cmd/hindsite/builtin/blog
+# Generate build, serve and validate rules for builtin templates:
+#
+#	build-minimal, server-minimal, validate-minimal
+#	build-blog, server-blog, validate-blog
 
-# Built the builtin blog's init directory.
-.PHONY: build-blog
-build-blog: install
-	hindsite build $(BLOG_DIR) -content $(BLOG_DIR)/template/init -v
+# Rule templates.
+define rules_template
+.PHONY: build-$(1)
+build-$(1):
+	hindsite build $(2) -content $(2)/template/init -launch -navigate -v
 
-.PHONY: serve-blog
-serve-blog: install
-	hindsite serve $(BLOG_DIR) -content $(BLOG_DIR)/template/init -launch -navigate -v
+.PHONY: serve-$(1)
+serve-$(1):
+	hindsite serve $(2) -content $(2)/template/init -launch -navigate -v
 
-.PHONY: validate-blog
-validate-blog: build-blog
-	for f in $$(find $(BLOG_DIR)/build -name "*.html"); do
+.PHONY: validate-$(1)
+validate-$(1): build-$(1)
+	for f in $$$$(find $(2)/build -name "*.html"); do
 		# Skip page (it has custom Google CSE elements that fail validation).
-		if [ "$$f" != "$(BLOG_DIR)/build/search.html" ]; then
-			echo $$f
-			html-validator --verbose --format=text --file=$$f
+		if [ "$$$$f" != "$(2)/build/search.html" ]; then
+			echo $$$$f
+			html-validator --verbose --format=text --file=$$$$f
 		fi	
 	done
+endef
+
+# Rule generation.
+templates := minimal blog
+$(foreach t,$(templates),$(eval $(call rules_template,$(t),./cmd/hindsite/builtin/$(t))))
