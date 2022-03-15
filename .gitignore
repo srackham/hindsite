@@ -7,5 +7,5 @@ dist/
 build/
 !cmd/hindsite/testdata/blog/build/
 cmd/hindsite/builtin/blog/content/
-cmd/hindsite/builtin/minimal/content/
+cmd/hindsite/builtin/hello/content/
 hindsite-benchmark*

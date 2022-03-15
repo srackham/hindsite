@@ -142,7 +142,7 @@ release:
 
 # Generate build, serve and validate rules for builtin templates:
 #
-#	build-minimal, server-minimal, validate-minimal
+#	build-hello, server-hello, validate-hello
 #	build-blog, server-blog, validate-blog
 
 # Rule templates.
@@ -167,5 +167,5 @@ validate-$(1): build-$(1)
 endef
 
 # Rule generation.
-templates := minimal blog
+templates := hello blog
 $(foreach t,$(templates),$(eval $(call rules_template,$(t),./cmd/hindsite/builtin/$(t))))

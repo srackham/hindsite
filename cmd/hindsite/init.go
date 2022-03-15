@@ -110,7 +110,7 @@ func (site *site) init() error {
 	return nil
 }
 
-//go:embed builtin/blog/template/** builtin/minimal/template/**
+//go:embed builtin/blog/template/** builtin/hello/template/**
 var embeddedFS embed.FS
 
 // Recursively restore embedded file system directory srcDir to disk dstDir.
