@@ -1,0 +1,41 @@
+# Home Page
+
+A Hindsite template to create sites that have a fixed, relatively small, number
+of pages. Ideal for building documentation sites e.g. User Guides, FAQs and
+Reference Manuals.
+
+The template features dynamic table of contents generation.
+
+## Section One
+Cursus pulvinar lectus placerat tincidunt sagittis cursus vel lectus sed lectus
+arcu et a lectus diam et a integer a parturient natoque integer a lorem a
+scelerisque ac dis dis integer cursus natoque nisi a tincidunt sed.
+
+```javascript
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+      links[i].rel = 'noopener noreferrer';
+    }
+  }
+})();
+```
+
+## Section Two
+Integer Amet montes porttitor montes cursus a sagittis Amet ac porttitor a
+penatibus purus sed et integer a lectus lectus montes a montes.
+
+.sidebar
+Lectus cursus porttitor sed lectus nisi est ac vel scelerisque natoque
+scelerisque lorem porttitor est scelerisque natoque vel.
+
+## Section Three
+.note
+Penatibus placerat integer scelerisque lorem dolor porttitor mattis dis cursus
+sed.
+
+Scelerisque ac dis dis integer cursus natoque nisi a tincidunt sed.
+Integer Amet montes porttitor montes cursus a sagittis Amet ac porttitor a
+penatibus purus sed et integer a lectus lectus montes a montes.

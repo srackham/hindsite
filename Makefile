@@ -142,21 +142,22 @@ release:
 
 # Generate build, serve and validate rules for builtin templates:
 #
-#	build-hello, server-hello, validate-hello
-#	build-blog, server-blog, validate-blog
+#	build-builtin-hello, server-builtin-hello, validate-builtin-hello
+#	build-builtin-blog, server-builtin-blog, validate-builtin-blog
+#	build-builtin-docs, server-builtin-docs, validate-builtin-docs
 
 # Rule templates.
 define rules_template
-.PHONY: build-$(1)
-build-$(1):
+.PHONY: build-builtin-$(1)
+build-builtin-$(1):
 	hindsite build $(2) -content $(2)/template/init -launch -navigate -v
 
-.PHONY: serve-$(1)
-serve-$(1):
+.PHONY: serve-builtin-$(1)
+serve-builtin-$(1):
 	hindsite serve $(2) -content $(2)/template/init -launch -navigate -v
 
-.PHONY: validate-$(1)
-validate-$(1): build-$(1)
+.PHONY: validate-builtin-$(1)
+validate-builtin-$(1): build-builtin-$(1)
 	for f in $$$$(find $(2)/build -name "*.html"); do
 		# Skip page (it has custom Google CSE elements that fail validation).
 		if [ "$$$$f" != "$(2)/build/search.html" ]; then
@@ -167,5 +168,5 @@ validate-$(1): build-$(1)
 endef
 
 # Rule generation.
-templates := hello blog
+templates := hello blog docs
 $(foreach t,$(templates),$(eval $(call rules_template,$(t),./cmd/hindsite/builtin/$(t))))

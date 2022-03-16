@@ -1,0 +1,31 @@
+/*
+  Rimu Markup definitions.
+*/
+
+/*
+  Hindsite documentation.
+*/
+{--header-ids} = 'yes'
+{--header-links} = 'yes'
+
+
+/*
+  Replacements
+*/
+// Typographic replacements.
+/\\?--/ = '&mdash;'
+/\\?\.{3}/ = '&hellip;'
+/\\?->/ = '&rightarrow;'
+/\\?<-/ = '&leftarrow;'
+/\\?\([cC]\)/ = '&copy;'
+/\\?\((tm|TM)\)/ = '&trade;'
+/\\?\+-/ = '&plusmn;'
+
+
+/*
+  Quotes
+*/
+// Double-underline (overrides built-in strong quote).
+__ = '<u>|</u>'
+// Left and right double-quote characters.
+" = '&ldquo;|&rdquo;'
