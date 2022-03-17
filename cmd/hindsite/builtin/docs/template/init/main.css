@@ -1,23 +1,24 @@
-* {
-    margin: 0;
-    padding: 0;
-    white-space: inherit;
-    box-sizing: border-box;
-  }
-  body {
+  :root {
     font-size: 16px;
     line-height: 20px;
     color: #333333;
     background-color: white;
     font-family: Helvetica, Arial, sans-serif;
   }
+  * {
+    margin: 0;
+    padding: 0;
+    white-space: inherit;
+    box-sizing: border-box;
+  }
   h1, h2, h3, h4, h5, h6 {
+    margin: 10px 0;
     color: #2362a1;
   }
-  h1 { font-size: 2.0rem; padding-top: 1.1rem;}
+  h1 { font-size: 2.2rem; line-height: 40px;}
   h2 { font-size: 1.5rem; }
-  h3 { font-size: 1.4rem; }
-  h4 { font-size: 1.0rem; }
+  h3 { font-size: 1.2rem; }
+  h4 { font-size: 1.1rem; }
   h5 { font-size: 1.0rem; }
   h6 { font-size: 0.9rem; }
   h2, h3, h4, h5, h6 {
@@ -34,6 +35,7 @@
   }
   table {
     border-collapse: collapse;
+    table-layout: fixed;
     width: 100%;
   }
   td, th {
@@ -64,9 +66,10 @@
   }
   dt {
     margin-bottom: 0;
+    font-style: italic;
   }
   dd {
-    margin-left: 2.5rem;
+    margin-left: 1.0rem;
     margin-top: 0;
   }
   blockquote {
@@ -90,7 +93,7 @@
     font-size: 90%;
     background-color: #f8f8f8;
   }
-  .hljs { background-color: var(--code-background) !important; }
+  .hljs { background-color: #f8f8f8 !important; }
   pre {
     font-family: Consolas, "Andale Mono", Monaco, monospace;
     line-height: normal;
@@ -103,7 +106,7 @@
   .light-background {
     background-color: #f8f8f8;
     border: none;
-    white-space: pre;
+    white-space: pre-wrap;
   }
   *:not(pre) > code {
     white-space: nowrap;
@@ -127,7 +130,7 @@
     margin-top: 0.75rem;
     margin-bottom: 0.75rem;
   }
-    .sidebar,
+  .sidebar,
   .important,
   .note,
   .tip,
@@ -284,12 +287,11 @@
     margin-left: 0;
   }
   #toc .h1 {
-    font-size: 125%;
+    font-size: 110%;
     font-weight: bold;
     padding-left: 1rem;
-    margin-top: 1.0rem;
+    margin-top: 0.5rem;
     margin-bottom: 0.4rem;
-    border-bottom: 1px solid #dddddd;
   }
   #toc .h2 {
     padding-left: 1rem;
@@ -335,7 +337,6 @@
     margin-left: 0;
     padding-left: 40px;
     padding-right: 40px;
-    margin-bottom: 1.5em;
   }
   #article {
     padding-top: 1px;
@@ -349,7 +350,7 @@
     left: 0;
     height: 100%;
     width: 40px;
-    background-color: #2b445e;
+    background-color: #2362a1;
     color: white;
   }
   #sidebar {
