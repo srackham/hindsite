@@ -1,10 +1,36 @@
 # FAQ
 
 ## Lorem Ipsum?
-Lorem mattis cras scelerisque hac cursus pulvinar sagittis integer a
-integer lorem cras pulvinar est parturient purus sed sed vel dolor
-scelerisque sed a sed placerat integer tincidunt natoque sagittis
-cursus dolor.
+Cursus pulvinar lectus placerat tincidunt sagittis cursus vel lectus sed lectus
+arcu et a lectus diam et a integer a parturient natoque integer a lorem a
+scelerisque ac dis dis integer cursus natoque nisi a tincidunt sed.
+
+```javascript
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+      links[i].rel = 'noopener noreferrer';
+    }
+  }
+})();
+```
+
+Integer Amet montes porttitor montes cursus a sagittis Amet ac porttitor a
+penatibus purus sed et integer a lectus lectus montes a montes.
+
+.sidebar
+Lectus cursus porttitor sed lectus nisi est ac vel scelerisque natoque
+scelerisque lorem porttitor est scelerisque natoque vel.
+
+.note
+Penatibus placerat integer scelerisque lorem dolor porttitor mattis dis cursus
+sed.
+
+Scelerisque ac dis dis integer cursus natoque nisi a tincidunt sed.
+Integer Amet montes porttitor montes cursus a sagittis Amet ac porttitor a
+penatibus purus sed et integer a lectus lectus montes a montes.
 
 ## Lectus vel est?
 Hac scelerisque parturient a sed natoque pulvinar tincidunt integer

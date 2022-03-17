@@ -1,4 +1,18 @@
+# Hindsite built-in `hello` template
 
-# Hello Hindsite!
+## Purpose
+A minimal single-page Hindsite bultin template.
 
-A minimal Hindsite site built with the builtin _hello_ template.
+## Implementation
+- A single `CONTENT_DIR/index.md` Markdown content document.
+- A single `TEMPLATE_DIR/layout.html` HTML template.
+
+## Usage
+To create, build and launch a site based on this template run the following commands:
+
+```
+mkdir hindsite-hello
+cd hindsite-hello
+hindsite init -builtin hello
+hindsite serve -launch
+```
