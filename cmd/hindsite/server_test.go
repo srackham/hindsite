@@ -23,7 +23,7 @@ func Test_server(t *testing.T) {
 		t.Fatalf("%s", cmd)
 	}
 	if dirCount(path.Join(tmpdir, "template")) != 9 {
-		t.Fatalf("%s: unexpected number of riles in template directory", cmd)
+		t.Fatalf("%s: unexpected number of files in template directory", cmd)
 	}
 	// Start server.
 	site = newSite()
