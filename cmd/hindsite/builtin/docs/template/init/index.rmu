@@ -8,17 +8,8 @@ FAQs and Reference Manuals.
 The [Hindsite documentation site](https://srackham.github.io/hindsite/) is based
 on this template.
 
-## Implementation
-- The template features dynamic table of contents (TOC) generation (performed by
-  JavaScript code in `main.js`).
-- The header template includes the [highlight.js](https://highlightjs.org/)
-  source code highlighter.
-- The example content pages are written in Rimu markup. Rimu generates the
-  header IDs which are used for table of contents generation (you could use
-  Markdown instead of Rimu, but would need to modify the TOC generator code).
-
-## Usage
-To create, build and launch a new blog site run the following commands:
+## Installation
+To create, build and launch a new documentation site run the following commands:
 
 ```
 mkdir hindsite-docs
@@ -26,3 +17,64 @@ cd hindsite-docs
 hindsite init -builtin docs
 hindsite serve -launch
 ```
+
+## Usage
+- Dynamic table of contents (TOC) generation is performed by JavaScript code in
+  `main.js`. To disable TOC generation set the `.user.toc` template variable
+  (either in document front matter or site configuration files) to any value
+  other than `"yes"`.
+
+- The example content pages are written in [Rimu
+  markup](https://srackham.github.io/rimu/). Rimu generates the header IDs which
+  are used for table of contents generation (you could use Markdown instead of
+  Rimu, but would need to modify the TOC generator code).
+
+- The header template includes the [highlight.js](https://highlightjs.org/)
+  source code highlighter if the `.user.highlightjs` template variable is set to
+  `"yes"`. This enables code block syntax highlighting.
+  
+- To disable _highlight.js_ for a specific code block include `nohighlight` in
+  its _class_ attribute.
+
+- If you set the `.user.toc` template variable to any value other than `"yes"`
+  the TOC will not be displayed.
+
+- The _user_ template variable values can be set per document (in the document
+  front matter) or per directory (in site configuration files).
+
+## Example Section
+.note
+Penatibus placerat integer scelerisque lorem dolor porttitor mattis dis cursus sed.
+
+### Example Subsection
+Hac tincidunt vel natoque natoque lectus sagittis nisi placerat purus
+placerat est cras nisi pulvinar montes penatibus.
+
+```go
+package main
+
+import (
+	"os"
+)
+
+func main() {
+	site := newSite()
+	os.Exit(site.executeArgs(os.Args))
+}
+```
+
+### Example Subsection
+Integer Amet montes porttitor montes cursus a sagittis Amet ac porttitor a
+penatibus purus sed et integer a lectus lectus montes a montes.
+
+.sidebar
+Lectus cursus porttitor sed lectus nisi est ac vel scelerisque natoque
+scelerisque lorem porttitor est scelerisque natoque vel.
+
+Hac scelerisque parturient a sed natoque pulvinar tincidunt integer
+parturient ac porttitor pulvinar.
+
+![image 1](/images/image-01.jpg)
+
+Dis natoque diam sed parturient lectus sed sed est parturient vel in
+placerat hac hac et montes ac montes montes.

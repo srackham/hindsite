@@ -8,7 +8,7 @@
     --mono-font: Consolas, "Andale Mono", Monaco, monospace;
     --mono-size: 90%;
     --border: 1px solid #dddddd;
-    --border-radius: 0;
+    --border-radius: 5px;
     --code-background: #f8f8f8;
     --sidebar-background: #ffffee;
     --max-text-width: 55rem;
@@ -67,8 +67,12 @@
     border-bottom: var(--border);
   }
 
-  img {
+  p>img:only-child {
     max-width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 16px 0 rgba(0, 0, 0, 0.19);
   }
 
   table {
@@ -145,10 +149,6 @@
     background-color: var(--code-background);
   }
 
-  .hljs {
-    background-color: var(--code-background) !important;
-  }
-
   pre {
     font-family: var(--mono-font);
     line-height: normal;
@@ -156,13 +156,7 @@
     background-color: var(--code-background);
     border: var(--border);
     border-radius: var(--border-radius);
-    padding: 6px;
-  }
-
-  .light-background {
-    background-color: var(--code-background);
-    border: none;
-    white-space: pre-wrap;
+    padding: 0;
   }
 
   *:not(pre)>code {
@@ -175,7 +169,9 @@
 
   pre>code {
     background-color: inherit;
-    padding: 0;
+    display: block;
+    padding: 0.5em !important;
+    border-radius: var(--border-radius);
   }
 
   pre span {
@@ -200,6 +196,7 @@
   .warning {
     margin: 1.5em 0;
     padding: 10px;
+    border-radius: var(--border-radius);
   }
 
   div.sidebar *:first-child,
@@ -224,7 +221,6 @@
   .sidebar {
     background: var(--sidebar-background);
     border: var(--border);
-    border-radius: var(--border-radius);
   }
 
   .note {
@@ -406,6 +402,7 @@
   #toc .h3 {
     padding-left: 2.5rem;
     font-size: 90%;
+    margin-top: 0.2rem;
   }
 
   #toc div[class^="h"]:nth-child(even) {
@@ -532,6 +529,10 @@
 
     * {
       overflow-wrap: break-word;
+    }
+
+    p>img:only-child {
+      max-width: 100%;
     }
   }
 

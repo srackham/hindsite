@@ -7,7 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <title>{{or .title "Title"}}</title>
 <link type="text/css" rel="stylesheet" href="{{.urlprefix}}/main.css">
-<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
+{{if eq .user.highlightjs "yes" -}}
+<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/default.min.css">
+{{- else}}{{end}}
 </head>
 <body>
 <div id="nav" class="no-print">
@@ -20,8 +22,10 @@
   <div class="h2"><a href="{{.urlprefix}}/faq.html">FAQ</a></div>
   <div class="h2"><a href="{{.urlprefix}}/changelog.html">Change Log</a></div>
   <div class="h2"><a href="https://github.com/srackham/hindsite">Github</a></div>
+{{if eq .user.toc "yes" -}}
   <h2>Table of Contents</h2>
   <div id="auto-toc"></div>
+{{- else}}{{end}}
 </div>
 </div>
 <div id="main">
@@ -32,12 +36,13 @@
 </div>
 </div>
 <script src="{{.urlprefix}}/main.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/go.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/typescript.min.js"></script>
+{{if eq .user.highlightjs "yes" -}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
+{{- else}}{{end}}
 <script>
-hljs.configure({languages: []});  // Turn off automatic language detection.
-hljs.initHighlightingOnLoad();
+{{if eq .user.highlightjs "yes" -}}
+hljs.highlightAll();
+{{- else}}{{end}}
 window.onload = function() {
   var headings = [].slice.call(document.body.querySelectorAll('#article > h1, #article > h2, #article > h3'));
   headings.forEach(function(heading) {
