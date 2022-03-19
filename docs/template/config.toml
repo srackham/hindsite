@@ -3,3 +3,5 @@ urlprefix = "/hindsite"
 
 [user]
 banner = "hindsite documentation"
+highlightjs = "no"
+toc = "yes"
