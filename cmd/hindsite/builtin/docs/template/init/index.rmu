@@ -29,17 +29,22 @@ hindsite serve -launch
   are used for table of contents generation (you could use Markdown instead of
   Rimu, but would need to modify the TOC generator code).
 
-- The header template includes the [highlight.js](https://highlightjs.org/)
-  source code highlighter if the `.user.highlightjs` template variable is set to
-  `"yes"`. This enables code block syntax highlighting.
-  
-- To disable _highlight.js_ for a specific code block include `nohighlight` in
-  its _class_ attribute.
-
 - If you set the `.user.toc` template variable to any value other than `"yes"`
   the TOC will not be displayed.
 
-- The _user_ template variable values can be set per document (in the document
+- The header template will include the [highlight.js](https://highlightjs.org/)
+  source code highlighter if the `.user.highlightjs` template variable is set to
+  `"yes"`. Highlight.js language auto-detection is not enabled and the code
+  block must specify the language explicitly. For example:
+``
+```python
+x = 1
+if x == 1:
+  print "x is 1."
+```
+``
+  
+- _user_ template variable values can be set per document (in the document
   front matter) or per directory (in site configuration files).
 
 ## Example Section
