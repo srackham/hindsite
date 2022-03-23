@@ -28,6 +28,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     margin: 10px 0;
+    font-weight: 600;
     color: var(--primary-color);
   }
 
@@ -379,6 +380,7 @@
     }
   }
 
+  /* Docs template specific  styles */
   #toc h2 {
     font-size: 125%;
     padding-left: 1rem;
