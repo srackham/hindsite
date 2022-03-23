@@ -22,7 +22,7 @@ commands:
    `hindsite` executable (see [_Building hindsite_](#building-hindsite) if you
    prefer to build and install from source).
 
-2. Create a new Hindsite site directory and install the [builtin `blog`
+2. Create a new Hindsite site directory and install the [built-in `blog`
    template](https://github.com/srackham/hindsite/tree/master/cmd/hindsite/builtin/blog/template)
    using the hindsite [init command](#init-command):
 
@@ -58,7 +58,7 @@ contained within one another).
 - A template directory can process multiple content directories just as a
   content directory can be processed by multiple template directories.
 
-For example, here's the builtin blog site structure:
+For example, here's the built-in blog site structure:
 
 ```
 ├── build
@@ -115,10 +115,10 @@ Commands:
     init    initialize a new site
     build   generate the website
     serve   start development webserver
-	new     create a new content document
+	  new     create a new content document
     help    display usage summary
 
-Common command options:
+All commands accept the following options:
 
 `SITE_DIR`:: The hindsite site directory (defaults to the current directory).
 `-content CONTENT_DIR`:: The site content directory (defaults to `SITE_DIR/content`).
@@ -165,12 +165,12 @@ Applicable options:
 - If the `-builtin NAME` option is specified the contents and template
   directories are initialized from one of the named built-in templates:
    `blog`:: A blog and newsletter site.
-   `minimal`:: A minimal site.
+   `hello`:: A hello site.
 - If the `-builtin` option is specified the `TEMPLATE_DIR` must be empty.
 
 #### Command execution
 
-1. If the `-builtin` option is specified then the selected builtin template is
+1. If the `-builtin` option is specified then the selected built-in template is
    copied to the `TEMPLATE_DIR`.
 2. The template directory structure is recreated in the content directory.
 3. If the `TEMPLATE_DIR/init` directory exists its contents is copied to the
@@ -179,7 +179,7 @@ Applicable options:
    site directory and the `SITE_DIR/template` directory does not exist or
    is empty the `TEMPLATE_DIR` is copied to `SITE_DIR/template`.
 
-The following example installs the builtin `blog` template to `./template` and
+The following example installs the built-in `blog` template to `./template` and
 initializes the `./contents` directory:
 
     hindsite init -builtin blog
