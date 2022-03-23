@@ -46,21 +46,9 @@ tag:
 	git tag -a -m "$$VERS" $$VERS
 
 .PHONY: push
-push: test validate-docs
+push: test validate-docs make-sitemap
 	git push -u --tags origin master
-
-.PHONY: build-docs
-build-docs: install
-	hindsite build docs
-	cp docs/build/* docs	# Github pages serves from the ./docs folder
-
-.PHONY: serve-docs
-serve-docs: install
-	hindsite serve docs -launch -navigate -v
-
-.PHONY: validate-docs
-validate-docs: build-docs
-	for f in $$(ls ./docs/*.html); do echo $$f; html-validator --verbose --format text --file $$f; done
+	make submit-sitemap
 
 DIST_DIR := ./dist
 
@@ -150,7 +138,7 @@ release:
 define rules_template
 .PHONY: build-builtin-$(1)
 build-builtin-$(1):
-	hindsite build $(2) -content $(2)/template/init -launch -navigate -v
+	hindsite build $(2) -content $(2)/template/init -v
 
 .PHONY: serve-builtin-$(1)
 serve-builtin-$(1):
@@ -170,3 +158,33 @@ endef
 # Rule generation.
 templates := hello blog docs
 $(foreach t,$(templates),$(eval $(call rules_template,$(t),./cmd/hindsite/builtin/$(t))))
+
+
+#
+# Documentation tasks
+#
+.PHONY: build-docs
+build-docs: install
+	hindsite build docs
+	cp docs/build/* docs	# Github pages serves from the ./docs folder
+
+.PHONY: serve-docs
+serve-docs: install
+	hindsite serve docs -launch -navigate -v
+
+.PHONY: validate-docs
+validate-docs: build-docs
+	for f in $$(ls ./docs/*.html); do echo $$f; html-validator --verbose --format text --file $$f; done
+
+# Build Google search engine site map (see https://support.google.com/webmasters/answer/183668)
+.PHONY: build-sitemap
+build-sitemap:
+	ls docs/*.html \
+	| grep -v 'docs/google' \
+	| sed -e 's/^docs/https:\/\/srackham.github.io\/hindsite/g' \
+	> docs/sitemap.txt
+
+# Submit site map to Google (see https://developers.google.com/search/docs/advanced/sitemaps/build-sitemap#addsitemap)
+.PHONY: submit-sitemap
+submit-sitemap:
+	curl https://www.google.com/ping?sitemap=https://srackham.github.io/hindsite/sitemap.txt
