@@ -46,7 +46,7 @@ tag:
 	git tag -a -m "$$VERS" $$VERS
 
 .PHONY: push
-push: test validate-docs make-sitemap
+push: test validate-docs
 	git push -u --tags origin master
 	make submit-sitemap
 
@@ -166,6 +166,7 @@ $(foreach t,$(templates),$(eval $(call rules_template,$(t),./cmd/hindsite/builti
 .PHONY: build-docs
 build-docs: install
 	hindsite build docs
+	make build-sitemap
 	cp docs/build/* docs	# Github pages serves from the ./docs folder
 
 .PHONY: serve-docs
