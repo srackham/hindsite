@@ -41,7 +41,7 @@
 {{- else}}{{end}}
 <script>
 {{if eq .user.highlightjs "yes" -}}
-hljs.configure({languages: []});
+hljs.configure({languages: []}); {{- /* Disable language auto-detection */}}
 hljs.highlightAll();
 {{- else}}{{end}}
 window.onload = function() {
