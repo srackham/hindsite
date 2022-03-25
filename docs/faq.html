@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <title>Faq</title>
 <link type="text/css" rel="stylesheet" href="/hindsite/main.css">
-<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
+
 </head>
 <body>
 <div id="nav" class="no-print">
@@ -20,6 +20,7 @@
   <div class="h2"><a href="/hindsite/faq.html">FAQ</a></div>
   <div class="h2"><a href="/hindsite/changelog.html">Change Log</a></div>
   <div class="h2"><a href="https://github.com/srackham/hindsite">Github</a></div>
+<h2>Table of Contents</h2>
   <div id="auto-toc"></div>
 </div>
 </div>
@@ -43,19 +44,10 @@ file</a>.</p>
 <p>TOML example:</p>
 <pre><code>exclude = "*~|4913"</code></pre>
 <h2 id="search-howto">How can I add site search to my website?</h2>
-<p>An easy way to add a site search feature is to use a <a href="https://cse.google.com">Google Custom Search Engine
-(CSE)</a>. For example, the hindsite built-in <a href="https://github.com/srackham/hindsite/tree/master/cmd/hindsite/builtin/blog/template"><code>blog</code>
-site</a>
-includes a Google CSE search page. To customize it for your website you need to:</p>
-<ol><li>Create a <a href="https://cse.google.com">Google Custom Search Engine (CSE)</a> for your
-   site.</li><li>Paste your site's CSE code into the
-   <a href="https://raw.githubusercontent.com/srackham/hindsite/master/cmd/hindsite/builtin/blog/template/init/search.md"><code>search.md</code></a>
-   content page.</li></ol><p>Google CSE tips:</p>
-<ul><li>You can choose <a href="https://support.google.com/customsearch/answer/4513886">which
-  portions</a> of your site
-  you want to be included in search results.</li><li>Use the <a href="https://search.google.com/search-console/about">Google Search
-  Console</a> to check search
-  performance and coverage.</li></ul><p><em>NOTE</em>: Google can take many days to index new and updated Web pages and even
+<p>An easy way to add a site search feature is to use the Google <a href="https://programmablesearchengine.google.com/about/">Programmable
+Search Engine</a>. For example,
+the hindsite built-in <code>blog</code> site template includes a Google PSE search page.</p>
+<p class="note">Google can take many days to index new and updated Web pages and even
 then there's no guarantee that they will be indexed. See <a href="https://support.google.com/webmasters/answer/34397">Get your website on
 Google</a>.</p>
 <h2 id="disqus-howto">How do I include Disqus comments in my website?</h2>
@@ -112,30 +104,14 @@ is an issue, only enable it for those documents or directories that need it.</p>
 <p>Use the Go <a href="https://golang.org/pkg/time/#Time.Format">Format function</a>. For
 example:</p>
 <pre><code>{{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}</code></pre>
-<p><i class="sans-font">NOTE</i>: The <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="/hindsite/index.html#document-template-variables">document template
+<p class="note">The <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="/hindsite/index.html#document-template-variables">document template
 variables</a> are simpler and preferable
 to using <code>.date</code> directly.</p>
 <h2 id="how-do-you-configure-source-code-highlighting">How do you configure source code highlighting?</h2>
 <p>By including <a href="https://github.com/isagalaev/highlight.js">highlight.js</a> CSS and
-scripts. For example, take a look at the <a href="https://github.com/srackham/hindsite/blob/master/docs/template/partials.html">hindsite documentation
-templates</a>.</p>
-<ol><li>Include <a href="https://github.com/srackham/hindsite/blob/master/docs/template/partials.html#L10">highlighter CSS in the HTML
-   header</a>.</li><li>Include the <a href="https://github.com/srackham/hindsite/blob/master/docs/template/partials.html#L33">highlighter scripts at the end of the HTML
-   body</a>.
-   Languages which are not in the default library can be inluded separately.</li><li>Include <a href="https://github.com/srackham/hindsite/blob/master/docs/template/partials.html#L37">highlighter
-   initialization code</a>
-   at the end of the HTML body:<pre class="javascript"><code>hljs.configure({languages: []});  // Turn off automatic language detection.
-hljs.initHighlightingOnLoad();</code></pre>
-</li><li>You may also need to <a href="https://github.com/srackham/hindsite/blob/master/docs/content/main.css#L94">tweak <code>.hljs</code> CSS class
-   properties</a>.</li></ol><p>Now when you annotate Markdown <em>fenced blocks</em> with the language name the source
-will be highlighted, for example:</p>
-<pre><code>``` javascript
-var myHeading = document.querySelector('h1');
-myHeading.textContent = 'Hello world!';
-```</code></pre>
-<p>Renders as:</p>
-<pre class="javascript"><code>var myHeading = document.querySelector('h1');
-myHeading.textContent = 'Hello world!';</code></pre>
+scripts in your web pages. The hindsite documentation and the built-in <code>blog</code>
+and <code>docs</code> site templates include <code>highlight.js</code>. As an example, take a look at
+the <a href="https://github.com/srackham/hindsite/blob/master/cmd/hindsite/builtin/blog/template/partials.html"><code>blog</code> HTML templates</a>.</p>
 <h2 id="how-can-i-partition-documents-into-separate-categories">How can I partition documents into separate categories</h2>
 <p>Put them in separate indexes. <a href="/hindsite/index.html#indexes">Indexes</a> are similar to <a href="https://en.support.wordpress.com/posts/categories-vs-tags/">Wordpress
 categories</a> but they
@@ -182,12 +158,12 @@ order of magnitude less memory than hugo:</p>
   <code>hugo</code> build command (hindsite 46KB vs hugo 524KB). The <code>hugo server</code> command
   consumed a whopping 13GB.</li></ul><p>The tests were run under Ubuntu 20.04. The differences were not as marked under
 Windows 10 (hindsite builds were around eight times faster).</p>
-<p><i class="sans-font">IMPORTANT</i>: This is not an &ldquo;apples with apples&rdquo; comparison, Hugo is more complex
+<p class="important">This is not an &ldquo;apples with apples&rdquo; comparison, Hugo is more complex
 and has more features than hindsite. Differences between the respective themes
 is also a factor &mdash; the Hugo theme is heavier than the hindsite theme. As
 always, benchmarks are irrelevant if they do not address your specific use
 cases.</p>
-<p><i class="sans-font">NOTE</i>: Exclude the site folders from Windows Defender anti-virus real-time
+<p class="note">Exclude the site folders from Windows Defender anti-virus real-time
 protection (not doing this imposed a performance hit for both hindsite and
 Hugo).</p>
 <p>The benchmarked hindsite and Hugo projects are available in the downloadable
@@ -221,8 +197,8 @@ Hugo's complexity.</p>
 Hugo is an outstanding program, it's chock full of features and has the
 flexibility needed to build complex static web sites. But features and
 flexibility come at the price of complexity and a steeper learning curve.</p>
-<p>My frustration was not with hugo but with my brain's ability to retain hard won
-working knowledge of hugo across 6 months or more between casual use. The amount
+<p>My frustration was not with hugo but with my brain's ability to retain hard-won
+working knowledge of hugo across six months or more between casual use. The amount
 of time spent relearning (necessitated by my occasional reconfiguration and
 theme tweak) motivated me to write hindsite.</p>
 <p>Hindsite was designed to be easy to learn and use, it was not designed to
@@ -234,12 +210,9 @@ Paint or KolorPaint and not Adobe Photoshop or The Gimp.</p>
 </div>
 </div>
 <script src="/hindsite/main.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/go.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/typescript.min.js"></script>
+
 <script>
-hljs.configure({languages: []});  
-hljs.initHighlightingOnLoad();
+
 window.onload = function() {
   var headings = [].slice.call(document.body.querySelectorAll('#article > h1, #article > h2, #article > h3'));
   headings.forEach(function(heading) {

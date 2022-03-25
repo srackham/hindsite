@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <title>Changelog</title>
 <link type="text/css" rel="stylesheet" href="/hindsite/main.css">
-<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
+
 </head>
 <body>
 <div id="nav" class="no-print">
@@ -20,6 +20,7 @@
   <div class="h2"><a href="/hindsite/faq.html">FAQ</a></div>
   <div class="h2"><a href="/hindsite/changelog.html">Change Log</a></div>
   <div class="h2"><a href="https://github.com/srackham/hindsite">Github</a></div>
+<h2>Table of Contents</h2>
   <div id="auto-toc"></div>
 </div>
 </div>
@@ -52,12 +53,9 @@
 </div>
 </div>
 <script src="/hindsite/main.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/go.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/typescript.min.js"></script>
+
 <script>
-hljs.configure({languages: []});  
-hljs.initHighlightingOnLoad();
+
 window.onload = function() {
   var headings = [].slice.call(document.body.querySelectorAll('#article > h1, #article > h2, #article > h3'));
   headings.forEach(function(heading) {

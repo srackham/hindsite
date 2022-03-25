@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <title>Reference</title>
 <link type="text/css" rel="stylesheet" href="/hindsite/main.css">
-<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
+
 </head>
 <body>
 <div id="nav" class="no-print">
@@ -20,6 +20,7 @@
   <div class="h2"><a href="/hindsite/faq.html">FAQ</a></div>
   <div class="h2"><a href="/hindsite/changelog.html">Change Log</a></div>
   <div class="h2"><a href="https://github.com/srackham/hindsite">Github</a></div>
+<h2>Table of Contents</h2>
   <div id="auto-toc"></div>
 </div>
 </div>
@@ -27,18 +28,23 @@
 <div id="article">
 
 <h1 id="hindsite-reference">Hindsite Reference</h1>
-<p>hindsite is a <a href="/hindsite/faq.html#how-fast-is-hindsite">fast</a>, lightweight static website
-generator. It builds static websites with optional document and tag indexes from
-Markdown source documents (e.g. blogs posts, newsletters, articles).</p>
+<p>Hindsite is a
+<a href="https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite">fast</a>,
+lightweight static website generator. It builds static websites with optional
+document and tag indexes from <a href="https://en.wikipedia.org/wiki/Markdown">Markdown</a>
+and <a href="https://github.com/srackham/rimu">Rimu</a> source documents.</p>
 <p>The hindsite stand-alone executable includes a built-in development web server
 with Live Reload, a file watcher and incremental rebuilds.</p>
+<div class="note"><p>References to <em>Markdown</em> throughout this documentation apply to both <em>Markdown</em>
+and <em>Rimu</em>.</p>
+<p>This documentation is written in Rimu.</p></div>
 <h2 id="quick-start">Quick Start</h2>
 <p>Create a fully functional blog and newsletter website with just two hindsite
 commands:</p>
 <ol><li>Download the binary for your platform from the <a href="https://github.com/srackham/hindsite/releases">releases
    page</a> and extract the
    <code>hindsite</code> executable (see <a href="#building-hindsite"><em>Building hindsite</em></a> if you
-   prefer to build and install from source).</li><li>Create a new Hindsite site directory and install the <a href="https://github.com/srackham/hindsite/tree/master/cmd/hindsite/builtin/blog/template">builtin <code>blog</code>
+   prefer to build and install from source).</li><li>Create a new Hindsite site directory and install the <a href="https://github.com/srackham/hindsite/tree/master/cmd/hindsite/builtin/blog/template">built-in <code>blog</code>
    template</a>
    using the hindsite <a href="#init-command">init command</a>:<pre><code>mkdir mysite
 hindsite init mysite -builtin blog</code></pre>
@@ -56,7 +62,7 @@ read Jekyll and Hugo Markdown document <a href="#front-matter">front matter</a>)
 contained within one another).</p>
 <ul><li>The <em>build</em>, <em>content</em> and <em>template</em> directories normally reside in the <em>site
   directory</em> folder but this convention is not enforced.</li><li>A template directory can process multiple content directories just as a
-  content directory can be processed by multiple template directories.</li></ul><p>For example, here's the builtin blog site structure:</p>
+  content directory can be processed by multiple template directories.</li></ul><p>For example, here's the built-in blog site structure:</p>
 <pre><code>├── build
 │   ├── images
 │   ├── indexes
@@ -103,7 +109,7 @@ build   generate the website
 serve   start development webserver
 new     create a new content document
 help    display usage summary</code></pre>
-<p>Common command options:</p>
+<p>All commands accept the following options:</p>
 <dl><dt><code>SITE_DIR</code></dt><dd>The hindsite site directory (defaults to the current directory).</dd><dt><code>-content CONTENT_DIR</code></dt><dd>The site content directory (defaults to <code>SITE_DIR/content</code>).</dd><dt><code>-build BUILD_DIR</code></dt><dd>The site build directory (defaults to <code>SITE_DIR/build</code>).</dd><dt><code>-template TEMPLATE_DIR</code></dt><dd>The site template directory (defaults to <code>SITE_DIR/template</code>).</dd><dt><code>-v</code></dt><dd>Increase verbosity. <code>-vv</code> is an alias for <code>-v -v</code>.</dd></dl><ul><li>Content, build and template directories cannot overlap, with one exception:
   the content directory can be <code>TEMPLATE_DIR/init</code>. This is handy for testing
   template initialization content.</li><li>Sites are not restricted to a single content, template and build directory.
@@ -125,12 +131,12 @@ directory</em> or from a built-in template.</p>
 -builtin NAME
 -v</code></pre>
 <ul><li>The <code>CONTENT_DIR</code> must be empty.</li><li>If the <code>-builtin NAME</code> option is specified the contents and template
-  directories are initialized from one of the named built-in templates:<dl><dt><code>blog</code></dt><dd>A blog and newsletter site.</dd><dt><code>minimal</code></dt><dd>A minimal site.</dd></dl></li><li>If the <code>-builtin</code> option is specified the <code>TEMPLATE_DIR</code> must be empty.</li></ul><h4 id="command-execution">Command execution</h4>
-<ol><li>If the <code>-builtin</code> option is specified then the selected builtin template is
+  directories are initialized from one of the named built-in templates:<dl><dt><code>blog</code></dt><dd>A blog and newsletter site.</dd><dt><code>hello</code></dt><dd>A hello site.</dd></dl></li><li>If the <code>-builtin</code> option is specified the <code>TEMPLATE_DIR</code> must be empty.</li></ul><h4 id="command-execution">Command execution</h4>
+<ol><li>If the <code>-builtin</code> option is specified then the selected built-in template is
    copied to the <code>TEMPLATE_DIR</code>.</li><li>The template directory structure is recreated in the content directory.</li><li>If the <code>TEMPLATE_DIR/init</code> directory exists its contents is copied to the
    content directory.</li><li>If the <code>-template TEMPLATE_DIR</code> option specifies a location outside the
    site directory and the <code>SITE_DIR/template</code> directory does not exist or
-   is empty the <code>TEMPLATE_DIR</code> is copied to <code>SITE_DIR/template</code>.</li></ol><p>The following example installs the builtin <code>blog</code> template to <code>./template</code> and
+   is empty the <code>TEMPLATE_DIR</code> is copied to <code>SITE_DIR/template</code>.</li></ol><p>The following example installs the built-in <code>blog</code> template to <code>./template</code> and
 initializes the <code>./contents</code> directory:</p>
 <pre><code>hindsite init -builtin blog</code></pre>
 <h3 id="build-command">build command</h3>
@@ -175,7 +181,7 @@ live reloading.</p>
 <ul><li>If the <code>-drafts</code> option is specified <a href="#documents">draft documents</a> are included
   in the built website.</li><li>The <code>-launch</code> option opens the site home page in the default web browser.</li><li>The <code>-navigate</code> option causes the browser to automatically navigate to new and
   updated <a href="#documents">documents</a>.</li><li>The <code>-port</code> option sets the server HTTP port number (<code>HTTP_PORT</code>) and/or the
-  LiveReload port number (<code>LR_PORT</code>):<ul><li><code>HTTP_PORT</code> defaults to <code>1212</code>.</li><li><code>LR_PORT</code> defaults to <code>35729</code>.</li><li>Setting <code>LR_PORT</code> to <code>-1</code> disables live reloads.</li><li>The port numbers must be unique across all running server instances.</li><li>Examples: <code>-port 1213</code>, <code>-port 1213:35730</code>, <code>-port :-1</code>.</li></ul></li><li>While the server is runing you can enter the following keyboard commands:<ul><li>Press the <em>R</em> key followed by the <em>Enter</em> key to force a complete site rebuild.</li><li>Press the <em>D</em> key followed by the <em>Enter</em> key to toggle the server <code>-drafts</code> option.</li><li>Press the <em>N</em> key followed by the <em>Enter</em> key to toggle the server <code>-navigate</code> option.</li></ul></li><li>The <em>serve command</em> monitors keyboard input, if you want to run it in the
+  LiveReload port number (<code>LR_PORT</code>):<ul><li><code>HTTP_PORT</code> defaults to <code>1212</code>.</li><li><code>LR_PORT</code> defaults to <code>35729</code>.</li><li>Setting <code>LR_PORT</code> to <code>-1</code> disables live reloads.</li><li>The port numbers must be unique across all running server instances.</li><li>Examples: <code>-port 1213</code>, <code>-port 1213:35730</code>, <code>-port :-1</code>.</li></ul></li><li>While the server is runing you can enter the following keyboard commands:<ul><li>Press the <em>R</em> key followed by the <em>Enter</em> key to force a complete site rebuild.</li><li>Press the <em>D</em> key followed by the <em>Enter</em> key to toggle the server <code>-drafts</code> option.</li><li>Press the <em>N</em> key followed by the <em>Enter</em> key to toggle the server <code>-navigate</code> option.</li><li>Press the <em>Enter</em> key to print help.</li></ul></li><li>The <em>serve command</em> monitors keyboard input, if you want to run it in the
   background you need to close stdin by passing it <code>/dev/null</code>. For example:<pre><code>hindsite serve mysite &lt; /dev/null &amp;</code></pre>
 </li><li>The server strips the <code>urlprefix</code> from URLs in HTML files before sending them
   to the browser. This allows the build to be tested irrespective of the
@@ -189,7 +195,7 @@ content files are modified, added or deleted.</p>
 type of change. Most content updates are very fast but processing times increase
 if:</p>
 <ul><li>Indexed documents are added or deleted (necessitating full index rebuild).</li><li>A configuration file or template file is added, changed or removed
-  (necessitating a full site rebuild).</li></ul><p><i class="sans-font">IMPORTANT</i>: To ensure build integrity you should always perform a complete
+  (necessitating a full site rebuild).</li></ul><p class="important">To ensure build integrity you should always perform a complete
 rebuild before deployment and after site structural changes (the serve
 command does not automatically process changes to the site directory
 structure).</p>
@@ -327,12 +333,12 @@ user:
 are site-wide and are always taken from the template directory root
 configuration i.e. they can only be specified in the template root configuration file.</p>
 <h2 id="documents">Documents</h2>
-<p><em>Documents</em> are <a href="https://daringfireball.net/projects/markdown/">Markdown</a>
-(<code>.md</code>) files in the site <a href="#sites"><em>content directory</em></a>. Each document is
-generates a wepage e.g. a blog post, a newsletter or an article. The <a href="#build-command">build
-command</a> combines the document with its <a href="#html-templates">layout
-template</a> and writes the resulting HTML webpage to the
-corresponding <em>build directory</em> path.</p>
+<p><em>Documents</em> are <a href="https://en.wikipedia.org/wiki/Markdown">Markdown</a> (<code>.md</code>) or
+<a href="https://github.com/srackham/rimu">Rimu</a> (<code>.rmu</code>) files in the site <a href="#sites"><em>content
+directory</em></a>. Each document is generates a wepage e.g. a blog post, a
+newsletter or an article. The <a href="#build-command">build command</a> combines the
+document with its <a href="#html-templates">layout template</a> and writes the resulting
+HTML webpage to the corresponding <em>build directory</em> path.</p>
 <p>hindsite uses the <a href="https://github.com/russross/blackfriday">Blackfriday Markdown
 processor</a> which supports a number of
 common <a href="https://github.com/russross/blackfriday#extensions">Markdown
@@ -345,9 +351,6 @@ option is specified.</p>
 <a href="#templates-conf"><code>templates</code></a> configuration parameter) then it is
 rendered as a <a href="#text-templates">text template</a> prior to layout template
 processing.</p>
-<p><i class="sans-font">NOTE</i>: In addition to Markdown, <em>hindsite</em> can also process <a href="https://srackham.github.io/rimu/">Rimu
-markup</a>. This documentation is written in
-Rimu.</p>
 <h2 id="static-files">Static files</h2>
 <p>Static files are non-document (non-Markdown) files in the <a href="#sites"><em>content
 directory</em></a>. These include website resources such as CSS, JavaScript
@@ -530,9 +533,9 @@ correctly. For example, if are deploying to the server <code>http://example.com/
 directory you need to set <code>urlprefix</code> to either <code>/blog</code> (to generate
 root-relative URLs) or <code>http://example.com/blog</code> (to generate absolute URLs).</p>
 <h2 id="building-hindsite">Building hindsite</h2>
+<p class="note">Requires Go 1.16 or better.</p>
 <p>To compile hindsite from source code run the following commands to download,
 compile and install hindsite:</p>
-<p><strong>NOTE</strong>: Requires Go 1.16 or better.</p>
 <pre><code>git clone https://github.com/srackham/hindsite.git
 cd hindsite
 go install ./...</code></pre>
@@ -543,12 +546,9 @@ checkout tags/v1.3.0</code>.</p>
 </div>
 </div>
 <script src="/hindsite/main.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/go.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/typescript.min.js"></script>
+
 <script>
-hljs.configure({languages: []});  
-hljs.initHighlightingOnLoad();
+
 window.onload = function() {
   var headings = [].slice.call(document.body.querySelectorAll('#article > h1, #article > h2, #article > h3'));
   headings.forEach(function(heading) {
