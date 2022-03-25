@@ -175,7 +175,7 @@ serve-docs: install
 
 .PHONY: validate-docs
 validate-docs: build-docs
-	for f in $$(ls ./docs/*.html); do echo $$f; html-validator --verbose --format text --file $$f; done
+	for f in $$(ls ./docs/{changelog,faq,index}.html); do echo $$f; html-validator --verbose --format text --file $$f; done
 
 # Build Google search engine site map (see https://support.google.com/webmasters/answer/183668)
 .PHONY: build-sitemap
