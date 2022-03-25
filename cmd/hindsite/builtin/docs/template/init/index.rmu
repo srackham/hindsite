@@ -2,8 +2,8 @@
 
 ## Purpose
 A Hindsite built-in template to create sites that have a fixed, relatively
-small, number of pages. Ideal for building documentation sites e.g. User Guides,
-FAQs and Reference Manuals.
+small, number of pages. Ideal for building documentation sites e.g. user guides,
+FAQs and reference manuals.
 
 The [Hindsite documentation site](https://srackham.github.io/hindsite/) is based
 on this template.
@@ -29,13 +29,16 @@ hindsite serve -launch
   are used for table of contents generation (you could use Markdown instead of
   Rimu, but would need to modify the TOC generator code).
 
+- The global site [configuration file](https://srackham.github.io/hindsite/index.html#configuration) is
+  `template/config.yaml`.
+
 - If you set the `.user.toc` template variable to any value other than `"yes"`
   the TOC will not be displayed.
 
-- The header template will include the [highlight.js](https://highlightjs.org/)
+- The `partials.html` header template will include the [highlight.js](https://highlightjs.org/)
   source code highlighter if the `.user.highlightjs` template variable is set to
-  `"yes"`. Highlight.js language auto-detection is not enabled and the code
-  block must specify the language explicitly. For example:
+  `"yes"`. Highlight.js language auto-detection is not enabled and code
+  blocks must specify the language explicitly. For example:
 ``
 ```python
 x = 1
@@ -44,7 +47,7 @@ if x == 1:
 ```
 ``
   
-- _user_ template variable values can be set per document (in the document
+- _user_ template variable values can be set per document (in document
   front matter) or per directory (in site configuration files).
 
 ## Example Section

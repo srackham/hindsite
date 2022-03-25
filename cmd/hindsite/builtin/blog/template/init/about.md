@@ -1,14 +1,11 @@
-## Hindsite built-in `blog` template
+---
+title: Hindsite built-in blog template
+---
 
-### Purpose
-A Hindsite builtin template to create a website for blog posts and newsletters.
-The example content pages are written in Markdown but you could also Rimu markup.
+## Purpose
+A Hindsite built-in template to create a website for blog posts and newsletters.
 
-### Implementation
-Refer to [Sites](https://srackham.github.io/hindsite/index.html#sites) in the
-Hindsite Reference.
-
-### Usage
+## Installation
 To create, build and launch a new blog site run the following commands:
 
 ```
@@ -18,4 +15,8 @@ hindsite init -builtin blog
 hindsite serve -launch
 ```
 
-![image 1](/images/image-03.jpg)
+## Implementation
+- The global site [configuration file](https://srackham.github.io/hindsite/index.html#configuration) is `template/config.toml`.
+- The directory layout is documented in the [Hindsite Reference](https://srackham.github.io/hindsite/index.html#sites).
+- The example content pages are written in Markdown but you could also [Rimu markup](https://github.com/srackham/rimu).
+- There is an example _Search_ page that leverages Google programable searches.
