@@ -5,12 +5,22 @@ permalink: /index.html
 # Hindsite Reference
 
 
-hindsite is a [fast]({faq}#how-fast-is-hindsite), lightweight static website
-generator. It builds static websites with optional document and tag indexes from
-Markdown source documents (e.g. blogs posts, newsletters, articles).
+Hindsite is a
+[fast](https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite),
+lightweight static website generator. It builds static websites with optional
+document and tag indexes from [Markdown](https://en.wikipedia.org/wiki/Markdown)
+and [Rimu](https://github.com/srackham/rimu) source documents.
 
 The hindsite stand-alone executable includes a built-in development web server
 with Live Reload, a file watcher and incremental rebuilds.
+
+.note
+..
+References to _Markdown_ throughout this documentation apply to both _Markdown_
+and _Rimu_.
+
+This documentation is written in Rimu.
+..
 
 
 ## Quick Start
@@ -564,12 +574,12 @@ configuration i.e. they can only be specified in the template root configuration
 
 
 ## Documents
-_Documents_ are [Markdown](https://daringfireball.net/projects/markdown/)
-(`.md`) files in the site [_content directory_](#sites). Each document is
-generates a wepage e.g. a blog post, a newsletter or an article. The [build
-command](#build-command) combines the document with its [layout
-template](#html-templates) and writes the resulting HTML webpage to the
-corresponding _build directory_ path.
+_Documents_ are [Markdown](https://en.wikipedia.org/wiki/Markdown) (`.md`) or
+[Rimu](https://github.com/srackham/rimu) (`.rmu`) files in the site [_content
+directory_](#sites). Each document is generates a wepage e.g. a blog post, a
+newsletter or an article. The [build command](#build-command) combines the
+document with its [layout template](#html-templates) and writes the resulting
+HTML webpage to the corresponding _build directory_ path.
 
 hindsite uses the [Blackfriday Markdown
 processor](https://github.com/russross/blackfriday) which supports a number of
@@ -586,11 +596,6 @@ If the document is classified as a template (see the
 [`templates`](#templates-conf) configuration parameter) then it is
 rendered as a [text template](#text-templates) prior to layout template
 processing.
-
-.note
-In addition to Markdown, _hindsite_ can also process [Rimu
-markup](https://srackham.github.io/rimu/). This documentation is written in
-Rimu.
 
 
 ## Static files

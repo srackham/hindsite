@@ -24,25 +24,9 @@ TOML example:
 
 .#search-howto
 ## How can I add site search to my website?
-An easy way to add a site search feature is to use a [Google Custom Search Engine
-(CSE)](https://cse.google.com). For example, the hindsite built-in [`blog`
-site](https://github.com/srackham/hindsite/tree/master/cmd/hindsite/builtin/blog/template)
-includes a Google CSE search page. To customize it for your website you need to:
-
-1. Create a [Google Custom Search Engine (CSE)](https://cse.google.com) for your
-   site.
-2. Paste your site's CSE code into the
-   [`search.md`](https://raw.githubusercontent.com/srackham/hindsite/master/cmd/hindsite/builtin/blog/template/init/search.md)
-   content page.
-
-Google CSE tips:
-
-- You can choose [which
-  portions](https://support.google.com/customsearch/answer/4513886) of your site
-  you want to be included in search results.
-- Use the [Google Search
-  Console](https://search.google.com/search-console/about) to check search
-  performance and coverage.
+An easy way to add a site search feature is to use the Google [Programmable
+Search Engine](https://programmablesearchengine.google.com/about/). For example,
+the hindsite built-in `blog` site template includes a Google PSE search page.
 
 .note
 Google can take many days to index new and updated Web pages and even
@@ -137,39 +121,10 @@ to using `.date` directly.
 
 ## How do you configure source code highlighting?
 By including [highlight.js](https://github.com/isagalaev/highlight.js) CSS and
-scripts. For example, take a look at the [hindsite documentation
-templates](https://github.com/srackham/hindsite/blob/master/docs/template/partials.html).
+scripts in your web pages. The hindsite documentation and the built-in `blog`
+and `docs` site templates include `highlight.js`. As an example, take a look at
+the [`blog` HTML templates](https://github.com/srackham/hindsite/blob/master/cmd/hindsite/builtin/blog/template/partials.html).
 
-1. Include [highlighter CSS in the HTML
-   header](https://github.com/srackham/hindsite/blob/master/docs/template/partials.html#L10).
-2. Include the [highlighter scripts at the end of the HTML
-   body](https://github.com/srackham/hindsite/blob/master/docs/template/partials.html#L33).
-   Languages which are not in the default library can be inluded separately.
-3. Include [highlighter
-   initialization code](https://github.com/srackham/hindsite/blob/master/docs/template/partials.html#L37)
-   at the end of the HTML body:
-``` javascript
-hljs.configure({languages: []});  // Turn off automatic language detection.
-hljs.initHighlightingOnLoad();
-```
-4. You may also need to [tweak `.hljs` CSS class
-   properties](https://github.com/srackham/hindsite/blob/master/docs/content/main.css#L94).
-
-Now when you annotate Markdown _fenced blocks_ with the language name the source
-will be highlighted, for example:
-
-``
-``` javascript
-var myHeading = document.querySelector('h1');
-myHeading.textContent = 'Hello world!';
-```
-``
-Renders as:
-
-``` javascript
-var myHeading = document.querySelector('h1');
-myHeading.textContent = 'Hello world!';
-```
 
 ## How can I partition documents into separate categories
 Put them in separate indexes. [Indexes]({reference}#indexes) are similar to [Wordpress
