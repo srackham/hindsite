@@ -163,6 +163,8 @@ $(foreach t,$(templates),$(eval $(call rules_template,$(t),./cmd/hindsite/builti
 #
 # Documentation tasks
 #
+HOMEPAGE = https://srackham.github.io/hindsite
+
 .PHONY: build-docs
 build-docs: install
 	hindsite build docs
@@ -182,10 +184,10 @@ validate-docs: build-docs
 build-sitemap:
 	ls docs/*.html \
 	| grep -v 'docs/google' \
-	| sed -e 's/^docs/https:\/\/srackham.github.io\/hindsite/g' \
+	| sed -e 's|^.|$(HOMEPAGE)|g' \
 	> docs/sitemap.txt
 
 # Submit site map to Google (see https://developers.google.com/search/docs/advanced/sitemaps/build-sitemap#addsitemap)
 .PHONY: submit-sitemap
 submit-sitemap:
-	curl https://www.google.com/ping?sitemap=https://srackham.github.io/hindsite/sitemap.txt
+	curl https://www.google.com/ping?sitemap=$(HOMEPAGE)/sitemap.txt
