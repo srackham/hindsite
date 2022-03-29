@@ -11,3 +11,6 @@ title: Search this site
 <script async src="https://cse.google.com/cse.js?cx=018012119986351016929:ssgsqqaizhc"></script>
 <div class="gcse-search"></div>
 </div>
+
+Edit `content/search.md` to enable and configure search functionality
+using the [Google Programmable Search Engine](https://developers.google.com/custom-search).

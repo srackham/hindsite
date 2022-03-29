@@ -1,5 +1,7 @@
-homepage = "about.html"
+homepage = "indexes/posts/docs-1.html"
 longdate = "Jan 2, 2006"
+#urlprefix = "https://blog.example.com"
+
 # Exclude Vim backup and temp files.
 exclude = "*~|4913"
 
@@ -18,3 +20,6 @@ title = "hindsite blog"
 # Set shortname to your site's Disqus short name then uncomment the line to enable Disqus comments.
 # See https://help.disqus.com/installation/whats-a-shortname
 #shortname = "disqus-shortname-goes-here"
+
+# Include highlight.js support.
+#highlightjs = "yes";
