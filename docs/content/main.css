@@ -336,46 +336,6 @@
     padding-left: 1.0rem;
   }
 
-  dl {
-    counter-reset: dl-counter;
-  }
-
-  dl>dt {
-    counter-increment: dl-counter;
-  }
-
-  ol {
-    counter-reset: ol-counter;
-  }
-
-  ol>li {
-    counter-increment: ol-counter;
-  }
-
-  ul {
-    counter-reset: ul-counter;
-  }
-
-  ul>li {
-    counter-increment: ul-counter;
-  }
-
-  .dl-counter:before {
-    content: counter(dl-counter) " ";
-  }
-
-  .ol-counter:before {
-    content: counter(ol-counter) " ";
-  }
-
-  .ul-counter:before {
-    content: counter(ul-counter) " ";
-  }
-
-  .dl-numbered>dt:before {
-    content: counter(dl-counter) ". ";
-  }
-
   @media print {
     .no-print, .no-print * {
       display: none !important;

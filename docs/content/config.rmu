@@ -35,10 +35,3 @@
 __ = '<u>|</u>'
 // Left and right double-quote characters.
 " = '&ldquo;|&rdquo;'
-
-/*
-  List item CSS counters
-*/
-{--dl-counter} = '<span class="dl-counter"></span>'
-{--ol-counter} = '<span class="ol-counter"></span>'
-{--ul-counter} = '<span class="ul-counter"></span>'
