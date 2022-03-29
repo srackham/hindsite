@@ -163,6 +163,12 @@ pre {
     padding: 0;
 }
 
+.light-background {
+    background-color: var(--code-background);
+    border: none;
+    white-space: pre-wrap;
+}
+
 *:not(pre)>code {
     white-space: nowrap;
 }
