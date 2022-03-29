@@ -12,7 +12,8 @@
 {faq} = '{urlprefix}/faq.html'
 {changelog} = '{urlprefix}/changelog.html'
 {reference} = '{urlprefix}/index.html'
-{github} = 'https://github.com/srackham/hindsite'
+{hindsite-github} = 'https://github.com/srackham/hindsite'
+{rimu-github} = 'https://github.com/srackham/rimu'
 
 
 /*

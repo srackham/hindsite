@@ -6,10 +6,10 @@ permalink: /index.html
 
 
 Hindsite is a
-[fast](https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite),
+[fast]({faq}#how-fast-is-hindsite),
 lightweight static website generator. It builds static websites with optional
 document and tag indexes from [Markdown](https://en.wikipedia.org/wiki/Markdown)
-and [Rimu](https://github.com/srackham/rimu) source documents.
+and [Rimu]({rimu-github}) source documents.
 
 The hindsite stand-alone executable includes a built-in development web server
 with Live Reload, a file watcher and incremental rebuilds.
@@ -28,12 +28,12 @@ Create a fully functional blog and newsletter website with just two hindsite
 commands:
 
 1. Download the binary for your platform from the [releases
-   page](https://github.com/srackham/hindsite/releases) and extract the
+   page]({hindsite-github}/releases) and extract the
    `hindsite` executable (see [_Building hindsite_](#building-hindsite) if you
    prefer to build and install from source).
 
 2. Create a new Hindsite site directory and install the [built-in `blog`
-   template](https://github.com/srackham/hindsite/tree/master/cmd/hindsite/builtin/blog/template)
+   template]({hindsite-github}/tree/master/cmd/hindsite/builtin/blog/template)
    using the hindsite [init command](#init-command):
 
     mkdir mysite
@@ -390,6 +390,33 @@ hindsite init -builtin blog
 hindsite serve -launch
 ```
 
+The `blog` and `docs` templates include the following block element CSS classes
+which are particularly useful for styling Rimu markup:
+
+```
+CSS class          Description
+________________________________________________________________
+align-center       Align element content center.
+align-left         Align element content left.
+align-right        Align element content right.
+bordered           Add borders to table element.
+cite               Quote and verse attribution.
+dl-horizontal      Format labeled lists horizontally.
+dl-numbered        Number labeled list items.
+no-page-break      Avoid page break inside the element.
+no-print           Do not print element.
+page-break         Force a page break before the element.
+preserve-breaks    Honor line breaks in element content.
+sidebar            Paragraph and division block sidebar.
+verse              Paragraph and division block verse.
+important          Paragraph and division block admonition.
+note               Paragraph and division block admonition.
+tip                Paragraph and division block admonition.
+warning            Paragraph and division block admonition.
+______________________________________________________________
+
+```
+
 ### `blog` built-in template
 A template to create a websites for blog posts and newsletters.
 
@@ -411,12 +438,12 @@ Customisation notes:
   using the [Google Programmable Search
   Engine](https://developers.google.com/custom-search).
 
-- The global site [configuration file](https://srackham.github.io/hindsite/index.html#configuration) is
+- The global site [configuration file]({reference}#configuration) is
   `template/config.toml`.
 
-- The directory layout is documented in the [Hindsite Reference](https://srackham.github.io/hindsite/index.html#sites).
+- The directory layout is documented in the [Hindsite Reference]({reference}#sites).
 
-- The example content pages are written in Markdown but you could also use [Rimu markup](https://github.com/srackham/rimu).
+- The example content pages are written in Markdown but you could also use [Rimu markup]({rimu-github}).
 
 
 ### `docs` built-in template
@@ -670,7 +697,7 @@ configuration i.e. they can only be specified in the template root configuration
 
 ## Documents
 _Documents_ are [Markdown](https://en.wikipedia.org/wiki/Markdown) (`.md`) or
-[Rimu](https://github.com/srackham/rimu) (`.rmu`) files in the site [_content
+[Rimu]({rimu-github}) (`.rmu`) files in the site [_content
 directory_](#sites). Each document is generates a wepage e.g. a blog post, a
 newsletter or an article. The [build command](#build-command) combines the
 document with its [layout template](#html-templates) and writes the resulting
@@ -825,7 +852,8 @@ overridden with the [build](#build-command) and [serve](#serve-command) command
 `-drafts` option. Defaults to `false`.
 
 .#document-id
-`id`:: A unique document identifier.
+`id`:: A general purpose document identifier that is unique across all documents
+within a site. Used in situations requiring a unique document ID.
 
   - Non-blank `id` values must be unique within a site (an error occurs if two
     or more published documents have the same `id` value).
