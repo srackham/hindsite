@@ -1,55 +1,5 @@
 # Hindsite `docs` template
 
-## Purpose
-A Hindsite built-in template to create sites that have a fixed, relatively
-small, number of pages. Ideal for building documentation sites e.g. user guides,
-FAQs and reference manuals.
-
-The [Hindsite documentation site](https://srackham.github.io/hindsite/) is based
-on this template.
-
-## Installation
-To create, build and launch a new documentation site run the following commands:
-
-```
-mkdir hindsite-docs
-cd hindsite-docs
-hindsite init -builtin docs
-hindsite serve -launch
-```
-
-## Usage
-- Dynamic table of contents (TOC) generation is performed by JavaScript code in
-  `main.js`. To disable TOC generation set the `.user.toc` template variable
-  (either in document front matter or site configuration files) to any value
-  other than `"yes"`.
-
-- The example content pages are written in [Rimu
-  markup](https://srackham.github.io/rimu/). Rimu generates the header IDs which
-  are used for table of contents generation (you could use Markdown instead of
-  Rimu, but would need to modify the TOC generator code).
-
-- The global site [configuration file](https://srackham.github.io/hindsite/index.html#configuration) is
-  `template/config.yaml`.
-
-- If you set the `.user.toc` template variable to any value other than `"yes"`
-  the TOC will not be displayed.
-
-- The `partials.html` header template will include the [highlight.js](https://highlightjs.org/)
-  source code highlighter if the `.user.highlightjs` template variable is set to
-  `"yes"`. Highlight.js language auto-detection is not enabled and code
-  blocks must specify the language explicitly. For example:
-``
-```python
-x = 1
-if x == 1:
-  print "x is 1."
-```
-``
-  
-- _user_ template variable values can be set per document (in document
-  front matter) or per directory (in site configuration files).
-
 ## Example Section
 .note
 Penatibus placerat integer scelerisque lorem dolor porttitor mattis dis cursus sed.
