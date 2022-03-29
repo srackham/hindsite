@@ -162,7 +162,7 @@ directory_ or from a built-in template.
 
 Usage:
 
-    hindsite init  [SITE_DIR] [OPTIONS]
+    hindsite init [SITE_DIR] [OPTIONS]
 
 Applicable options:
 
@@ -173,9 +173,9 @@ Applicable options:
 
 - The `CONTENT_DIR` must be empty.
 - If the `-builtin NAME` option is specified the contents and template
-  directories are initialized from one of the named built-in templates:
-   `blog`:: A blog and newsletter site.
-   `hello`:: A hello site.
+  directories are initialized from one of the named [built-in
+  templates](#built-in-site-templates).
+  `NAME` is the name of the built-in template (`blog`, `docs`, `hello`).
 - If the `-builtin` option is specified the `TEMPLATE_DIR` must be empty.
 
 #### Command execution
@@ -369,6 +369,101 @@ draft: true
 
 Document content goes here.
 ```
+
+
+## Built-in site templates
+The Hindsite [init command](#init-command) `-builtin NAME` option instructs
+Hindsite to initialize a site using one of the named built-in site templates.
+
+To create a site using a built-in template:
+
+. Create a directory for the new site.
+. Install the built-in template with the `hindsite init -builtin <template-name>` command.
+. Build the site and open it the browser with the `hindsite serve -launch` command.
+
+For example:
+
+```
+mkdir hindsite-blog
+cd hindsite-blog
+hindsite init -builtin blog
+hindsite serve -launch
+```
+
+### `blog` built-in template
+A template to create a websites for blog posts and newsletters.
+
+Customisation notes:
+
+- Edit `content/main.css` to customise CSS styling.
+
+- The `template/partials.html` header template will include the
+  [highlight.js](https://highlightjs.org/) source code highlighter if the
+  `.user.highlightjs` template variable is set to `"yes"`. Highlight.js language
+  auto-detection is not enabled and code blocks must specify the language
+  explicitly. For example:
+
+- _user_ template variable values can be set per document (in document
+  front matter) or per directory (in site configuration files).
+
+- There is an example _Search_ page that leverages Google Programable Searches.
+  Edit `content/search.md` to enable and configure search functionality
+  using the [Google Programmable Search
+  Engine](https://developers.google.com/custom-search).
+
+- The global site [configuration file](https://srackham.github.io/hindsite/index.html#configuration) is
+  `template/config.toml`.
+
+- The directory layout is documented in the [Hindsite Reference](https://srackham.github.io/hindsite/index.html#sites).
+
+- The example content pages are written in Markdown but you could also use [Rimu markup](https://github.com/srackham/rimu).
+
+
+### `docs` built-in template
+A template to create sites that have a fixed, relatively small, number of pages.
+Ideal for building documentation sites for user guides, FAQs and reference
+manuals.
+
+The [Hindsite documentation site](https://srackham.github.io/hindsite/) is based
+on this template.
+
+Customisation notes:
+
+- Edit `content/main.css` to customise CSS styling.
+- Dynamic table of contents (TOC) generation is performed by JavaScript code in
+  `content/main.js`. To disable TOC generation set the `.user.toc` template variable
+  (either in document front matter or site configuration files) to any value
+  other than `"yes"`.
+
+- The example content pages are written in [Rimu
+  markup](https://srackham.github.io/rimu/). Rimu generates the header IDs which
+  are used for table of contents generation (you could use Markdown instead of
+  Rimu, but would need to modify the TOC generator code).
+
+- The global site [configuration file](#configuration) is
+  `template/config.yaml`.
+
+- If you set the `.user.toc` template variable to any value other than `"yes"`
+  the TOC will not be displayed.
+
+- The `template/partials.html` header template will include the
+  [highlight.js](https://highlightjs.org/) source code highlighter if the
+  `.user.highlightjs` template variable is set to `"yes"`. Highlight.js language
+  auto-detection is not enabled and code blocks must specify the language
+  explicitly. For example:
+``
+```python
+x = 1
+if x == 1:
+  print "x is 1."
+```
+``
+- _user_ template variable values can be set per document (in document
+  front matter) or per directory (in site configuration files).
+
+### `hello` built-in template
+A minimal single-page built-in template consisting of a single
+`content/index.md` document and a single `template/layout.html` HTML template.
 
 
 ## Configuration
