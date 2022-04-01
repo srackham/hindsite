@@ -180,12 +180,16 @@ validate-docs: build-docs
 	for f in $$(ls ./docs/{changelog,faq,index}.html); do echo $$f; html-validator --verbose --format text --file $$f; done
 
 # Build Google search engine site map (see https://support.google.com/webmasters/answer/183668)
+# index.html file URLs are converted to the canonical format with trailing slash character.
 .PHONY: build-sitemap
 build-sitemap:
-	ls docs/*.html \
-	| grep -v 'docs/google' \
-	| sed -e 's|^.|$(HOMEPAGE)|g' \
-	> docs/sitemap.txt
+	cd docs
+	ls ./*.html \
+	| grep -v './google' \
+	| sed -e 's|^.|$(HOMEPAGE)|' \
+	| sed -e 's|\/index.html$$|/|' \
+	> sitemap.txt
+	cd ..
 
 # Submit site map to Google (see https://developers.google.com/search/docs/advanced/sitemaps/build-sitemap#addsitemap)
 .PHONY: submit-sitemap
