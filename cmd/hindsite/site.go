@@ -365,17 +365,13 @@ func (site *site) isDocument(f string) bool {
 	return (ext == ".md" || ext == ".rmu") && pathIsInDir(f, site.contentDir)
 }
 
-// match returns true if path name f matches one of the patterns.
+// match returns true if content file `f` matches one of the `patterns`.
 // The match is lexical.
 func (site *site) match(f string, patterns []string) bool {
-	switch {
-	case pathIsInDir(f, site.contentDir):
-		f, _ = filepath.Rel(site.contentDir, f)
-	case pathIsInDir(f, site.templateDir):
-		f, _ = filepath.Rel(site.templateDir, f)
-	default:
-		panic("matched path must reside in content or template directories: " + f)
+	if !pathIsInDir(f, site.contentDir) {
+		panic("matched path must reside in content directory: " + f)
 	}
+	f, _ = filepath.Rel(site.contentDir, f)
 	f = filepath.ToSlash(f)
 	matched := false
 	for _, pat := range patterns {
@@ -399,7 +395,7 @@ func (site *site) match(f string, patterns []string) bool {
 	return false
 }
 
-// exclude returns true if path name f is excluded.
+// exclude returns true if content file `f` is skipped by the `build` command.
 func (site *site) exclude(f string) bool {
 	return site.match(f, site.rootConf.exclude) && !site.match(f, site.rootConf.include)
 }

@@ -48,13 +48,6 @@ func (site *site) build() error {
 		if info.IsDir() && f == site.initDir {
 			return filepath.SkipDir
 		}
-		if site.exclude(f) {
-			site.verbose("exclude: " + f)
-			if info.IsDir() {
-				return filepath.SkipDir
-			}
-			return nil
-		}
 		if !info.IsDir() {
 			switch filepath.Ext(f) {
 			case ".toml", ".yaml":
