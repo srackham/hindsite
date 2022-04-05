@@ -37,7 +37,7 @@ type site struct {
 	indexDir      string
 	initDir       string
 	newFile       string
-	builtin       string
+	from          string
 	drafts        bool
 	launch        bool
 	httpport      uint16
@@ -144,7 +144,7 @@ func (site *site) parseArgs(args []string) error {
 			site.verbosity++
 		case opt == "-vv":
 			site.verbosity += 2
-		case stringlist{"-content", "-template", "-build", "-builtin", "-port"}.Contains(opt):
+		case stringlist{"-content", "-template", "-build", "-from", "-port"}.Contains(opt):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
 			}
@@ -156,8 +156,8 @@ func (site *site) parseArgs(args []string) error {
 				site.templateDir = arg
 			case "-build":
 				site.buildDir = arg
-			case "-builtin":
-				site.builtin = arg
+			case "-from":
+				site.from = arg
 			case "-port":
 				ports := strings.SplitN(arg, ":", 2)
 				if len(ports) > 0 && ports[0] != "" {
@@ -232,7 +232,7 @@ func (site *site) parseArgs(args []string) error {
 		return err
 	}
 	site.verbose2("template directory: " + site.templateDir)
-	if !(site.command == "init" && site.builtin != "") && !dirExists(site.templateDir) {
+	if site.command != "init" && !dirExists(site.templateDir) {
 		return fmt.Errorf("missing template directory: " + site.templateDir)
 	}
 	site.buildDir, err = getPath(site.buildDir, filepath.Join(site.siteDir, "build"))
@@ -339,7 +339,7 @@ Options:
     -template TEMPLATE_DIR
     -build    BUILD_DIR
     -port     [HTTP_PORT][:LR_PORT]
-    -builtin  NAME
+    -from     SOURCE
     -drafts
     -launch
     -navigate
@@ -352,9 +352,12 @@ Github:     https://github.com/srackham/hindsite
 Docs:       https://srackham.github.io/hindsite`)
 }
 
-// isTemplate returns true if the file path f is in the templates configuration value.
+// isTemplate returns true if the file f is a text template.
 func isTemplate(f string, templates *string) bool {
-	return strings.Contains("|"+nz(templates)+"|", "|"+filepath.Ext(f)+"|")
+	if templates == nil {
+		return false
+	}
+	return stringlist(strings.Split(strings.TrimSpace(*templates), "|")).Contains(filepath.Ext(f))
 }
 
 func (site *site) isDocument(f string) bool {
@@ -363,7 +366,7 @@ func (site *site) isDocument(f string) bool {
 }
 
 // match returns true if path name f matches one of the patterns.
-// The match is purely lexical.
+// The match is lexical.
 func (site *site) match(f string, patterns []string) bool {
 	switch {
 	case pathIsInDir(f, site.contentDir):

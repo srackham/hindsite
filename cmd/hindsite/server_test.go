@@ -16,7 +16,7 @@ func Test_server(t *testing.T) {
 	os.RemoveAll(tmpdir)
 	mkMissingDir(tmpdir)
 	site := newSite()
-	cmd := "hindsite init " + tmpdir + " -template ./testdata/blog/template"
+	cmd := "hindsite init " + tmpdir + " -from ./testdata/blog/template"
 	args := strings.Split(cmd, " ")
 	code := site.executeArgs(args)
 	if code != 0 {

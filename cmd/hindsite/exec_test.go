@@ -36,7 +36,7 @@ func Test_execute(t *testing.T) {
 
 	os.RemoveAll(tmpdir)
 	mkMissingDir(tmpdir)
-	out, code = exec("hindsite init " + tmpdir + " -builtin blog -v")
+	out, code = exec("hindsite init " + tmpdir + " -from blog -v")
 	assert.Equal(0, code)
 	assert.Contains(out, "installing builtin template: blog")
 
@@ -46,7 +46,7 @@ func Test_execute(t *testing.T) {
 
 	os.RemoveAll(tmpdir)
 	mkMissingDir(tmpdir)
-	out, code = exec("hindsite init " + tmpdir + " -template ./testdata/blog/template -v")
+	out, code = exec("hindsite init " + tmpdir + " -from ./testdata/blog/template -v")
 	assert.Equal(0, code)
 	assert.Contains(out, "make directory: content/newsletters")
 

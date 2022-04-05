@@ -147,6 +147,8 @@ func mkMissingDir(dir string) error {
 
 // pathIsInDir returns true if path p is in directory dir or if p equals dir.
 func pathIsInDir(p, dir string) bool {
+	p = filepath.Clean(p)
+	dir = filepath.Clean(dir)
 	return p == dir || strings.HasPrefix(p, dir+string(filepath.Separator))
 }
 
