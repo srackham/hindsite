@@ -17,7 +17,7 @@ type config struct {
 	origin string // Configuration file directory.
 	// Configuration parameters.
 	author    *string           // Default document author (nil if undefined).
-	templates *string           // Comma separated list of content file name extensions to undergo text template expansion (nil if undefined).
+	templates []string          // List of included content templates.
 	homepage  string            // Use this built file for /index.html.
 	paginate  int               // Number of documents per index page. No pagination if zero or less.
 	urlprefix string            // Prefix for synthesized document and index page URLs.
@@ -34,15 +34,6 @@ type config struct {
 }
 
 type configs []config
-
-// checkTemplates returns an error if the templates configuration value is illegal.
-func checkTemplates(templates string) error {
-	re := regexp.MustCompile(`^(\.\w+\|)*(\.\w+)+$`)
-	if templates != "" && !re.MatchString(templates) {
-		return fmt.Errorf("illegal templates: %s", templates)
-	}
-	return nil
-}
 
 // Return default configuration.
 func newConfig() config {
@@ -100,10 +91,7 @@ func (conf *config) parseFile(site *site, f string) error {
 		conf.author = cf.Author
 	}
 	if cf.Templates != nil {
-		if err := checkTemplates(*cf.Templates); err != nil {
-			return err
-		}
-		conf.templates = cf.Templates
+		conf.templates = splitPatterns(*cf.Templates)
 	}
 	if cf.Permalink != "" {
 		conf.permalink = cf.Permalink
@@ -144,20 +132,10 @@ func (conf *config) parseFile(site *site, f string) error {
 		conf.urlprefix = strings.TrimSuffix(value, "/")
 	}
 	if cf.Exclude != nil {
-		conf.exclude = append([]string{".*"}, strings.Split(filepath.ToSlash(*cf.Exclude), "|")...)
-		for _, pat := range conf.exclude {
-			if pat == "" {
-				return fmt.Errorf("exclude pattern cannot be blank: %s", *cf.Exclude)
-			}
-		}
+		conf.exclude = append([]string{".*"}, splitPatterns(*cf.Exclude)...)
 	}
 	if cf.Include != nil {
-		conf.include = strings.Split(filepath.ToSlash(*cf.Include), "|")
-		for _, pat := range conf.include {
-			if pat == "" {
-				return fmt.Errorf("include pattern cannot be blank: %s", *cf.Include)
-			}
-		}
+		conf.include = splitPatterns(*cf.Include)
 	}
 	if cf.Timezone != "" {
 		tz, err := time.LoadLocation(cf.Timezone)
@@ -185,7 +163,7 @@ func (conf *config) parseFile(site *site, f string) error {
 func (conf *config) data() templateData {
 	data := templateData{}
 	data["author"] = nz(conf.author)
-	data["templates"] = nz(conf.templates)
+	data["templates"] = strings.Join(conf.templates, "|")
 	data["id"] = conf.id
 	data["permalink"] = conf.permalink
 	data["homepage"] = conf.homepage
@@ -270,4 +248,9 @@ func (conf *config) joinPrefix(elem ...string) string {
 		panic("relative URL has '/' prefix: " + elem[0])
 	}
 	return conf.urlprefix + "/" + path.Join(elem...)
+}
+
+// splitPatterns splits `|` separated file patterns
+func splitPatterns(patterns string) []string {
+	return strings.Split(filepath.ToSlash(patterns), "|")
 }

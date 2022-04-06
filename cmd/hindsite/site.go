@@ -353,11 +353,8 @@ Docs:       https://srackham.github.io/hindsite`)
 }
 
 // isTemplate returns true if the file f is a text template.
-func isTemplate(f string, templates *string) bool {
-	if templates == nil {
-		return false
-	}
-	return stringlist(strings.Split(strings.TrimSpace(*templates), "|")).Contains(filepath.Ext(f))
+func (site *site) isTemplate(f string, templates []string) bool {
+	return site.match(f, templates)
 }
 
 func (site *site) isDocument(f string) bool {
@@ -366,7 +363,7 @@ func (site *site) isDocument(f string) bool {
 }
 
 // match returns true if content file `f` matches one of the `patterns`.
-// The match is lexical.
+// A blank pattern matches nothing.
 func (site *site) match(f string, patterns []string) bool {
 	if !pathIsInDir(f, site.contentDir) {
 		panic("matched path must reside in content directory: " + f)
@@ -375,6 +372,10 @@ func (site *site) match(f string, patterns []string) bool {
 	f = filepath.ToSlash(f)
 	matched := false
 	for _, pat := range patterns {
+		pat = strings.TrimSpace(pat)
+		if pat == "" {
+			continue
+		}
 		if strings.HasSuffix(pat, "/") {
 			if pathIsInDir(f, strings.TrimSuffix(pat, "/")) {
 				matched = true

@@ -34,7 +34,7 @@ type document struct {
 	date        time.Time
 	author      *string
 	id          *string // Unique document ID.
-	templates   *string
+	templates   []string
 	description string
 	url         string // Synthesized document URL.
 	tags        []string
@@ -84,6 +84,7 @@ func newDocument(contentfile string, site *site) (document, error) {
 	if err := doc.extractFrontMatter(); err != nil {
 		return doc, parseError(fmt.Errorf("front matter: %s", err.Error()))
 	}
+	// TODO extract into doc.buildPath() function??? Note that site === doc.site.
 	// Synthesize build path and URL according to content path, permalink and slug values.
 	rel, _ := filepath.Rel(site.contentDir, doc.contentPath)
 	doc.templatePath = filepath.Join(site.templateDir, rel)
@@ -253,10 +254,7 @@ func (doc *document) extractFrontMatter() error {
 		doc.id = fm.ID
 	}
 	if fm.Templates != nil {
-		if err := checkTemplates(*fm.Templates); err != nil {
-			return err
-		}
-		doc.templates = fm.Templates
+		doc.templates = splitPatterns(*fm.Templates)
 	}
 	if fm.Permalink != "" {
 		doc.permalink = fm.Permalink
@@ -288,7 +286,7 @@ func (doc *document) frontMatter() templateData {
 	data["title"] = doc.title
 	data["author"] = nz(doc.author)
 	data["id"] = nz(doc.id)
-	data["templates"] = nz(doc.templates)
+	data["templates"] = strings.Join(doc.templates, "|")
 	data["permalink"] = doc.permalink
 	data["shortdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.shortdate)
 	data["mediumdate"] = doc.date.In(doc.conf.timezone).Format(doc.conf.mediumdate)
@@ -325,7 +323,7 @@ func (doc *document) frontMatter() templateData {
 	data["user"] = user
 	// Process description as a text template before rendering to HTML.
 	description := doc.description
-	if isTemplate(doc.contentPath, doc.templates) {
+	if doc.site.isTemplate(doc.contentPath, doc.templates) {
 		description, _ = doc.site.textTemplates.renderText("documentDescription", description, data)
 	}
 	data["description"] = doc.render(description)

@@ -178,7 +178,7 @@ func (site *site) copyHomePage() error {
 
 func (site *site) buildStaticFile(f string) error {
 	conf := site.configFor(f)
-	if isTemplate(f, conf.templates) {
+	if site.isTemplate(f, conf.templates) {
 		return site.renderStaticFile(f)
 	}
 	return site.copyStaticFile(f)
@@ -217,7 +217,7 @@ func (site *site) renderStaticFile(f string) error {
 	site.verbose2("render static: " + doc.contentPath)
 	site.verbose2(doc.String())
 	markup := doc.content
-	if isTemplate(doc.contentPath, doc.templates) {
+	if site.isTemplate(doc.contentPath, doc.templates) {
 		data := doc.frontMatter()
 		markup, err = site.textTemplates.renderText("staticFile", markup, data)
 		if err != nil {
@@ -237,7 +237,7 @@ func (site *site) renderDocument(doc *document) error {
 	data := doc.frontMatter()
 	markup := doc.content
 	// Render document markup as a text template.
-	if isTemplate(doc.contentPath, doc.templates) {
+	if site.isTemplate(doc.contentPath, doc.templates) {
 		site.verbose2("render template: " + doc.contentPath)
 		markup, err = site.textTemplates.renderText("documentMarkup", markup, data)
 		if err != nil {
