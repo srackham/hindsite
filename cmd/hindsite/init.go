@@ -13,77 +13,79 @@ func (site *site) init() error {
 		return fmt.Errorf("-from option source has not been specified")
 	}
 	if dirCount(site.templateDir) > 0 {
-		return fmt.Errorf("non-empty target template directory: " + site.templateDir)
+		site.warning("skipping non-empty target template directory: " + site.templateDir)
+	} else {
+		if (stringlist{"blog", "doc", "hello"}).Contains(site.from) {
+			// Load template directory from the built-in site.
+			site.verbose("installing builtin template: " + site.from)
+			if err := restoreEmbeddedFS(embeddedFS, "builtin/"+site.from+"/template", site.templateDir); err != nil {
+				return err
+			}
+			// Hoist the restored template files from the root of the restored
+			// builtin directory up one level into the root of the site template
+			// directory.
+			files, _ := filepath.Glob(filepath.Join(site.templateDir, site.from, "template", "*"))
+			for _, f := range files {
+				if err := os.Rename(f, filepath.Join(site.templateDir, filepath.Base(f))); err != nil {
+					return err
+				}
+			}
+			// Remove the now empty restored path.
+			if err := os.RemoveAll(filepath.Join(site.templateDir, site.from)); err != nil {
+				return err
+			}
+		} else {
+			// Copy the contents of the source template directory to the template
+			// directory.
+			if !dirExists(site.from) {
+
+			}
+			if pathIsInDir(site.from, site.templateDir) {
+				return fmt.Errorf("source template directory '%s' cannot reside inside target template directory '%s'", site.from, site.templateDir)
+			}
+			if !dirExists(site.templateDir) {
+				site.verbose("make directory: " + site.templateDir)
+				if err := mkMissingDir(site.templateDir); err != nil {
+					return err
+				}
+			}
+			if err := site.copyDirContents(site.from, site.templateDir); err != nil {
+				return err
+			}
+		}
 	}
 	if dirCount(site.contentDir) > 0 {
-		return fmt.Errorf("non-empty target content directory: " + site.contentDir)
-	}
-	if (stringlist{"blog", "doc", "hello"}).Contains(site.from) {
-		// Load template directory from the built-in site.
-		site.verbose("installing builtin template: " + site.from)
-		if err := restoreEmbeddedFS(embeddedFS, "builtin/"+site.from+"/template", site.templateDir); err != nil {
-			return err
-		}
-		// Hoist the restored template files from the root of the restored
-		// builtin directory up one level into the root of the site template
-		// directory.
-		files, _ := filepath.Glob(filepath.Join(site.templateDir, site.from, "template", "*"))
-		for _, f := range files {
-			if err := os.Rename(f, filepath.Join(site.templateDir, filepath.Base(f))); err != nil {
-				return err
-			}
-		}
-		// Remove the now empty restored path.
-		if err := os.RemoveAll(filepath.Join(site.templateDir, site.from)); err != nil {
-			return err
-		}
+		site.warning("skipping non-empty target content directory: " + site.contentDir)
 	} else {
-		// Copy the contents of the source template directory to the template
-		// directory.
-		if !dirExists(site.from) {
-
-		}
-		if pathIsInDir(site.from, site.templateDir) {
-			return fmt.Errorf("source template directory '%s' cannot reside inside target template directory '%s'", site.from, site.templateDir)
-		}
-		if !dirExists(site.templateDir) {
-			site.verbose("make directory: " + site.templateDir)
-			if err := mkMissingDir(site.templateDir); err != nil {
-				return err
-			}
-		}
-		if err := site.copyDirContents(site.from, site.templateDir); err != nil {
+		// Create the template directory structure in the content directory.
+		if err := mkMissingDir(site.contentDir); err != nil {
 			return err
 		}
-	}
-	// Create the template directory structure in the content directory.
-	if err := mkMissingDir(site.contentDir); err != nil {
-		return err
-	}
-	err := filepath.Walk(site.templateDir, func(f string, info os.FileInfo, err error) error {
+		err := filepath.Walk(site.templateDir, func(f string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if f == site.templateDir {
+				return nil
+			}
+			if info.IsDir() && f == site.initDir {
+				return filepath.SkipDir
+			}
+			if info.IsDir() {
+				dst := pathTranslate(f, site.templateDir, site.contentDir)
+				site.verbose("make directory: " + dst)
+				err = mkMissingDir(dst)
+			}
+			return err
+		})
 		if err != nil {
 			return err
 		}
-		if f == site.templateDir {
-			return nil
-		}
-		if info.IsDir() && f == site.initDir {
-			return filepath.SkipDir
-		}
-		if info.IsDir() {
-			dst := pathTranslate(f, site.templateDir, site.contentDir)
-			site.verbose("make directory: " + dst)
-			err = mkMissingDir(dst)
-		}
-		return err
-	})
-	if err != nil {
-		return err
-	}
-	// Copy the contents of the optional template init directory to the content directory.
-	if dirExists(site.initDir) {
-		if err := site.copyDirContents(site.initDir, site.contentDir); err != nil {
-			return err
+		// Copy the contents of the optional template init directory to the content directory.
+		if dirExists(site.initDir) {
+			if err := site.copyDirContents(site.initDir, site.contentDir); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

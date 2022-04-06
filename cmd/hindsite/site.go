@@ -62,7 +62,7 @@ func newSite() site {
 	return site
 }
 
-// output prints a line to out writer if `-v` option verbosity is equal to or
+// output prints a line to `out` if `-v` option verbosity is equal to or
 // greater than verbosity.
 func (site *site) output(out io.Writer, verbosity int, format string, v ...interface{}) {
 	if site.verbosity >= verbosity {
@@ -95,10 +95,17 @@ func (site *site) verbose2(format string, v ...interface{}) {
 	site.output(os.Stdout, 2, format, v...)
 }
 
-// logerror prints a line to logerr.
+// logerror prints a line to stderr.
 func (site *site) logerror(format string, v ...interface{}) {
 	color.Set(color.FgRed, color.Bold)
 	site.output(os.Stderr, 0, "error: "+format, v...)
+	color.Unset()
+}
+
+// warning prints a line to stdout.
+func (site *site) warning(format string, v ...interface{}) {
+	color.Set(color.Bold)
+	site.output(os.Stdout, 0, "warning: "+format, v...)
 	color.Unset()
 }
 
