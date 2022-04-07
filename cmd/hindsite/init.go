@@ -106,16 +106,13 @@ func restoreEmbeddedFS(srcFS embed.FS, srcDir string, dstDir string) error {
 				return err
 			}
 		} else {
-			if err := mkMissingDir(dstDir); err != nil {
-				return err
-			}
 			srcFile := srcDir + "/" + entry.Name()
 			contents, err := srcFS.ReadFile(srcFile)
 			if err != nil {
 				panic("failed to read embedded file: " + srcFile)
 			}
 			dstFile := dstDir + "/" + entry.Name()
-			if err := writeFile(dstFile, string(contents)); err != nil {
+			if err := writePath(dstFile, string(contents)); err != nil {
 				return err
 			}
 		}

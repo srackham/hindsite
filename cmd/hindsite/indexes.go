@@ -136,13 +136,13 @@ func (idx *index) build(doc *document) error {
 			// Merge applicable configuration variables.
 			fm["urlprefix"] = idx.conf.urlprefix
 			fm["user"] = idx.conf.user
-			err := tmpls.render(tmpl, fm, pg.file)
+			html, err := tmpls.render(tmpl, fm)
 			if doc != nil {
 				idx.site.verbose("write index: " + pg.file)
 			} else {
 				idx.site.verbose2("write index: " + pg.file)
 			}
-			if err != nil {
+			if err = writePath(pg.file, html); err != nil {
 				return err
 			}
 		}
@@ -182,9 +182,12 @@ func (idx *index) build(doc *document) error {
 			data["urlprefix"] = idx.conf.urlprefix
 			data["user"] = idx.conf.user
 			outfile := filepath.Join(idx.indexDir, "tags.html")
-			err := tmpls.render(tagsTemplate, data, outfile)
-			idx.site.verbose2("write index: " + outfile)
+			html, err := tmpls.render(tagsTemplate, data)
 			if err != nil {
+				return err
+			}
+			idx.site.verbose2("write index: " + outfile)
+			if err = writePath(outfile, html); err != nil {
 				return err
 			}
 		}

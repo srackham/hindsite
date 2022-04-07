@@ -61,15 +61,11 @@ func (tmpls *htmlTemplates) add(tmplfile string) error {
 	return nil
 }
 
-// render renders named template to file.
-func (tmpls htmlTemplates) render(name string, data templateData, outfile string) error {
+// render renders named HTML template to a string.
+func (tmpls htmlTemplates) render(name string, data templateData) (string, error) {
 	buf := bytes.NewBufferString("")
 	if err := tmpls.templates.ExecuteTemplate(buf, name, data); err != nil {
-		return err
+		return "", err
 	}
-	html := buf.String()
-	if err := mkMissingDir(filepath.Dir(outfile)); err != nil {
-		return err
-	}
-	return writeFile(outfile, html)
+	return buf.String(), nil
 }

@@ -117,6 +117,14 @@ func writeFile(name string, text string) error {
 	return ioutil.WriteFile(name, []byte(text), 0644)
 }
 
+// writePath writes file and creates any missing path directories.
+func writePath(path string, text string) error {
+	if err := mkMissingDir(filepath.Dir(path)); err != nil {
+		return err
+	}
+	return writeFile(path, text)
+}
+
 // Return file name sans extension.
 func fileName(name string) string {
 	return replaceExt(filepath.Base(name), "")

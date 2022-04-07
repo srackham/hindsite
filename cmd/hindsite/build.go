@@ -225,11 +225,7 @@ func (site *site) renderStaticFile(f string) error {
 		}
 	}
 	site.verbose("write static: " + doc.buildPath)
-	err = mkMissingDir(filepath.Dir(doc.buildPath))
-	if err != nil {
-		return err
-	}
-	return writeFile(doc.buildPath, markup)
+	return writePath(doc.buildPath, markup)
 }
 
 func (site *site) renderDocument(doc *document) error {
@@ -247,11 +243,15 @@ func (site *site) renderDocument(doc *document) error {
 	// Convert markup to HTML then render document layout to build directory.
 	site.verbose2("render document: " + doc.contentPath)
 	data["body"] = doc.render(markup)
-	err = site.htmlTemplates.render(doc.layout, data, doc.buildPath)
+	html, err := site.htmlTemplates.render(doc.layout, data)
 	if err != nil {
 		return err
 	}
+	// TODO checkIds()
 	site.verbose("write document: " + doc.buildPath)
+	if err = writePath(doc.buildPath, html); err != nil {
+		return err
+	}
 	site.verbose2(doc.String())
 	return nil
 }
