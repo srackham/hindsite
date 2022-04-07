@@ -39,6 +39,7 @@ type site struct {
 	newFile       string
 	from          string
 	drafts        bool
+	lint          bool
 	launch        bool
 	httpport      uint16
 	lrport        uint16
@@ -143,6 +144,8 @@ func (site *site) parseArgs(args []string) error {
 			site.siteDir = opt
 		case opt == "-drafts":
 			site.drafts = true
+		case opt == "-lint":
+			site.lint = true
 		case opt == "-launch":
 			site.launch = true
 		case opt == "-navigate":
@@ -348,6 +351,7 @@ Options:
     -port     [HTTP_PORT][:LR_PORT]
     -from     SOURCE
     -drafts
+    -lint
     -launch
     -navigate
     -v

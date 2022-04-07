@@ -138,7 +138,7 @@ release:
 define rules_template
 .PHONY: build-builtin-$(1)
 build-builtin-$(1):
-	hindsite build $(2) -content $(2)/template/init -v
+	hindsite build $(2) -content $(2)/template/init -lint -v
 
 .PHONY: serve-builtin-$(1)
 serve-builtin-$(1):
@@ -167,7 +167,7 @@ HOMEPAGE = https://srackham.github.io/hindsite
 
 .PHONY: build-docs
 build-docs: install
-	hindsite build docs
+	hindsite build docs -lint
 	make build-sitemap
 	cp docs/build/* docs	# Github pages serves from the ./docs folder
 

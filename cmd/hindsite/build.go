@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -242,16 +245,46 @@ func (site *site) renderDocument(doc *document) error {
 	}
 	// Convert markup to HTML then render document layout to build directory.
 	site.verbose2("render document: " + doc.contentPath)
-	data["body"] = doc.render(markup)
+	body := doc.render(markup)
+	if site.lint {
+		if unmatched := checkIds(string(body), os.Stdout); len(unmatched) > 0 {
+			return fmt.Errorf("%s: undeclared anchor ids: %s", doc.contentPath, strings.Join(unmatched, " "))
+		}
+	}
+	data["body"] = body
 	html, err := site.htmlTemplates.render(doc.layout, data)
 	if err != nil {
 		return err
 	}
-	// TODO checkIds()
 	site.verbose("write document: " + doc.buildPath)
 	if err = writePath(doc.buildPath, html); err != nil {
 		return err
 	}
 	site.verbose2(doc.String())
 	return nil
+}
+
+// checkIds scans html returns a list of link anchors that have no matching element id.
+func checkIds(html string, errlog io.Writer) (unmatched []string) {
+	// Scan HTML for intra-document anchor URLs and element ids.
+	unmatched = stringlist{}
+	ids := stringlist{}
+	pat := regexp.MustCompile(`id="(.+?)"`)
+	matches := pat.FindAllStringSubmatch(html, -1)
+	for _, match := range matches {
+		ids = append(ids, match[1])
+	}
+	hrefs := stringlist{}
+	pat = regexp.MustCompile(`href="#(.+?)"`)
+	matches = pat.FindAllStringSubmatch(html, -1)
+	for _, match := range matches {
+		hrefs = append(hrefs, match[1])
+	}
+	// Check that all hrefs have a matching element id.
+	for _, href := range hrefs {
+		if !ids.Contains(href) {
+			unmatched = append(unmatched, href)
+		}
+	}
+	return
 }
