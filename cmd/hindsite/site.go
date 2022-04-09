@@ -71,6 +71,7 @@ func (site *site) output(out io.Writer, verbosity int, format string, v ...inter
 		// Strip leading site directory from path names to make message more readable.
 		if filepath.IsAbs(site.siteDir) {
 			msg = strings.Replace(msg, " "+site.siteDir+string(filepath.Separator), " ", -1)
+			msg = strings.TrimPrefix(msg, site.siteDir+string(filepath.Separator))
 		}
 		if site.out == nil {
 			fmt.Fprintln(out, msg)
@@ -99,14 +100,14 @@ func (site *site) verbose2(format string, v ...interface{}) {
 // logerror prints a line to stderr.
 func (site *site) logerror(format string, v ...interface{}) {
 	color.Set(color.FgRed, color.Bold)
-	site.output(os.Stderr, 0, "error: "+format, v...)
+	site.output(os.Stderr, 0, format, v...)
 	color.Unset()
 }
 
 // warning prints a line to stdout.
 func (site *site) warning(format string, v ...interface{}) {
 	color.Set(color.Bold)
-	site.output(os.Stdout, 0, "warning: "+format, v...)
+	site.output(os.Stdout, 0, format, v...)
 	color.Unset()
 }
 

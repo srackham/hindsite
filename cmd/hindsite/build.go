@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -147,6 +146,44 @@ func (site *site) build() error {
 	if err := site.copyHomePage(); err != nil {
 		return err
 	}
+	// Lint documents.
+	if site.lint {
+		for _, doc := range site.docs.byContentPath {
+			// Iterate all document href/src attribute URLs.
+			for _, url := range doc.urls {
+				link, ok := doc.parseUrl(url)
+				if !ok {
+					site.verbose2("lint: %s: skipped external link: %s", doc.contentPath, url)
+					continue
+				}
+				// Check the target URL file exists.
+				var target *document
+				t := link.buildPath
+				if t == "" {
+					t = doc.buildPath
+				}
+				if !fileExists(t) {
+					err := fmt.Errorf("%s: contains link to missing file: %s", doc.contentPath, strings.TrimPrefix(t, site.buildDir+"/"))
+					errCount++
+					site.logerror(err.Error())
+					continue
+				}
+				// Check the href/src URL anchor has a matching HTML id attribute in
+				// the target document.
+				if link.anchor != "" {
+					target, ok = site.docs.byBuildPath[t]
+					if !ok || !target.ids.Contains(link.anchor) {
+						err := fmt.Errorf("%s: contains link to missing anchor: %s", doc.contentPath, strings.TrimPrefix(url, site.rootConf.urlprefix+"/"))
+						errCount++
+						site.logerror(err.Error())
+						continue
+					}
+				}
+
+				site.verbose2("lint: %s: validated link: %s", doc.contentPath, url)
+			}
+		}
+	}
 	// Print summary.
 	if errCount == 0 {
 		color.Set(color.FgGreen, color.Bold)
@@ -158,7 +195,7 @@ func (site *site) build() error {
 	color.Unset()
 	// Report accumulated document parse errors.
 	if errCount > 0 {
-		return fmt.Errorf("document parse errors: %d", errCount)
+		return fmt.Errorf("document errors: %d", errCount)
 	}
 	return nil
 }
@@ -245,16 +282,25 @@ func (site *site) renderDocument(doc *document) error {
 	}
 	// Convert markup to HTML then render document layout to build directory.
 	site.verbose2("render document: " + doc.contentPath)
-	body := doc.render(markup)
-	if site.lint {
-		if unmatched := checkIds(string(body), os.Stdout); len(unmatched) > 0 {
-			return fmt.Errorf("%s: undeclared anchor ids: %s", doc.contentPath, strings.Join(unmatched, " "))
-		}
-	}
-	data["body"] = body
+	data["body"] = doc.render(markup)
 	html, err := site.htmlTemplates.render(doc.layout, data)
 	if err != nil {
 		return err
+	}
+	if site.lint {
+		// Scan HTML for intra-document anchor URLs and element ids.
+		doc.ids = stringlist{}
+		pat := regexp.MustCompile(`(?i)id="(.+?)"`)
+		matches := pat.FindAllStringSubmatch(html, -1)
+		for _, match := range matches {
+			doc.ids = append(doc.ids, match[1])
+		}
+		doc.urls = stringlist{}
+		pat = regexp.MustCompile(`(?i)(?:href|src)="(.+?)"`)
+		matches = pat.FindAllStringSubmatch(html, -1)
+		for _, match := range matches {
+			doc.urls = append(doc.urls, match[1])
+		}
 	}
 	site.verbose("write document: " + doc.buildPath)
 	if err = writePath(doc.buildPath, html); err != nil {
@@ -262,29 +308,4 @@ func (site *site) renderDocument(doc *document) error {
 	}
 	site.verbose2(doc.String())
 	return nil
-}
-
-// checkIds scans html returns a list of link anchors that have no matching element id.
-func checkIds(html string, errlog io.Writer) (unmatched []string) {
-	// Scan HTML for intra-document anchor URLs and element ids.
-	unmatched = stringlist{}
-	ids := stringlist{}
-	pat := regexp.MustCompile(`id="(.+?)"`)
-	matches := pat.FindAllStringSubmatch(html, -1)
-	for _, match := range matches {
-		ids = append(ids, match[1])
-	}
-	hrefs := stringlist{}
-	pat = regexp.MustCompile(`href="#(.+?)"`)
-	matches = pat.FindAllStringSubmatch(html, -1)
-	for _, match := range matches {
-		hrefs = append(hrefs, match[1])
-	}
-	// Check that all hrefs have a matching element id.
-	for _, href := range hrefs {
-		if !ids.Contains(href) {
-			unmatched = append(unmatched, href)
-		}
-	}
-	return
 }

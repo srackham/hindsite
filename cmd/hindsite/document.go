@@ -23,12 +23,14 @@ type document struct {
 	conf         config // Merged configuration for this document.
 	contentPath  string
 	buildPath    string
-	templatePath string    // Virtual path used to find document related templates.
-	content      string    // Markup text (without front matter header).
-	modtime      time.Time // Document source file modified timestamp.
-	primaryIndex *index    // Top-level document index (nil if document is not indexed).
-	prev         *document // Previous document in primary index.
-	next         *document // Next document in primary index.
+	templatePath string     // Virtual path used to find document related templates.
+	content      string     // Markup text (without front matter header).
+	modtime      time.Time  // Document source file modified timestamp.
+	primaryIndex *index     // Top-level document index (nil if document is not indexed).
+	prev         *document  // Previous document in primary index.
+	next         *document  // Next document in primary index.
+	ids          stringlist // HTML element ids.
+	urls         stringlist // HTML element href and src attributes.
 	// Front matter.
 	title       string
 	date        time.Time
@@ -43,6 +45,11 @@ type document struct {
 	slug        string
 	layout      string            // Document template name.
 	user        map[string]string // User defined configuration key/values.
+}
+
+type documentLink struct {
+	buildPath string // Target document build path
+	anchor    string // URL fragment
 }
 
 // Parse document content and front matter.
@@ -130,7 +137,7 @@ func newDocument(contentfile string, site *site) (document, error) {
 		doc.layout = site.htmlTemplates.name(layout)
 	}
 	urlpath := func() *string {
-		s := strings.TrimPrefix(doc.url, doc.conf.urlprefix)
+		s := doc.trimUrlPrefix(doc.url)
 		return &s
 	}
 	if doc.id != nil && *doc.id == "urlpath" {
@@ -380,6 +387,43 @@ func (doc *document) updateFrom(src document) {
 // isDraft returns true if document is a draft and the drafts option is not true.
 func (doc *document) isDraft() bool {
 	return doc.draft && !doc.site.drafts
+}
+
+// parseUrl computes the URL's document build path and URL anchor fragment from
+// `url` and returns them in `link`. If the URL is external to the site then `ok`
+// is returned `false`.
+func (doc *document) parseUrl(url string) (link documentLink, ok bool) {
+	// Split into URL and anchor.
+	s := strings.Split(url, "#")
+	url = s[0]
+	if len(s) > 1 {
+		link.anchor = s[1]
+	}
+	// Match URLs with a urlprefix or root-relative URLs.
+	if url != "" {
+		re := regexp.MustCompile(`(?i)^(?:` + regexp.QuoteMeta(doc.conf.urlprefix) + `)?/(.+)$`)
+		matches := re.FindStringSubmatch(url)
+		if matches != nil {
+			link.buildPath = filepath.Join(doc.site.buildDir, matches[1])
+			if dirExists(link.buildPath) {
+				link.buildPath = filepath.Join(link.buildPath, "index.html")
+			}
+		} else {
+			// Match relative URLs.
+			re := regexp.MustCompile(`(?i)^([\w][\w./-]*)$`)
+			matches := re.FindStringSubmatch(url)
+			if matches == nil {
+				return link, false
+			}
+			link.buildPath = filepath.Join(filepath.Dir(doc.buildPath), matches[1])
+		}
+	}
+	return link, true
+}
+
+// TODO is this refactor worth it???
+func (doc *document) trimUrlPrefix(url string) string {
+	return strings.TrimPrefix(url, doc.conf.urlprefix)
 }
 
 /*

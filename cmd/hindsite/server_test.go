@@ -76,7 +76,7 @@ func Test_server(t *testing.T) {
 		t.Fatal(err)
 	}
 	newfile := path.Join(tmpdir, "content", "posts", "newfile.md")
-	updateAndWait(newfile, text, "error: content/posts/newfile.md: duplicate document build path in: content/posts/2016-10-18-sed-sed.md")
+	updateAndWait(newfile, text, "content/posts/newfile.md: duplicate document build path in: content/posts/2016-10-18-sed-sed.md")
 	// Fix post error.
 	text = strings.Replace(text, "slug: sed-sed", "slug: newfile", 1)
 	updateAndWait(newfile, text, "updated: content/posts/newfile.md")

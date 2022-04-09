@@ -32,7 +32,7 @@ func Test_execute(t *testing.T) {
 
 	out, code = exec("hindsite build missing")
 	assert.Equal(1, code)
-	assert.Contains(out, "error: missing site directory")
+	assert.Contains(out, "missing site directory")
 
 	os.RemoveAll(tmpdir)
 	mkMissingDir(tmpdir)
@@ -84,7 +84,7 @@ func Test_execute(t *testing.T) {
 
 	out, code = exec("hindsite new " + f)
 	assert.Equal(1, code)
-	assert.Contains(out, "error: document already exists: content/posts/2018-12-01-new-test-file-two.md")
+	assert.Contains(out, "document already exists: content/posts/2018-12-01-new-test-file-two.md")
 
 	out, code = exec("hindsite build -drafts")
 	assert.Equal(0, code)
