@@ -29,7 +29,17 @@
 
 <h1 id="hindsite-change-log">Hindsite Change Log</h1>
 <p>See the <a href="https://github.com/srackham/hindsite/commits/master">Github commit logs</a> for a full list of changes.</p>
-<h2 id="version-1-4-1-2021-08-22">Version 1.4.1 (2021-08-22)</h2>
+<h2 id="version-2-0-0-2022">Version 2.0.0 (2022-??-??)</h2>
+<ul><li>BREAKING CHANGE: The <code>templates</code> configuration variable has been extended to
+  include file pattern (previously it only accepted file name extensions). For
+  example the Hindsite version 1 templates configuration value
+  <code>.css|.html|.js|.md</code> would become <code>*.css|*.html|*.js|*.md</code> in Hindsite version 2.</li><li>BREAKING CHANGE: The <code>exclude/include</code> configuration variables only apply to
+  the content directory (previously applied to both content and template
+  directories).</li><li>BREAKING CHANGE: Replaced <code>init</code> command <code>-builtin</code> option with the mandatory
+  <code>-from</code> option. The semantics differ in that <code>-from</code> can specify the location
+  of a non-builtin template &mdash; previously the <code>-template</code> option was used which
+  was confusing and less flexible).</li><li>Add built-in <em>docs</em> site template.</li><li>Rename built-in <em>minimal</em> site template to <em>hello</em>.</li><li>Add help to hindsite <code>serve</code> command: prints help if any key other than the <em>R</em>,
+  <em>D</em>, <em>N</em> keys are entered while the serve command is running.</li><li>Add Rimu CSS admonition classes to Hindsite documentation website.</li></ul><h2 id="version-1-4-1-2021-08-22">Version 1.4.1 (2021-08-22)</h2>
 <ul><li>Refactor project directories layout.</li><li>Upgrade dependencies.</li><li>Migrate from the <code>go-bindata</code> tool to the Go <code>embed</code> package for embedded data.</li></ul><h2 id="version-1-4-0-2018-12-10">Version 1.4.0 (2018-12-10)</h2>
 <ul><li>Hindsite projects are now called <em>sites</em>. The word <em>site</em> is more descriptive
   and less generic than <em>project</em>.</li><li>Added the <a href="/hindsite/index.html#new-command"><code>new</code> command</a> which is used to create new

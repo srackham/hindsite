@@ -29,7 +29,7 @@
 
 <h1 id="hindsite-reference">Hindsite Reference</h1>
 <p>Hindsite is a
-<a href="https://srackham.github.io/hindsite/faq.html#how-fast-is-hindsite">fast</a>,
+<a href="/hindsite/faq.html#how-fast-is-hindsite">fast</a>,
 lightweight static website generator. It builds static websites with optional
 document and tag indexes from <a href="https://en.wikipedia.org/wiki/Markdown">Markdown</a>
 and <a href="https://github.com/srackham/rimu">Rimu</a> source documents.</p>
@@ -47,22 +47,24 @@ commands:</p>
    prefer to build and install from source).</li><li>Create a new Hindsite site directory and install the <a href="https://github.com/srackham/hindsite/tree/master/cmd/hindsite/builtin/blog/template">built-in <code>blog</code>
    template</a>
    using the hindsite <a href="#init-command">init command</a>:<pre><code>mkdir mysite
-hindsite init mysite -builtin blog</code></pre>
+hindsite init mysite -from blog</code></pre>
 </li><li>Build the website, start the hindsite web server and open it in the browser:<pre><code>hindsite serve mysite -launch</code></pre>
 </li></ol><p>Include the <code>-v</code> (verbose) command option to see what's going on. The best way
 to start learning hindsite is to browse the blog <a href="#sites">site directory</a>.</p>
 <p>If you are familiar with Jekyll or Hugo you'll be right a home (hindsite can
 read Jekyll and Hugo Markdown document <a href="#front-matter">front matter</a>).</p>
 <h2 id="sites">Sites</h2>
-<p>A hindsite <em>site</em> consists of three separate directories:</p>
-<ul><li>A <em>content directory</em> containing Markdown <a href="#documents">documents</a> and
-  <a href="#static-files">static resource files</a>.</li><li>A <em>template directory</em> containing <a href="#templates">templates</a> and site
-  <a href="#configuration">configuration files</a>.</li><li>A <em>build directory</em> containing the generated website.</li></ul><p>By default these directories reside in the <em>site directory</em> and are named
-<em>content</em>, <em>template</em> and <em>build</em>, all three must be mutually exclusive (not
-contained within one another).</p>
-<ul><li>The <em>build</em>, <em>content</em> and <em>template</em> directories normally reside in the <em>site
-  directory</em> folder but this convention is not enforced.</li><li>A template directory can process multiple content directories just as a
-  content directory can be processed by multiple template directories.</li></ul><p>For example, here's the built-in blog site structure:</p>
+<p>A site consists of three separate directory trees containing the files and used
+by the <code>hindsite</code> command to build, maintain and test a static website:</p>
+<ul><li>A <em>content directory</em> containing <a href="#documents">documents</a> and
+  <a href="#static-files">static resource files</a>.</li><li>A <em>template directory</em> containing <a href="#templates">templates</a> and
+  <a href="#configuration">configuration files</a>.</li><li>A <em>build directory</em> where Hindsite builds the static website.</li></ul><p>By default, these directories reside in a <em>site directory</em> and are named
+<em>content</em>, <em>template</em> and <em>build</em>. The default locations can be changed using
+command-line options so, for example, a single template directory can process
+multiple content directories just as a single content directory can be processed
+by multiple template directories. The <em>build</em>, <em>content</em> and <em>template</em>
+directories must be mutually exclusive (not contained within one another).</p>
+<p>For example, here's the built-in blog site structure:</p>
 <pre><code>├── build
 │   ├── images
 │   ├── indexes
@@ -82,20 +84,20 @@ contained within one another).</p>
     │   └── posts
     ├── newsletters
     └── posts</code></pre>
+<p>Corresponding content and template directory paths maintain relationships
+between content documents, their layout templates and their configuration files.
+For example, layout templates and configuration files in <code>template/posts</code> are
+applied to content files in <code>content/posts</code></p>
 <p>The <code>build/indexes</code> directory contains the generated document and tag index
 pages.</p>
 <p>The <code>template/init</code> directory is optional, it contains static resources and
-example documents which serve as a starting point for new sites (see the
-<a href="#init-command">init command</a>). In all other respects it is just another content
-directory.</p>
+example documents which serve as a starting point for new sites (see the <a href="#init-command">init
+command</a>). In all other respects it is just like any other
+content directory.</p>
 <p>File and directory names should only contain lower case alpha numeric and hyphen
 characters. This convention is not enforced but is recommended because it
 ensures consistent, readable URLs without ugly encodings for illegal URL
 characters.</p>
-<p>Notice that, if we exclude the <code>build/indexes</code> and <code>template/init</code>
-directories, all three directories share the same base directory structure.
-Specifically, all three contain the template directory structure and the build
-directory is a one-to-one reconstruction of the content directory.</p>
 <h2 id="commands">Commands</h2>
 <p>Usage:</p>
 <pre><code>hindsite init  [SITE_DIR] [OPTIONS]
@@ -121,25 +123,26 @@ version information.</p>
 <pre><code>hindsite help</code></pre>
 <p><code>hindsite</code>, <code>hindsite -h</code> and <code>hindsite --help</code> are all aliases for <code>hindsite help</code>.</p>
 <h3 id="init-command">init command</h3>
-<p>The <em>init</em> command initializes site <em>content directory</em> from the <em>template
-directory</em> or from a built-in template.</p>
+<p>The <em>init</em> command creates a new site from another site template or from a
+built-in template. The <em>init</em> command copies the source template to the
+site's template directory and initializes the site's content directory.</p>
 <p>Usage:</p>
-<pre><code>hindsite init  [SITE_DIR] [OPTIONS]</code></pre>
+<pre><code>hindsite init [SITE_DIR] [OPTIONS]</code></pre>
 <p>Applicable options:</p>
 <pre><code>-content CONTENT_DIR
 -template TEMPLATE_DIR
--builtin NAME
+-from SOURCE
 -v</code></pre>
-<ul><li>The <code>CONTENT_DIR</code> must be empty.</li><li>If the <code>-builtin NAME</code> option is specified the contents and template
-  directories are initialized from one of the named built-in templates:<dl><dt><code>blog</code></dt><dd>A blog and newsletter site.</dd><dt><code>hello</code></dt><dd>A hello site.</dd></dl></li><li>If the <code>-builtin</code> option is specified the <code>TEMPLATE_DIR</code> must be empty.</li></ul><h4 id="command-execution">Command execution</h4>
-<ol><li>If the <code>-builtin</code> option is specified then the selected built-in template is
-   copied to the <code>TEMPLATE_DIR</code>.</li><li>The template directory structure is recreated in the content directory.</li><li>If the <code>TEMPLATE_DIR/init</code> directory exists its contents is copied to the
-   content directory.</li><li>If the <code>-template TEMPLATE_DIR</code> option specifies a location outside the
-   site directory and the <code>SITE_DIR/template</code> directory does not exist or
-   is empty the <code>TEMPLATE_DIR</code> is copied to <code>SITE_DIR/template</code>.</li></ol><p>The following example installs the built-in <code>blog</code> template to <code>./template</code> and
-initializes the <code>./contents</code> directory:</p>
-<pre><code>hindsite init -builtin blog</code></pre>
-<h3 id="build-command">build command</h3>
+<ul><li>The <code>-from</code> option is mandatory and <code>SOURCE</code> is either the name of a <a href="#built-in-site-templates">built-in
+  template</a> (<code>blog</code>, <code>docs</code>, <code>hello</code>) or the name
+  of a site template directory.</li><li>Non-empty target content and template directories are skipped.</li></ul><h4 id="command-execution">Command execution</h4>
+<ol><li>The <code>SOURCE</code> template is copied to the site <code>TEMPLATE_DIR</code>.</li><li>The template directory structure is recreated in the content directory.</li><li>If the <code>TEMPLATE_DIR/init</code> directory exists its contents is copied to the
+   content directory.</li></ol><h4 id="examples">Examples</h4>
+<ul><li>Install the built-in <code>blog</code> template to <code>./template</code> and initialize the
+  <code>./contents</code> directory:<pre><code>hindsite init -from blog</code></pre>
+</li><li>Copy an existing site template from <code>~/webs/foobar/template</code> to <code>./template</code> and
+  initialize the <code>./contents</code> directory:<pre><code>hindsite init -from ~/webs/foobar/template</code></pre>
+</li></ul><h3 id="build-command">build command</h3>
 <p>The <em>build</em> command generates a static website in the <em>build</em> directory using
 files from the <em>content</em> and <em>template</em> directories.</p>
 <p>Usage:</p>
@@ -151,16 +154,16 @@ files from the <em>content</em> and <em>template</em> directories.</p>
 -drafts
 -v</code></pre>
 <ul><li>All files from the <em>content</em> directory not that are not
-  <a href="#configuration-parameters">excluded</a> are rebuilt.</li><li>If the <code>-drafts</code> option is specified <a href="#documents">draft documents</a> are included
+  <a href="#configuration-variables">excluded</a> are rebuilt.</li><li>If the <code>-drafts</code> option is specified <a href="#documents">draft documents</a> are included
   in the built website.</li><li>Content, build and template directories cannot overlap, with one exception:
   the content directory can be <code>TEMPLATE_DIR/init</code> (this is handy for testing
   template initialization content).</li></ul><h4 id="command-execution-2">Command execution</h4>
-<ol><li>Configuration files in the template directories are parsed.</li><li>All files and folders in the <em>build</em> directory are deleted.</li><li>Templates from templates directories are parsed.</li><li>The content directory is recursively scanned:<ul><li><a href="#documents">Document files</a> are read and front matter is parsed.</li><li><a href="#static-files">Static files</a> are copied to the corresponding build
-     directories.</li></ul></li><li>Document indexes are built.</li><li>Document bodies are rendered with their corresponding layout templates.</li><li>If a <a href="#homepage">homepage</a> is specified it is copied to the root of the build
-   directory and named <code>index.html</code>.</li></ol><h4 id="build-summary">Build summary</h4>
+<ol><li>Configuration files (<code>config.toml</code> and <code>config.yaml</code> files) in the template directory tree are parsed.</li><li>All files and folders in the build directory are deleted.</li><li>HTML and text templates (<code>*.html</code> and <code>*.txt</code> files) in the template directory tree are parsed.</li><li>The content files are processed:<ol style="list-style:lower-roman"><li>Front matter headers are parsed and document variables are computed.</li><li>Files classified as <a href="#text-templates">templates</a> are expanded.</li><li><a href="#static-files">Static files</a> are copied to their corresponding build
+     directories.</li></ol></li><li>Document indexes are built.</li><li>Document webpages are built:<ol style="list-style:lower-roman"><li>Document content is rendered to HTML and assigned to the <code>.body</code> document variable.</li><li>The document's <code>layout.html</code> template is rendered and saved to the document's build directory.</li></ol></li><li>If a <a href="#homepage">homepage</a> is specified it is copied to the root of the build
+  directory and named <code>index.html</code>.</li></ol><h4 id="build-summary">Build summary</h4>
 <p>The printed build summary includes:</p>
 <dl><dt><em>documents</em></dt><dd>The total number of Markdown documents (including skipped drafts).</dd><dt><em>static</em></dt><dd>The total number of static files.</dd><dt><em>drafts</em></dt><dd>The number of skipped draft documents. If the <code>-drafts</code> option is
-specified this will be zero.</dd><dt><em>time</em></dt><dd>The execution time in seconds.</dd></dl><p>The build summary does not include <a href="#configuration-parameters">excluded</a> files.</p>
+specified this will be zero.</dd><dt><em>time</em></dt><dd>The execution time in seconds.</dd></dl><p>The build summary does not include <a href="#configuration-variables">excluded</a> files.</p>
 <h3 id="serve-command">serve command</h3>
 <p>The <em>serve</em> command rebuilds the site then starts the built-in webserver on
 the site <em>build directory</em>. If files in the <em>content</em> or <em>template
@@ -215,9 +218,8 @@ sets the <a href="#front-matter">front matter</a> <code>date</code> and <code>ti
   <code>DOCUMENT</code> path that determines which <code>new.md</code> template is chosen from the
   <em>template directory</em> tree.</li><li>If a <code>new.md</code> template is not found the default built-in template is
   used.</li></ul><p>The following template variables are available to the new template:</p>
-<dl><dt><code>.date</code></dt><dd>The publication date is extracted from the file name <code>YYYY-MM-DD-</code> date
-prefix and formatted according to RFC 3339. If there is no prefix it defaults to
-the current date and time.</dd><dt><code>.title</code></dt><dd>The document title is set to the <code>DOCUMENT</code> file name stripped of the
+<dl><dt><code>.date</code></dt><dd>The publication date is extracted from the file name <code>YYYY-MM-DD-</code>
+date prefix. If there is no prefix it defaults to the current date and time.</dd><dt><code>.title</code></dt><dd>The document title is set to the <code>DOCUMENT</code> file name stripped of the
 date prefix (if there is one) and the file name extension; hyphens replaced by
 spaces; then capitalized.</dd></dl><p>For example, the following <em>new</em> command will set the
 title to <code>"Foofoo Valve History"</code> and the date to the current date and time:</p>
@@ -230,88 +232,168 @@ draft: true
 ---
 
 Document content goes here.</code></pre>
+<h2 id="dates-and-times">Dates and times</h2>
+<p>It's important to understand that timezones 
+TODO</p>
+<p>Hindsite processes document <a href="#???">publication dates</a> and <a href="#ZZZ">modification times</a> (see <a href="#YYY-ZZZ">???</a>)</p>
+<h2 id="built-in-site-templates">Built-in site templates</h2>
+<p>Hindsite includes <code>blog</code>, <code>docs</code> and <code>hello</code> built-in site templates
+which can be installed using the Hindsite <a href="#init-command">init command</a>.</p>
+<p>To create a site using a built-in template:</p>
+<ol><li>Create a directory for the new site (optional).</li><li>Install the built-in template with the <code>hindsite init -from &lt;template-name&gt;</code> command.</li><li>Build the site and open it the browser with the <code>hindsite serve -launch</code> command.</li></ol><p>For example:</p>
+<pre><code>mkdir hindsite-blog
+cd hindsite-blog
+hindsite init -from blog
+hindsite serve -launch</code></pre>
+<h3 id="blog-built-in-template"><code>blog</code> built-in template</h3>
+<p>A template to create a websites for blog posts and newsletters.</p>
+<p>Customisation notes:</p>
+<ul><li>Edit <code>content/main.css</code> to customise CSS styling.</li><li>The <code>template/partials.html</code> header template will include the
+  <a href="https://highlightjs.org/">highlight.js</a> source code highlighter if the
+  <code>.user.highlightjs</code> template variable is set to <code>"yes"</code>. Highlight.js language
+  auto-detection is not enabled and code blocks must specify the language
+  explicitly. For example:</li><li><em>user</em> template variable values can be set per document (in document
+  front matter) or per directory (in site configuration files).</li><li>The template includes an example <em>Search</em> page (<code>content/search.md</code>) that
+  leverages Google Programable Searches. To use this functionality in your own
+  website you need register it with Google and then configure and test it. See:<ul><li><a href="https://developers.google.com/custom-search">Programmable Search Engine</a></li><li><a href="https://search.google.com/search-console/about">Google Search Console</a></li></ul></li><li>The global site <a href="/hindsite/index.html#configuration">configuration file</a> is
+  <code>template/config.toml</code>.</li><li>The directory layout is documented in the <a href="/hindsite/index.html#sites">Hindsite Reference</a>.</li><li>The example content pages are written in Markdown but you could also use <a href="https://github.com/srackham/rimu">Rimu markup</a>.</li></ul><h3 id="docs-built-in-template"><code>docs</code> built-in template</h3>
+<p>A template to create sites that have a fixed, relatively small, number of pages.
+Ideal for building documentation sites for user guides, FAQs and reference
+manuals.</p>
+<p>The <a href="https://srackham.github.io/hindsite/">Hindsite documentation site</a> is based
+on this template.</p>
+<p>Customisation notes:</p>
+<ul><li>Edit <code>content/main.css</code> to customise CSS styling.</li><li>Dynamic table of contents (TOC) generation is performed by JavaScript code in
+  <code>content/main.js</code>. To disable TOC generation set the <code>.user.toc</code> template variable
+  (either in document front matter or site configuration files) to any value
+  other than <code>"yes"</code>.</li><li>The example content pages are written in <a href="https://srackham.github.io/rimu/">Rimu
+  markup</a>. Rimu generates the header IDs which
+  are used for table of contents generation (you could use Markdown instead of
+  Rimu, but would need to modify the TOC generator code).</li><li>The global site <a href="#configuration">configuration file</a> is
+  <code>template/config.yaml</code>.</li><li>If you set the <code>.user.toc</code> template variable to any value other than <code>"yes"</code>
+  the TOC will not be displayed.</li><li>The <code>template/partials.html</code> header template will include the
+  <a href="https://highlightjs.org/">highlight.js</a> source code highlighter if the
+  <code>.user.highlightjs</code> template variable is set to <code>"yes"</code>. Highlight.js language
+  auto-detection is not enabled and code blocks must specify the language
+  explicitly. For example:<pre><code>```python
+x = 1
+if x == 1:
+  print "x is 1."
+```</code></pre>
+</li><li><em>user</em> template variable values can be set per document (in document
+  front matter) or per directory (in site configuration files).</li></ul><h3 id="hello-built-in-template"><code>hello</code> built-in template</h3>
+<p>A minimal single-page built-in template consisting of a single
+<code>content/index.md</code> document and a single <code>template/layout.html</code> HTML template.</p>
+<h3 id="built-in-template-styling">Built-in template styling</h3>
+<p>The <code>blog</code> and <code>docs</code> templates include the following block element CSS classes
+which are particularly useful for styling Rimu markup:</p>
+<pre><code>CSS class          Description
+___________________________________________________________
+align-center       Align element content center.
+align-left         Align element content left.
+align-right        Align element content right.
+bordered           Add borders to table element.
+cite               Quote and verse attribution.
+dl-horizontal      Format labeled lists horizontally.
+dl-numbered        Number labeled list items.
+no-page-break      Avoid page break inside the element.
+no-print           Do not print element.
+page-break         Force a page break before the element.
+preserve-breaks    Honor line breaks in element content.
+sidebar            Paragraph and division block sidebar.
+verse              Paragraph and division block verse.
+important          Paragraph and division block admonition.
+note               Paragraph and division block admonition.
+tip                Paragraph and division block admonition.
+warning            Paragraph and division block admonition.
+___________________________________________________________
+</code></pre>
 <h2 id="configuration">Configuration</h2>
-<p>Website generation is customized with configuration parameters from one or more
-configuration files.</p>
+<p>Website generation is customized with configuration variables (named values)
+from one or more configuration files.</p>
 <h3 id="configuration-files">Configuration files</h3>
-<p>Configuration files are TOML and YAML markup files named <code>config.toml</code> and
-<code>config.yaml</code> respectively in the site <em>template directory</em>.</p>
-<ul><li>Configuration files can located anywhere in the <em>template directory
-  tree</em> (except the <em>init</em> directory).</li><li>A configuration file only affects documents in the corresponding content
-  directory (and subdirectories).</li><li>The configuration applied to a document or index is computed by merging
-  configuration files lying on the corresponding <em>template directory</em> path.
+<p>A site can have multiple configuration files which reside in the site
+<em>template directory</em> and subdirectories.</p>
+<ul><li>Configuration files are optional, though most sites will have at least one
+  at the root of the template directory.</li><li>Configuration files are TOML or YAML markup files named <code>config.toml</code> and
+  <code>config.yaml</code> respectively.</li><li>Configuration files can located anywhere in the template directory tree
+  (except for the <em>init</em> directory) and are applied <a href="#content-files">content files</a>
+  in the corresponding content directory.</li><li>The configuration applied to a content file is computed by merging
+  configuration files lying along the corresponding <em>template directory</em> path.
   Configuration files closer to the document have higher precedence than those
-  further up the directory path.</li><li>Configuration files are optional, though most sites will have at least one
-  at the root of the template directory.</li></ul><h3 id="configuration-parameters">Configuration parameters</h3>
-<p>Valid configuration parameters are:</p>
+  further along the directory path. For example, the configuration applied to
+  <code>posts/foobar.md</code> in the content directory is computed by merging template
+  directory configuration files <code>posts/config.yaml</code> and <code>config.yaml</code> (the
+  former taking precedence over the latter).</li></ul><h3 id="configuration-variables">Configuration variables</h3>
+<p>The <code>exclude</code>, <code>include</code>, <code>homepage</code> and <code>urlprefix</code> configuration variables
+are site-wide and must reside in the template directory root configuration file.
+All other configuration variables can occur in any configuration file.</p>
+<p>Valid configuration variables are:</p>
 <dl><dt><code>author</code></dt><dd>Specifies the default document author and is overridden by the
-document's <a href="#front-matter-values"><code>author</code> front matter value</a>. TOML example:<pre><code>author = "Joe Bloggs"</code></pre>
-</dd><dt><code>exclude</code> †</dt><dd>A <code>|</code> separated list of file and directory paths specifying files
-from the site <em>content</em> and <em>template</em> directories that are excluded from
-processing. TOML example:<pre><code>exclude = "config.rmu|*~|4913"</code></pre>
+document's <a href="#front-matter-variables"><code>author</code> front matter value</a>. TOML example:<pre><code>author = "Joe Bloggs"</code></pre>
+</dd><dt id="exclude"><code>exclude</code> †</dt><dd>A <code>|</code> separated list of file and directory paths specifying files
+from the site content directory that are excluded from processing. TOML example:<pre><code>exclude = "config.rmu|*~|4913"</code></pre>
 <ul><li>Dotfiles (file names starting with a period) are excluded by default. To force
-  inclusion of a dotfile add it to the <code>include</code> parameter.</li><li>The paths are relative to the content or template directories.</li><li>The path separator is a slash (<code>/</code>) character.</li><li>The file paths can contain wildcard patterns conforming to patterns matched by
+  inclusion of a dotfile add it to the <code>include</code> variable.</li><li>The paths are relative to the content directory.</li><li>The path separator is a slash (<code>/</code>) character.</li><li>The file paths can contain wildcard patterns conforming to patterns matched by
   the Go <a href="https://golang.org/pkg/path/#Match">path.Match() function</a>.</li><li>If the path contains no path separators then it is matched against all file
-  names e.g. <code>*.swp</code> will match all files from content and template directories
+  names e.g. <code>*.swp</code> will match all files in the content directory
   with the <code>.swp</code> file name extension.</li><li>If the path contains path separators then it is matched against the file path
   e.g. <code>posts/*.md</code> will only match files with the <code>.md</code> extension from the
   <code>posts</code> directory.</li><li>If the path ends with a slash then it specifies a directory whose contents are
   excluded (no wildcards are allowed). For example <code>news/archive/</code> excludes all
-  files from the <code>news/archive</code> directory.</li><li>To exclude a file in the content or template root directories prefix the name
+  files from the <code>news/archive</code> directory.</li><li>To exclude a file in the content root directory, prefix the name
   name with a path separator e.g. <code>/config.rmu</code> will exclude <code>config.rmu</code> only
-  if it is in the top directory.</li></ul>
+  if it is in the root content directory.</li></ul>
 </dd><dt><code>include</code> †</dt><dd>A <code>|</code> separated list of file and directory paths specifying files
-that are processed unconditionally i.e. irrespective of the <code>exclude</code> parameter.
-<code>include</code> parameter values have the same syntax as the <code>exclude</code> parameter. TOML
+that are processed unconditionally i.e. irrespective of the <code>exclude</code> variable.
+<code>include</code> values have the same syntax as the <code>exclude</code> values. TOML
 example:<pre><code>include = ".htaccess"</code></pre>
-</dd><dt id="id-configuration-parameter"><code>id</code></dt><dd>Specifies the default behavior of the <a href="#document-id">document <code>id</code> front matter
- value</a>:<ul><li>If the <code>id</code> configuration parameter is <code>optional</code> then <code>id</code> front matter
-  values default to blank.</li><li>If the <code>id</code> configuration parameter is <code>urlpath</code> then document <code>id</code> front
-  matter values default to the document URL stripped of the
-  <a href="#urlprefix"><code>urlprefix</code></a>.</li><li>If the <code>id</code> configuration parameter is <code>mandatory</code> then document front matter
+</dd><dt id="id-configuration-variable"><code>id</code></dt><dd>Specifies the default behavior of the <a href="#document-id">document <code>id</code> front matter
+ value</a>:<ul><li>If the <code>id</code> configuration value is <code>optional</code> then <code>id</code> front matter values default to blank.</li><li>If the <code>id</code> configuration value is <code>urlpath</code> then document <code>id</code> front matter values default
+  to the document URL stripped of the <a href="#urlprefix"><code>urlprefix</code></a>.</li><li>If the <code>id</code> configuration value is <code>mandatory</code> then document front matter
   <code>id</code>'s must have explicit non-blank values (an error is generated if a
-  document <code>id</code> is not specified).</li></ul><p>The <code>id</code> configuration parameter defaults to <code>optional</code>. TOML example:</p>
+  document <code>id</code> is not specified).</li></ul><p>The <code>id</code> configuration value defaults to <code>optional</code>. TOML example:</p>
 <pre><code>id = "urlpath"</code></pre>
 </dd><dt><code>shortdate</code>, <code>mediumdate</code>, <code>longdate</code></dt><dd>These are date formats for <code>shortdate</code>,
-<code>mediumdate</code> and <code>longdate</code> <a href="#document-template-variables">document template
+<code>mediumdate</code> and <code>longdate</code> <a href="#document-variables">document template
 variables</a> respectively. The values conform to the
 layouts supported by Go <a href="https://golang.org/pkg/time/#Time.Format">time.Format
 function</a>. The default values are:<pre><code>shortdate = "2006-01-02",
 mediumdate = "2-Jan-2006",
 longdate = "Mon Jan 2, 2006",</code></pre>
-</dd><dt id="homepage"><code>homepage</code> †</dt><dd>The <code>homepage</code> parameter is the name of a file, relative to the
-build directory, that is copied by the <code>build</code> command to the root of the build
-directory and named <code>index.html</code>. Use the slash (<code>/</code>) character as the path
-separator to ensure cross-platform compatibility. TOML example:<pre><code>homepage = "indexes/posts/docs-1.html"</code></pre>
-</dd><dt><code>paginate</code></dt><dd>This parameter sets the number of documents per document index
+</dd><dt id="homepage"><code>homepage</code> †</dt><dd>The optional <code>homepage</code> configuration value is the
+name of a file, relative to the build directory, that is copied by the <code>build</code>
+command to the root of the build directory and named <code>index.html</code>. Use the slash
+(<code>/</code>) character as the path separator to ensure cross-platform compatibility.
+TOML example:<pre><code>homepage = "indexes/posts/docs-1.html"</code></pre>
+</dd><dt><code>paginate</code></dt><dd>This variable sets the number of documents per document index
 page. The default value is 5. Set to -1 to include all documents on a single
 document index page. TOML example:<pre><code>paginate = 10</code></pre>
-</dd><dt id="permalink"><code>permalink</code></dt><dd>An optional parameter for customizing document <a href="#build-paths">build
-paths</a> and <a href="#urls">URLs</a>. A document's URL and build path is
-computed by substituting the following <code>permalink</code> placeholders:<dl><dt><code>%y</code></dt><dd>Four digit publication date year.</dd><dt><code>%m</code></dt><dd>Two digit publication date month.</dd><dt><code>%d</code></dt><dd>Two digit publication date day of month.</dd><dt><code>%f</code></dt><dd>The build file name.</dd><dt><code>%p</code></dt><dd>The build file name minus the file name extension.</dd></dl><ul><li>If the permalink ends with a trailing slash then hindsite creates &ldquo;pretty&rdquo;
+</dd><dt id="permalink"><code>permalink</code></dt><dd>An optional variable for customizing document <a href="#build-paths">build
+paths</a> and <a href="#urls">URLs</a>. A document's build path is
+computed by substituting the following <code>permalink</code> placeholders:<pre><code>%y    Four digit publication date year.
+%m    Two digit publication date month.
+%d    Two digit publication date day of month.
+%f    The build file name.
+%p    The build file name minus the file name extension.</code></pre>
+<ul><li>Publication date substitutions are rendered in the publication date
+  timezone, this ensures permalinks do not change if the <code>timezone</code> is changed.</li><li>If the permalink ends with a trailing slash then hindsite creates &ldquo;pretty&rdquo;
   URLs (the expanded permalink is the build file directory path; the build file
   is named <code>index.html</code>).</li><li>A document specific <code>permalink</code> can be specified in the document <a href="#front-matter">front
-  matter</a> taking precedence over <code>permalink</code> configuration
-  parameters.</li><li>A permalink URL will not change provided the <code>permalink</code> parameter, the
+  matter</a> and takes precedence over the <code>permalink</code> configuration
+  variable.</li><li>A permalink URL will not change provided the <code>permalink</code> value, the
   document publication date and the document slug are not changed. Changing the
-  source document's content directory location does not change a permalink URL.</li><li>URLs are prefixed with the <a href="#urlprefix"><code>urlprefix</code></a> configuration parameter.</li></ul><p>TOML examples:</p>
-<pre><code>permalink = "/posts/%y/%m/%d/%f"
-permalink = "/posts/%y-%m-%d/%p/"</code></pre>
-</dd><dt id="templates-conf"><code>templates</code></dt><dd>A <code>|</code> separated list of file name extensions specifying document
-and static files in the content directory that undergo <a href="#text-templates">text
-template</a> expansion.<ul><li>The file name extensions include the leading dot character.</li><li><code>templates</code> defaults to blank.</li><li>A document specific <code>templates</code> value can can be specified in the document
-  <a href="#front-matter">front matter</a> taking precedence over <code>templates</code> configuration
-  parameters.</li></ul><p>TOML example:</p>
-<pre><code>templates = ".css|.html|.js|.md"</code></pre>
-</dd><dt><code>timezone</code></dt><dd>Sets the time zone for dates and times. Set to a TZ name from the
-IANA Timezone Database or to <code>"Local"</code> (the system's local timezone).
-TOML example:<pre><code>timezone = "Pacific/Auckland"</code></pre>
-<ul><li><code>timezone</code> defaults to <code>"Local"</code>.</li><li><code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="#document-template-variables">document template
-  variables</a> are rendered in the configured
-  <code>timezone</code>.</li><li><code>timezone</code> is assigned to <a href="#front-matter-values">publication <code>date</code> values</a>
-  that are specified without a timezone.</li><li><code>permalink</code> dates are rendered in their assigned timezone, this ensures
-  permalinks do not change if the <code>timezone</code> is changed.</li></ul>
-</dd><dt id="urlprefix"><code>urlprefix</code> †</dt><dd>This parameter is prepended to all synthesized document and index
+  source document's content directory location does not change a permalink URL.</li><li>URLs are prefixed with the <a href="#urlprefix"><code>urlprefix</code></a> configuration value.</li><li>TOML examples:<pre><code>permalink = "/posts/%y/%m/%d/%f"
+permalink = "/posts/%y-%m-%d/%p/"</code></pre></li></ul>
+</dd><dt id="templates-conf"><code>templates</code></dt><dd>A <code>|</code> separated list of file and directory patterns specifying
+the <a href="#content-files">content files</a> that undergo <a href="#text-templates">text template</a> expansion. The
+<code>templates</code> configuration variable has the same syntax as the
+<a href="#exclude"><code>exclude</code></a> configuration variable. TOML example:<pre><code>templates = "*.css|*.js"</code></pre>
+</dd><dt id="timezone"><code>timezone</code></dt><dd>Set to a timezone name from the
+<a href="https://www.iana.org/time-zones">IANA Timezone Database</a>.<ul><li>Assigned to document <a href="#front-matter-variables">publication dates</a>
+  that were specified without a timezone.</li><li>Used to render <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="#document-variables">document template
+  variables</a>.</li><li><code>timezone</code> defaults to <code>"Local"</code> (the system's local timezone).</li><li>TOML example:<pre><code>timezone = "Pacific/Auckland"</code></pre>
+</li></ul></dd><dt id="urlprefix"><code>urlprefix</code> †</dt><dd>This variable is prepended to all synthesized document and index
 page <a href="#urls">URLs</a>. Its default value is a blank string. TOML examples:<pre><code>urlprefix = "/blog"                     # Root-relative URL prefix.
 urlprefix = "https://www.example.com"   # Absolute URL prefix.</code></pre>
 </dd><dt id="user"><code>user</code></dt><dd>This is a user defined key/value map and provides a mechanism for
@@ -329,99 +411,98 @@ user:
 <p>Are available as these template variables:</p>
 <pre><code>.user.banner
 .user.byline</code></pre>
-</dd></dl><p>† The <code>exclude</code>, <code>include</code>, <code>homepage</code> and <code>urlprefix</code> configuration parameters
-are site-wide and are always taken from the template directory root
-configuration i.e. they can only be specified in the template root configuration file.</p>
-<h2 id="documents">Documents</h2>
-<p><em>Documents</em> are <a href="https://en.wikipedia.org/wiki/Markdown">Markdown</a> (<code>.md</code>) or
-<a href="https://github.com/srackham/rimu">Rimu</a> (<code>.rmu</code>) files in the site <a href="#sites"><em>content
-directory</em></a>. Each document is generates a wepage e.g. a blog post, a
-newsletter or an article. The <a href="#build-command">build command</a> combines the
-document with its <a href="#html-templates">layout template</a> and writes the resulting
-HTML webpage to the corresponding <em>build directory</em> path.</p>
-<p>hindsite uses the <a href="https://github.com/russross/blackfriday">Blackfriday Markdown
-processor</a> which supports a number of
-common <a href="https://github.com/russross/blackfriday#extensions">Markdown
-extensions</a>.</p>
-<p>Documents can include an optional <a href="#front-matter-header">front matter header</a>.</p>
-<p>A documents with the <a href="#front-matter-values">draft</a> front matter value set to
-<code>true</code> will not be included in the built website unless the <code>-drafts</code> command
-option is specified.</p>
-<p>If the document is classified as a template (see the
-<a href="#templates-conf"><code>templates</code></a> configuration parameter) then it is
-rendered as a <a href="#text-templates">text template</a> prior to layout template
-processing.</p>
-<h2 id="static-files">Static files</h2>
-<p>Static files are non-document (non-Markdown) files in the <a href="#sites"><em>content
-directory</em></a>. These include website resources such as CSS, JavaScript
-and image files. The <a href="#build-command">build command</a> copies static files to the
-corresponding location in the <em>build directory</em>.</p>
+</dd></dl><p>† Site-wide configuration variable.</p>
+<h2 id="content-files">Content files</h2>
+<p>Content files are the source files residing in the site <a href="#???">content
+directory</a>. They are used to build the website.</p>
+<ul><li>There are two types of content file: <a href="#documents">documents</a> and <a href="#static-files">static files</a>.</li><li>Content files can include an optional <a href="#front-matter-header">front matter header</a>.</li><li>If a content file is classified as a template (see the
+  <a href="#templates-conf"><code>templates</code></a> configuration variable) then it undergoes
+  <a href="#text-templates">template</a> expansion prior to any other build processing.</li></ul><h3 id="documents">Documents</h3>
+<p>Documents are are <a href="https://en.wikipedia.org/wiki/Markdown">Markdown</a> (<code>.md</code>) or
+<a href="https://github.com/srackham/rimu">Rimu</a> (<code>.rmu</code>) <a href="#content-files">content files</a>. Each document
+generates a webpage. Examples include blog posts, newsletters and articles.</p>
+<p>Documents with the <a href="#front-matter-variables">draft</a> front matter value set to
+<code>true</code> will not be included in the built website unless the <a href="#build-command">build
+command</a> <code>-drafts</code> command option is specified.</p>
+<p>The <a href="#build-command">build command</a> renders the document with its <a href="#html-templates">layout
+template</a> and writes the resulting HTML webpage to the
+document's <a href="#build-paths">build path</a>.</p>
+<h3 id="static-files">Static files</h3>
+<p>Static files typically include website resources such as CSS, JavaScript and
+image files.</p>
+<p>The <a href="#build-command">build command</a> copies static files to the corresponding
+location in the <em>build directory</em>.</p>
 <p>If a static file is classified as a template (see the
-<a href="#templates-conf"><code>templates</code></a> configuration parameter) then it is
-rendered as a <a href="#text-templates">text template</a> prior to being written to the
-<em>build directory</em>.</p>
+<a href="#templates-conf"><code>templates</code></a> configuration variable) then optional front matter is
+parsed and the remainder of the file undergoes <a href="#text-templates">text template</a>
+expansion prior to being written to the <em>build directory</em>.</p>
 <h2 id="indexes">Indexes</h2>
-<p>The hindsite build command generates paginated document and tag indexes.</p>
+<p>The hindsite build command generates paginated document and tag HTML index files.</p>
 <ul><li>A content directory is indexed when the corresponding template directory
   contains a <a href="#html-templates"><code>docs.html</code> template</a>. The <code>docs.html</code> template
-  generates document indexes, if a <a href="#html-templates"><code>tags.html</code> template</a> is
-  also present then tag indexes are generated.</li><li>Documents from the indexed content directory and its subdirectories contribute
+  generates HTML document index files. If a <a href="#html-templates"><code>tags.html</code> template</a> is
+  present they are used to generate HTML tag index files.</li><li>Documents from the indexed content directory and its subdirectories contribute
   to the index.</li><li>A site can contain any number of indexed content directories.</li><li>Indexes can be nested. This allows categorized document subdirectories to have
   separate indexes along with aggregated parent directory indexes.</li><li>A <em>primary index</em> is an index that is not nested (has no parent index). A
   document can only belong to one primary index.</li><li>Generated index pages are written to a directory named <code>indexes</code> located at
   the root of the <em>build directory</em>.</li><li>The <code>indexes</code> directory structure mirrors the <em>templates</em> directory structure.</li></ul><p>The following HTML index files are built for each index:</p>
 <dl><dt><code>docs-1.html</code>, <code>docs-2.html</code> &hellip;</dt><dd>Paginated document index files. The number
   of documents per index page is set by the
-  <a href="#configuration-parameters"><code>paginate</code></a> configuration parameter. Rendered with
-  the corresponding <a href="#html-templates">docs.html</a> template.</dd><dt><code>tags.html</code></dt><dd>A list of document tags linked to paginated per-tag document
+  <a href="#configuration-variables"><code>paginate</code></a> configuration variable.
+  Rendered with the corresponding <a href="#html-templates">docs.html</a> template.</dd><dt><code>tags.html</code></dt><dd>A list of document tags linked to paginated per-tag document
   index files in the <code>tags</code> subdirectory. Rendered with the corresponding
   <a href="#html-templates">tags.html</a> template.</dd><dt><code>tags/&lt;tag&gt;-1.html</code>, <code>tags/&lt;tag&gt;-2.html</code> &hellip;</dt><dd>Paginated per-tag document
   index files. The number of documents per index page is set by the
-  <a href="#configuration-parameters"><code>paginate</code></a> configuration parameter. Rendered with
+  <a href="#configuration-variables"><code>paginate</code></a> configuration variable. Rendered with
   the corresponding <a href="#html-templates">docs.html</a> template.</dd></dl><h2 id="front-matter">Front matter</h2>
-<p>Front matter is a document specific set of named values. Front matter values are
-embedded in a front matter header at the beginning of the document file.</p>
+<p>Front matter is an optional set of variables (named values) declared in a <em>front
+matter header</em> at the beginning of content files (<a href="#documents">documents</a>
+and <a href="#static-files">static files</a>).</p>
 <h3 id="front-matter-header">Front matter header</h3>
 <p>The front matter header begins with a start delimiter (which must be the first
-line of the file) and ends with the corresponding end delimiter (also on on a
-separate line). The delimiter determines the front matter format
-(<a href="https://github.com/toml-lang/toml">TOML</a> or
+line of the file), followed by variable declarations, and ending with the
+an end delimiter line. The delimiter determines the front matter
+format (<a href="https://github.com/toml-lang/toml">TOML</a> or
 <a href="https://learn.getgrav.org/advanced/yaml">YAML</a>).</p>
 <dl><dt><em>Start delimiters</em></dt><dd>TOML: <code>+++</code><br>
     YAML: <code>---</code>, <code>&lt;!--</code>, <code>/***</code></dd><dt><em>End delimiters</em></dt><dd>TOML: <code>+++</code><br>
     YAML: <code>---</code>, <code>--&gt;</code>, <code>***/</code></dd></dl><p>Example YAML front matter:</p>
 <pre><code>---
 title:    Foo Bar
-description: A brief history of the origins of the foofoo valve.
+description: A brief history of the origins of the foo valve.
 date:     2018-02-16
-tags:     [foo foo valve, qux, baz]
-slug:     foofoo-valve-history
+tags:     [foo valve, qux, baz]
+slug:     foo-valve-history
 draft:    true
 ---</code></pre>
 <p>Example TOML front matter:</p>
 <pre><code>+++
 title = "Foo Bar"
-description = "A brief history of the origins of the foofoo valve."
+description = "A brief history of the origins of the foo valve."
 date = 2018-02-16
-tags = ["foo foo valve", "qux", "baz"]
-slug = "foofoo-valve-history"
+tags = ["foo valve", "qux", "baz"]
+slug = "foo-valve-history"
 draft = true
 +++</code></pre>
-<h3 id="front-matter-values">Front matter values</h3>
-<p>Front matter document values control webpage generation and are used in
-<a href="#document-template-variables">document template variables</a>.</p>
+<h3 id="front-matter-variables">Front matter variables</h3>
+<p>Front matter variables are exposed as
+<a href="#document-variables">document template variables</a> during webpage
+template expansion.</p>
 <dl><dt><code>author</code></dt><dd>The document author. If not specified it defaults to the
-<a href="#configuration-parameters"><code>author</code></a> configuration parameter value.</dd><dt><code>date</code></dt><dd>The document publication date. If it is not specified it is extracted
+<a href="#configuration-variables"><code>author</code></a> configuration value.</dd><dt><code>date</code></dt><dd>The document publication date. If it is not specified it is extracted
 from the file name <code>YYYY-MM-DD-</code> date prefix, if there is no prefix it defaults
 to Jan 1 0001. The <code>date</code> format is RFC 3339 with the following relaxations:<ul><li>If the time zone offset is omitted then the
-  <a href="#configuration-parameters"><code>timezone</code></a> configuration parameter is assigned.
+  <a href="#configuration-variables"><code>timezone</code></a> configuration value is used.
   This has the effect of always rendering the date as written irrespective of
-  the <code>timezone</code> parameter value.</li><li>If the time is omitted then the time <code>00:00:00</code> is used.</li><li>A space character separator (instead of the letter <code>T</code>) between the date and
+  the <code>timezone</code> value.</li><li>If the time is omitted then the time <code>00:00:00</code> is used.</li><li>A space character separator (instead of the letter <code>T</code>) between the date and
   the time is allowed.</li></ul><p>Examples with <code>timezone = "+13:00"</code>:</p>
-<pre><code>1979-05-27T07:32:00+02:00   # 1979-05-27T07:32:00+02:00
-1979-05-27T07:32:00         # 1979-05-27T07:32:00+13:00
-1979-05-27 07:32:00         # 1979-05-27T07:32:00+13:00
-1979-05-27                  # 1979-05-27T00:00:00+13:00</code></pre>
+<pre><code>Front matter date value      Translated to
+______________________________________________________
+1979-05-27T07:32:00+02:00    1979-05-27T07:32:00+02:00
+1979-05-27T07:32:00          1979-05-27T07:32:00+13:00
+1979-05-27 07:32:00          1979-05-27T07:32:00+13:00
+1979-05-27                   1979-05-27T00:00:00+13:00
+______________________________________________________</code></pre>
 <p>In TOML headers the date can be specified as a quoted string or an unquoted
 date/time.</p>
 </dd><dt><code>description</code></dt><dd>A brief summary of the document. If not specified <code>description</code>
@@ -429,39 +510,41 @@ defaults to the content up to the first <code>&lt;!--more--&gt;</code> tag or bl
 no <code>&lt;!--more--&gt;</code> tag. The <code>&lt;!--more--&gt;</code> tag must appear alone on a separate
 line. The description is processed as Markdown.</dd><dt><code>draft</code></dt><dd>If set to <code>true</code> then the document will not be processed. This can be
 overridden with the <a href="#build-command">build</a> and <a href="#serve-command">serve</a> command
-<code>-drafts</code> option. Defaults to <code>false</code>.</dd><dt id="document-id"><code>id</code></dt><dd>A unique document identifier.<ul><li>Non-blank <code>id</code> values must be unique within a site (an error occurs if two
+<code>-drafts</code> option. Defaults to <code>false</code>.</dd><dt id="document-id"><code>id</code></dt><dd>A general purpose document identifier that is unique across all documents
+within a site. Used in situations requiring a unique document ID.<ul><li>Non-blank <code>id</code> values must be unique within a site (an error occurs if two
     or more published documents have the same <code>id</code> value).</li><li>If a document has no explicit <code>id</code> value then the default value is determined
-    by the <a href="#id-configuration-parameter"><code>id</code> configuration parameter</a>.</li></ul></dd><dt><code>layout</code></dt><dd>The name of the template used to render the document. <code>layout</code>
-defaults to the closest <code>layout.html</code> <a href="#html-templates">HTML template</a>.</dd><dt><code>permalink</code></dt><dd>Sets the document <code>permalink</code> value. Defaults to the
-<a href="#permalink"><code>permalink</code></a> configuration parameter value.</dd><dt><code>tags</code></dt><dd>A list of tag keywords and phrases. Examples:<pre><code># TOML
+    by the <a href="#id-configuration-variable"><code>id</code> configuration variable</a>.</li></ul></dd><dt><code>layout</code></dt><dd>The name of the template used to render the document. <code>layout</code>
+defaults to the closest <code>layout.html</code> <a href="#html-templates">HTML template</a>.</dd><dt><code>permalink</code></dt><dd>Sets the document <code>permalink</code> value. It defaults to the
+<a href="#permalink"><code>permalink</code></a> configuration value.</dd><dt><code>tags</code></dt><dd>A list of tag keywords and phrases. Examples:<pre><code># TOML
 tags = ["foo foo valve", "qux", "baz"]
 
 # YAML
 tags: [foo foo valve, qux, baz]</code></pre>
-</dd><dt><code>templates</code></dt><dd>Defaults to the <a href="#configuration-parameters"><code>templates</code></a>
-configuration value. The only sensible values in this context are a blank string
-(to disable text template expansion) or the document's file name extension (to
-enable text template expansion).</dd><dt id="slug"><code>slug</code></dt><dd>The slug replaces the document file name (minus file name extension) in
+</dd><dt><code>templates</code></dt><dd>Defaults to the <a href="#templates-conf"><code>templates</code></a> configuration
+value. Setting it to <code>*</code> will ensure the document undergoes template expansion;
+setting it to a blank string will suppress template expansion.</dd><dt id="slug"><code>slug</code></dt><dd>The slug replaces the document file name (minus file name extension) in
 generated <a href="#build-paths">build paths</a> and <a href="#urls">URLs</a>.</dd></dl><dl><dt><code>title</code></dt><dd>The document title. If not specified <code>title</code> defaults the document
 file name stripped of the date prefix (if there is one), with hyphens replaced
 by spaces, then capitalized.</dd><dt><code>user</code></dt><dd><code>user</code> is a user defined key/value map. It is merged with the lower
-precedence <a href="#user"><code>user</code> configuration parameter</a> and assigned to the <code>.user</code>
-<a href="#document-template-variables">template variable</a>. If <code>user</code> is not specified in
-the document front matter it defaults to the <code>user</code> configuration parameter
-value.</dd></dl><h2 id="document-template-variables">Document template variables</h2>
-<p>Document template variables are a combination of document <a href="#front-matter-values">front matter
-values</a>, document <a href="#configuration-parameters">configuration
-parameters</a> and synthesized values. They are used in
+precedence <a href="#user"><code>user</code> configuration variable</a> and assigned to the <code>.user</code>
+<a href="#document-variables">template variable</a>. If <code>user</code> is not specified in
+the document front matter it defaults to the <code>user</code> configuration value.</dd></dl><h2 id="document-variables">Document variables</h2>
+<p>Document variables are a combination of document <a href="#front-matter-variables">front matter
+variables</a>, document <a href="#configuration-variables">configuration
+variables</a> and synthesized variables. They are used in
 layout and index page <a href="#html-templates">HTML templates</a> and in <a href="#text-templates">text
-templates</a>.</p>
-<dl><dt><code>.author</code></dt><dd>Document author.</dd><dt><code>.body</code></dt><dd>The document body rendered as HTML.</dd><dt><code>.description</code></dt><dd>The document <a href="#front-matter-values"><code>description</code></a> front matter
-value rendered as HTML.</dd><dt><code>.shortdate</code>, <code>.mediumdate</code>, <code>.longdate</code></dt><dd>The document publication date strings
-formatted using the <code>shortdate</code>, <code>mediumdate</code> and <code>longdate</code> <a href="#configuration-parameters">configuration
-parameters</a> respectively.</dd><dt><code>.date</code></dt><dd><a href="#front-matter-values"><code>date</code></a> front matter value.</dd><dt><code>.layout</code></dt><dd><a href="#front-matter-values"><code>layout</code></a> front matter value.</dd><dt><code>.modtime</code></dt><dd>Document content file modification date and time.</dd><dt><code>.next</code>, <code>.prev</code></dt><dd>The next and previous document URLs in primary index order.
-<code>.prev</code> is <code>nil</code> in the first document, <code>.next</code> is <code>nil</code> in the last document.</dd><dt><code>.permalink</code></dt><dd><a href="#front-matter-values"><code>permalink</code></a> front matter value.</dd><dt><code>.slug</code></dt><dd><a href="#front-matter-values"><code>slug</code></a> front matter value.</dd><dt><code>.url</code></dt><dd>Synthesized document <a href="#urls">URL</a>.</dd><dt><code>.tags</code></dt><dd>An iterable list of tags. Each item contains the variables <code>.tag</code> (the
-tag) and <code>.url</code> (the tag index URL).</dd><dt><code>.templates</code></dt><dd><a href="#front-matter-values"><code>templates</code></a> front matter value.</dd><dt><code>.title</code></dt><dd>Document title.</dd><dt><code>.urlprefix</code></dt><dd><a href="#urlprefix"><code>urlprefix</code></a> configuration value.</dd><dt><code>.user</code></dt><dd>This key/value map is synthesized by merging the (higher precedence)
-document <a href="#front-matter-values">front matter <code>user</code> value</a> with the document's
-<a href="#user"><code>user</code> configuration parameter</a>.</dd></dl><h2 id="templates">Templates</h2>
+templates</a>.
+Front matter variables take precedence over configuration variables.</p>
+<p>Template variables are Go strings unless otherwise noted.</p>
+<dl><dt><code>.author</code></dt><dd>Document author.</dd><dt><code>.body</code></dt><dd>The document body rendered as HTML.</dd><dt><code>.description</code></dt><dd>The document <a href="#front-matter-variables"><code>description</code></a> front matter
+value rendered as HTML.</dd><dt><code>.shortdate</code>, <code>.mediumdate</code>, <code>.longdate</code></dt><dd>These are document publication date
+strings, formatted using the <code>shortdate</code>, <code>mediumdate</code> and <code>longdate</code>
+<a href="#configuration-variables">configuration variables</a> respectively and rendered
+in the configuration <a href="#timezone">timezone</a>.</dd><dt><code>.date</code></dt><dd><a href="#front-matter-variables"><code>date</code></a> front matter value (<a href="https://pkg.go.dev/time#Time">time.Time</a> type).</dd><dt><code>.layout</code></dt><dd><a href="#front-matter-variables"><code>layout</code></a> front matter value.</dd><dt><code>.modtime</code></dt><dd>Document content file modification date and time (<a href="https://pkg.go.dev/time#Time">time.Time</a> type).</dd><dt><code>.next</code>, <code>.prev</code></dt><dd>The next and previous document URLs in primary index order.
+<code>.prev</code> is <code>nil</code> in the first document, <code>.next</code> is <code>nil</code> in the last document.</dd><dt><code>.permalink</code></dt><dd><a href="#front-matter-variables"><code>permalink</code></a> front matter value.</dd><dt><code>.slug</code></dt><dd><a href="#front-matter-variables"><code>slug</code></a> front matter value.</dd><dt><code>.url</code></dt><dd>Synthesized document <a href="#urls">URL</a>.</dd><dt><code>.tags</code></dt><dd>An iterable list of tags. Each item contains the variable <code>.tag</code> (the
+tag) and <code>.url</code> (the tag index URL).</dd><dt><code>.templates</code></dt><dd><a href="#front-matter-variables"><code>templates</code></a> configuration variable.</dd><dt><code>.title</code></dt><dd>Document title.</dd><dt><code>.urlprefix</code></dt><dd><a href="#urlprefix"><code>urlprefix</code></a> configuration value.</dd><dt><code>.user</code></dt><dd>This key/value map is synthesized by merging the (higher precedence)
+document <a href="#front-matter-variables">front matter <code>user</code> value</a> with the document's
+<a href="#user"><code>user</code> configuration variable</a>.</dd></dl><h2 id="templates">Templates</h2>
 <p><em>hindsite</em> uses Go templates from the site <a href="#sites"><em>template directory</em></a>
 to build webpages. There are two types of templates:</p>
 <ul><li><a href="#html-templates">HTML templates</a> which are used to build indexes and document
@@ -486,51 +569,59 @@ namespace.</p>
 content document webpages. A site can have one or more layout templates. The
 selected layout template is the one closest to the content document on the
 corresponding <em>template directory</em> path (but this can be overridden using the
-document <a href="#front-matter-values">front matter <code>layout</code> value</a>). These conventions
+document <a href="#front-matter-variables">front matter <code>layout</code> value</a>). These conventions
 allow document layouts to be assigned per directory and per document. Layouts
-are rendered with the corresponding <a href="#document-template-variables">document template
-variables</a>.</dd><dt><code>docs.html</code></dt><dd>This template generates a paginated document index page. The
+are rendered with the document's <a href="#document-variables">document template variables</a>.</dd><dt><code>docs.html</code></dt><dd>This template generates a paginated document index page. The
 presence of a <code>docs.html</code> template file specifies that the corresponding content
 directory is indexed.<p><code>docs.html</code> templates are rendered with the following template variables:</p>
 <dl><dt><code>.docs</code></dt><dd>An iterable list of index page documents. Each list item contains a
-set of <a href="#document-template-variables">document template variables</a>.</dd><dt><code>.count</code></dt><dd>The total number of documents in the index.</dd><dt><code>.page</code></dt><dd>Document index page variables:<dl><dt><code>.number</code></dt><dd>The page number.</dd><dt><code>.url</code></dt><dd>The page URL.</dd><dt><code>.prev</code>, <code>.next</code>, <code>.first</code>, <code>.last</code></dt><dd>These items include the page <code>.number</code> and
+set of <a href="#document-variables">document template variables</a>.</dd><dt><code>.count</code></dt><dd>The total number of documents in the index.</dd><dt><code>.page</code></dt><dd>Document index page variables:<dl><dt><code>.number</code></dt><dd>The page number.</dd><dt><code>.url</code></dt><dd>The page URL.</dd><dt><code>.prev</code>, <code>.next</code>, <code>.first</code>, <code>.last</code></dt><dd>These items include the page <code>.number</code> and
        <code>.url</code> of the previous, next, first and last index pages. For example
       <code>.page.prev.number</code> is the page number (1&hellip;) of the previous document index page.
-      <code>.prev</code> is <code>nil</code> on the first last index page, <code>.next</code> is <code>nil</code> on the last last index page.</dd></dl></dd><dt><code>.urlprefix</code></dt><dd>The <a href="#urlprefix"><code>urlprefix</code></a> configuration parameter value.</dd><dt><code>.user</code></dt><dd>The index configuration <a href="#user"><code>user</code></a> key/value map.</dd></dl>
+      <code>.prev</code> is <code>nil</code> on the first last index page, <code>.next</code> is <code>nil</code> on the last last index page.</dd></dl></dd><dt><code>.urlprefix</code></dt><dd>The <a href="#urlprefix"><code>urlprefix</code></a> configuration value.</dd><dt><code>.user</code></dt><dd>The index configuration <a href="#user"><code>user</code></a> key/value map.</dd></dl>
 </dd><dt><code>tags.html</code></dt><dd>This optional index template is used to build a <code>tags.html</code> tags
 index webpage. If it is not present the tags index files are not built.
-<code>tags.html</code> templates are rendered with the following template variables:<dl><dt><code>.tags</code></dt><dd>An iterable list, each list item contains:<dl><dt><code>.tag</code></dt><dd>The tag.</dd><dt><code>.url</code></dt><dd>The URL of of the tag's document index.</dd><dt><code>.count</code></dt><dd>The number of documents with this tag.</dd></dl></dd><dt><code>.urlprefix</code></dt><dd>The <a href="#urlprefix"><code>urlprefix</code></a> configuration parameter value.</dd><dt><code>.user</code></dt><dd>The index configuration <a href="#user"><code>user</code></a> key/value map.</dd></dl>
+<code>tags.html</code> templates are rendered with the following template variables:<dl><dt><code>.tags</code></dt><dd>An iterable list, each list item contains:<dl><dt><code>.tag</code></dt><dd>The tag.</dd><dt><code>.url</code></dt><dd>The URL of of the tag's document index.</dd><dt><code>.count</code></dt><dd>The number of documents with this tag.</dd></dl></dd><dt><code>.urlprefix</code></dt><dd>The <a href="#urlprefix"><code>urlprefix</code></a> configuration value.</dd><dt><code>.user</code></dt><dd>The index configuration <a href="#user"><code>user</code></a> key/value map.</dd></dl>
 </dd></dl><h3 id="text-templates">Text templates</h3>
 <p>All <code>.txt</code> files in the <em>template directory</em> (excluding the <code>init</code>
-directory) contribute to the set of named text templates available during
-<a href="#documents">document file</a> and <a href="#static-files">static file</a> template expansion.
-All text templates share the same namespace.</p>
-<p>Text template expansion is optional. By default there is no document or static
-file expansion, it is enabled by the <a href="#templates-conf"><code>templates</code></a>
-configuration parameter.</p>
-<p><a href="#static-files">Static files</a> that undergo template expansion can include a
-<a href="#front-matter-header">front matter header</a>.</p>
+directory) contribute to the set of named text templates which are available during
+<a href="#documents">document file</a> and <a href="#static-files">static file</a> template expansion.</p>
+<p>By default there is no document or static file template expansion &mdash; it must be
+enabled by the <a href="#templates-conf"><code>templates</code></a> configuration variable.</p>
 <h2 id="build-paths">Build paths</h2>
 <p>A document's <em>build path</em> is the file path of its generated web page.</p>
 <ul><li>The <em>build path</em> will always be located in the site <a href="#sites">build
   directory</a>.</li><li>By default the <em>build path</em> mirrors the document's <a href="#sites">content directory
-  path</a>.<p>For example, if the content directory is <code>/mysite/content</code>, the build
-directory is <code>/mysite/build</code> and the document path is
-<code>/mysite/content/posts/foo.md</code> then the build path will be
-<code>/mysite/build/posts/foo.html</code>.</p>
-</li><li>The <a href="#permalink"><code>permalink</code></a> configuration parameter can be used to customize
+  path</a>.</li><li>The <a href="#permalink"><code>permalink</code></a> configuration variable can be used to customize
   the <em>build path</em>.</li><li>If a <a href="#slug"><code>slug</code></a> front matter value is specified it
-   replaces the document file name (excluding file name extension).</li></ul><h2 id="urls">URLs</h2>
-<p>hindsite synthesizes document URLs by taking the document's <a href="#build-paths">build
-path</a> relative to the <a href="#sites">build directory</a> and prefixing
-it with the <a href="#urlprefix"><code>urlprefix</code></a> configuration parameter.</p>
-<ul><li>File path separators are translated to slash characters.</li><li>URLs are root-relative by default.</li></ul><p>For example, if the build directory is <code>/mysite/build</code> and the generated web
+   replaces the document file name (excluding file name extension).</li></ul><p>The following examples assume that the content document path is <code>/posts/foo.md</code>
+and the document publication date is 11-Mar-2022:</p>
+<pre><code>permalink             slug      Build path
+________________________________________________________________
+                                /posts/foo.html 
+                      bar       /posts/bar.html 
+/posts/%y/%m/%d/%f              /posts/2022/03/11/foo.html 
+/posts/%y/%m/%d/%f    bar       /posts/2022/03/11/bar.html 
+/posts/%y-%m-%d/%p/             /posts/2022-03-11/foo/index.html 
+/posts/%y-%m-%d/%p/   bar       /posts/2022-03-11/bar/index.html 
+/index.html                     /index.html
+/index.html           bar       /index.html ???
+________________________________________________________________</code></pre>
+<h2 id="urls">URLs</h2>
+<p>Hindsite synthesizes URLs and assigns them to <a href="#html-templates">HTML template</a>
+variables. The URLs are used for site navigation. For example:</p>
+<ul><li>The <code>.next</code> <a href="#document-variables">document template variable</a> is used
+  to link to the next document in document <code>layout.html</code> templates.</li><li>The <code>.page.next</code> <a href="#html-templates">HTML template</a> variable is used to link to
+  the next page of documents in <code>docs.html</code> document index templates.</li></ul><p>A URL is synthesized by taking the document's <a href="#build-paths">build path</a>
+(relative to the <a href="#sites">build directory</a>) and prefixing it with the
+<a href="#urlprefix"><code>urlprefix</code></a> configuration value. File path separators are
+translated to slash characters.</p>
+<p>For example, if the build directory is <code>/mysite/build</code> and the generated web
 page is <code>/mysite/build/posts/foo.html</code> then:</p>
-<ul><li>The document URL will be <code>/posts/foo.html</code></li><li>If the <code>urlprefix</code> is <code>/blog</code> then the URL would be <code>/blog/posts/foo.html</code></li><li>If the document <code>slug</code> is <code>bar</code> the URL becomes <code>/blog/posts/bar.html</code></li></ul><p>To synthesize absolute URLs include the URL domain in the <code>urlprefix</code>.</p>
-<p>If you are deploying to a web server subdirectory then you need to set the
-<code>urlprefix</code> configuration parameter to ensure synthesized URLs are rooted
-correctly. For example, if are deploying to the server <code>http://example.com/blog</code>
-directory you need to set <code>urlprefix</code> to either <code>/blog</code> (to generate
+<ul><li>The default document URL will be <code>/posts/foo.html</code> (URLs are root-relative by default).</li><li>If the <code>urlprefix</code> is <code>/blog</code> then the URL would be <code>/blog/posts/foo.html</code></li><li>If the <code>urlprefix</code> is <code>https://example.com</code> then the URL would be <code>https://example.com/posts/foo.html</code></li></ul><p>If you are deploying to a web server subdirectory then you need to set the
+<code>urlprefix</code> configuration variable to ensure synthesized URLs are rooted
+correctly. For example, if you are deploying to the server <code>http://example.com/blog</code>
+URL you need to set <code>urlprefix</code> to either <code>/blog</code> (to generate
 root-relative URLs) or <code>http://example.com/blog</code> (to generate absolute URLs).</p>
 <h2 id="building-hindsite">Building hindsite</h2>
 <p class="note">Requires Go 1.16 or better.</p>
@@ -542,6 +633,8 @@ go install ./...</code></pre>
 <p>This will build the latest commit (<code>master</code> branch). If you want a specific
 version checkout the version before running <code>go install ./...</code> e.g. <code>git
 checkout tags/v1.3.0</code>.</p>
+<h2 id="glossary">Glossary</h2>
+<dl><dt>Site</dt><dd></dd><dt>Site directory</dt><dd></dd><dt>Site template</dt><dd></dd><dt>Built-in template</dt><dd></dd><dt>Init directory</dt><dd></dd><dt>Build path</dt><dd></dd><dt>Build file</dt><dd></dd><dt>Template directory</dt><dd></dd><dt>Configuration file</dt><dd></dd><dt>Template path</dt><dd></dd><dt>Template file</dt><dd></dd><dt>HTML template</dt><dd></dd><dt>Text template</dt><dd></dd><dt>Content file</dt><dd></dd><dt>Content path</dt><dd></dd><dt>Document file</dt><dd>Static file:</dd><dt>Front matter variable</dt><dd></dd><dt>Configuration variable</dt><dd></dd><dt><del>Document</del> Content variable</dt><dd>Variables, derived from font matter and configuration variables, made available to HTML and Text templates.</dd><dt>Index</dt><dd></dd><dt>Document index</dt><dd></dd><dt>Tag index</dt><dd></dd></dl>
 
 </div>
 </div>
