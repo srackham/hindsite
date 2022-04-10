@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -148,41 +146,7 @@ func (site *site) build() error {
 	}
 	// Lint documents.
 	if site.lint {
-		for _, doc := range site.docs.byContentPath {
-			// Iterate all document href/src attribute URLs.
-			for _, url := range doc.urls {
-				link, ok := doc.parseUrl(url)
-				if !ok {
-					site.verbose2("lint: %s: skipped external link: %s", doc.contentPath, url)
-					continue
-				}
-				// Check the target URL file exists.
-				var target *document
-				t := link.buildPath
-				if t == "" {
-					t = doc.buildPath
-				}
-				if !fileExists(t) {
-					err := fmt.Errorf("%s: contains link to missing file: %s", doc.contentPath, strings.TrimPrefix(t, site.buildDir+"/"))
-					errCount++
-					site.logerror(err.Error())
-					continue
-				}
-				// Check the href/src URL anchor has a matching HTML id attribute in
-				// the target document.
-				if link.anchor != "" {
-					target, ok = site.docs.byBuildPath[t]
-					if !ok || !target.ids.Contains(link.anchor) {
-						err := fmt.Errorf("%s: contains link to missing anchor: %s", doc.contentPath, strings.TrimPrefix(url, site.rootConf.urlprefix+"/"))
-						errCount++
-						site.logerror(err.Error())
-						continue
-					}
-				}
-
-				site.verbose2("lint: %s: validated link: %s", doc.contentPath, url)
-			}
-		}
+		errCount += site.lintLinks()
 	}
 	// Print summary.
 	if errCount == 0 {
@@ -288,19 +252,7 @@ func (site *site) renderDocument(doc *document) error {
 		return err
 	}
 	if site.lint {
-		// Scan HTML for intra-document anchor URLs and element ids.
-		doc.ids = stringlist{}
-		pat := regexp.MustCompile(`(?i)id="(.+?)"`)
-		matches := pat.FindAllStringSubmatch(html, -1)
-		for _, match := range matches {
-			doc.ids = append(doc.ids, match[1])
-		}
-		doc.urls = stringlist{}
-		pat = regexp.MustCompile(`(?i)(?:href|src)="(.+?)"`)
-		matches = pat.FindAllStringSubmatch(html, -1)
-		for _, match := range matches {
-			doc.urls = append(doc.urls, match[1])
-		}
+		doc.parseHTML(html)
 	}
 	site.verbose("write document: " + doc.buildPath)
 	if err = writePath(doc.buildPath, html); err != nil {

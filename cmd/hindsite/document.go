@@ -47,11 +47,6 @@ type document struct {
 	user        map[string]string // User defined configuration key/values.
 }
 
-type documentLink struct {
-	buildPath string // Target document build path
-	anchor    string // URL fragment
-}
-
 // Parse document content and front matter.
 func newDocument(contentfile string, site *site) (document, error) {
 	parseError := func(err error) error {
@@ -387,38 +382,6 @@ func (doc *document) updateFrom(src document) {
 // isDraft returns true if document is a draft and the drafts option is not true.
 func (doc *document) isDraft() bool {
 	return doc.draft && !doc.site.drafts
-}
-
-// parseUrl computes the URL's document build path and URL anchor fragment from
-// `url` and returns them in `link`. If the URL is external to the site then `ok`
-// is returned `false`.
-func (doc *document) parseUrl(url string) (link documentLink, ok bool) {
-	// Split into URL and anchor.
-	s := strings.Split(url, "#")
-	url = s[0]
-	if len(s) > 1 {
-		link.anchor = s[1]
-	}
-	// Match URLs with a urlprefix or root-relative URLs.
-	if url != "" {
-		re := regexp.MustCompile(`(?i)^(?:` + regexp.QuoteMeta(doc.conf.urlprefix) + `)?/(.+)$`)
-		matches := re.FindStringSubmatch(url)
-		if matches != nil {
-			link.buildPath = filepath.Join(doc.site.buildDir, matches[1])
-			if dirExists(link.buildPath) {
-				link.buildPath = filepath.Join(link.buildPath, "index.html")
-			}
-		} else {
-			// Match relative URLs.
-			re := regexp.MustCompile(`(?i)^([\w][\w./-]*)$`)
-			matches := re.FindStringSubmatch(url)
-			if matches == nil {
-				return link, false
-			}
-			link.buildPath = filepath.Join(filepath.Dir(doc.buildPath), matches[1])
-		}
-	}
-	return link, true
 }
 
 // TODO is this refactor worth it???

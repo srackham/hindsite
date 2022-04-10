@@ -376,6 +376,8 @@ func (site *site) isDocument(f string) bool {
 
 // match returns true if content file `f` matches one of the `patterns`.
 // A blank pattern matches nothing.
+// NOTE: Used for matching configuration `exclude`, `include`, `templates`
+// configuration variables which use the `/` path separator.
 func (site *site) match(f string, patterns []string) bool {
 	if !pathIsInDir(f, site.contentDir) {
 		panic("matched path must reside in content directory: " + f)

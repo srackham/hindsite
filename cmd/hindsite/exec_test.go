@@ -40,7 +40,7 @@ func Test_execute(t *testing.T) {
 	assert.Equal(0, code)
 	assert.Contains(out, "installing builtin template: blog")
 
-	out, code = exec("hindsite build " + tmpdir)
+	out, code = exec("hindsite build " + tmpdir + " -lint")
 	assert.Equal(0, code)
 	assert.Contains(out, "documents: 12\ndrafts: 0\nstatic: 6")
 
