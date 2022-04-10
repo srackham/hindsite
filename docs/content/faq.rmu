@@ -1,9 +1,9 @@
 # Hindsite FAQ
 
 ## Does hindsite support themes?
-Themes are baked in. Every [site template directory]({reference}#sites)
-is a theme and the [init command]({reference}#init-command) is the "theme"
-installer.
+Themes are baked in. Every [site template directory]({reference}#sites), along
+with the built-in templates, is a theme. The Hindsite [init
+command]({reference}#init-command) is the "theme" installer.
 
 
 ## Why does the `serve` command sometimes fail a live reload?
@@ -13,7 +13,7 @@ so can result in rebuild false positives and premature watcher reloads.
 
 For example, the Vim editor creates tilda suffixed backup files and temporary
 [`4913` files](https://github.com/neovim/neovim/issues/3460) so you need to add
-them to the [`exclude`]({reference}#configuration-parameters) configuration
+them to the [`exclude`]({reference}#configuration-variables) configuration
 parameter in the templates directory root [configuration
 file]({reference}#configuration-files).
 
@@ -94,7 +94,7 @@ That's it, all published documents with a non-blank [document
 `id`]({reference}#document-id) will now include Disqus comments.
 
 - You can automatically assign document `id`s to all documents by setting the
-  [`id` configuration parameter]({reference}#id-configuration-parameter) to
+  [`id` configuration parameter]({reference}#id-configuration-variable) to
   `urlpath`. To confine auto `id` assignment to a specific folder put the `id`
   parameter in that folder's configuration file.
 - To disable comments on specific pages explicitly set the document `id` front
@@ -115,7 +115,7 @@ example:
 
 .note
 The `.shortdate`, `.mediumdate` and `.longdate` [document template
-variables]({reference}#document-template-variables) are simpler and preferable
+variables]({reference}#document-template-variable) are simpler and preferable
 to using `.date` directly.
 
 
@@ -135,7 +135,7 @@ are folder based so you do not have to assign them explicitly.
 
 ## I want a single page document index
 Set the [`paginate` configuration
-parameter]({reference}#configuration-parameters) to `-1` and all indexed
+parameter]({reference}#configuration-variables) to `-1` and all indexed
 documents will appear on the first page.
 
 

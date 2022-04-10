@@ -1,6 +1,25 @@
 # Hindsite Change Log
 
-See the [Github commit logs]({github}/commits/master) for a full list of changes.
+See the [Github commit logs]({hindsite-github}/commits/master) for a full list of changes.
+
+
+## Version 2.0.0 (2022-??-??)
+- BREAKING CHANGE: The `templates` configuration variable has been extended to
+  include file pattern (previously it only accepted file name extensions). For
+  example the Hindsite version 1 templates configuration value
+  `.css|.html|.js|.md` would become `*.css|*.html|*.js|*.md` in Hindsite version 2.
+- BREAKING CHANGE: The `exclude/include` configuration variables only apply to
+  the content directory (previously applied to both content and template
+  directories).
+- BREAKING CHANGE: Replaced `init` command `-builtin` option with the mandatory
+  `-from` option. The semantics differ in that `-from` can specify the location
+  of a non-builtin template -- previously the `-template` option was used which
+  was confusing and less flexible).
+- Add built-in _docs_ site template.
+- Rename built-in _minimal_ site template to _hello_.
+- Add help to hindsite `serve` command: prints help if any key other than the _R_,
+  _D_, _N_ keys are entered while the serve command is running.
+- Add Rimu CSS admonition classes to Hindsite documentation website.
 
 
 ## Version 1.4.1 (2021-08-22)

@@ -25,6 +25,6 @@ commands](https://srackham.github.io/hindsite/#quick-start).
 ```
 mkdir hindsite-hello
 cd hindsite-hello
-hindsite init -builtin hello
+hindsite init -from hello
 hindsite serve -launch
 ```
