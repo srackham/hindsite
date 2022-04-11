@@ -15,7 +15,7 @@ func (site *site) init() error {
 	if dirCount(site.templateDir) > 0 {
 		site.warning("skipping non-empty target template directory: " + site.templateDir)
 	} else {
-		if (stringlist{"blog", "doc", "hello"}).Contains(site.from) {
+		if (Slice[string]{"blog", "doc", "hello"}).Has(site.from) {
 			// Load template directory from the built-in site.
 			site.verbose("installing builtin template: " + site.from)
 			if err := restoreEmbeddedFS(embeddedFS, "builtin/"+site.from+"/template", site.templateDir); err != nil {

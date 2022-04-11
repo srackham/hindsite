@@ -25,7 +25,7 @@ func nz(s *string) string {
 }
 
 // Transform text into a slug (lowercase alpha-numeric + hyphens).
-func slugify(text string, exclude stringlist) string {
+func slugify(text string, exclude Slice[string]) string {
 	slug := text
 	slug = regexp.MustCompile(`\W+`).ReplaceAllString(slug, "-") // Replace non-alphanumeric characters with dashes.
 	slug = regexp.MustCompile(`-+`).ReplaceAllString(slug, "-")  // Replace multiple dashes with single dash.
@@ -74,14 +74,13 @@ func extractDateTitle(name string) (date string, title string) {
 }
 
 /*
-String lists.
+Generic slices.
 */
-type stringlist []string
+type Slice[T comparable] []T
 
-// Returns the first index of the target string `t`, or
-// -1 if no match is found.
-func (list stringlist) IndexOf(t string) int {
-	for i, v := range list {
+// IndexOf returns the first index `t`, or -1 if no match is found.
+func (slice Slice[T]) IndexOf(t T) int {
+	for i, v := range slice {
 		if v == t {
 			return i
 		}
@@ -89,10 +88,9 @@ func (list stringlist) IndexOf(t string) int {
 	return -1
 }
 
-// Returns `true` if the target string t is in the
-// slice.
-func (list stringlist) Contains(t string) bool {
-	return list.IndexOf(t) >= 0
+// Has returns `true` if `t` is in the slice.
+func (slice Slice[T]) Has(t T) bool {
+	return slice.IndexOf(t) >= 0
 }
 
 /*

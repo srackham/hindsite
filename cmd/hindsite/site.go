@@ -155,7 +155,7 @@ func (site *site) parseArgs(args []string) error {
 			site.verbosity++
 		case opt == "-vv":
 			site.verbosity += 2
-		case stringlist{"-content", "-template", "-build", "-from", "-port"}.Contains(opt):
+		case Slice[string]{"-content", "-template", "-build", "-from", "-port"}.Has(opt):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
 			}
@@ -292,7 +292,7 @@ func (site *site) parseArgs(args []string) error {
 }
 
 func isCommand(name string) bool {
-	return stringlist{"build", "help", "init", "new", "serve"}.Contains(name)
+	return Slice[string]{"build", "help", "init", "new", "serve"}.Has(name)
 }
 
 // executeArgs runs a hindsite command specified by CLI args and returns a

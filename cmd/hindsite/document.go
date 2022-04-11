@@ -23,14 +23,14 @@ type document struct {
 	conf         config // Merged configuration for this document.
 	contentPath  string
 	buildPath    string
-	templatePath string     // Virtual path used to find document related templates.
-	content      string     // Markup text (without front matter header).
-	modtime      time.Time  // Document source file modified timestamp.
-	primaryIndex *index     // Top-level document index (nil if document is not indexed).
-	prev         *document  // Previous document in primary index.
-	next         *document  // Next document in primary index.
-	ids          stringlist // HTML element ids.
-	urls         stringlist // HTML element href and src attributes.
+	templatePath string        // Virtual path used to find document related templates.
+	content      string        // Markup text (without front matter header).
+	modtime      time.Time     // Document source file modified timestamp.
+	primaryIndex *index        // Top-level document index (nil if document is not indexed).
+	prev         *document     // Previous document in primary index.
+	next         *document     // Next document in primary index.
+	ids          Slice[string] // HTML element ids.
+	urls         Slice[string] // HTML element href and src attributes.
 	// Front matter.
 	title       string
 	date        time.Time

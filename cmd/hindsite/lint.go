@@ -46,14 +46,14 @@ func (doc *document) parseLink(url string) (link documentLink, offsite bool) {
 // URL attributes to `doc.urls` which are used for subsequent site link validation.
 func (doc *document) parseHTML(html string) {
 	// Scan HTML element id attributes.
-	doc.ids = stringlist{}
+	doc.ids = Slice[string]{}
 	pat := regexp.MustCompile(`(?i)id="(.+?)"`)
 	matches := pat.FindAllStringSubmatch(html, -1)
 	for _, match := range matches {
 		doc.ids = append(doc.ids, match[1])
 	}
 	// Scan HTML for href and src URL attributes.
-	doc.urls = stringlist{}
+	doc.urls = Slice[string]{}
 	pat = regexp.MustCompile(`(?i)(?:href|src)="(.+?)"`)
 	matches = pat.FindAllStringSubmatch(html, -1)
 	for _, match := range matches {
@@ -75,7 +75,7 @@ func (site *site) lintLinks() (errCount int) {
 				continue
 			}
 			if strings.HasPrefix(url, "#") { // Intra-document URL fragment.
-				if !doc.ids.Contains(url[1:]) {
+				if !doc.ids.Has(url[1:]) {
 					doc.site.logerror("%s: contains link to missing anchor: \"%s\"", doc.contentPath, url)
 					errCount++
 					continue
@@ -95,7 +95,7 @@ func (site *site) lintLinks() (errCount int) {
 				// Check the URL anchor has a matching HTML id attribute in the target document.
 				if link.anchor != "" {
 					target, ok := site.docs.byBuildPath[link.target]
-					if !ok || !target.ids.Contains(link.anchor) {
+					if !ok || !target.ids.Has(link.anchor) {
 						doc.site.logerror("%s: contains link to missing anchor: \"%s\"", doc.contentPath, strings.TrimPrefix(url, site.rootConf.urlprefix+string(filepath.Separator)))
 						errCount++
 						continue
