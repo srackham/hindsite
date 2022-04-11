@@ -142,7 +142,7 @@ build-builtin-$(1):
 
 .PHONY: serve-builtin-$(1)
 serve-builtin-$(1):
-	hindsite serve $(2) -content $(2)/template/init -launch -navigate -v
+	hindsite serve $(2) -content $(2)/template/init -launch -navigate -lint -v
 
 .PHONY: validate-builtin-$(1)
 validate-builtin-$(1): build-builtin-$(1)
@@ -173,7 +173,7 @@ build-docs: install
 
 .PHONY: serve-docs
 serve-docs: install
-	hindsite serve docs -launch -navigate -v
+	hindsite serve docs -launch -navigate -lint -v
 
 .PHONY: validate-docs
 validate-docs: build-docs
