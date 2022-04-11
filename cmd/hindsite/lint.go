@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	urlpkg "net/url"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -9,13 +9,13 @@ import (
 
 // documentLink represents an intra-site document link.
 type documentLink struct {
-	target string // Target build path
+	target string // Target build fle path
 	anchor string // URL fragment
 }
 
-// parseLink computes the URL's target build path and URL anchor fragment from
-// `url` and returns them in `link`. `offsite` returns `true` if the URL targets
-// an external resource.
+// parseLink computes the URL's target build file path and URL anchor fragment from
+// `url` and returns them in `link`.
+// `offsite` is returned set to `true` if `url` refers to an external resource.
 func (doc *document) parseLink(url string) (link documentLink, offsite bool) {
 	// Split into URL and anchor.
 	s := strings.Split(url, "#")
@@ -33,12 +33,13 @@ func (doc *document) parseLink(url string) (link documentLink, offsite bool) {
 	} else { // Matches relative URLs.
 		re := regexp.MustCompile(`(?i)^([\w][\w./-]*)$`)
 		matches := re.FindStringSubmatch(url)
-		if matches == nil {
-			return link, true
+		if matches != nil {
+			link.target = filepath.Join(filepath.Dir(doc.buildPath), matches[1])
+		} else {
+			offsite = true
 		}
-		link.target = filepath.Join(filepath.Dir(doc.buildPath), matches[1])
 	}
-	return link, false
+	return
 }
 
 // parseHTML scans the document's `html` saving id attributes to `doc.ids` and href and src
@@ -67,37 +68,40 @@ func (site *site) lintLinks() (errCount int) {
 	for _, doc := range site.docs.byContentPath {
 		// Iterate the document's href/src attribute URLs.
 		for _, url := range doc.urls {
+			_, err := urlpkg.Parse(url)
+			if err != nil {
+				doc.site.logerror("%s: contains malformed URL: \"%s\"", doc.contentPath, url)
+				errCount++
+				continue
+			}
 			if strings.HasPrefix(url, "#") { // Intra-document URL fragment.
 				if !doc.ids.Contains(url[1:]) {
-					err := fmt.Errorf("%s: contains link to missing anchor: %s", doc.contentPath, url)
+					doc.site.logerror("%s: contains link to missing anchor: \"%s\"", doc.contentPath, url)
 					errCount++
-					doc.site.logerror(err.Error())
 					continue
 				}
 			} else {
 				link, offsite := doc.parseLink(url)
 				if offsite {
-					site.verbose2("lint: %s: skipped offsite link: %s", doc.contentPath, url)
+					site.verbose2("lint: %s: skipped offsite link: \"%s\"", doc.contentPath, url)
 					continue
 				}
 				// Check the target URL file exists.
 				if !fileExists(link.target) {
-					err := fmt.Errorf("%s: contains link to missing file: %s", doc.contentPath, strings.TrimPrefix(link.target, site.buildDir+string(filepath.Separator)))
+					doc.site.logerror("%s: contains link to missing file: \"%s\"", doc.contentPath, strings.TrimPrefix(link.target, site.buildDir+string(filepath.Separator)))
 					errCount++
-					site.logerror(err.Error())
 					continue
 				}
 				// Check the URL anchor has a matching HTML id attribute in the target document.
 				if link.anchor != "" {
 					target, ok := site.docs.byBuildPath[link.target]
 					if !ok || !target.ids.Contains(link.anchor) {
-						err := fmt.Errorf("%s: contains link to missing anchor: %s", doc.contentPath, strings.TrimPrefix(url, site.rootConf.urlprefix+string(filepath.Separator)))
+						doc.site.logerror("%s: contains link to missing anchor: \"%s\"", doc.contentPath, strings.TrimPrefix(url, site.rootConf.urlprefix+string(filepath.Separator)))
 						errCount++
-						site.logerror(err.Error())
 						continue
 					}
 				}
-				site.verbose2("lint: %s: validated link: %s", doc.contentPath, url)
+				site.verbose2("lint: %s: validated link: \"%s\"", doc.contentPath, url)
 			}
 		}
 	}

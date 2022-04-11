@@ -253,6 +253,7 @@ func (site *site) renderDocument(doc *document) error {
 	}
 	if site.lint {
 		doc.parseHTML(html)
+		// doc.parseHTML(string(data["body"].(template.HTML)))
 	}
 	site.verbose("write document: " + doc.buildPath)
 	if err = writePath(doc.buildPath, html); err != nil {
