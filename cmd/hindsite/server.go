@@ -316,13 +316,15 @@ func (svr *server) serve() error {
 				case "N": // Toggle -navigate option.
 					svr.navigate = !svr.navigate
 					svr.logconsole("navigation: %t\n", svr.navigate)
+				case "Q":
+					svr.close(nil)
 				default:
 					svr.logconsole(`Serving build directory %q on %q
 Press the R key followed by the Enter key to force a complete site rebuild
 Press the D key followed by the Enter key to toggle the server -drafts option
 Press the N key followed by the Enter key to toggle the server -navigate option
+Press the Q key followed by the Enter key or Ctrl+C to exit
 Press the Enter key to print help
-Press Ctrl+C to exit
 `, svr.buildDir, rooturl)
 				}
 			case evt := <-fsevent:
