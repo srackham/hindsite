@@ -51,10 +51,11 @@ read Jekyll and Hugo Markdown document [front matter](#front-matter)).
 
 
 ## Sites
-A site consists of three separate directory trees containing the files and used
-by the `hindsite` command to build, maintain and test a static website:
+A Hindsite site consists of three separate directory trees containing all the
+source document, templates and resources to build, maintain and test a static
+website:
 
-- A _content directory_ containing [documents](#documents) and
+- A _content directory_ containing source [documents](#documents) and
   [static resource files](#static-files).
 - A _template directory_ containing [templates](#templates) and
   [configuration files](#configuration).
@@ -62,7 +63,7 @@ by the `hindsite` command to build, maintain and test a static website:
 
 By default, these directories reside in a _site directory_ and are named
 _content_, _template_ and _build_. The default locations can be changed using
-command-line options so, for example, a single template directory can process
+command-line options. For example, a single template directory can process
 multiple content directories just as a single content directory can be processed
 by multiple template directories. The _build_, _content_ and _template_
 directories must be mutually exclusive (not contained within one another).
@@ -109,22 +110,33 @@ ensures consistent, readable URLs without ugly encodings for illegal URL
 characters.
 
 
-## Commands
-Usage:
+## Hindsite commands
+Hindsite implements the following commands:
 
-    hindsite init  [SITE_DIR] [OPTIONS]
+[build](#build-command)::
+Build the website:
+
     hindsite build [SITE_DIR] [OPTIONS]
-    hindsite serve [SITE_DIR] [OPTIONS]
-    hindsite new   [SITE_DIR] DOCUMENT [OPTIONS]
+
+[help](#help-command)::
+Display usage summary:
+
     hindsite help
 
-Commands:
+[init](#init-command)::
+Initialize a new site from a site template:
 
-    init    initialize a new site
-    build   generate the website
-    serve   start development webserver
-	  new     create a new content document
-    help    display usage summary
+    hindsite init  [SITE_DIR] [OPTIONS]
+
+[new](#new-command)::
+Create a new content document:
+
+    hindsite new   [SITE_DIR] DOCUMENT [OPTIONS]
+
+[serve](#serve-command)::
+Start the development webserver:
+
+    hindsite serve [SITE_DIR] [OPTIONS]
 
 All commands accept the following options:
 
@@ -134,36 +146,36 @@ All commands accept the following options:
 `-template TEMPLATE_DIR`:: The site template directory (defaults to `SITE_DIR/template`).
 `-v`:: Increase verbosity. `-vv` is an alias for `-v -v`.
 
-
 - Content, build and template directories cannot overlap, with one exception:
   the content directory can be `TEMPLATE_DIR/init`. This is handy for testing
-  template initialization content.
+  site template initialization content.
 - Sites are not restricted to a single content, template and build directory.
   The `-content`, `-template` and `-build` options allow separate builds from
   differing combinations of content and template directories.
 
 
-### help command
+## help command
 The _help_ command prints command usage and options summary plus hindsite
 version information.
 
-Usage:
+### Syntax
 
     hindsite help
 
+### Options
 `hindsite`, `hindsite -h` and `hindsite --help` are all aliases for `hindsite help`.
 
 
-### init command
+## init command
 The _init_ command creates a new site from another site template or from a
 built-in template. The _init_ command copies the source template to the
 site's template directory and initializes the site's content directory.
 
-Usage:
+### Syntax
 
     hindsite init [SITE_DIR] [OPTIONS]
 
-Applicable options:
+### Options
 
     -content CONTENT_DIR
     -template TEMPLATE_DIR
@@ -175,13 +187,13 @@ Applicable options:
   of a site template directory.
 - Non-empty target content and template directories are skipped.
 
-#### Command execution
+### Command execution
 1. The `SOURCE` template is copied to the site `TEMPLATE_DIR`.
 2. The template directory structure is recreated in the content directory.
 3. If the `TEMPLATE_DIR/init` directory exists its contents is copied to the
    content directory.
 
-#### Examples
+### Examples
 - Install the built-in `blog` template to `./template` and initialize the
   `./contents` directory:
 
@@ -193,15 +205,15 @@ Applicable options:
     hindsite init -from ~/webs/foobar/template
 
 
-### build command
+## build command
 The _build_ command generates a static website in the _build_ directory using
 files from the _content_ and _template_ directories.
 
-Usage:
+### Syntax
 
     hindsite build [SITE_DIR] [OPTIONS]
 
-Applicable options:
+### Options
 
     -content CONTENT_DIR
     -template TEMPLATE_DIR
@@ -213,11 +225,12 @@ Applicable options:
   [excluded](#configuration-variables) are rebuilt.
 - If the `-drafts` option is specified [draft documents](#documents) are included
   in the built website.
+- The `-lint` option checks link [validity](#validity-checks) in generated HTML document files.
 - Content, build and template directories cannot overlap, with one exception:
   the content directory can be `TEMPLATE_DIR/init` (this is handy for testing
   template initialization content).
 
-#### Command execution
+### Command execution
 
 . Configuration files (`config.toml` and `config.yaml` files) in the template directory tree are parsed.
 . All files and folders in the build directory are deleted.
@@ -236,7 +249,22 @@ Applicable options:
 . If a [homepage](#homepage) is specified it is copied to the root of the build
   directory and named `index.html`.
 
-#### Build summary
+### Validity checks
+Following a site rebuild the `-lint` option checks that all intra-site links in
+generated HTML document files are valid. HTML `href` and
+`src` attribute URL values are checked to ensure:
+
+. URL syntax is valid.
+. URL target resource files exist.
+. URL fragment identifiers have a matching HTML `id` attribute in the target resource file.
+
+The existence of external (off-site) URL resources is not checked -- for full
+site validation use a cross-site validator such as the
+[W3C Markup Validation Service](https://validator.w3.org/).
+
+Validity checks increase site build times.
+
+### Build summary
 The printed build summary includes:
 
 _documents_:: The total number of Markdown documents (including skipped drafts).
@@ -251,24 +279,25 @@ _time_:: The execution time in seconds.
 The build summary does not include [excluded](#configuration-variables) files.
 
 
-### serve command
+## serve command
 The _serve_ command rebuilds the site then starts the built-in webserver on
 the site _build directory_. If files in the _content_ or _template
 directories_ changed the _serve_ command automatically
 [rebuilds](#partial-rebuilds) affected webpages. The server also handles browser
 live reloading.
 
-Usage:
+### Syntax
 
     hindsite serve [SITE_DIR] [OPTIONS]
 
-Applicable options:
+### Options
 
     -content CONTENT_DIR
     -template TEMPLATE_DIR
     -build BUILD_DIR
     -drafts
     -launch
+    -lint
     -navigate
     -port [HTTP_PORT][:LR_PORT]
     -v
@@ -276,6 +305,8 @@ Applicable options:
 - If the `-drafts` option is specified [draft documents](#documents) are included
   in the built website.
 - The `-launch` option opens the site home page in the default web browser.
+- Use the `-lint` option to check [link validity](#validity-checks) in generated HTML document files
+  following a site rebuild.
 - The `-navigate` option causes the browser to automatically navigate to new and
   updated [documents](#documents).
 - The `-port` option sets the server HTTP port number (`HTTP_PORT`) and/or the
@@ -285,24 +316,26 @@ Applicable options:
   * Setting `LR_PORT` to `-1` disables live reloads.
   * The port numbers must be unique across all running server instances.
   * Examples: `-port 1213`, `-port 1213:35730`, `-port :-1`.
-- While the server is runing you can enter the following keyboard commands:
-  * Press the _R_ key followed by the _Enter_ key to force a complete site rebuild.
-  * Press the _D_ key followed by the _Enter_ key to toggle the server `-drafts` option.
-  * Press the _N_ key followed by the _Enter_ key to toggle the server `-navigate` option.
-  * Press the _Enter_ key to print help.
-- The _serve command_ monitors keyboard input, if you want to run it in the
-  background you need to close stdin by passing it `/dev/null`. For example:
+- The server responds to the following keyboard commands:
+  * Press the R key followed by the Enter key to force a complete site rebuild
+  * Press the D key followed by the Enter key to toggle the server -drafts option
+  * Press the N key followed by the Enter key to toggle the server -navigate option
+  * Press the Q key followed by the Enter key or Ctrl+C to exit
+  * Press the Enter key to print help
+- The _serve command_ commandeers keyboard input -- if you want to run the server
+  command in the background you need to assign `/dev/null` to its standard
+  input. For example:
 
   hindsite serve mysite < /dev/null &
 
 - The server strips the `urlprefix` from URLs in HTML files before sending them
-  to the browser. This allows the build to be tested irrespective of the
+  to the browser. This allows the site to be tested locally irrespective of the
   `urlprefix` value.
 - To enable browser live reloads the server injects the
   [LiveReload](http://livereload.com/) script into HTML files prior to sending
   them to the browser.
 
-#### Partial rebuilds
+### Partial rebuilds
 To speed up live reloads and to make the content creation process easier and
 more responsive the _serve_ command automatically performs partial builds when
 content files are modified, added or deleted.
@@ -315,6 +348,9 @@ if:
 - A configuration file or template file is added, changed or removed
   (necessitating a full site rebuild).
 
+Partial rebuilds do not perform `-lint` option checks -- you can run them
+manually while the server is running with the "R" (Rebuild) keyboard command.
+
 .important
 To ensure build integrity you should always perform a complete
 rebuild before deployment and after site structural changes (the serve
@@ -322,15 +358,15 @@ command does not automatically process changes to the site directory
 structure).
 
 
-### new command
+## new command
 The _new_ command creates a new [document](#documents) file and automatically
 sets the [front matter](#front-matter) `date` and `title`.
 
-Usage:
+### Syntax
 
     hindsite new [SITE_DIR] DOCUMENT [OPTIONS]
 
-Applicable options:
+### Options
 
     -content CONTENT_DIR
     -template TEMPLATE_DIR
@@ -377,7 +413,7 @@ Document content goes here.
 It's important to understand that timezones 
 TODO
 
-Hindsite processes document [publication dates](#XXX) and [modification times](#ZZZ) (see [???](qux.html#YYY-ZZZ))
+Hindsite processes document [publication dates](//:YYY#XXX) and [modification times](#ZZZ) (see [???](qux.html#YYY-ZZZ))
 
 ## Built-in site templates
 Hindsite includes `blog`, `docs` and `hello` built-in site templates
@@ -447,8 +483,8 @@ Customisation notes:
 
 - The example content pages are written in [Rimu
   markup](https://srackham.github.io/rimu/). Rimu generates the header IDs which
-  are used for table of contents generation (you could use Markdown instead of
-  Rimu, but would need to modify the TOC generator code).
+  are used for table of contents generation. You could use Markdown instead of
+  Rimu so long as all TOC headings have `id` attributes (some ,g).
 
 - The global site [configuration file](#configuration) is
   `template/config.yaml`.
@@ -476,7 +512,7 @@ A minimal single-page built-in template consisting of a single
 `content/index.md` document and a single `template/layout.html` HTML template.
 
 ### Built-in template styling
-The `blog` and `docs` templates include the following block element CSS classes
+The `blog` and `docs` templates include the following block element CSS classes (in `main.css`)
 which are particularly useful for styling Rimu markup:
 
 ```
@@ -708,7 +744,7 @@ Are available as these template variables:
 
 ## Content files
 Content files are the source files residing in the site [content
-directory](#??????). They are used to build the website.
+directory](#???). They are used to build the website.
 
 - There are two types of content file: [documents](#documents) and [static files](#static-files).
 - Content files can include an optional [front matter header](#front-matter-header).
