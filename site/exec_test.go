@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/srackham/hindsite/fsutil"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,7 +36,7 @@ func Test_execute(t *testing.T) {
 	assert.Contains(out, "missing site directory")
 
 	os.RemoveAll(tmpdir)
-	mkMissingDir(tmpdir)
+	MkMissingDir(tmpdir)
 	out, code = exec("hindsite init " + tmpdir + " -from blog -v")
 	assert.Equal(0, code)
 	assert.Contains(out, "installing builtin template: blog")
@@ -45,7 +46,7 @@ func Test_execute(t *testing.T) {
 	assert.Contains(out, "documents: 12\ndrafts: 0\nstatic: 6")
 
 	os.RemoveAll(tmpdir)
-	mkMissingDir(tmpdir)
+	MkMissingDir(tmpdir)
 	out, code = exec("hindsite init " + tmpdir + " -from ./testdata/blog/template -v")
 	assert.Equal(0, code)
 	assert.Contains(out, "make directory: content/newsletters")
@@ -62,8 +63,8 @@ func Test_execute(t *testing.T) {
 	out, code = exec("hindsite new " + tmpdir + " " + f)
 	assert.Equal(0, code)
 	assert.Contains(out, "")
-	assert.True(fileExists(f))
-	text, _ := readFile(f)
+	assert.True(FileExists(f))
+	text, _ := ReadFile(f)
 	assert.Contains(text, "title: New Test File")
 	assert.Contains(text, "date:  "+time.Now().Format("2006-01-02"))
 	assert.Contains(text, "Document content goes here.")
@@ -76,8 +77,8 @@ func Test_execute(t *testing.T) {
 	out, code = exec("hindsite new " + f)
 	assert.Equal(0, code)
 	assert.Contains(out, "")
-	assert.True(fileExists(f))
-	text, _ = readFile(f)
+	assert.True(FileExists(f))
+	text, _ = ReadFile(f)
 	assert.Contains(text, "title: New Test File Two")
 	assert.Contains(text, "date:  2018-12-01")
 	assert.Contains(text, "Test new template.")

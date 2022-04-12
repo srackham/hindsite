@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	. "github.com/srackham/hindsite/fsutil"
 )
 
 // build implements the build command.
@@ -22,7 +23,7 @@ func (site *site) build() error {
 		site.rootConf.merge(site.confs[0])
 	}
 	site.verbose2("root config: \n" + site.rootConf.String())
-	if !dirExists(site.buildDir) {
+	if !DirExists(site.buildDir) {
 		if err := os.Mkdir(site.buildDir, 0775); err != nil {
 			return err
 		}
@@ -167,13 +168,13 @@ func (site *site) build() error {
 func (site *site) copyHomePage() error {
 	if site.rootConf.homepage != "" {
 		src := site.rootConf.homepage
-		if !fileExists(src) {
+		if !FileExists(src) {
 			return fmt.Errorf("homepage file missing: %s", src)
 		}
 		dst := filepath.Join(site.buildDir, "index.html")
 		site.verbose2("copy homepage: " + src)
 		site.verbose("write homepage: " + dst)
-		if err := copyFile(src, dst); err != nil {
+		if err := CopyFile(src, dst); err != nil {
 			return err
 		}
 	}
@@ -191,16 +192,16 @@ func (site *site) buildStaticFile(f string) error {
 // copyStaticFile copies the content directory srcFile to corresponding build
 // directory. Creates missing destination directories.
 func (site *site) copyStaticFile(srcFile string) error {
-	if !pathIsInDir(srcFile, site.contentDir) {
+	if !PathIsInDir(srcFile, site.contentDir) {
 		panic("static file is outside content directory: " + srcFile)
 	}
-	dstFile := pathTranslate(srcFile, site.contentDir, site.buildDir)
+	dstFile := PathTranslate(srcFile, site.contentDir, site.buildDir)
 	site.verbose("copy static:  " + srcFile)
-	err := mkMissingDir(filepath.Dir(dstFile))
+	err := MkMissingDir(filepath.Dir(dstFile))
 	if err != nil {
 		return err
 	}
-	err = copyFile(srcFile, dstFile)
+	err = CopyFile(srcFile, dstFile)
 	if err != nil {
 		return err
 	}
@@ -229,7 +230,7 @@ func (site *site) renderStaticFile(f string) error {
 		}
 	}
 	site.verbose("write static: " + doc.buildPath)
-	return writePath(doc.buildPath, markup)
+	return WritePath(doc.buildPath, markup)
 }
 
 func (site *site) renderDocument(doc *document) error {
@@ -256,7 +257,7 @@ func (site *site) renderDocument(doc *document) error {
 		// doc.parseHTML(string(data["body"].(template.HTML)))
 	}
 	site.verbose("write document: " + doc.buildPath)
-	if err = writePath(doc.buildPath, html); err != nil {
+	if err = WritePath(doc.buildPath, html); err != nil {
 		return err
 	}
 	site.verbose2(doc.String())

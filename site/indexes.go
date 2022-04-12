@@ -2,6 +2,7 @@ package site
 
 import (
 	"fmt"
+	. "github.com/srackham/hindsite/fsutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -49,7 +50,7 @@ func newIndexes(site *site) (indexes, error) {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() && fileExists(filepath.Join(f, "docs.html")) {
+		if info.IsDir() && FileExists(filepath.Join(f, "docs.html")) {
 			idx := newIndex(site)
 			idx.templateDir = f
 			p, err := filepath.Rel(site.templateDir, f)
@@ -57,7 +58,7 @@ func newIndexes(site *site) (indexes, error) {
 				return err
 			}
 			idx.contentDir = filepath.Join(site.contentDir, p)
-			if !dirExists(idx.contentDir) {
+			if !DirExists(idx.contentDir) {
 				return fmt.Errorf("missing indexed content directory: %s", idx.contentDir)
 			}
 			idx.indexDir = filepath.Join(site.indexDir, p)
@@ -75,7 +76,7 @@ func newIndexes(site *site) (indexes, error) {
 	for i, idx1 := range idxs {
 		idxs[i].isPrimary = true
 		for _, idx2 := range idxs {
-			if pathIsInDir(idx1.templateDir, idx2.templateDir) && idx1.templateDir != idx2.templateDir {
+			if PathIsInDir(idx1.templateDir, idx2.templateDir) && idx1.templateDir != idx2.templateDir {
 				// idx1 is child of idx2.
 				idxs[i].isPrimary = false
 			}
@@ -88,7 +89,7 @@ func newIndexes(site *site) (indexes, error) {
 // the document its primary index.
 func (idxs indexes) addDocument(doc *document) {
 	for i, idx := range idxs {
-		if pathIsInDir(doc.templatePath, idx.templateDir) {
+		if PathIsInDir(doc.templatePath, idx.templateDir) {
 			idxs[i].docs = append(idx.docs, doc)
 			if idx.isPrimary {
 				doc.primaryIndex = idxs[i]
@@ -142,7 +143,7 @@ func (idx *index) build(doc *document) error {
 			} else {
 				idx.site.verbose2("write index: " + pg.file)
 			}
-			if err = writePath(pg.file, html); err != nil {
+			if err = WritePath(pg.file, html); err != nil {
 				return err
 			}
 		}
@@ -187,7 +188,7 @@ func (idx *index) build(doc *document) error {
 				return err
 			}
 			idx.site.verbose2("write index: " + outfile)
-			if err = writePath(outfile, html); err != nil {
+			if err = WritePath(outfile, html); err != nil {
 				return err
 			}
 		}

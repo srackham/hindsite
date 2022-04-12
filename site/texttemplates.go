@@ -2,6 +2,7 @@ package site
 
 import (
 	"bytes"
+	. "github.com/srackham/hindsite/fsutil"
 	"path/filepath"
 	"text/template"
 )
@@ -32,7 +33,7 @@ func (tmpls textTemplates) name(elem ...string) string {
 // add parses the corresponding file from the templates directory and adds it to
 // templates.
 func (tmpls *textTemplates) add(tmplfile string) error {
-	text, err := readFile(tmplfile)
+	text, err := ReadFile(tmplfile)
 	if err != nil {
 		return err
 	}

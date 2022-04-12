@@ -1,11 +1,13 @@
 package site
 
 import (
-	. "github.com/srackham/hindsite/slice"
 	urlpkg "net/url"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	. "github.com/srackham/hindsite/fsutil"
+	. "github.com/srackham/hindsite/slice"
 )
 
 // documentLink represents an intra-site document link.
@@ -28,7 +30,7 @@ func (doc *document) parseLink(url string) (link documentLink, offsite bool) {
 	matches := re.FindStringSubmatch(url)
 	if matches != nil { // Matches absolute or root-relative URL.
 		link.target = filepath.Join(doc.site.buildDir, matches[1])
-		if dirExists(link.target) {
+		if DirExists(link.target) {
 			link.target = filepath.Join(link.target, "index.html")
 		}
 	} else { // Matches relative URLs.
@@ -88,7 +90,7 @@ func (site *site) lintLinks() (errCount int) {
 					continue
 				}
 				// Check the target URL file exists.
-				if !fileExists(link.target) {
+				if !FileExists(link.target) {
 					doc.site.logerror("%s: contains link to missing file: \"%s\"", doc.contentPath, strings.TrimPrefix(link.target, site.buildDir+string(filepath.Separator)))
 					errCount++
 					continue

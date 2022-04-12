@@ -2,15 +2,14 @@ package site
 
 import (
 	"fmt"
-	. "github.com/srackham/hindsite/slice"
-	"io/ioutil"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
 	"time"
+
+	. "github.com/srackham/hindsite/fsutil"
+	. "github.com/srackham/hindsite/slice"
 )
 
 /*
@@ -65,111 +64,13 @@ func launchBrowser(url string) error {
 
 // extractDateTitle extracts the date and title strings from file name.
 func extractDateTitle(name string) (date string, title string) {
-	title = fileName(name)
+	title = FileName(name)
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(title) {
 		date = title[0:10]
 		title = title[11:]
 	}
 	title = strings.Title(strings.Replace(title, "-", " ", -1))
 	return date, title
-}
-
-/*
-File functions.
-*/
-func dirExists(name string) bool {
-	info, err := os.Stat(name)
-	return err == nil && info.IsDir()
-}
-
-func fileExists(name string) bool {
-	info, err := os.Stat(name)
-	return err == nil && !info.IsDir()
-}
-
-func readFile(name string) (string, error) {
-	bytes, err := ioutil.ReadFile(name)
-	return string(bytes), err
-}
-
-func writeFile(name string, text string) error {
-	return ioutil.WriteFile(name, []byte(text), 0644)
-}
-
-// writePath writes file and creates any missing path directories.
-func writePath(path string, text string) error {
-	if err := mkMissingDir(filepath.Dir(path)); err != nil {
-		return err
-	}
-	return writeFile(path, text)
-}
-
-// Return file name sans extension.
-func fileName(name string) string {
-	return replaceExt(filepath.Base(name), "")
-}
-
-// Replace the extension of name.
-func replaceExt(name, ext string) string {
-	return name[0:len(name)-len(filepath.Ext(name))] + ext
-}
-
-func copyFile(from, to string) error {
-	contents, err := readFile(from)
-	if err != nil {
-		return err
-	}
-	err = writeFile(to, contents)
-	return err
-}
-
-func mkMissingDir(dir string) error {
-	if !dirExists(dir) {
-		if err := os.MkdirAll(dir, 0775); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// pathIsInDir returns true if path p is in directory dir or if p equals dir.
-func pathIsInDir(p, dir string) bool {
-	p = filepath.Clean(p)
-	dir = filepath.Clean(dir)
-	return p == dir || strings.HasPrefix(p, dir+string(filepath.Separator))
-}
-
-// Translate srcPath to corresponding path in dstRoot.
-func pathTranslate(srcPath, srcRoot, dstRoot string) string {
-	if !pathIsInDir(srcPath, srcRoot) {
-		panic("srcPath not in srcRoot: " + srcPath)
-	}
-	dstPath, err := filepath.Rel(srcRoot, srcPath)
-	if err != nil {
-		panic(err.Error())
-	}
-	return filepath.Join(dstRoot, dstPath)
-}
-
-// fileModTime returns file f's modification time or zero time if it can't.
-func fileModTime(f string) time.Time {
-	info, err := os.Stat(f)
-	if err != nil {
-		return time.Time{}
-	}
-	return info.ModTime()
-}
-
-// dirCount returns the number of files and folders in a directory. Returns zero if directory does not exist.
-func dirCount(dir string) int {
-	if !dirExists(dir) {
-		return 0
-	}
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		panic(err)
-	}
-	return len(files)
 }
 
 /*

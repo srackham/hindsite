@@ -15,6 +15,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/fsnotify/fsnotify"
 	"github.com/jaschaephraim/lrserver"
+	. "github.com/srackham/hindsite/fsutil"
 )
 
 const (
@@ -124,12 +125,12 @@ func (svr *server) htmlFilter(h http.Handler) http.Handler {
 		}
 		if path.Ext(p) == ".html" {
 			p = filepath.Join(svr.buildDir, filepath.FromSlash(p[1:])) // Convert URL path to file path.
-			if !fileExists(p) {
+			if !FileExists(p) {
 				http.Error(w, "404: file not found: "+p, 404)
 				return
 
 			}
-			content, err := readFile(p)
+			content, err := ReadFile(p)
 			if err != nil {
 				http.Error(w, "500: "+err.Error(), 500)
 				return
@@ -177,7 +178,7 @@ func (svr *server) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotify.
 				msg = "ignored"
 			case svr.exclude(evt.Name):
 				msg = "excluded"
-			case dirExists(evt.Name):
+			case DirExists(evt.Name):
 				msg = "ignored"
 				if evt.Op == fsnotify.Create {
 					watcher.Add(evt.Name)
@@ -337,9 +338,9 @@ func (svr *server) serve() error {
 				start := time.Now()
 				switch evt.Op {
 				case fsnotify.Create, fsnotify.Write:
-					t := fileModTime(svr.rootConf.homepage)
+					t := FileModTime(svr.rootConf.homepage)
 					err = svr.writeFile(evt.Name)
-					if err == nil && t.Before(fileModTime(svr.rootConf.homepage)) {
+					if err == nil && t.Before(FileModTime(svr.rootConf.homepage)) {
 						// homepage was modified by this event.
 						err = svr.copyHomePage()
 					}
@@ -391,7 +392,7 @@ func (svr *server) createFile(f string) error {
 		svr.idxs.addDocument(&doc)
 		// Rebuild indexes containing the new document.
 		for _, idx := range svr.idxs {
-			if pathIsInDir(doc.templatePath, idx.templateDir) {
+			if PathIsInDir(doc.templatePath, idx.templateDir) {
 				if err := idx.build(nil); err != nil {
 					return err
 				}
@@ -399,9 +400,9 @@ func (svr *server) createFile(f string) error {
 		}
 		svr.setNavigateURL(doc.url)
 		return svr.renderDocument(&doc)
-	case pathIsInDir(f, svr.contentDir):
+	case PathIsInDir(f, svr.contentDir):
 		return svr.buildStaticFile(f)
-	case pathIsInDir(f, svr.templateDir):
+	case PathIsInDir(f, svr.templateDir):
 		return svr.build()
 	default:
 		panic("file is not in watched directories: " + f)
@@ -422,7 +423,7 @@ func (svr *server) removeFile(f string) error {
 		svr.docs.delete(doc)
 		// Rebuild indexes containing the removed document.
 		for _, idx := range svr.idxs {
-			if pathIsInDir(doc.templatePath, idx.templateDir) {
+			if PathIsInDir(doc.templatePath, idx.templateDir) {
 				idx.docs = idx.docs.delete(doc)
 				if err := idx.build(nil); err != nil {
 					return err
@@ -431,15 +432,15 @@ func (svr *server) removeFile(f string) error {
 		}
 		svr.verbose("delete document: " + doc.buildPath)
 		return os.Remove(doc.buildPath)
-	case pathIsInDir(f, svr.contentDir):
-		f := pathTranslate(f, svr.contentDir, svr.buildDir)
+	case PathIsInDir(f, svr.contentDir):
+		f := PathTranslate(f, svr.contentDir, svr.buildDir)
 		// The deleted content may have been a directory.
-		if fileExists(f) {
+		if FileExists(f) {
 			svr.verbose("delete static: " + f)
 			return os.Remove(f)
 		}
 		return nil
-	case pathIsInDir(f, svr.templateDir):
+	case PathIsInDir(f, svr.templateDir):
 		return svr.build()
 	default:
 		panic("file is not in watched directories: " + f)
@@ -477,7 +478,7 @@ func (svr *server) writeFile(f string) error {
 		}
 		// Rebuild affected document index pages.
 		for _, idx := range svr.idxs {
-			if pathIsInDir(doc.templatePath, idx.templateDir) {
+			if PathIsInDir(doc.templatePath, idx.templateDir) {
 				if oldDoc.date.Equal(doc.date) && strings.Join(oldDoc.tags, ",") == strings.Join(doc.tags, ",") {
 					// Neither date ordering or tags have changed so only rebuild document index pages containing doc.
 					if err := idx.build(doc); err != nil {
@@ -493,9 +494,9 @@ func (svr *server) writeFile(f string) error {
 		}
 		svr.setNavigateURL(doc.url)
 		return svr.renderDocument(doc)
-	case pathIsInDir(f, svr.contentDir):
+	case PathIsInDir(f, svr.contentDir):
 		return svr.buildStaticFile(f)
-	case pathIsInDir(f, svr.templateDir):
+	case PathIsInDir(f, svr.templateDir):
 		return svr.build()
 	default:
 		panic("file is not in watched directories: " + f)
