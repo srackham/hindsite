@@ -1,4 +1,4 @@
-package main
+package site
 
 import (
 	urlpkg "net/url"

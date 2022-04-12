@@ -1,4 +1,4 @@
-package main
+package site
 
 import (
 	"net/http"
@@ -15,10 +15,10 @@ func Test_server(t *testing.T) {
 	// Initialize temporary directory with test blog.
 	os.RemoveAll(tmpdir)
 	mkMissingDir(tmpdir)
-	site := newSite()
+	site := NewSite()
 	cmd := "hindsite init " + tmpdir + " -from ./testdata/blog/template"
 	args := strings.Split(cmd, " ")
-	code := site.executeArgs(args)
+	code := site.ExecuteArgs(args)
 	if code != 0 {
 		t.Fatalf("%s", cmd)
 	}
@@ -26,7 +26,7 @@ func Test_server(t *testing.T) {
 		t.Fatalf("%s: unexpected number of files in template directory", cmd)
 	}
 	// Start server.
-	site = newSite()
+	site = NewSite()
 	site.out = make(chan string, 100)
 	site.in = make(chan string, 1)
 	cmd = "hindsite serve " + tmpdir
@@ -105,7 +105,7 @@ func Test_server(t *testing.T) {
 
 // Based onhttps://blog.questionable.services/article/testing-http-handlers-go/
 func Test_httpHandlers(t *testing.T) {
-	site := newSite()
+	site := NewSite()
 	site.buildDir = "./testdata/blog/build"
 	site.rootConf = newConfig()
 	site.rootConf.urlprefix = "http:/example.com"

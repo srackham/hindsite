@@ -1,4 +1,4 @@
-package main
+package site
 
 import (
 	"testing"
@@ -8,7 +8,7 @@ import (
 
 func Test_parseArgs(t *testing.T) {
 	assert := assert.New(t)
-	site := newSite()
+	site := NewSite()
 
 	args := []string{"hindsite", "serve", "./testdata/blog", "-content", "./testdata/blog/template/init"}
 	assert.NoError(site.parseArgs(args))

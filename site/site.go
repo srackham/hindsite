@@ -1,4 +1,4 @@
-package main
+package site
 
 import (
 	"fmt"
@@ -54,7 +54,7 @@ type site struct {
 	textTemplates textTemplates
 }
 
-func newSite() site {
+func NewSite() site {
 	site := site{
 		httpport:   1212,
 		lrport:     35729,
@@ -295,9 +295,9 @@ func isCommand(name string) bool {
 	return Slice[string]{"build", "help", "init", "new", "serve"}.Has(name)
 }
 
-// executeArgs runs a hindsite command specified by CLI args and returns a
+// ExecuteArgs runs a hindsite command specified by CLI args and returns a
 // non-zero exit code if an error occurred.
-func (site *site) executeArgs(args []string) int {
+func (site *site) ExecuteArgs(args []string) int {
 	var err error
 	err = site.parseArgs(args)
 	if err == nil {

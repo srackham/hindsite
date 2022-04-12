@@ -1,4 +1,4 @@
-package main
+package site
 
 import (
 	"os"
@@ -14,10 +14,10 @@ func Test_execute(t *testing.T) {
 	tmpdir := filepath.Join(os.TempDir(), "hindsite-tests")
 	assert := assert.New(t)
 	exec := func(cmd string) (out string, code int) {
-		site := newSite()
+		site := NewSite()
 		site.out = make(chan string, 100)
 		args := strings.Split(cmd, " ")
-		code = site.executeArgs(args)
+		code = site.ExecuteArgs(args)
 		close(site.out)
 		for line := range site.out {
 			out += line + "\n"
