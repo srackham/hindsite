@@ -1,6 +1,7 @@
 package site
 
 import (
+	. "github.com/srackham/hindsite/slice"
 	urlpkg "net/url"
 	"path/filepath"
 	"regexp"

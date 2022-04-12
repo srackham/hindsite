@@ -3,6 +3,7 @@ package site
 import (
 	"bufio"
 	"fmt"
+	. "github.com/srackham/hindsite/slice"
 	"html/template"
 	"os"
 	"path"

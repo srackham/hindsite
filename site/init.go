@@ -3,6 +3,7 @@ package site
 import (
 	"embed"
 	"fmt"
+	. "github.com/srackham/hindsite/slice"
 	"os"
 	"path/filepath"
 )

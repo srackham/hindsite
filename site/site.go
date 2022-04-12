@@ -2,6 +2,7 @@ package site
 
 import (
 	"fmt"
+	. "github.com/srackham/hindsite/slice"
 	"io"
 	"os"
 	"path"

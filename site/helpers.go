@@ -2,6 +2,7 @@ package site
 
 import (
 	"fmt"
+	. "github.com/srackham/hindsite/slice"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -71,26 +72,6 @@ func extractDateTitle(name string) (date string, title string) {
 	}
 	title = strings.Title(strings.Replace(title, "-", " ", -1))
 	return date, title
-}
-
-/*
-Generic slices.
-*/
-type Slice[T comparable] []T
-
-// IndexOf returns the first index of `v`, or -1 if no match is found.
-func (slice Slice[T]) IndexOf(t T) int {
-	for i, v := range slice {
-		if v == t {
-			return i
-		}
-	}
-	return -1
-}
-
-// Has returns `true` if `v` is in the slice.
-func (slice Slice[T]) Has(v T) bool {
-	return slice.IndexOf(v) >= 0
 }
 
 /*
