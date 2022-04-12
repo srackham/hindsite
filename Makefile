@@ -167,13 +167,12 @@ HOMEPAGE = https://srackham.github.io/hindsite
 
 .PHONY: build-docs
 build-docs: install
-	hindsite build docs -lint
+	hindsite build docsite -build docs -lint
 	make build-sitemap
-	cp docs/build/* docs	# Github pages serves from the ./docs folder
 
 .PHONY: serve-docs
 serve-docs: install
-	hindsite serve docs -launch -navigate -lint -v
+	hindsite serve docsite -build docs -launch -navigate -lint -v
 
 .PHONY: validate-docs
 validate-docs: build-docs

@@ -38,7 +38,7 @@ created, you need to exclude these files from document processing. Failure to do
 so can result in rebuild false positives and premature watcher reloads.</p>
 <p>For example, the Vim editor creates tilda suffixed backup files and temporary
 <a href="https://github.com/neovim/neovim/issues/3460"><code>4913</code> files</a> so you need to add
-them to the <a href="/hindsite/index.html#configuration-parameters"><code>exclude</code></a> configuration
+them to the <a href="/hindsite/index.html#configuration-variables"><code>exclude</code></a> configuration
 parameter in the templates directory root <a href="/hindsite/index.html#configuration-files">configuration
 file</a>.</p>
 <p>TOML example:</p>
@@ -93,7 +93,7 @@ shortname = "disqus-shortname-goes-here"</code></pre>
 </li></ol><p>That's it, all published documents with a non-blank <a href="/hindsite/index.html#document-id">document
 <code>id</code></a> will now include Disqus comments.</p>
 <ul><li>You can automatically assign document <code>id</code>s to all documents by setting the
-  <a href="/hindsite/index.html#id-configuration-parameter"><code>id</code> configuration parameter</a> to
+  <a href="/hindsite/index.html#id-configuration-variable"><code>id</code> configuration parameter</a> to
   <code>urlpath</code>. To confine auto <code>id</code> assignment to a specific folder put the <code>id</code>
   parameter in that folder's configuration file.</li><li>To disable comments on specific pages explicitly set the document <code>id</code> front
   matter value to a blank string.</li></ul><h2 id="should-i-enable-document-and-static-file-text-template-expansion">Should I enable document and static file text template expansion?</h2>
@@ -104,7 +104,7 @@ is an issue, only enable it for those documents or directories that need it.</p>
 <p>Use the Go <a href="https://golang.org/pkg/time/#Time.Format">Format function</a>. For
 example:</p>
 <pre><code>{{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}</code></pre>
-<p class="note">The <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="/hindsite/index.html#document-template-variables">document template
+<p class="note">The <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="/hindsite/index.html#document-template-variable">document template
 variables</a> are simpler and preferable
 to using <code>.date</code> directly.</p>
 <h2 id="how-do-you-configure-source-code-highlighting">How do you configure source code highlighting?</h2>
@@ -118,7 +118,7 @@ the <a href="https://github.com/srackham/hindsite/blob/master/cmd/hindsite/built
 categories</a> but they
 are folder based so you do not have to assign them explicitly.</p>
 <h2 id="i-want-a-single-page-document-index">I want a single page document index</h2>
-<p>Set the <a href="/hindsite/index.html#configuration-parameters"><code>paginate</code> configuration
+<p>Set the <a href="/hindsite/index.html#configuration-variables"><code>paginate</code> configuration
 parameter</a> to <code>-1</code> and all indexed
 documents will appear on the first page.</p>
 <h2 id="i-want-both-paginated-and-single-page-document-indexes">I want both paginated and single page document indexes</h2>

@@ -54,13 +54,14 @@ to start learning hindsite is to browse the blog <a href="#sites">site directory
 <p>If you are familiar with Jekyll or Hugo you'll be right a home (hindsite can
 read Jekyll and Hugo Markdown document <a href="#front-matter">front matter</a>).</p>
 <h2 id="sites">Sites</h2>
-<p>A site consists of three separate directory trees containing the files and used
-by the <code>hindsite</code> command to build, maintain and test a static website:</p>
-<ul><li>A <em>content directory</em> containing <a href="#documents">documents</a> and
+<p>A Hindsite site consists of three separate directory trees containing all the
+source document, templates and resources to build, maintain and test a static
+website:</p>
+<ul><li>A <em>content directory</em> containing source <a href="#documents">documents</a> and
   <a href="#static-files">static resource files</a>.</li><li>A <em>template directory</em> containing <a href="#templates">templates</a> and
   <a href="#configuration">configuration files</a>.</li><li>A <em>build directory</em> where Hindsite builds the static website.</li></ul><p>By default, these directories reside in a <em>site directory</em> and are named
 <em>content</em>, <em>template</em> and <em>build</em>. The default locations can be changed using
-command-line options so, for example, a single template directory can process
+command-line options. For example, a single template directory can process
 multiple content directories just as a single content directory can be processed
 by multiple template directories. The <em>build</em>, <em>content</em> and <em>template</em>
 directories must be mutually exclusive (not contained within one another).</p>
@@ -98,56 +99,51 @@ content directory.</p>
 characters. This convention is not enforced but is recommended because it
 ensures consistent, readable URLs without ugly encodings for illegal URL
 characters.</p>
-<h2 id="commands">Commands</h2>
-<p>Usage:</p>
-<pre><code>hindsite init  [SITE_DIR] [OPTIONS]
-hindsite build [SITE_DIR] [OPTIONS]
-hindsite serve [SITE_DIR] [OPTIONS]
-hindsite new   [SITE_DIR] DOCUMENT [OPTIONS]
-hindsite help</code></pre>
-<p>Commands:</p>
-<pre><code>init    initialize a new site
-build   generate the website
-serve   start development webserver
-new     create a new content document
-help    display usage summary</code></pre>
-<p>All commands accept the following options:</p>
-<dl><dt><code>SITE_DIR</code></dt><dd>The hindsite site directory (defaults to the current directory).</dd><dt><code>-content CONTENT_DIR</code></dt><dd>The site content directory (defaults to <code>SITE_DIR/content</code>).</dd><dt><code>-build BUILD_DIR</code></dt><dd>The site build directory (defaults to <code>SITE_DIR/build</code>).</dd><dt><code>-template TEMPLATE_DIR</code></dt><dd>The site template directory (defaults to <code>SITE_DIR/template</code>).</dd><dt><code>-v</code></dt><dd>Increase verbosity. <code>-vv</code> is an alias for <code>-v -v</code>.</dd></dl><ul><li>Content, build and template directories cannot overlap, with one exception:
+<h2 id="hindsite-commands">Hindsite commands</h2>
+<p>Hindsite implements the following commands:</p>
+<dl><dt><a href="#build-command">build</a></dt><dd>Build the website:<pre><code>hindsite build [SITE_DIR] [OPTIONS]</code></pre>
+</dd><dt><a href="#help-command">help</a></dt><dd>Display usage summary:<pre><code>hindsite help</code></pre>
+</dd><dt><a href="#init-command">init</a></dt><dd>Initialize a new site from a site template:<pre><code>hindsite init  [SITE_DIR] [OPTIONS]</code></pre>
+</dd><dt><a href="#new-command">new</a></dt><dd>Create a new content document:<pre><code>hindsite new   [SITE_DIR] DOCUMENT [OPTIONS]</code></pre>
+</dd><dt><a href="#serve-command">serve</a></dt><dd>Start the development webserver:<pre><code>hindsite serve [SITE_DIR] [OPTIONS]</code></pre>
+</dd></dl><p>All commands accept the following options:</p>
+<dl><dt><code>SITE_DIR</code></dt><dd>The hindsite site directory (defaults to the current directory).</dd><dt><code>-content CONTENT_DIR</code></dt><dd>The site content directory (defaults to <code>SITE_DIR/content</code>).</dd><dt><code>-build BUILD_DIR</code></dt><dd>The site build directory (defaults to <code>SITE_DIR/build</code>).</dd><dt><code>-template TEMPLATE_DIR</code></dt><dd>The site template directory (defaults to <code>SITE_DIR/template</code>).</dd><dt><code>-v</code></dt><dd>Increase verbosity. <code>-vv</code> is an alias for <code>-v -v</code>.<ul><li>Content, build and template directories cannot overlap, with one exception:
   the content directory can be <code>TEMPLATE_DIR/init</code>. This is handy for testing
-  template initialization content.</li><li>Sites are not restricted to a single content, template and build directory.
+  site template initialization content.</li><li>Sites are not restricted to a single content, template and build directory.
   The <code>-content</code>, <code>-template</code> and <code>-build</code> options allow separate builds from
-  differing combinations of content and template directories.</li></ul><h3 id="help-command">help command</h3>
+  differing combinations of content and template directories.</li></ul></dd></dl><h2 id="help-command">help command</h2>
 <p>The <em>help</em> command prints command usage and options summary plus hindsite
 version information.</p>
-<p>Usage:</p>
+<h3 id="syntax">Syntax</h3>
 <pre><code>hindsite help</code></pre>
+<h3 id="options">Options</h3>
 <p><code>hindsite</code>, <code>hindsite -h</code> and <code>hindsite --help</code> are all aliases for <code>hindsite help</code>.</p>
-<h3 id="init-command">init command</h3>
+<h2 id="init-command">init command</h2>
 <p>The <em>init</em> command creates a new site from another site template or from a
 built-in template. The <em>init</em> command copies the source template to the
 site's template directory and initializes the site's content directory.</p>
-<p>Usage:</p>
+<h3 id="syntax-2">Syntax</h3>
 <pre><code>hindsite init [SITE_DIR] [OPTIONS]</code></pre>
-<p>Applicable options:</p>
+<h3 id="options-2">Options</h3>
 <pre><code>-content CONTENT_DIR
 -template TEMPLATE_DIR
 -from SOURCE
 -v</code></pre>
 <ul><li>The <code>-from</code> option is mandatory and <code>SOURCE</code> is either the name of a <a href="#built-in-site-templates">built-in
   template</a> (<code>blog</code>, <code>docs</code>, <code>hello</code>) or the name
-  of a site template directory.</li><li>Non-empty target content and template directories are skipped.</li></ul><h4 id="command-execution">Command execution</h4>
+  of a site template directory.</li><li>Non-empty target content and template directories are skipped.</li></ul><h3 id="command-execution">Command execution</h3>
 <ol><li>The <code>SOURCE</code> template is copied to the site <code>TEMPLATE_DIR</code>.</li><li>The template directory structure is recreated in the content directory.</li><li>If the <code>TEMPLATE_DIR/init</code> directory exists its contents is copied to the
-   content directory.</li></ol><h4 id="examples">Examples</h4>
+   content directory.</li></ol><h3 id="examples">Examples</h3>
 <ul><li>Install the built-in <code>blog</code> template to <code>./template</code> and initialize the
   <code>./contents</code> directory:<pre><code>hindsite init -from blog</code></pre>
 </li><li>Copy an existing site template from <code>~/webs/foobar/template</code> to <code>./template</code> and
   initialize the <code>./contents</code> directory:<pre><code>hindsite init -from ~/webs/foobar/template</code></pre>
-</li></ul><h3 id="build-command">build command</h3>
+</li></ul><h2 id="build-command">build command</h2>
 <p>The <em>build</em> command generates a static website in the <em>build</em> directory using
 files from the <em>content</em> and <em>template</em> directories.</p>
-<p>Usage:</p>
+<h3 id="syntax-3">Syntax</h3>
 <pre><code>hindsite build [SITE_DIR] [OPTIONS]</code></pre>
-<p>Applicable options:</p>
+<h3 id="options-3">Options</h3>
 <pre><code>-content CONTENT_DIR
 -template TEMPLATE_DIR
 -build BUILD_DIR
@@ -155,42 +151,53 @@ files from the <em>content</em> and <em>template</em> directories.</p>
 -v</code></pre>
 <ul><li>All files from the <em>content</em> directory not that are not
   <a href="#configuration-variables">excluded</a> are rebuilt.</li><li>If the <code>-drafts</code> option is specified <a href="#documents">draft documents</a> are included
-  in the built website.</li><li>Content, build and template directories cannot overlap, with one exception:
+  in the built website.</li><li>The <code>-lint</code> option checks link <a href="#validity-checks">validity</a> in generated HTML document files.</li><li>Content, build and template directories cannot overlap, with one exception:
   the content directory can be <code>TEMPLATE_DIR/init</code> (this is handy for testing
-  template initialization content).</li></ul><h4 id="command-execution-2">Command execution</h4>
+  template initialization content).</li></ul><h3 id="command-execution-2">Command execution</h3>
 <ol><li>Configuration files (<code>config.toml</code> and <code>config.yaml</code> files) in the template directory tree are parsed.</li><li>All files and folders in the build directory are deleted.</li><li>HTML and text templates (<code>*.html</code> and <code>*.txt</code> files) in the template directory tree are parsed.</li><li>The content files are processed:<ol style="list-style:lower-roman"><li>Front matter headers are parsed and document variables are computed.</li><li>Files classified as <a href="#text-templates">templates</a> are expanded.</li><li><a href="#static-files">Static files</a> are copied to their corresponding build
      directories.</li></ol></li><li>Document indexes are built.</li><li>Document webpages are built:<ol style="list-style:lower-roman"><li>Document content is rendered to HTML and assigned to the <code>.body</code> document variable.</li><li>The document's <code>layout.html</code> template is rendered and saved to the document's build directory.</li></ol></li><li>If a <a href="#homepage">homepage</a> is specified it is copied to the root of the build
-  directory and named <code>index.html</code>.</li></ol><h4 id="build-summary">Build summary</h4>
+  directory and named <code>index.html</code>.</li></ol><h3 id="validity-checks">Validity checks</h3>
+<p>Following a site rebuild the <code>-lint</code> option checks that all intra-site links in
+generated HTML document files are valid. HTML <code>href</code> and
+<code>src</code> attribute URL values are checked to ensure:</p>
+<ol><li>URL syntax is valid.</li><li>URL target resource files exist.</li><li>URL fragment identifiers have a matching HTML <code>id</code> attribute in the target resource file.</li></ol><p>The existence of external (off-site) URL resources is not checked &mdash; for full
+site validation use a cross-site validator such as the
+<a href="https://validator.w3.org/">W3C Markup Validation Service</a>.</p>
+<p>Validity checks increase site build times.</p>
+<h3 id="build-summary">Build summary</h3>
 <p>The printed build summary includes:</p>
 <dl><dt><em>documents</em></dt><dd>The total number of Markdown documents (including skipped drafts).</dd><dt><em>static</em></dt><dd>The total number of static files.</dd><dt><em>drafts</em></dt><dd>The number of skipped draft documents. If the <code>-drafts</code> option is
 specified this will be zero.</dd><dt><em>time</em></dt><dd>The execution time in seconds.</dd></dl><p>The build summary does not include <a href="#configuration-variables">excluded</a> files.</p>
-<h3 id="serve-command">serve command</h3>
+<h2 id="serve-command">serve command</h2>
 <p>The <em>serve</em> command rebuilds the site then starts the built-in webserver on
 the site <em>build directory</em>. If files in the <em>content</em> or <em>template
 directories</em> changed the <em>serve</em> command automatically
 <a href="#partial-rebuilds">rebuilds</a> affected webpages. The server also handles browser
 live reloading.</p>
-<p>Usage:</p>
+<h3 id="syntax-4">Syntax</h3>
 <pre><code>hindsite serve [SITE_DIR] [OPTIONS]</code></pre>
-<p>Applicable options:</p>
+<h3 id="options-4">Options</h3>
 <pre><code>-content CONTENT_DIR
 -template TEMPLATE_DIR
 -build BUILD_DIR
 -drafts
 -launch
+-lint
 -navigate
 -port [HTTP_PORT][:LR_PORT]
 -v</code></pre>
 <ul><li>If the <code>-drafts</code> option is specified <a href="#documents">draft documents</a> are included
-  in the built website.</li><li>The <code>-launch</code> option opens the site home page in the default web browser.</li><li>The <code>-navigate</code> option causes the browser to automatically navigate to new and
+  in the built website.</li><li>The <code>-launch</code> option opens the site home page in the default web browser.</li><li>Use the <code>-lint</code> option to check <a href="#validity-checks">link validity</a> in generated HTML document files
+  following a site rebuild.</li><li>The <code>-navigate</code> option causes the browser to automatically navigate to new and
   updated <a href="#documents">documents</a>.</li><li>The <code>-port</code> option sets the server HTTP port number (<code>HTTP_PORT</code>) and/or the
-  LiveReload port number (<code>LR_PORT</code>):<ul><li><code>HTTP_PORT</code> defaults to <code>1212</code>.</li><li><code>LR_PORT</code> defaults to <code>35729</code>.</li><li>Setting <code>LR_PORT</code> to <code>-1</code> disables live reloads.</li><li>The port numbers must be unique across all running server instances.</li><li>Examples: <code>-port 1213</code>, <code>-port 1213:35730</code>, <code>-port :-1</code>.</li></ul></li><li>While the server is runing you can enter the following keyboard commands:<ul><li>Press the <em>R</em> key followed by the <em>Enter</em> key to force a complete site rebuild.</li><li>Press the <em>D</em> key followed by the <em>Enter</em> key to toggle the server <code>-drafts</code> option.</li><li>Press the <em>N</em> key followed by the <em>Enter</em> key to toggle the server <code>-navigate</code> option.</li><li>Press the <em>Enter</em> key to print help.</li></ul></li><li>The <em>serve command</em> monitors keyboard input, if you want to run it in the
-  background you need to close stdin by passing it <code>/dev/null</code>. For example:<pre><code>hindsite serve mysite &lt; /dev/null &amp;</code></pre>
+  LiveReload port number (<code>LR_PORT</code>):<ul><li><code>HTTP_PORT</code> defaults to <code>1212</code>.</li><li><code>LR_PORT</code> defaults to <code>35729</code>.</li><li>Setting <code>LR_PORT</code> to <code>-1</code> disables live reloads.</li><li>The port numbers must be unique across all running server instances.</li><li>Examples: <code>-port 1213</code>, <code>-port 1213:35730</code>, <code>-port :-1</code>.</li></ul></li><li>The server responds to the following keyboard commands:<ul><li>Press the R key followed by the Enter key to force a complete site rebuild</li><li>Press the D key followed by the Enter key to toggle the server -drafts option</li><li>Press the N key followed by the Enter key to toggle the server -navigate option</li><li>Press the Q key followed by the Enter key or Ctrl+C to exit</li><li>Press the Enter key to print help</li></ul></li><li>The <em>serve command</em> commandeers keyboard input &mdash; if you want to run the server
+  command in the background you need to assign <code>/dev/null</code> to its standard
+  input. For example:<pre><code>hindsite serve mysite &lt; /dev/null &amp;</code></pre>
 </li><li>The server strips the <code>urlprefix</code> from URLs in HTML files before sending them
-  to the browser. This allows the build to be tested irrespective of the
+  to the browser. This allows the site to be tested locally irrespective of the
   <code>urlprefix</code> value.</li><li>To enable browser live reloads the server injects the
   <a href="http://livereload.com/">LiveReload</a> script into HTML files prior to sending
-  them to the browser.</li></ul><h4 id="partial-rebuilds">Partial rebuilds</h4>
+  them to the browser.</li></ul><h3 id="partial-rebuilds">Partial rebuilds</h3>
 <p>To speed up live reloads and to make the content creation process easier and
 more responsive the <em>serve</em> command automatically performs partial builds when
 content files are modified, added or deleted.</p>
@@ -198,16 +205,18 @@ content files are modified, added or deleted.</p>
 type of change. Most content updates are very fast but processing times increase
 if:</p>
 <ul><li>Indexed documents are added or deleted (necessitating full index rebuild).</li><li>A configuration file or template file is added, changed or removed
-  (necessitating a full site rebuild).</li></ul><p class="important">To ensure build integrity you should always perform a complete
+  (necessitating a full site rebuild).</li></ul><p>Partial rebuilds do not perform <code>-lint</code> option checks &mdash; you can run them
+manually while the server is running with the &ldquo;R&rdquo; (Rebuild) keyboard command.</p>
+<p class="important">To ensure build integrity you should always perform a complete
 rebuild before deployment and after site structural changes (the serve
 command does not automatically process changes to the site directory
 structure).</p>
-<h3 id="new-command">new command</h3>
+<h2 id="new-command">new command</h2>
 <p>The <em>new</em> command creates a new <a href="#documents">document</a> file and automatically
 sets the <a href="#front-matter">front matter</a> <code>date</code> and <code>title</code>.</p>
-<p>Usage:</p>
+<h3 id="syntax-5">Syntax</h3>
 <pre><code>hindsite new [SITE_DIR] DOCUMENT [OPTIONS]</code></pre>
-<p>Applicable options:</p>
+<h3 id="options-5">Options</h3>
 <pre><code>-content CONTENT_DIR
 -template TEMPLATE_DIR
 -v</code></pre>
@@ -235,7 +244,7 @@ Document content goes here.</code></pre>
 <h2 id="dates-and-times">Dates and times</h2>
 <p>It's important to understand that timezones 
 TODO</p>
-<p>Hindsite processes document <a href="#???">publication dates</a> and <a href="#ZZZ">modification times</a> (see <a href="#YYY-ZZZ">???</a>)</p>
+<p>Hindsite processes document <a href="//:YYY#XXX">publication dates</a> and <a href="#ZZZ">modification times</a> (see <a href="qux.html#YYY-ZZZ">???</a>)</p>
 <h2 id="built-in-site-templates">Built-in site templates</h2>
 <p>Hindsite includes <code>blog</code>, <code>docs</code> and <code>hello</code> built-in site templates
 which can be installed using the Hindsite <a href="#init-command">init command</a>.</p>
@@ -268,8 +277,8 @@ on this template.</p>
   (either in document front matter or site configuration files) to any value
   other than <code>"yes"</code>.</li><li>The example content pages are written in <a href="https://srackham.github.io/rimu/">Rimu
   markup</a>. Rimu generates the header IDs which
-  are used for table of contents generation (you could use Markdown instead of
-  Rimu, but would need to modify the TOC generator code).</li><li>The global site <a href="#configuration">configuration file</a> is
+  are used for table of contents generation. You could use Markdown instead of
+  Rimu so long as all TOC headings have <code>id</code> attributes (some ,g).</li><li>The global site <a href="#configuration">configuration file</a> is
   <code>template/config.yaml</code>.</li><li>If you set the <code>.user.toc</code> template variable to any value other than <code>"yes"</code>
   the TOC will not be displayed.</li><li>The <code>template/partials.html</code> header template will include the
   <a href="https://highlightjs.org/">highlight.js</a> source code highlighter if the
@@ -285,7 +294,7 @@ if x == 1:
 <p>A minimal single-page built-in template consisting of a single
 <code>content/index.md</code> document and a single <code>template/layout.html</code> HTML template.</p>
 <h3 id="built-in-template-styling">Built-in template styling</h3>
-<p>The <code>blog</code> and <code>docs</code> templates include the following block element CSS classes
+<p>The <code>blog</code> and <code>docs</code> templates include the following block element CSS classes (in <code>main.css</code>)
 which are particularly useful for styling Rimu markup:</p>
 <pre><code>CSS class          Description
 ___________________________________________________________

@@ -30,7 +30,8 @@
 <h1 id="hindsite-change-log">Hindsite Change Log</h1>
 <p>See the <a href="https://github.com/srackham/hindsite/commits/master">Github commit logs</a> for a full list of changes.</p>
 <h2 id="version-2-0-0-2022">Version 2.0.0 (2022-??-??)</h2>
-<ul><li>BREAKING CHANGE: The <code>templates</code> configuration variable has been extended to
+<ul><li>Added <code>-lint</code> option to <em>build</em> and <em>serve</em> commands for intra-site link
+  validation.</li><li>BREAKING CHANGE: The <code>templates</code> configuration variable has been extended to
   include file pattern (previously it only accepted file name extensions). For
   example the Hindsite version 1 templates configuration value
   <code>.css|.html|.js|.md</code> would become <code>*.css|*.html|*.js|*.md</code> in Hindsite version 2.</li><li>BREAKING CHANGE: The <code>exclude/include</code> configuration variables only apply to
