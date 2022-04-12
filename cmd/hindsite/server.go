@@ -45,6 +45,7 @@ LiveReload.addPlugin(HindsitePlugin);`
 type server struct {
 	*site
 	mutex      *sync.Mutex
+	rootURL    string
 	browserURL string
 	quit       chan struct{}
 	err        error
@@ -52,9 +53,10 @@ type server struct {
 
 func newServer(site *site) server {
 	return server{
-		site:  site,
-		mutex: &sync.Mutex{},
-		quit:  make(chan struct{}),
+		site:    site,
+		rootURL: "http://localhost:" + fmt.Sprintf("%d", site.httpport) + "/",
+		mutex:   &sync.Mutex{},
+		quit:    make(chan struct{}),
 	}
 }
 
@@ -63,6 +65,17 @@ func (svr *server) close(err error) {
 	svr.err = err
 	svr.mutex.Unlock()
 	close(svr.quit)
+}
+
+func (svr *server) help() {
+	svr.logconsole(`Serving build directory %q on %q
+
+Press the R key followed by the Enter key to force a complete site rebuild
+Press the D key followed by the Enter key to toggle the server -drafts option
+Press the N key followed by the Enter key to toggle the server -navigate option
+Press the Q key followed by the Enter key or Ctrl+C to exit
+Press the Enter key to print help
+`, svr.buildDir, svr.rootURL)
 }
 
 // setNavigateURL sets the document navigation URL that will be processed by the
@@ -195,7 +208,6 @@ func (svr *server) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotify.
 // serve implements the serve comand. Does not return unless and error occurs or
 // the server quit channel is closed.
 func (svr *server) serve() error {
-	rooturl := "http://localhost:" + fmt.Sprintf("%d", svr.httpport) + "/"
 	// Full rebuild to initialize document and index structures.
 	if err := svr.build(); err != nil {
 		svr.logerror(err.Error())
@@ -244,7 +256,7 @@ func (svr *server) serve() error {
 	}
 	// Start Web server.
 	go func() {
-		svr.logconsole("\nServing build directory %q on %q\nPress Ctrl+C to exit\n", svr.buildDir, rooturl)
+		svr.help()
 		handler := http.FileServer(http.Dir(svr.buildDir))
 		handler = svr.htmlFilter(handler)
 		handler = svr.saveBrowserURL(handler)
@@ -286,8 +298,8 @@ func (svr *server) serve() error {
 	// Launch browser.
 	if svr.launch {
 		go func() {
-			svr.verbose("launching browser: " + rooturl)
-			if err := launchBrowser(rooturl); err != nil {
+			svr.verbose("launching browser: " + svr.rootURL)
+			if err := launchBrowser(svr.rootURL); err != nil {
 				svr.logerror(err.Error())
 			}
 		}()
@@ -319,13 +331,7 @@ func (svr *server) serve() error {
 				case "Q":
 					svr.close(nil)
 				default:
-					svr.logconsole(`Serving build directory %q on %q
-Press the R key followed by the Enter key to force a complete site rebuild
-Press the D key followed by the Enter key to toggle the server -drafts option
-Press the N key followed by the Enter key to toggle the server -navigate option
-Press the Q key followed by the Enter key or Ctrl+C to exit
-Press the Enter key to print help
-`, svr.buildDir, rooturl)
+					svr.help()
 				}
 			case evt := <-fsevent:
 				start := time.Now()
