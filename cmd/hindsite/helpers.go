@@ -78,7 +78,7 @@ Generic slices.
 */
 type Slice[T comparable] []T
 
-// IndexOf returns the first index `t`, or -1 if no match is found.
+// IndexOf returns the first index of `v`, or -1 if no match is found.
 func (slice Slice[T]) IndexOf(t T) int {
 	for i, v := range slice {
 		if v == t {
@@ -88,9 +88,9 @@ func (slice Slice[T]) IndexOf(t T) int {
 	return -1
 }
 
-// Has returns `true` if `t` is in the slice.
-func (slice Slice[T]) Has(t T) bool {
-	return slice.IndexOf(t) >= 0
+// Has returns `true` if `v` is in the slice.
+func (slice Slice[T]) Has(v T) bool {
+	return slice.IndexOf(v) >= 0
 }
 
 /*
