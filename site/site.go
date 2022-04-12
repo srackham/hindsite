@@ -367,11 +367,6 @@ Github:     https://github.com/srackham/hindsite
 Docs:       https://srackham.github.io/hindsite`)
 }
 
-// isTemplate returns true if the file f is a text template.
-func (site *site) isTemplate(f string, templates []string) bool {
-	return site.match(f, templates)
-}
-
 func (site *site) isDocument(f string) bool {
 	ext := filepath.Ext(f)
 	return (ext == ".md" || ext == ".rmu") && PathIsInDir(f, site.contentDir)
