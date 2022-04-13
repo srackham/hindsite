@@ -11,6 +11,7 @@ SHELL := bash
  .SILENT:
 
 GOFLAGS ?=
+PACKAGES = ./fsutil ./site ./slice
 
 .PHONY: install
 install:
@@ -26,14 +27,14 @@ install:
 
 .PHONY: test
 test: install
-	go vet ./...
-	go test -cover ./...
+	go vet $(PACKAGES)
+	go test -cover $(PACKAGES)
 
 .PHONY: clean
 clean: fmt
 	go mod verify
 	go mod tidy
-	go clean -i ./...
+	go clean -i $(PACKAGES)
 
 .PHONY: fmt
 fmt:
