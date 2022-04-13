@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_execute(t *testing.T) {
+func TestExecute(t *testing.T) {
 	tmpdir := filepath.Join(os.TempDir(), "hindsite-tests")
 	assert := assert.New(t)
 	exec := func(cmd string) (out string, code int) {

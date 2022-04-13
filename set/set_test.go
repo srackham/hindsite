@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_set(t *testing.T) {
+func TestSet(t *testing.T) {
 	assert := assert.New(t)
 	set1 := NewSet[int]()
 	assert.Equal(0, len(set1))

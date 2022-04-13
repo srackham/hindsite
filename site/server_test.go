@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func Test_server(t *testing.T) {
+func TestServer(t *testing.T) {
 	tmpdir := path.Join(os.TempDir(), "hindsite-tests")
 	// Initialize temporary directory with test blog.
 	os.RemoveAll(tmpdir)
@@ -105,7 +105,7 @@ func Test_server(t *testing.T) {
 }
 
 // Based onhttps://blog.questionable.services/article/testing-http-handlers-go/
-func Test_httpHandlers(t *testing.T) {
+func TestHTTPHandlers(t *testing.T) {
 	site := NewSite()
 	site.buildDir = "./testdata/blog/build"
 	site.rootConf = newConfig()

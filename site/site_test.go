@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_parseArgs(t *testing.T) {
+func TestParseArgs(t *testing.T) {
 	assert := assert.New(t)
 	site := NewSite()
 

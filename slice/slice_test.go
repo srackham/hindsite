@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_set(t *testing.T) {
+func TestSlice(t *testing.T) {
 	assert := assert.New(t)
 	s := Slice[string]{"foo", "bar"}
 	assert.Equal(2, len(s))
