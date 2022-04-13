@@ -1,9 +1,14 @@
 package slice
 
 /*
-Generic slice.
+Comparable slice.
 */
+
 type Slice[T comparable] []T
+
+func New[T comparable](v ...T) Slice[T] {
+	return append(Slice[T]{}, v...)
+}
 
 // IndexOf returns the first index of `v`, or -1 if no match is found.
 func (slice Slice[T]) IndexOf(t T) int {

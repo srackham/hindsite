@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/srackham/hindsite/fsutil"
-	. "github.com/srackham/hindsite/slice"
+	"github.com/srackham/hindsite/fsx"
+	"github.com/srackham/hindsite/slice"
 
 	"github.com/BurntSushi/toml"
 	blackfriday "github.com/russross/blackfriday/v2"
@@ -26,14 +26,14 @@ type document struct {
 	conf         config // Merged configuration for this document.
 	contentPath  string
 	buildPath    string
-	templatePath string        // Virtual path used to find document related templates.
-	content      string        // Markup text (without front matter header).
-	modtime      time.Time     // Document source file modified timestamp.
-	primaryIndex *index        // Top-level document index (nil if document is not indexed).
-	prev         *document     // Previous document in primary index.
-	next         *document     // Next document in primary index.
-	ids          Slice[string] // HTML element ids.
-	urls         Slice[string] // HTML element href and src attributes.
+	templatePath string              // Virtual path used to find document related templates.
+	content      string              // Markup text (without front matter header).
+	modtime      time.Time           // Document source file modified timestamp.
+	primaryIndex *index              // Top-level document index (nil if document is not indexed).
+	prev         *document           // Previous document in primary index.
+	next         *document           // Next document in primary index.
+	ids          slice.Slice[string] // HTML element ids.
+	urls         slice.Slice[string] // HTML element href and src attributes.
 	// Front matter.
 	title       string
 	date        time.Time
@@ -55,10 +55,10 @@ func newDocument(contentfile string, site *site) (document, error) {
 	parseError := func(err error) error {
 		return fmt.Errorf("%s: %s", contentfile, err.Error())
 	}
-	if !PathIsInDir(contentfile, site.contentDir) {
+	if !fsx.PathIsInDir(contentfile, site.contentDir) {
 		panic("document is outside content directory: " + contentfile)
 	}
-	if !FileExists(contentfile) {
+	if !fsx.FileExists(contentfile) {
 		panic("missing document: " + contentfile)
 	}
 	doc := document{}
@@ -82,7 +82,7 @@ func newDocument(contentfile string, site *site) (document, error) {
 	doc.author = doc.conf.author       // Default author.
 	doc.templates = doc.conf.templates // Default templates.
 	doc.permalink = doc.conf.permalink // Default permalink.
-	doc.content, err = ReadFile(doc.contentPath)
+	doc.content, err = fsx.ReadFile(doc.contentPath)
 	if err != nil {
 		return doc, parseError(err)
 	}
@@ -96,7 +96,7 @@ func newDocument(contentfile string, site *site) (document, error) {
 	f := filepath.Base(rel)
 	switch filepath.Ext(f) {
 	case ".md", ".rmu":
-		f = ReplaceExt(f, ".html")
+		f = fsx.ReplaceExt(f, ".html")
 	}
 	if doc.slug != "" {
 		f = doc.slug + filepath.Ext(f)
@@ -107,7 +107,7 @@ func newDocument(contentfile string, site *site) (document, error) {
 		link = strings.Replace(link, "%m", doc.date.Format("01"), -1)
 		link = strings.Replace(link, "%d", doc.date.Format("02"), -1)
 		link = strings.Replace(link, "%f", f, -1)
-		link = strings.Replace(link, "%p", FileName(f), -1)
+		link = strings.Replace(link, "%p", fsx.FileName(f), -1)
 		link = strings.TrimPrefix(link, "/")
 		if strings.HasSuffix(link, "/") {
 			// "Pretty" URLs.
@@ -125,7 +125,7 @@ func newDocument(contentfile string, site *site) (document, error) {
 		// Find nearest document layout template file.
 		layout := ""
 		for _, l := range site.htmlTemplates.layouts {
-			if len(l) > len(layout) && PathIsInDir(doc.templatePath, filepath.Dir(l)) {
+			if len(l) > len(layout) && fsx.PathIsInDir(doc.templatePath, filepath.Dir(l)) {
 				layout = l
 			}
 		}
@@ -349,7 +349,7 @@ func (doc *document) render(text string) template.HTML {
 	case ".md":
 		html = string(blackfriday.Run([]byte(text)))
 	case ".rmu":
-		conf, err := ReadFile(filepath.Join(doc.site.contentDir, "config.rmu"))
+		conf, err := fsx.ReadFile(filepath.Join(doc.site.contentDir, "config.rmu"))
 		if err == nil {
 			text = conf + "\n\n" + text
 		}

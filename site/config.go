@@ -2,13 +2,14 @@ package site
 
 import (
 	"fmt"
-	. "github.com/srackham/hindsite/fsutil"
 	"io/ioutil"
 	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/srackham/hindsite/fsx"
 
 	"github.com/BurntSushi/toml"
 	yaml "gopkg.in/yaml.v3"
@@ -105,10 +106,10 @@ func (conf *config) parseFile(site *site, f string) error {
 		} else {
 			return fmt.Errorf("homepage must be relative to the build directory: %s", site.buildDir)
 		}
-		if !PathIsInDir(home, site.buildDir) {
+		if !fsx.PathIsInDir(home, site.buildDir) {
 			return fmt.Errorf("homepage must reside in build directory: %s", site.buildDir)
 		}
-		if DirExists(home) {
+		if fsx.DirExists(home) {
 			return fmt.Errorf("homepage cannot be a directory: %s", home)
 		}
 		conf.homepage = home

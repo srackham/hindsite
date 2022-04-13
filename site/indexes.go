@@ -2,12 +2,13 @@ package site
 
 import (
 	"fmt"
-	. "github.com/srackham/hindsite/fsutil"
 	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/srackham/hindsite/fsx"
 )
 
 type index struct {
@@ -50,7 +51,7 @@ func newIndexes(site *site) (indexes, error) {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() && FileExists(filepath.Join(f, "docs.html")) {
+		if info.IsDir() && fsx.FileExists(filepath.Join(f, "docs.html")) {
 			idx := newIndex(site)
 			idx.templateDir = f
 			p, err := filepath.Rel(site.templateDir, f)
@@ -58,7 +59,7 @@ func newIndexes(site *site) (indexes, error) {
 				return err
 			}
 			idx.contentDir = filepath.Join(site.contentDir, p)
-			if !DirExists(idx.contentDir) {
+			if !fsx.DirExists(idx.contentDir) {
 				return fmt.Errorf("missing indexed content directory: %s", idx.contentDir)
 			}
 			idx.indexDir = filepath.Join(site.indexDir, p)
@@ -76,7 +77,7 @@ func newIndexes(site *site) (indexes, error) {
 	for i, idx1 := range idxs {
 		idxs[i].isPrimary = true
 		for _, idx2 := range idxs {
-			if PathIsInDir(idx1.templateDir, idx2.templateDir) && idx1.templateDir != idx2.templateDir {
+			if fsx.PathIsInDir(idx1.templateDir, idx2.templateDir) && idx1.templateDir != idx2.templateDir {
 				// idx1 is child of idx2.
 				idxs[i].isPrimary = false
 			}
@@ -89,7 +90,7 @@ func newIndexes(site *site) (indexes, error) {
 // the document its primary index.
 func (idxs indexes) addDocument(doc *document) {
 	for i, idx := range idxs {
-		if PathIsInDir(doc.templatePath, idx.templateDir) {
+		if fsx.PathIsInDir(doc.templatePath, idx.templateDir) {
 			idxs[i].docs = append(idx.docs, doc)
 			if idx.isPrimary {
 				doc.primaryIndex = idxs[i]
@@ -137,13 +138,16 @@ func (idx *index) build(doc *document) error {
 			// Merge applicable configuration variables.
 			fm["urlprefix"] = idx.conf.urlprefix
 			fm["user"] = idx.conf.user
-			html, err := tmpls.render(tmpl, fm)
 			if doc != nil {
 				idx.site.verbose("write index: " + pg.file)
 			} else {
 				idx.site.verbose2("write index: " + pg.file)
 			}
-			if err = WritePath(pg.file, html); err != nil {
+			html, err := tmpls.render(tmpl, fm)
+			if err != nil {
+				return err
+			}
+			if err = fsx.WritePath(pg.file, html); err != nil {
 				return err
 			}
 		}
@@ -188,7 +192,7 @@ func (idx *index) build(doc *document) error {
 				return err
 			}
 			idx.site.verbose2("write index: " + outfile)
-			if err = WritePath(outfile, html); err != nil {
+			if err = fsx.WritePath(outfile, html); err != nil {
 				return err
 			}
 		}

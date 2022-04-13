@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/srackham/hindsite/fsutil"
-	. "github.com/srackham/hindsite/slice"
+	"github.com/srackham/hindsite/fsx"
+	"github.com/srackham/hindsite/slice"
 )
 
 /*
@@ -25,7 +25,7 @@ func nz(s *string) string {
 }
 
 // Transform text into a slug (lowercase alpha-numeric + hyphens).
-func slugify(text string, exclude Slice[string]) string {
+func slugify(text string, exclude slice.Slice[string]) string {
 	slug := text
 	slug = regexp.MustCompile(`\W+`).ReplaceAllString(slug, "-") // Replace non-alphanumeric characters with dashes.
 	slug = regexp.MustCompile(`-+`).ReplaceAllString(slug, "-")  // Replace multiple dashes with single dash.
@@ -64,11 +64,12 @@ func launchBrowser(url string) error {
 
 // extractDateTitle extracts the date and title strings from file name.
 func extractDateTitle(name string) (date string, title string) {
-	title = FileName(name)
+	title = fsx.FileName(name)
 	if regexp.MustCompile(`^\d\d\d\d-\d\d-\d\d-.+`).MatchString(title) {
 		date = title[0:10]
 		title = title[11:]
 	}
+	//lint:ignore SA1019 the file name is ASCII
 	title = strings.Title(strings.Replace(title, "-", " ", -1))
 	return date, title
 }

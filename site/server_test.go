@@ -1,7 +1,6 @@
 package site
 
 import (
-	. "github.com/srackham/hindsite/fsutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -9,13 +8,15 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/srackham/hindsite/fsx"
 )
 
 func TestServer(t *testing.T) {
 	tmpdir := path.Join(os.TempDir(), "hindsite-tests")
 	// Initialize temporary directory with test blog.
 	os.RemoveAll(tmpdir)
-	MkMissingDir(tmpdir)
+	fsx.MkMissingDir(tmpdir)
 	site := NewSite()
 	cmd := "hindsite init " + tmpdir + " -from ./testdata/blog/template"
 	args := strings.Split(cmd, " ")
@@ -23,7 +24,7 @@ func TestServer(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("%s", cmd)
 	}
-	if DirCount(path.Join(tmpdir, "template")) != 9 {
+	if fsx.DirCount(path.Join(tmpdir, "template")) != 9 {
 		t.Fatalf("%s: unexpected number of files in template directory", cmd)
 	}
 	// Start server.
@@ -56,7 +57,7 @@ func TestServer(t *testing.T) {
 		}
 	}
 	updateAndWait := func(f, text, output string) {
-		err := WriteFile(f, text)
+		err := fsx.WriteFile(f, text)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -72,7 +73,7 @@ func TestServer(t *testing.T) {
 	waitFor("Press the Enter key to print help")
 	// Create new post with copy of existing post.
 	existingfile := path.Join(tmpdir, "content", "posts", "2016-10-18-sed-sed.md")
-	text, err := ReadFile(existingfile)
+	text, err := fsx.ReadFile(existingfile)
 	if err != nil {
 		t.Fatal(err)
 	}

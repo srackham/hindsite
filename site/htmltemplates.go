@@ -2,9 +2,10 @@ package site
 
 import (
 	"bytes"
-	. "github.com/srackham/hindsite/fsutil"
 	"html/template"
 	"path/filepath"
+
+	"github.com/srackham/hindsite/fsx"
 )
 
 type templateData map[string]interface{}
@@ -48,7 +49,7 @@ func (tmpls htmlTemplates) name(elem ...string) string {
 // add parses the corresponding file from the templates directory and adds it to
 // templates.
 func (tmpls *htmlTemplates) add(tmplfile string) error {
-	text, err := ReadFile(tmplfile)
+	text, err := fsx.ReadFile(tmplfile)
 	if err != nil {
 		return err
 	}

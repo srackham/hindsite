@@ -1,4 +1,8 @@
-package fsutil
+package fsx
+
+/*
+Extra file system related functions.
+*/
 
 import (
 	"io/ioutil"

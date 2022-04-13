@@ -11,7 +11,7 @@ SHELL := bash
  .SILENT:
 
 GOFLAGS ?=
-PACKAGES = ./fsutil ./site ./slice
+PACKAGES = ./fsx ./site ./slice
 
 .PHONY: install
 install:

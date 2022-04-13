@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	. "github.com/srackham/hindsite/fsutil"
-	. "github.com/srackham/hindsite/slice"
+	"github.com/srackham/hindsite/fsx"
+	"github.com/srackham/hindsite/slice"
 )
 
 // documentLink represents an intra-site document link.
@@ -30,7 +30,7 @@ func (doc *document) parseLink(url string) (link documentLink, offsite bool) {
 	matches := re.FindStringSubmatch(url)
 	if matches != nil { // Matches absolute or root-relative URL.
 		link.target = filepath.Join(doc.site.buildDir, matches[1])
-		if DirExists(link.target) {
+		if fsx.DirExists(link.target) {
 			link.target = filepath.Join(link.target, "index.html")
 		}
 	} else { // Matches relative URLs.
@@ -49,14 +49,14 @@ func (doc *document) parseLink(url string) (link documentLink, offsite bool) {
 // URL attributes to `doc.urls` which are used for subsequent site link validation.
 func (doc *document) parseHTML(html string) {
 	// Scan HTML element id attributes.
-	doc.ids = Slice[string]{}
+	doc.ids = slice.Slice[string]{}
 	pat := regexp.MustCompile(`(?i)id="(.+?)"`)
 	matches := pat.FindAllStringSubmatch(html, -1)
 	for _, match := range matches {
 		doc.ids = append(doc.ids, match[1])
 	}
 	// Scan HTML for href and src URL attributes.
-	doc.urls = Slice[string]{}
+	doc.urls = slice.Slice[string]{}
 	pat = regexp.MustCompile(`(?i)(?:href|src)="(.+?)"`)
 	matches = pat.FindAllStringSubmatch(html, -1)
 	for _, match := range matches {
@@ -90,7 +90,7 @@ func (site *site) lintLinks() (errCount int) {
 					continue
 				}
 				// Check the target URL file exists.
-				if !FileExists(link.target) {
+				if !fsx.FileExists(link.target) {
 					doc.site.logerror("%s: contains link to missing file: \"%s\"", doc.contentPath, strings.TrimPrefix(link.target, site.buildDir+string(filepath.Separator)))
 					errCount++
 					continue

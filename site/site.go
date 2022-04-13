@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	. "github.com/srackham/hindsite/fsutil"
-	. "github.com/srackham/hindsite/slice"
+	"github.com/srackham/hindsite/fsx"
+	"github.com/srackham/hindsite/slice"
 
 	"github.com/fatih/color"
 )
@@ -158,7 +158,7 @@ func (site *site) parseArgs(args []string) error {
 			site.verbosity++
 		case opt == "-vv":
 			site.verbosity += 2
-		case Slice[string]{"-content", "-template", "-build", "-from", "-port"}.Has(opt):
+		case slice.Slice[string]{"-content", "-template", "-build", "-from", "-port"}.Has(opt):
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
 			}
@@ -207,13 +207,13 @@ func (site *site) parseArgs(args []string) error {
 		if site.newFile == "" {
 			return fmt.Errorf("document has not been specified")
 		}
-		if DirExists(site.newFile) {
+		if fsx.DirExists(site.newFile) {
 			return fmt.Errorf("document is a directory: %s", site.newFile)
 		}
-		if d := filepath.Dir(site.newFile); !DirExists(d) {
+		if d := filepath.Dir(site.newFile); !fsx.DirExists(d) {
 			return fmt.Errorf("missing document directory: %s", d)
 		}
-		if FileExists(site.newFile) {
+		if fsx.FileExists(site.newFile) {
 			return fmt.Errorf("document already exists: %s", site.newFile)
 		}
 	}
@@ -230,7 +230,7 @@ func (site *site) parseArgs(args []string) error {
 	if err != nil {
 		return err
 	}
-	if !DirExists(site.siteDir) {
+	if !fsx.DirExists(site.siteDir) {
 		return fmt.Errorf("missing site directory: " + site.siteDir)
 	}
 	site.contentDir, err = getPath(site.contentDir, filepath.Join(site.siteDir, "content"))
@@ -238,7 +238,7 @@ func (site *site) parseArgs(args []string) error {
 		return err
 	}
 	site.verbose2("content directory: " + site.contentDir)
-	if site.command != "init" && !DirExists(site.contentDir) {
+	if site.command != "init" && !fsx.DirExists(site.contentDir) {
 		return fmt.Errorf("missing content directory: " + site.contentDir)
 	}
 	site.templateDir, err = getPath(site.templateDir, filepath.Join(site.siteDir, "template"))
@@ -246,7 +246,7 @@ func (site *site) parseArgs(args []string) error {
 		return err
 	}
 	site.verbose2("template directory: " + site.templateDir)
-	if site.command != "init" && !DirExists(site.templateDir) {
+	if site.command != "init" && !fsx.DirExists(site.templateDir) {
 		return fmt.Errorf("missing template directory: " + site.templateDir)
 	}
 	site.buildDir, err = getPath(site.buildDir, filepath.Join(site.siteDir, "build"))
@@ -262,10 +262,10 @@ func (site *site) parseArgs(args []string) error {
 		if dir1 == dir2 {
 			return fmt.Errorf("%s directory cannot be the same as %s directory", name1, name2)
 		}
-		if PathIsInDir(dir1, dir2) {
+		if fsx.PathIsInDir(dir1, dir2) {
 			return fmt.Errorf("%s directory cannot reside inside %s directory", name1, name2)
 		}
-		if PathIsInDir(dir2, dir1) {
+		if fsx.PathIsInDir(dir2, dir1) {
 			return fmt.Errorf("%s directory cannot reside inside %s directory", name2, name1)
 		}
 		return nil
@@ -287,7 +287,7 @@ func (site *site) parseArgs(args []string) error {
 		if err != nil {
 			return err
 		}
-		if !PathIsInDir(site.newFile, site.contentDir) {
+		if !fsx.PathIsInDir(site.newFile, site.contentDir) {
 			return fmt.Errorf("document must reside in %s directory", site.contentDir)
 		}
 	}
@@ -295,7 +295,7 @@ func (site *site) parseArgs(args []string) error {
 }
 
 func isCommand(name string) bool {
-	return Slice[string]{"build", "help", "init", "new", "serve"}.Has(name)
+	return slice.Slice[string]{"build", "help", "init", "new", "serve"}.Has(name)
 }
 
 // ExecuteArgs runs a hindsite command specified by CLI args and returns a
@@ -369,7 +369,7 @@ Docs:       https://srackham.github.io/hindsite`)
 
 func (site *site) isDocument(f string) bool {
 	ext := filepath.Ext(f)
-	return (ext == ".md" || ext == ".rmu") && PathIsInDir(f, site.contentDir)
+	return (ext == ".md" || ext == ".rmu") && fsx.PathIsInDir(f, site.contentDir)
 }
 
 // match returns true if content file `f` matches one of the `patterns`.
@@ -377,7 +377,7 @@ func (site *site) isDocument(f string) bool {
 // NOTE: Used for matching configuration `exclude`, `include`, `templates`
 // configuration variables which use the `/` path separator.
 func (site *site) match(f string, patterns []string) bool {
-	if !PathIsInDir(f, site.contentDir) {
+	if !fsx.PathIsInDir(f, site.contentDir) {
 		panic("matched path must reside in content directory: " + f)
 	}
 	f, _ = filepath.Rel(site.contentDir, f)
@@ -389,7 +389,7 @@ func (site *site) match(f string, patterns []string) bool {
 			continue
 		}
 		if strings.HasSuffix(pat, "/") {
-			if PathIsInDir(f, strings.TrimSuffix(pat, "/")) {
+			if fsx.PathIsInDir(f, strings.TrimSuffix(pat, "/")) {
 				matched = true
 			}
 		} else {
@@ -425,16 +425,16 @@ func (site *site) exclude(f string) bool {
 // The `site.confs` have been sorted by configuration `origin` in ascending
 // order to ensure the directory precedence.
 func (site *site) configFor(p string) config {
-	if !PathIsInDir(p, site.contentDir) {
+	if !fsx.PathIsInDir(p, site.contentDir) {
 		panic("path outside content directory: " + p)
 	}
-	dir := PathTranslate(p, site.contentDir, site.templateDir)
-	if FileExists(p) {
+	dir := fsx.PathTranslate(p, site.contentDir, site.templateDir)
+	if fsx.FileExists(p) {
 		dir = filepath.Dir(dir)
 	}
 	result := newConfig()
 	for _, conf := range site.confs {
-		if PathIsInDir(dir, conf.origin) {
+		if fsx.PathIsInDir(dir, conf.origin) {
 			result.merge(conf)
 		}
 	}
@@ -465,7 +465,7 @@ func (site *site) parseConfigs() error {
 		found := false
 		for _, v := range []string{"config.toml", "config.yaml"} {
 			cf := filepath.Join(f, v)
-			if FileExists(cf) {
+			if fsx.FileExists(cf) {
 				found = true
 				site.verbose("read config: " + cf)
 				if err := conf.parseFile(site, cf); err != nil {

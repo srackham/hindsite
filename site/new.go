@@ -2,10 +2,11 @@ package site
 
 import (
 	"bytes"
-	. "github.com/srackham/hindsite/fsutil"
 	"path/filepath"
 	"text/template"
 	"time"
+
+	"github.com/srackham/hindsite/fsx"
 )
 
 const (
@@ -35,10 +36,10 @@ func (site *site) new() (err error) {
 	site.verbose("document title: %s\ndocument date: %s", data["title"], data["date"])
 	// Search up the corresponding template directory path for the closest new.md template file.
 	text := defaultNewTemplate
-	for d := PathTranslate(filepath.Dir(site.newFile), site.contentDir, site.templateDir); ; {
-		if f := filepath.Join(d, "new.md"); FileExists(f) {
+	for d := fsx.PathTranslate(filepath.Dir(site.newFile), site.contentDir, site.templateDir); ; {
+		if f := filepath.Join(d, "new.md"); fsx.FileExists(f) {
 			site.verbose("document template: %s", f)
-			if text, err = ReadFile(f); err != nil {
+			if text, err = fsx.ReadFile(f); err != nil {
 				return err
 			}
 			break
@@ -60,7 +61,7 @@ func (site *site) new() (err error) {
 	site.verbose2("document text: %#v", output.String())
 	// Write the new document file.
 	site.verbose("document file: %s", site.newFile)
-	if err := WriteFile(site.newFile, output.String()); err != nil {
+	if err := fsx.WriteFile(site.newFile, output.String()); err != nil {
 		return err
 	}
 	return nil

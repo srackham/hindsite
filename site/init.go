@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	. "github.com/srackham/hindsite/fsutil"
-	. "github.com/srackham/hindsite/slice"
+	"github.com/srackham/hindsite/fsx"
+	"github.com/srackham/hindsite/slice"
 )
 
 // init implements the init command.
@@ -15,10 +15,10 @@ func (site *site) init() error {
 	if site.from == "" {
 		return fmt.Errorf("-from option source has not been specified")
 	}
-	if DirCount(site.templateDir) > 0 {
+	if fsx.DirCount(site.templateDir) > 0 {
 		site.warning("skipping non-empty target template directory: " + site.templateDir)
 	} else {
-		if (Slice[string]{"blog", "doc", "hello"}).Has(site.from) {
+		if (slice.Slice[string]{"blog", "doc", "hello"}).Has(site.from) {
 			// Load template directory from the built-in site.
 			site.verbose("installing builtin template: " + site.from)
 			if err := restoreEmbeddedFS(embeddedFS, "builtin/"+site.from+"/template", site.templateDir); err != nil {
@@ -40,15 +40,15 @@ func (site *site) init() error {
 		} else {
 			// Copy the contents of the source template directory to the template
 			// directory.
-			if !DirExists(site.from) {
-
+			if !fsx.DirExists(site.from) {
+				return fmt.Errorf("missing source template '%s'", site.from)
 			}
-			if PathIsInDir(site.from, site.templateDir) {
+			if fsx.PathIsInDir(site.from, site.templateDir) {
 				return fmt.Errorf("source template directory '%s' cannot reside inside target template directory '%s'", site.from, site.templateDir)
 			}
-			if !DirExists(site.templateDir) {
+			if !fsx.DirExists(site.templateDir) {
 				site.verbose("make directory: " + site.templateDir)
-				if err := MkMissingDir(site.templateDir); err != nil {
+				if err := fsx.MkMissingDir(site.templateDir); err != nil {
 					return err
 				}
 			}
@@ -57,11 +57,11 @@ func (site *site) init() error {
 			}
 		}
 	}
-	if DirCount(site.contentDir) > 0 {
+	if fsx.DirCount(site.contentDir) > 0 {
 		site.warning("skipping non-empty target content directory: " + site.contentDir)
 	} else {
 		// Create the template directory structure in the content directory.
-		if err := MkMissingDir(site.contentDir); err != nil {
+		if err := fsx.MkMissingDir(site.contentDir); err != nil {
 			return err
 		}
 		err := filepath.Walk(site.templateDir, func(f string, info os.FileInfo, err error) error {
@@ -75,9 +75,9 @@ func (site *site) init() error {
 				return filepath.SkipDir
 			}
 			if info.IsDir() {
-				dst := PathTranslate(f, site.templateDir, site.contentDir)
+				dst := fsx.PathTranslate(f, site.templateDir, site.contentDir)
 				site.verbose("make directory: " + dst)
-				err = MkMissingDir(dst)
+				err = fsx.MkMissingDir(dst)
 			}
 			return err
 		})
@@ -85,7 +85,7 @@ func (site *site) init() error {
 			return err
 		}
 		// Copy the contents of the optional template init directory to the content directory.
-		if DirExists(site.initDir) {
+		if fsx.DirExists(site.initDir) {
 			if err := site.copyDirContents(site.initDir, site.contentDir); err != nil {
 				return err
 			}
@@ -115,7 +115,7 @@ func restoreEmbeddedFS(srcFS embed.FS, srcDir string, dstDir string) error {
 				panic("failed to read embedded file: " + srcFile)
 			}
 			dstFile := dstDir + "/" + entry.Name()
-			if err := WritePath(dstFile, string(contents)); err != nil {
+			if err := fsx.WritePath(dstFile, string(contents)); err != nil {
 				return err
 			}
 		}
@@ -132,16 +132,16 @@ func (site *site) copyDirContents(fromDir, toDir string) error {
 		if f == fromDir {
 			return nil
 		}
-		dst := PathTranslate(f, fromDir, toDir)
+		dst := fsx.PathTranslate(f, fromDir, toDir)
 		if info.IsDir() {
-			if !DirExists(dst) {
+			if !fsx.DirExists(dst) {
 				site.verbose("make directory: " + dst)
-				err = MkMissingDir(dst)
+				err = fsx.MkMissingDir(dst)
 			}
 		} else {
 			site.verbose2("copy: " + f)
 			site.verbose("write: " + dst)
-			err = CopyFile(f, dst)
+			err = fsx.CopyFile(f, dst)
 		}
 		return err
 	})

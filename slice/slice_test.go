@@ -8,7 +8,11 @@ import (
 
 func TestSlice(t *testing.T) {
 	assert := assert.New(t)
-	s := Slice[string]{"foo", "bar"}
+	s := New("foo", "bar", "baz")
+	assert.Equal("foo", s[0])
+	assert.Equal("bar", s[1])
+	assert.Equal(3, len(s))
+	s = Slice[string]{"foo", "bar"}
 	assert.Equal(2, len(s))
 	assert.Equal(1, s.IndexOf("bar"))
 	assert.True(s.Has("foo"))
