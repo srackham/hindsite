@@ -2,6 +2,7 @@ package site
 
 import (
 	"bytes"
+	"fmt"
 	"path/filepath"
 	"text/template"
 	"time"
@@ -21,6 +22,27 @@ Document content goes here.`
 
 // new implements the new command.
 func (site *site) new() (err error) {
+	if site.command == "new" {
+		if site.newFile == "" {
+			return fmt.Errorf("document has not been specified")
+		}
+		if fsx.DirExists(site.newFile) {
+			return fmt.Errorf("document is a directory: %s", site.newFile)
+		}
+		if d := filepath.Dir(site.newFile); !fsx.DirExists(d) {
+			return fmt.Errorf("missing document directory: %s", d)
+		}
+		if fsx.FileExists(site.newFile) {
+			return fmt.Errorf("document already exists: %s", site.newFile)
+		}
+	}
+	site.newFile, err = filepath.Abs(site.newFile)
+	if err != nil {
+		return err
+	}
+	if !fsx.PathIsInDir(site.newFile, site.contentDir) {
+		return fmt.Errorf("document must reside in content directory: %s", site.contentDir)
+	}
 	conf := site.configFor(site.newFile)
 	// Extract date and title into template data map.
 	date := time.Now()

@@ -203,20 +203,6 @@ func (site *site) parseArgs(args []string) error {
 	if site.command == "help" {
 		return nil
 	}
-	if site.command == "new" {
-		if site.newFile == "" {
-			return fmt.Errorf("document has not been specified")
-		}
-		if fsx.DirExists(site.newFile) {
-			return fmt.Errorf("document is a directory: %s", site.newFile)
-		}
-		if d := filepath.Dir(site.newFile); !fsx.DirExists(d) {
-			return fmt.Errorf("missing document directory: %s", d)
-		}
-		if fsx.FileExists(site.newFile) {
-			return fmt.Errorf("document already exists: %s", site.newFile)
-		}
-	}
 	// Clean and convert directories to absolute paths.
 	// Internally all file paths are absolute.
 	getPath := func(path, defaultPath string) (string, error) {
@@ -281,15 +267,6 @@ func (site *site) parseArgs(args []string) error {
 	}
 	if err := checkOverlap("build", site.buildDir, "template", site.templateDir); err != nil {
 		return err
-	}
-	if site.command == "new" {
-		site.newFile, err = filepath.Abs(site.newFile)
-		if err != nil {
-			return err
-		}
-		if !fsx.PathIsInDir(site.newFile, site.contentDir) {
-			return fmt.Errorf("document must reside in %s directory", site.contentDir)
-		}
 	}
 	return nil
 }
