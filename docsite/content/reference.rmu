@@ -33,7 +33,7 @@ commands:
    prefer to build and install from source).
 
 2. Create a new Hindsite site directory and install the [built-in `blog`
-   template]({hindsite-github}/tree/master/cmd/hindsite/builtin/blog/template)
+   template]({hindsite-github}/tree/master/site/builtin/blog/template)
    using the hindsite [init command](#init-command):
 
     mkdir mysite
@@ -110,13 +110,13 @@ ensures consistent, readable URLs without ugly encodings for illegal URL
 characters.
 
 
-## Hindsite commands
+## Commands
 Hindsite implements the following commands:
 
 [build](#build-command)::
 Build the website:
 
-    hindsite build [SITE_DIR] [OPTIONS]
+    hindsite build [OPTION]...
 
 [help](#help-command)::
 Display usage summary:
@@ -126,57 +126,62 @@ Display usage summary:
 [init](#init-command)::
 Initialize a new site from a site template:
 
-    hindsite init  [SITE_DIR] [OPTIONS]
+    hindsite init [OPTION]...
 
 [new](#new-command)::
 Create a new content document:
 
-    hindsite new   [SITE_DIR] DOCUMENT [OPTIONS]
+    hindsite new [OPTION]... DOCUMENT
 
 [serve](#serve-command)::
 Start the development webserver:
 
-    hindsite serve [SITE_DIR] [OPTIONS]
+    hindsite serve [OPTION]...
 
 All commands accept the following options:
 
-`SITE_DIR`:: The hindsite site directory (defaults to the current directory).
+`-site SITE_DIR`:: The hindsite site directory (defaults to the current directory).
 `-content CONTENT_DIR`:: The site content directory (defaults to `SITE_DIR/content`).
 `-build BUILD_DIR`:: The site build directory (defaults to `SITE_DIR/build`).
 `-template TEMPLATE_DIR`:: The site template directory (defaults to `SITE_DIR/template`).
 `-v`:: Increase verbosity. `-vv` is an alias for `-v -v`.
 
-- Content, build and template directories cannot overlap, with one exception:
-  the content directory can be `TEMPLATE_DIR/init`. This is handy for testing
-  site template initialization content.
+- Content, build and template directories are mutually exclusive and cannot
+  overlap, with one exception: the content directory can be `TEMPLATE_DIR/init`.
+  This is handy for testing site template initialization content.
 - Sites are not restricted to a single content, template and build directory.
   The `-content`, `-template` and `-build` options allow separate builds from
   differing combinations of content and template directories.
 
 
-## help command
-The _help_ command prints command usage and options summary plus hindsite
-version information.
+## Help command
+The _help_ command prints Hindsite documentation and version information.
 
 ### Syntax
 
-    hindsite help
+    hindsite help [COMMAND]
 
 ### Options
-`hindsite`, `hindsite -h` and `hindsite --help` are all aliases for `hindsite help`.
+- `hindsite`, `hindsite -h` and `hindsite --help` are aliases for `hindsite help`.
+- `COMMAND` is a Hindsite command name.
+- If `COMMAND` is not specified a brief help summary and version information is
+  printed to the console.
+- If `COMMAND` is specified the command topic on the Hindsite documentation
+  website is opened in the default web browser.
 
 
-## init command
+## Init command
 The _init_ command creates a new site from another site template or from a
 built-in template. The _init_ command copies the source template to the
 site's template directory and initializes the site's content directory.
 
 ### Syntax
 
-    hindsite init [SITE_DIR] [OPTIONS]
+    hindsite init [OPTION]...
 
 ### Options
 
+    -site SITE_DIR
     -content CONTENT_DIR
     -template TEMPLATE_DIR
     -from SOURCE
@@ -205,16 +210,17 @@ site's template directory and initializes the site's content directory.
     hindsite init -from ~/webs/foobar/template
 
 
-## build command
+## Build command
 The _build_ command generates a static website in the _build_ directory using
 files from the _content_ and _template_ directories.
 
 ### Syntax
 
-    hindsite build [SITE_DIR] [OPTIONS]
+    hindsite build [OPTION]...
 
 ### Options
 
+    -site SITE_DIR
     -content CONTENT_DIR
     -template TEMPLATE_DIR
     -build BUILD_DIR
@@ -279,7 +285,7 @@ _time_:: The execution time in seconds.
 The build summary does not include [excluded](#configuration-variables) files.
 
 
-## serve command
+## Serve command
 The _serve_ command rebuilds the site then starts the built-in webserver on
 the site _build directory_. If files in the _content_ or _template
 directories_ changed the _serve_ command automatically
@@ -288,10 +294,11 @@ live reloading.
 
 ### Syntax
 
-    hindsite serve [SITE_DIR] [OPTIONS]
+    hindsite serve [OPTION]...
 
 ### Options
 
+    -site SITE_DIR
     -content CONTENT_DIR
     -template TEMPLATE_DIR
     -build BUILD_DIR
@@ -358,16 +365,17 @@ command does not automatically process changes to the site directory
 structure).
 
 
-## new command
+## New command
 The _new_ command creates a new [document](#documents) file and automatically
 sets the [front matter](#front-matter) `date` and `title`.
 
 ### Syntax
 
-    hindsite new [SITE_DIR] DOCUMENT [OPTIONS]
+    hindsite new [OPTION]... DOCUMENT
 
 ### Options
 
+    -site SITE_DIR
     -content CONTENT_DIR
     -template TEMPLATE_DIR
     -v

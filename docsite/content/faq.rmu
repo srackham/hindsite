@@ -37,7 +37,7 @@ Google](https://support.google.com/webmasters/answer/34397).
 .#disqus-howto
 ## How do I include Disqus comments in my website?
 The recipe described below is taken from the hindsite [built-in `blog`
-site]({hindsite-github}/tree/master/cmd/hindsite/builtin/blog/template).
+site]({hindsite-github}/tree/master/site/builtin/blog/template).
 If you [initialized your site]({reference}#init-command) with the built-in
 `blog` template then you already have the Disqus template and steps 3 and 4
 below are redundant.
@@ -124,7 +124,7 @@ TODO
 By including [highlight.js](https://github.com/isagalaev/highlight.js) CSS and
 scripts in your web pages. The hindsite documentation and the built-in `blog`
 and `docs` site templates include `highlight.js`. As an example, take a look at
-the [`blog` HTML templates]({hindsite-github}/blob/master/cmd/hindsite/builtin/blog/template/partials.html).
+the [`blog` HTML templates]({hindsite-github}/blob/master/site/builtin/blog/template/partials.html).
 
 
 ## How can I partition documents into separate categories

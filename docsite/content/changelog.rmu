@@ -4,6 +4,12 @@ See the [Github commit logs]({hindsite-github}/commits/master) for a full list o
 
 
 ## Version 2.0.0 (2022-??-??)
+- Added optional `COMMAND` parameter to the help command.
+  If `COMMAND` is specified the command topic on the Hindsite documentation
+  website is opened in the default web browser.
+- BREAKING CHANGE: Added `-site SITE_DIR` option (the previous optional leading
+  `SITE_DIR` argument syntax is deprecated). Use of the version 1 syntax will
+  usually generate a `to many command arguments` error.
 - Added `-lint` option to _build_ and _serve_ commands for intra-site link
   validation.
 - BREAKING CHANGE: The `templates` configuration variable has been extended to
