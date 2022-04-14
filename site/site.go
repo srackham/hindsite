@@ -300,6 +300,8 @@ func (site *site) ExecuteArgs(args []string) int {
 
 // help implements the help command.
 func (site *site) help() (err error) {
+	github := "https://github.com/srackham/hindsite"
+	docsite := "https://srackham.github.io/hindsite"
 	summary := `Hindsite is a static website generator.
 
 Usage:
@@ -308,7 +310,7 @@ Usage:
     hindsite build  [OPTION]...
     hindsite serve  [OPTION]...
     hindsite new    [OPTION]... DOCUMENT
-    hindsite help
+    hindsite help   [COMMAND]
 
 Commands:
 
@@ -335,16 +337,24 @@ Options:
 Version:    ` + VERS + " (" + OS + ")" + `
 Git commit: ` + COMMIT + `
 Built:      ` + BUILT + `
-Github:     https://github.com/srackham/hindsite
-Docs:       https://srackham.github.io/hindsite`
+Github:     ` + github + `
+Docs:       ` + docsite + ``
 
-	if site.launch {
-		url := "https://srackham.github.io/hindsite/#zzz"
-		err = launchBrowser(url)
-		if err != nil {
-			err = fmt.Errorf("fail to open '%s' in web browser: %s", url, err.Error())
+	switch {
+	case len(site.cmdargs) > 1:
+		err = fmt.Errorf("to many command arguments")
+	case len(site.cmdargs) == 1:
+		cmd := site.cmdargs[0]
+		if !isCommand(cmd) {
+			err = fmt.Errorf("illegal command: %s", cmd)
+		} else {
+			url := fmt.Sprintf("%s#%s-command", docsite, cmd)
+			err = launchBrowser(url)
+			if err != nil {
+				err = fmt.Errorf("fail to open '%s' in web browser: %s", url, err.Error())
+			}
 		}
-	} else {
+	default:
 		site.logconsole(summary)
 	}
 	return err
