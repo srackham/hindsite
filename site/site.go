@@ -279,7 +279,7 @@ func (site *site) ExecuteArgs(args []string) int {
 		case "build":
 			err = site.build()
 		case "help":
-			site.help()
+			err = site.help()
 		case "init":
 			err = site.init()
 		case "new":
@@ -299,8 +299,8 @@ func (site *site) ExecuteArgs(args []string) int {
 }
 
 // help implements the help command.
-func (site *site) help() {
-	site.logconsole(`Hindsite is a static website generator.
+func (site *site) help() (err error) {
+	summary := `Hindsite is a static website generator.
 
 Usage:
 
@@ -336,7 +336,18 @@ Version:    ` + VERS + " (" + OS + ")" + `
 Git commit: ` + COMMIT + `
 Built:      ` + BUILT + `
 Github:     https://github.com/srackham/hindsite
-Docs:       https://srackham.github.io/hindsite`)
+Docs:       https://srackham.github.io/hindsite`
+
+	if site.launch {
+		url := "https://srackham.github.io/hindsite/#zzz"
+		err = launchBrowser(url)
+		if err != nil {
+			err = fmt.Errorf("fail to open '%s' in web browser: %s", url, err.Error())
+		}
+	} else {
+		site.logconsole(summary)
+	}
+	return err
 }
 
 func (site *site) isDocument(f string) bool {
