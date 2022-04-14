@@ -31,6 +31,18 @@ func TestExecute(t *testing.T) {
 	assert.Equal(0, code)
 	assert.Contains(out, "Hindsite is a static website generator")
 
+	out, code = exec("hindsite help")
+	assert.Equal(0, code)
+	assert.Contains(out, "Hindsite is a static website generator")
+
+	out, code = exec("hindsite help foobar")
+	assert.Equal(1, code)
+	assert.Contains(out, "illegal command: foobar")
+
+	out, code = exec("hindsite help foo bar")
+	assert.Equal(1, code)
+	assert.Contains(out, "to many command arguments")
+
 	out, code = exec("hindsite build -site missing")
 	assert.Equal(1, code)
 	assert.Contains(out, "missing site directory")
