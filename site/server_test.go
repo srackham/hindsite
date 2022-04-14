@@ -18,7 +18,7 @@ func TestServer(t *testing.T) {
 	os.RemoveAll(tmpdir)
 	fsx.MkMissingDir(tmpdir)
 	site := NewSite()
-	cmd := "hindsite init " + tmpdir + " -from ./testdata/blog/template"
+	cmd := "hindsite init -site " + tmpdir + " -from ./testdata/blog/template"
 	args := strings.Split(cmd, " ")
 	code := site.ExecuteArgs(args)
 	if code != 0 {
@@ -31,7 +31,7 @@ func TestServer(t *testing.T) {
 	site = NewSite()
 	site.out = make(chan string, 100)
 	site.in = make(chan string, 1)
-	cmd = "hindsite serve " + tmpdir
+	cmd = "hindsite serve -site " + tmpdir
 	args = strings.Split(cmd, " ")
 	if err := site.parseArgs(args); err != nil {
 		t.Fatalf("serve error: %v", err.Error())

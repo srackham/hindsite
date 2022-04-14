@@ -22,31 +22,38 @@ Document content goes here.`
 
 // new implements the new command.
 func (site *site) new() (err error) {
+	if len(site.cmdargs) == 0 {
+		return fmt.Errorf("missing document file name")
+	}
+	if len(site.cmdargs) > 1 {
+		return fmt.Errorf("to many command arguments")
+	}
+	newFile := site.cmdargs[0]
 	if site.command == "new" {
-		if site.newFile == "" {
-			return fmt.Errorf("document has not been specified")
+		if newFile == "" {
+			return fmt.Errorf("new document has not been specified")
 		}
-		if fsx.DirExists(site.newFile) {
-			return fmt.Errorf("document is a directory: %s", site.newFile)
+		if fsx.DirExists(newFile) {
+			return fmt.Errorf("document is a directory: %s", newFile)
 		}
-		if d := filepath.Dir(site.newFile); !fsx.DirExists(d) {
+		if d := filepath.Dir(newFile); !fsx.DirExists(d) {
 			return fmt.Errorf("missing document directory: %s", d)
 		}
-		if fsx.FileExists(site.newFile) {
-			return fmt.Errorf("document already exists: %s", site.newFile)
+		if fsx.FileExists(newFile) {
+			return fmt.Errorf("document already exists: %s", newFile)
 		}
 	}
-	site.newFile, err = filepath.Abs(site.newFile)
+	newFile, err = filepath.Abs(newFile)
 	if err != nil {
 		return err
 	}
-	if !fsx.PathIsInDir(site.newFile, site.contentDir) {
+	if !fsx.PathIsInDir(newFile, site.contentDir) {
 		return fmt.Errorf("document must reside in content directory: %s", site.contentDir)
 	}
-	conf := site.configFor(site.newFile)
+	conf := site.configFor(newFile)
 	// Extract date and title into template data map.
 	date := time.Now()
-	d, title := extractDateTitle(site.newFile)
+	d, title := extractDateTitle(newFile)
 	if d != "" {
 		if date, err = parseDate(d, conf.timezone); err != nil {
 			return err
@@ -58,7 +65,7 @@ func (site *site) new() (err error) {
 	site.verbose("document title: %s\ndocument date: %s", data["title"], data["date"])
 	// Search up the corresponding template directory path for the closest new.md template file.
 	text := defaultNewTemplate
-	for d := fsx.PathTranslate(filepath.Dir(site.newFile), site.contentDir, site.templateDir); ; {
+	for d := fsx.PathTranslate(filepath.Dir(newFile), site.contentDir, site.templateDir); ; {
 		if f := filepath.Join(d, "new.md"); fsx.FileExists(f) {
 			site.verbose("document template: %s", f)
 			if text, err = fsx.ReadFile(f); err != nil {
@@ -82,8 +89,8 @@ func (site *site) new() (err error) {
 	}
 	site.verbose2("document text: %#v", output.String())
 	// Write the new document file.
-	site.verbose("document file: %s", site.newFile)
-	if err := fsx.WriteFile(site.newFile, output.String()); err != nil {
+	site.verbose("document file: %s", newFile)
+	if err := fsx.WriteFile(newFile, output.String()); err != nil {
 		return err
 	}
 	return nil

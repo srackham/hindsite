@@ -139,11 +139,11 @@ release:
 define rules_template
 .PHONY: build-builtin-$(1)
 build-builtin-$(1):
-	hindsite build $(2) -content $(2)/template/init -lint -v
+	hindsite build -site $(2) -content $(2)/template/init -lint -v
 
 .PHONY: serve-builtin-$(1)
 serve-builtin-$(1):
-	hindsite serve $(2) -content $(2)/template/init -launch -navigate -lint -v
+	hindsite serve -site $(2) -content $(2)/template/init -launch -navigate -lint -v
 
 .PHONY: validate-builtin-$(1)
 validate-builtin-$(1): build-builtin-$(1)
@@ -158,7 +158,7 @@ endef
 
 # Rule generation.
 templates := hello blog docs
-$(foreach t,$(templates),$(eval $(call rules_template,$(t),./cmd/hindsite/builtin/$(t))))
+$(foreach t,$(templates),$(eval $(call rules_template,$(t),./site/builtin/$(t))))
 
 
 #
@@ -168,12 +168,12 @@ HOMEPAGE = https://srackham.github.io/hindsite
 
 .PHONY: build-docs
 build-docs: install
-	hindsite build docsite -build docs -lint
+	hindsite build -site docsite -build docs -lint
 	make build-sitemap
 
 .PHONY: serve-docs
 serve-docs: install
-	hindsite serve docsite -build docs -launch -navigate -lint -v
+	hindsite serve -site docsite -build docs -launch -navigate -lint -v
 
 .PHONY: validate-docs
 validate-docs: build-docs

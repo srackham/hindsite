@@ -31,23 +31,27 @@ func TestExecute(t *testing.T) {
 	assert.Equal(0, code)
 	assert.Contains(out, "Hindsite is a static website generator")
 
-	out, code = exec("hindsite build missing")
+	out, code = exec("hindsite build -site missing")
 	assert.Equal(1, code)
 	assert.Contains(out, "missing site directory")
 
 	os.RemoveAll(tmpdir)
 	fsx.MkMissingDir(tmpdir)
-	out, code = exec("hindsite init " + tmpdir + " -from blog -v")
+	out, code = exec("hindsite init -site " + tmpdir + " -from blog -v")
 	assert.Equal(0, code)
 	assert.Contains(out, "installing builtin template: blog")
 
-	out, code = exec("hindsite build " + tmpdir + " -lint")
+	out, code = exec("hindsite build -site " + tmpdir + " -lint")
 	assert.Equal(0, code)
 	assert.Contains(out, "documents: 12\ndrafts: 0\nstatic: 6")
 
+	out, code = exec("hindsite build " + tmpdir + " -lint") // Old v1 command syntax.
+	assert.Equal(1, code)
+	assert.Contains(out, "missing content directory: content")
+
 	os.RemoveAll(tmpdir)
 	fsx.MkMissingDir(tmpdir)
-	out, code = exec("hindsite init " + tmpdir + " -from ./testdata/blog/template -v")
+	out, code = exec("hindsite init -site " + tmpdir + " -from ./testdata/blog/template -v")
 	assert.Equal(0, code)
 	assert.Contains(out, "make directory: content/newsletters")
 
@@ -60,7 +64,7 @@ func TestExecute(t *testing.T) {
 	assert.Contains(out, "documents: 11\ndrafts: 1\nstatic: 7")
 
 	f := filepath.Join(tmpdir, "content", "new-test-file.md")
-	out, code = exec("hindsite new " + tmpdir + " " + f)
+	out, code = exec("hindsite new -site " + tmpdir + " " + f)
 	assert.Equal(0, code)
 	assert.Contains(out, "")
 	assert.True(fsx.FileExists(f))
@@ -86,6 +90,10 @@ func TestExecute(t *testing.T) {
 	out, code = exec("hindsite new " + f)
 	assert.Equal(1, code)
 	assert.Contains(out, "document already exists: content/posts/2018-12-01-new-test-file-two.md")
+
+	out, code = exec("hindsite new " + tmpdir + " " + f) // Old v1 command syntax.
+	assert.Equal(1, code)
+	assert.Contains(out, "to many command arguments")
 
 	out, code = exec("hindsite build -drafts")
 	assert.Equal(0, code)

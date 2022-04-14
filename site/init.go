@@ -12,6 +12,9 @@ import (
 
 // init implements the init command.
 func (site *site) init() error {
+	if len(site.cmdargs) > 0 {
+		return fmt.Errorf("to many command arguments")
+	}
 	if site.from == "" {
 		return fmt.Errorf("-from option source has not been specified")
 	}

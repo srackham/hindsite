@@ -12,6 +12,9 @@ import (
 
 // build implements the build command.
 func (site *site) build() error {
+	if len(site.cmdargs) > 0 {
+		return fmt.Errorf("to many command arguments")
+	}
 	startTime := time.Now()
 	// Parse configuration files.
 	if err := site.parseConfigs(); err != nil {

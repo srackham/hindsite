@@ -209,6 +209,9 @@ func (svr *server) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotify.
 // serve implements the serve comand. Does not return unless and error occurs or
 // the server quit channel is closed.
 func (svr *server) serve() error {
+	if len(svr.cmdargs) > 0 {
+		return fmt.Errorf("to many command arguments")
+	}
 	// Full rebuild to initialize document and index structures.
 	if err := svr.build(); err != nil {
 		svr.logerror(err.Error())

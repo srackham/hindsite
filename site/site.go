@@ -39,7 +39,6 @@ type site struct {
 	buildDir      string
 	indexDir      string
 	initDir       string
-	newFile       string
 	from          string
 	drafts        bool
 	lint          bool
@@ -49,6 +48,7 @@ type site struct {
 	livereload    bool
 	navigate      bool
 	verbosity     int
+	cmdargs       []string
 	rootConf      config
 	confs         configs
 	docs          documentsLookup
@@ -136,16 +136,6 @@ func (site *site) parseArgs(args []string) error {
 				return fmt.Errorf("illegal command: %s", opt)
 			}
 			site.command = opt
-		case i == 2 && site.command == "new":
-			if strings.HasPrefix(opt, "-") {
-				return fmt.Errorf("illegal document file name: %s", opt)
-			}
-			site.newFile = opt
-		case i == 3 && site.command == "new" && !strings.HasPrefix(opt, "-"):
-			site.siteDir = args[2]
-			site.newFile = opt
-		case i == 2 && !strings.HasPrefix(opt, "-"):
-			site.siteDir = opt
 		case opt == "-drafts":
 			site.drafts = true
 		case opt == "-lint":
@@ -158,12 +148,15 @@ func (site *site) parseArgs(args []string) error {
 			site.verbosity++
 		case opt == "-vv":
 			site.verbosity += 2
-		case slice.New("-content", "-template", "-build", "-from", "-port").Has(opt):
+		case slice.New("-site", "-content", "-template", "-build", "-from", "-port").Has(opt):
+			// Process option argument.
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
 			}
 			arg := args[i+1]
 			switch opt {
+			case "-site":
+				site.siteDir = arg
 			case "-content":
 				site.contentDir = arg
 			case "-template":
@@ -193,18 +186,19 @@ func (site *site) parseArgs(args []string) error {
 					}
 				}
 			default:
-				panic("illegal argument: " + opt)
+				panic("unexpected option: " + opt)
 			}
 			skip = true
-		default:
+		case strings.HasPrefix(opt, "-"):
 			return fmt.Errorf("illegal option: %s", opt)
+		default:
+			site.cmdargs = append(site.cmdargs, opt)
 		}
 	}
 	if site.command == "help" {
 		return nil
 	}
-	// Clean and convert directories to absolute paths.
-	// Internally all file paths are absolute.
+	// Validate site, content, template and build directories.
 	getPath := func(path, defaultPath string) (string, error) {
 		if path == "" {
 			path = defaultPath
@@ -310,10 +304,10 @@ func (site *site) help() {
 
 Usage:
 
-    hindsite init  [SITE_DIR] [OPTIONS]
-    hindsite build [SITE_DIR] [OPTIONS]
-    hindsite serve [SITE_DIR] [OPTIONS]
-    hindsite new   [SITE_DIR] DOCUMENT [OPTIONS]
+    hindsite init   [OPTION]...
+    hindsite build  [OPTION]...
+    hindsite serve  [OPTION]...
+    hindsite new    [OPTION]... DOCUMENT
     hindsite help
 
 Commands:
@@ -326,6 +320,7 @@ Commands:
 
 Options:
 
+    -site     SITE_DIR
     -content  CONTENT_DIR
     -template TEMPLATE_DIR
     -build    BUILD_DIR
