@@ -12,9 +12,9 @@ and updated to work with Go 1.18.
 type Set[T comparable] map[T]bool
 
 // Constructor to create new set
-// Example :-  NewSet[int]() to create a int set
-// NewSet(string)() to create a string set
-func NewSet[T comparable](values ...T) Set[T] {
+// Example :-  New[int]() to create a int set
+// New(string)() to create a string set
+func New[T comparable](values ...T) Set[T] {
 	s := make(Set[T])
 	s.Add(values...)
 	return s
