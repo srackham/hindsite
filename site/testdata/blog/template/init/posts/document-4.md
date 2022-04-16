@@ -1,5 +1,4 @@
 ---
-draft: true
 title: Parturient Sed
 date: 2016-09-21T09:45:14-00:00
 description: Mattis mattis a natoque pulvinar placerat.

@@ -72,13 +72,13 @@ func TestServer(t *testing.T) {
 	}
 	waitFor("Press the Enter key to print help")
 	// Create new post with copy of existing post.
-	existingfile := path.Join(tmpdir, "content", "posts", "2016-10-18-sed-sed.md")
+	existingfile := path.Join(tmpdir, "content", "posts", "document-3.md")
 	text, err := fsx.ReadFile(existingfile)
 	if err != nil {
 		t.Fatal(err)
 	}
 	newfile := path.Join(tmpdir, "content", "posts", "newfile.md")
-	updateAndWait(newfile, text, "content/posts/newfile.md: duplicate document build path in: content/posts/2016-10-18-sed-sed.md")
+	updateAndWait(newfile, text, "content/posts/newfile.md: duplicate document build path in: content/posts/document-3.md")
 	// Fix post error.
 	text = strings.Replace(text, "slug: sed-sed", "slug: newfile", 1)
 	updateAndWait(newfile, text, "updated: content/posts/newfile.md")
@@ -89,7 +89,7 @@ func TestServer(t *testing.T) {
 	text = strings.Replace(text, "tags: [integer,est,sed,tincidunt]", "tags: [integer,est,sed,tincidunt,newfile]", 1)
 	updateAndWait(newfile, text, "updated: content/posts/newfile.md")
 	// Remove post.
-	removeAndWait(existingfile, "removed: content/posts/2016-10-18-sed-sed.md")
+	removeAndWait(existingfile, "removed: content/posts/document-3.md")
 	// Rebuild.
 	svr.in <- "R\n"
 	waitFor("rebuilding...")

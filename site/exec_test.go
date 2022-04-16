@@ -2,6 +2,7 @@ package site
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -52,9 +53,13 @@ func TestExecute(t *testing.T) {
 	out, code = exec("hindsite init -site " + tmpdir + " -from blog -v")
 	assert.Equal(0, code)
 	assert.Contains(out, "installing builtin template: blog")
+	assert.Equal(6, fsx.DirCount(path.Join(tmpdir, "template")), "unexpected number of files in template directory")
+	assert.Equal(7, fsx.DirCount(path.Join(tmpdir, "content", "posts")), "unexpected number of files in content/posts directory")
+	assert.Equal(0, fsx.DirCount(path.Join(tmpdir, "build")), "unexpected number of files in build directory")
 
 	out, code = exec("hindsite build -site " + tmpdir + " -lint")
 	assert.Equal(0, code)
+	assert.Equal(7, fsx.DirCount(path.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
 	assert.Contains(out, "documents: 12\ndrafts: 0\nstatic: 6")
 
 	out, code = exec("hindsite build " + tmpdir + " -lint") // Old v1 command syntax.
@@ -71,8 +76,21 @@ func TestExecute(t *testing.T) {
 	defer os.Chdir(wd)
 	os.Chdir(tmpdir)
 
+	out, code = exec("hindsite build -drafts")
+	assert.Equal(0, code)
+	assert.Equal(7, fsx.DirCount(path.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
+	assert.FileExists(path.Join("build", "posts", "2015-05-20", "tincidunt-cursus-pulvinar", "index.html"))
+	assert.Contains(out, "documents: 11\ndrafts: 0\nstatic: 7")
+
+	// The draft document contains invalid links.
+	out, code = exec("hindsite build -drafts -lint")
+	assert.Equal(1, code)
+	assert.Equal(7, fsx.DirCount(path.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
+	assert.Contains(out, "content/posts/draft-document.md: contains malformed URL: \":invalid-url\"\ncontent/posts/draft-document.md: contains link to missing anchor: \"#invalid-id\"\ncontent/posts/draft-document.md: contains link to missing file: \"posts/2015-10-13/lorem-penatibus/missing-file.html\"\ncontent/posts/draft-document.md: contains link to missing anchor: \"index.html#invalid-id\"\ndocuments: 11\ndrafts: 0\nstatic: 7\ndocument errors: 4\n")
+
 	out, code = exec("hindsite build")
 	assert.Equal(0, code)
+	assert.Equal(6, fsx.DirCount(path.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
 	assert.Contains(out, "documents: 11\ndrafts: 1\nstatic: 7")
 
 	f := filepath.Join(tmpdir, "content", "new-test-file.md")
@@ -103,12 +121,13 @@ func TestExecute(t *testing.T) {
 	assert.Equal(1, code)
 	assert.Contains(out, "document already exists: content/posts/2018-12-01-new-test-file-two.md")
 
+	out, code = exec("hindsite build -drafts")
+	assert.Equal(0, code)
+	assert.FileExists(path.Join("build", "new-test-file.html"))
+	assert.FileExists(path.Join("build", "posts", "2018-12-01", "2018-12-01-new-test-file-two", "index.html"))
+	assert.Contains(out, "documents: 13\ndrafts: 0\nstatic: 7")
+
 	out, code = exec("hindsite new " + tmpdir + " " + f) // Old v1 command syntax.
 	assert.Equal(1, code)
 	assert.Contains(out, "to many command arguments")
-
-	out, code = exec("hindsite build -drafts")
-	assert.Equal(0, code)
-	assert.Contains(out, "documents: 13\ndrafts: 0\nstatic: 7")
-
 }
