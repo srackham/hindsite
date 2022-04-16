@@ -168,6 +168,8 @@ func (site *site) build() error {
 	return nil
 }
 
+// copyHomePage copies the `homepage` config variable file to `/index.html` and
+// adds it to the list of built documents.
 func (site *site) copyHomePage() error {
 	if site.rootConf.homepage != "" {
 		src := site.rootConf.homepage
@@ -180,6 +182,7 @@ func (site *site) copyHomePage() error {
 		if err := fsx.CopyFile(src, dst); err != nil {
 			return err
 		}
+		site.docs.byBuildPath[dst] = site.docs.byBuildPath[src]
 	}
 	return nil
 }
