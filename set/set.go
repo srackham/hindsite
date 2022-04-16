@@ -5,11 +5,11 @@ Generic Set type.
 
 Taken from
 https://dbuddy.medium.com/implementing-set-data-structure-in-go-using-generics-4a967f823bfb
-and updated to work with Go 1.18.
+and updated to work with Go 1.18 and added Count method.
 
 */
 
-type Set[T comparable] map[T]bool
+type Set[T comparable] map[T]int
 
 // Constructor to create new set
 // Example :-  New[int]() to create a int set
@@ -23,7 +23,12 @@ func New[T comparable](values ...T) Set[T] {
 // Add values to set
 func (s Set[T]) Add(values ...T) {
 	for _, value := range values {
-		s[value] = true
+		//lint:ignore S1036 we are only testing for value
+		if _, ok := s[value]; ok {
+			s[value]++
+		} else {
+			s[value] = 1
+		}
 	}
 }
 
@@ -43,6 +48,16 @@ func (s Set[T]) Len() int {
 func (s Set[T]) Has(value T) bool {
 	_, ok := s[value]
 	return ok
+}
+
+// Count the number of times the value has been added to the set.
+func (s Set[T]) Count(value T) int {
+	v, ok := s[value]
+	if ok {
+		return v
+	} else {
+		return 0
+	}
 }
 
 // Iterate over set using a callback
