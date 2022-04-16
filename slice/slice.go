@@ -24,3 +24,15 @@ func (slice Slice[T]) IndexOf(t T) int {
 func (slice Slice[T]) Has(v T) bool {
 	return slice.IndexOf(v) >= 0
 }
+
+func (slice Slice[T]) Equal(s Slice[T]) bool {
+	if len(slice) != len(s) {
+		return false
+	}
+	for i := range slice {
+		if slice[i] != s[i] {
+			return false
+		}
+	}
+	return true
+}
