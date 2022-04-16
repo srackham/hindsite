@@ -17,7 +17,7 @@ import (
 
 type config struct {
 	origin string // Configuration file directory.
-	// Configuration parameters.
+	// Configuration variables.
 	author    *string           // Default document author (nil if undefined).
 	templates []string          // List of included content templates.
 	homepage  string            // Use this built file for /index.html.
@@ -187,7 +187,7 @@ func (conf *config) String() (result string) {
 	return string(d)
 }
 
-// merge merges "non-zero" configuration parameters into configuration.
+// merge merges "non-zero" configuration variables into configuration.
 func (conf *config) merge(from config) {
 	if from.origin != "" {
 		conf.origin = from.origin

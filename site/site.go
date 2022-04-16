@@ -318,7 +318,7 @@ Commands:
     build   build the website
     serve   start development webserver
     new     create a new content document
-    help    display usage summary
+    help    display documentation
 
 Options:
 
@@ -351,7 +351,7 @@ Docs:       ` + docsite + ``
 			url := fmt.Sprintf("%s#%s-command", docsite, cmd)
 			err = launchBrowser(url)
 			if err != nil {
-				err = fmt.Errorf("fail to open '%s' in web browser: %s", url, err.Error())
+				err = fmt.Errorf("failed to open '%s' in web browser: %s", url, err.Error())
 			}
 		}
 	default:
