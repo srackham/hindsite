@@ -9,13 +9,20 @@ draft: true
 
 [MALFORMED URL](:invalid-url)
 
-[MISSING URL FRAGMENT ID](#invalid-id)
+[MISSING FRAGMENT ID](#invalid-id)
+
+[valid fragment ID](#id1)
 
 [MISSING TARGET FILE](missing-file.html)
 
-[MISSING TARGET FRAGMENT](http://example.com/index.html#invalid-id)
+[valid target file](http://example.com/index.html)
+
+[MISSING TARGET FRAGMENT ID](http://example.com/index.html#invalid-id)
+
+[valid target fragment ID](http://example.com/index.html#id1)
 
 
+## <a id="id1"> Header
 Porttitor sed hac porttitor tincidunt integer a natoque a in dis.
 
 ![image 1](/images/image-01.jpg)
