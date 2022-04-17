@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/srackham/hindsite/fsx"
+	"github.com/srackham/hindsite/set"
 	"github.com/srackham/hindsite/slice"
 )
 
@@ -69,11 +70,24 @@ func (doc *document) parseHTML(html string) {
 // files and valid HTML id attributes.
 func (site *site) lintLinks() (errCount int) {
 	for _, doc := range site.docs.byContentPath {
+		// Check for llicit or duplicate ids.
+		ids := set.New(doc.ids...)
+		for id, _ := range ids {
+			re := regexp.MustCompile(`^[A-Za-z][\w:.-]*$`) // https://www.w3.org/TR/html4/types.html
+			if !re.MatchString(id) {
+				doc.site.logerror("%s: contains illicit element id: \"%s\"", doc.contentPath, id)
+				errCount++
+			}
+			if ids.Count(id) > 1 {
+				doc.site.logerror("%s: contains duplicate element id: \"%s\"", doc.contentPath, id)
+				errCount++
+			}
+		}
 		// Iterate the document's href/src attribute URLs.
 		for _, url := range doc.urls {
 			_, err := urlpkg.Parse(url)
 			if err != nil {
-				doc.site.logerror("%s: contains malformed URL: \"%s\"", doc.contentPath, url)
+				doc.site.logerror("%s: contains illicit URL: \"%s\"", doc.contentPath, url)
 				errCount++
 				continue
 			}
