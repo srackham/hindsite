@@ -20,4 +20,6 @@ func TestSlice(t *testing.T) {
 	s2 := Slice[int]{1, 2, 3, 4}
 	assert.Equal(4, len(s2))
 	assert.True(s2.Equal(New(1, 2, 3, 4)))
+	assert.False(s2.Equal(New(1, 2, 3)))
+	assert.False(s2.Equal(New(1, 2, 3, 5)))
 }
