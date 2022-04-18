@@ -421,20 +421,6 @@ func (docs documentsList) sortByDate() {
 	})
 }
 
-/*
-// Return slice of first n documents.
-func (docs documentsList) first(n int) documentsList {
-	result := documentsList{}
-	for i, doc := range docs {
-		if n >= 0 && i >= n {
-			break
-		}
-		result = append(result, doc)
-	}
-	return result
-}
-*/
-
 // delete deletes document from docs and returns resulting slice. Panics if
 // document not in slice.
 func (docs documentsList) delete(doc *document) documentsList {
