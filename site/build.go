@@ -72,7 +72,6 @@ func (site *site) build() error {
 		return err
 	}
 	// Parse content directory documents and copy/render static files to the build directory.
-	draftsCount := 0
 	docsCount := 0
 	staticCount := 0
 	errCount := 0
@@ -102,7 +101,6 @@ func (site *site) build() error {
 					return nil
 				}
 				if doc.isDraft() {
-					draftsCount++
 					site.verbose("skip draft: " + f)
 					return nil
 				}
@@ -157,12 +155,11 @@ func (site *site) build() error {
 		color.Set(color.FgGreen, color.Bold)
 	}
 	site.logconsole("documents: %d", docsCount)
-	site.logconsole("drafts: %d", draftsCount)
 	site.logconsole("static: %d", staticCount)
 	color.Unset()
-	// Report accumulated document errors.
+	// Report accumulated errors.
 	if errCount > 0 {
-		return fmt.Errorf("document errors: %d", errCount)
+		return fmt.Errorf("errors: %d", errCount)
 	}
 	site.logconsole("time: %.2fs", time.Since(startTime).Seconds())
 	return nil

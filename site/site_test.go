@@ -116,7 +116,7 @@ func TestExecuteArgs(t *testing.T) {
 	out, code = exec("hindsite build -site " + tmpdir + " -lint")
 	assert.Equal(0, code)
 	assert.Equal(7, fsx.DirCount(filepath.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
-	assert.Contains(out, "documents: 12\ndrafts: 0\nstatic: 6")
+	assert.Contains(out, "documents: 12\nstatic: 6")
 
 	out, code = exec("hindsite build " + tmpdir + " -lint") // Old v1 command syntax.
 	assert.Equal(1, code)
@@ -136,7 +136,7 @@ func TestExecuteArgs(t *testing.T) {
 	assert.Equal(0, code)
 	assert.Equal(7, fsx.DirCount(filepath.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
 	assert.FileExists(filepath.Join("build", "posts", "2015-05-20", "tincidunt-cursus-pulvinar", "index.html"))
-	assert.Contains(out, "documents: 11\ndrafts: 0\nstatic: 7")
+	assert.Contains(out, "documents: 11\nstatic: 7")
 
 	/*
 		Test build command -lint option.
@@ -151,7 +151,7 @@ func TestExecuteArgs(t *testing.T) {
 	assert.Contains(out, `content/posts/links-test.md: contains link to missing anchor: "#invalid-id"`)
 	assert.Contains(out, `content/posts/links-test.md: contains link to missing file: "posts/2015-10-13/lorem-penatibus/missing-file.html"`)
 	assert.Contains(out, `content/posts/links-test.md: contains link to missing anchor: "index.html#invalid-id"`)
-	assert.Contains(out, "documents: 11\ndrafts: 0\nstatic: 7\ndocument errors: 6")
+	assert.Contains(out, "documents: 11\nstatic: 7\nerrors: 6")
 
 	/*
 		Test the new command
@@ -159,7 +159,7 @@ func TestExecuteArgs(t *testing.T) {
 	out, code = exec("hindsite build")
 	assert.Equal(0, code)
 	assert.Equal(6, fsx.DirCount(filepath.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
-	assert.Contains(out, "documents: 11\ndrafts: 1\nstatic: 7")
+	assert.Contains(out, "documents: 11\nstatic: 7")
 
 	f := filepath.Join(tmpdir, "content", "new-test-file.md")
 	out, code = exec("hindsite new -site " + tmpdir + " " + f)
@@ -173,7 +173,7 @@ func TestExecuteArgs(t *testing.T) {
 
 	out, code = exec("hindsite build")
 	assert.Equal(0, code)
-	assert.Contains(out, "documents: 12\ndrafts: 2\nstatic: 7")
+	assert.Contains(out, "documents: 12\nstatic: 7")
 
 	f = filepath.Join("content", "posts", "2018-12-01-new-test-file-two.md")
 	out, code = exec("hindsite new " + f)
@@ -193,7 +193,7 @@ func TestExecuteArgs(t *testing.T) {
 	assert.Equal(0, code)
 	assert.FileExists(filepath.Join("build", "new-test-file.html"))
 	assert.FileExists(filepath.Join("build", "posts", "2018-12-01", "2018-12-01-new-test-file-two", "index.html"))
-	assert.Contains(out, "documents: 13\ndrafts: 0\nstatic: 7")
+	assert.Contains(out, "documents: 13\nstatic: 7")
 
 	out, code = exec("hindsite new " + tmpdir + " " + f) // Old v1 command syntax.
 	assert.Equal(1, code)
