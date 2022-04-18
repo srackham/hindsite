@@ -156,12 +156,11 @@ func (site *site) build() error {
 	}
 	site.logconsole("documents: %d", docsCount)
 	site.logconsole("static: %d", staticCount)
-	color.Unset()
-	// Report accumulated errors.
-	if errCount > 0 {
-		return fmt.Errorf("errors: %d", errCount)
-	}
 	site.logconsole("time: %.2fs", time.Since(startTime).Seconds())
+	color.Unset()
+	if errCount > 0 {
+		return fmt.Errorf("document errors: %d", errCount)
+	}
 	return nil
 }
 

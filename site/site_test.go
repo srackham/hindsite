@@ -151,7 +151,8 @@ func TestExecuteArgs(t *testing.T) {
 	assert.Contains(out, `content/posts/links-test.md: contains link to missing anchor: "#invalid-id"`)
 	assert.Contains(out, `content/posts/links-test.md: contains link to missing file: "posts/2015-10-13/lorem-penatibus/missing-file.html"`)
 	assert.Contains(out, `content/posts/links-test.md: contains link to missing anchor: "index.html#invalid-id"`)
-	assert.Contains(out, "documents: 11\nstatic: 7\nerrors: 6")
+	assert.Contains(out, "documents: 11\nstatic: 7\n")
+	assert.Contains(out, "errors: 6")
 
 	/*
 		Test the new command
