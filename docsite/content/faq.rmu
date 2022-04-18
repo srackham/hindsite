@@ -14,7 +14,7 @@ so can result in rebuild false positives and premature watcher reloads.
 For example, the Vim editor creates tilda suffixed backup files and temporary
 [`4913` files](https://github.com/neovim/neovim/issues/3460) so you need to add
 them to the [`exclude`]({reference}#configuration-variables) configuration
-parameter in the templates directory root [configuration
+variable in the templates directory root [configuration
 file]({reference}#configuration-files).
 
 TOML example:
@@ -94,9 +94,9 @@ That's it, all published documents with a non-blank [document
 `id`]({reference}#document-id) will now include Disqus comments.
 
 - You can automatically assign document `id`s to all documents by setting the
-  [`id` configuration parameter]({reference}#id-configuration-variable) to
+  [`id` configuration variable]({reference}#id-configuration-variable) to
   `urlpath`. To confine auto `id` assignment to a specific folder put the `id`
-  parameter in that folder's configuration file.
+  variable in that folder's configuration file.
 - To disable comments on specific pages explicitly set the document `id` front
   matter value to a blank string.
 
@@ -115,16 +115,14 @@ example:
 
 .note
 The `.shortdate`, `.mediumdate` and `.longdate` [document template
-variables]({reference}#document-template-variable) are simpler and preferable
+variables]({reference}#document-variables) are simpler and preferable
 to using `.date` directly.
 
 
 ## How do you configure source code highlighting?
-TODO
 By including [highlight.js](https://github.com/isagalaev/highlight.js) CSS and
-scripts in your web pages. The hindsite documentation and the built-in `blog`
-and `docs` site templates include `highlight.js`. As an example, take a look at
-the [`blog` HTML templates]({hindsite-github}/blob/master/site/builtin/blog/template/partials.html).
+scripts in your web pages. For example, see the hindsite built-in
+[`docs`]({reference}#docs-built-in-template).
 
 
 ## How can I partition documents into separate categories
@@ -135,14 +133,14 @@ are folder based so you do not have to assign them explicitly.
 
 ## I want a single page document index
 Set the [`paginate` configuration
-parameter]({reference}#configuration-variables) to `-1` and all indexed
+variable]({reference}#configuration-variables) to `-1` and all indexed
 documents will appear on the first page.
 
 
 ## I want both paginated and single page document indexes
 This technique creates a second nested index:
 
-1. Create a child index with the `paginate` configuration parameter set to `-1`.
+1. Create a child index with the `paginate` configuration variable set to `-1`.
    For example:
 ```
 template/
@@ -160,7 +158,7 @@ content/
         all/    # Move documents here from posts.
 ```
 
-Each index has it's own page `docs.html` template. This technique can be
+Each index has it's own `docs.html` HTML template. This technique can be
 extended to create multiple additional indexes over a the same indexed document
 set.
 
@@ -170,14 +168,28 @@ A relative link is a URL equivalent to a relative directory path e.g.
 `./images/beach.jpg`. A root-relative link is relative to the website root and
 begins with a slash e.g. `/images/beach.jpg`.
 
-- Relative links are not affected by the `urlprefix` whereas root-relative links
+- Relative links are not subject to the `urlprefix` whereas root-relative links
   are.
-- Relative links are broken by changes to the content document location and the
-  `permalink` configuration parameter, root-relative links are not.
+- Relative links are broken by when the location of target documents change,
+  root-relative links are not.
+- Links can also be broken if the `urlprefix` configuration variable changes.
+  For this reason it's best not to hardcode the `urlprefix` into your documents
+  (render it with the `{{.urlprefix}}` template field).
+- Changing the `permalink` variable can also break intra-site links. It probably
+  won't change much but it's something to be aware of.
 
-The `urlprefix` and `permalink` parameters do not tend to change much so this
-is probably just something to be aware of. Although you could enable document template
-expansion and prefix root-relative URLs with `{{.urlprefix}}`.
+
+## Aren't single-hyphen command options non-standard?
+Hindsite follows the Go command single-hyphen convention:
+
+- "I wanted a single, straightforward syntax for flags, nothing
+  more, nothing less."
+  -- Rob Pike (https://groups.google.com/g/golang-nuts/c/3myLL-6mA94)
+
+- "Traditionally, UNIX command-line options consist of a dash, followed by one
+  or more lowercase letters. The GNU utilities added a double-dash, followed by
+  a complete word or compound word."
+  --https://tldp.org/LDP/abs/html/standard-options.html
 
 
 ## How fast is hindsite?

@@ -10,8 +10,8 @@ See the [Github commit logs]({hindsite-github}/commits/master) for a full list o
 - BREAKING CHANGE: Added `-site SITE_DIR` option (the previous optional leading
   `SITE_DIR` argument syntax is deprecated). Use of the version 1 syntax will
   usually generate a `to many command arguments` error.
-- Added `-lint` option to _build_ and _serve_ commands for intra-site link
-  validation.
+- Added `-lint` option to _build_ and _serve_ commands to perform validity
+  checks on the generated HTML document files.
 - BREAKING CHANGE: The `templates` configuration variable has been extended to
   include file pattern (previously it only accepted file name extensions). For
   example the Hindsite version 1 templates configuration value
@@ -28,6 +28,7 @@ See the [Github commit logs]({hindsite-github}/commits/master) for a full list o
 - Add help to hindsite `serve` command: prints help if any key other than the _R_,
   _D_, _N_ keys are entered while the serve command is running.
 - Add Rimu CSS admonition classes to Hindsite documentation website.
+- Refactor project directories layout.
 
 
 ## Version 1.4.1 (2021-08-22)

@@ -121,7 +121,7 @@ Build the website:
 [help](#help-command)::
 Display usage summary:
 
-    hindsite help
+    hindsite help [COMMAND]
 
 [init](#init-command)::
 Initialize a new site from a site template:
@@ -138,6 +138,7 @@ Start the development webserver:
 
     hindsite serve [OPTION]...
 
+### Common command options
 All commands accept the following options:
 
 `-site SITE_DIR`:: The hindsite site directory (defaults to the current directory).
@@ -146,12 +147,14 @@ All commands accept the following options:
 `-template TEMPLATE_DIR`:: The site template directory (defaults to `SITE_DIR/template`).
 `-v`:: Increase verbosity. `-vv` is an alias for `-v -v`.
 
+Note:
+
 - Content, build and template directories are mutually exclusive and cannot
   overlap, with one exception: the content directory can be `TEMPLATE_DIR/init`.
   This is handy for testing site template initialization content.
 - Sites are not restricted to a single content, template and build directory.
   The `-content`, `-template` and `-build` options allow separate builds from
-  differing combinations of content and template directories.
+  differing combinations of build, content and template directories.
 
 
 ## Help command
@@ -196,7 +199,8 @@ site's template directory and initializes the site's content directory.
 1. The `SOURCE` template is copied to the site `TEMPLATE_DIR`.
 2. The template directory structure is recreated in the content directory.
 3. If the `TEMPLATE_DIR/init` directory exists its contents is copied to the
-   content directory.
+   content directory. This feature allows example documents to be shipped with
+   and installed from a site template.
 
 ### Examples
 - Install the built-in `blog` template to `./template` and initialize the
@@ -231,7 +235,7 @@ files from the _content_ and _template_ directories.
   [excluded](#configuration-variables) are rebuilt.
 - If the `-drafts` option is specified [draft documents](#documents) are included
   in the built website.
-- The `-lint` option checks link [validity](#validity-checks) in generated HTML document files.
+- The `-lint` option performs [validity checks](#validity-checks) on the generated HTML document files.
 - Content, build and template directories cannot overlap, with one exception:
   the content directory can be `TEMPLATE_DIR/init` (this is handy for testing
   template initialization content).
@@ -256,13 +260,17 @@ files from the _content_ and _template_ directories.
   directory and named `index.html`.
 
 ### Validity checks
-Following a site rebuild the `-lint` option checks that all intra-site links in
-generated HTML document files are valid. HTML `href` and
-`src` attribute URL values are checked to ensure:
+Following a site rebuild the `-lint` option carries out validity checks on the
+generated HTML document files.
 
-. URL syntax is valid.
-. URL target resource files exist.
-. URL fragment identifiers have a matching HTML `id` attribute in the target resource file.
+- HTML `href` and `src` attribute URL values are checked to ensure:
+  . URL syntax is valid.
+  . URL target resource files exist.
+  . URL fragment identifiers have a matching HTML `id` attribute in the target resource file.
+
+- HTML `id` attributes are checked to ensure:
+  . ID syntax is valid.
+  . There are no duplicate intra-document IDs.
 
 The existence of external (off-site) URL resources is not checked -- for full
 site validation use a cross-site validator such as the
@@ -273,12 +281,14 @@ Validity checks increase site build times.
 ### Build summary
 The printed build summary includes:
 
-_documents_:: The total number of Markdown documents (including skipped drafts).
-
-_static_:: The total number of static files.
+_documents_:: The total number of content documents (including skipped drafts).
 
 _drafts_:: The number of skipped draft documents. If the `-drafts` option is
 specified this will be zero.
+
+_static_:: The total number of static files.
+
+_document errors_:: The document error count (omitted if there are no errors).
 
 _time_:: The execution time in seconds.
 
@@ -327,7 +337,7 @@ live reloading.
   * Press the R key followed by the Enter key to force a complete site rebuild
   * Press the D key followed by the Enter key to toggle the server -drafts option
   * Press the N key followed by the Enter key to toggle the server -navigate option
-  * Press the Q key followed by the Enter key or Ctrl+C to exit
+  * Press the Q key followed by the Enter key to exit
   * Press the Enter key to print help
 - The _serve command_ commandeers keyboard input -- if you want to run the server
   command in the background you need to assign `/dev/null` to its standard
@@ -417,12 +427,6 @@ Document content goes here.
 ```
 
 
-## Dates and times
-It's important to understand that timezones 
-TODO
-
-Hindsite processes document [publication dates](//:YYY#XXX) and [modification times](#ZZZ) (see [???](qux.html#YYY-ZZZ))
-
 ## Built-in site templates
 Hindsite includes `blog`, `docs` and `hello` built-in site templates
 which can be installed using the Hindsite [init command](#init-command).
@@ -451,9 +455,7 @@ Customisation notes:
 
 - The `template/partials.html` header template will include the
   [highlight.js](https://highlightjs.org/) source code highlighter if the
-  `.user.highlightjs` template variable is set to `"yes"`. Highlight.js language
-  auto-detection is not enabled and code blocks must specify the language
-  explicitly. For example:
+  `.user.highlightjs` template variable is set to `"yes"`.
 
 - _user_ template variable values can be set per document (in document
   front matter) or per directory (in site configuration files).
@@ -704,11 +706,11 @@ the [content files](#content-files) that undergo [text template](#text-templates
 `timezone`:: Set to a timezone name from the
 [IANA Timezone Database](https://www.iana.org/time-zones).
 
-- Assigned to document [publication dates](#front-matter-variables)
-  that were specified without a timezone.
-- Used to render `.shortdate`, `.mediumdate` and `.longdate` [document template
-  variables](#document-variables).
+- It is assigned to document [publication dates](#publication-date)
+  that specified without a timezone.
 - `timezone` defaults to `"Local"` (the system's local timezone).
+- `timezone` is used to render `.shortdate`, `.mediumdate` and `.longdate`
+  [document template variables](#document-variables).
 - TOML example:
 
   timezone = "Pacific/Auckland"
@@ -751,8 +753,8 @@ Are available as these template variables:
 
 
 ## Content files
-Content files are the source files residing in the site [content
-directory](#???). They are used to build the website.
+Content files are the source files residing in the site [content directory](#sites).
+They are used to build the website.
 
 - There are two types of content file: [documents](#documents) and [static files](#static-files).
 - Content files can include an optional [front matter header](#front-matter-header).
@@ -877,12 +879,13 @@ template expansion.
 `author`:: The document author. If not specified it defaults to the
 [`author`](#configuration-variables) configuration value.
 
+.#publication-date
 `date`:: The document publication date. If it is not specified it is extracted
 from the file name `YYYY-MM-DD-` date prefix, if there is no prefix it defaults
 to Jan 1 0001. The `date` format is RFC 3339 with the following relaxations:
 ..
 - If the time zone offset is omitted then the
-  [`timezone`](#configuration-variables) configuration value is used.
+  [`timezone`](#configuration-variables) configuration variable value is used.
   This has the effect of always rendering the date as written irrespective of
   the `timezone` value.
 - If the time is omitted then the time `00:00:00` is used.
@@ -900,7 +903,6 @@ ______________________________________________________
 1979-05-27                   1979-05-27T00:00:00+13:00
 ______________________________________________________
 ```
-
 In TOML headers the date can be specified as a quoted string or an unquoted
 date/time.
 ..
@@ -1014,7 +1016,7 @@ to build webpages. There are two types of templates:
 
 - [HTML templates](#html-templates) which are used to build indexes and document
   HTML webpages.
-- Optional [Text templates](#text-templates) are used to preprocess Markdown
+- Optional [Text templates](#text-templates) are used to preprocess content
   documents and static files.
 
 There are two template name spaces, one for _HTML templates_ and the other for
@@ -1156,7 +1158,7 @@ root-relative URLs) or `http://example.com/blog` (to generate absolute URLs).
 
 ## Building hindsite
 .note
-Requires Go 1.16 or better.
+Requires Go 1.18 or better.
 
 To compile hindsite from source code run the following commands to download,
 compile and install hindsite:
