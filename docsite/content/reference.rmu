@@ -57,11 +57,12 @@ website:
 
 - A _content directory_ containing source [documents](#documents) and
   [static resource files](#static-files).
-- A _template directory_ containing [templates](#templates) and
-  [configuration files](#configuration).
+- A _template directory_ (also called the _site template_) containing
+  [template](#template-files), [configuration](#configuration) and
+  [content initialisation](#new-command) files.
 - A _build directory_ where Hindsite builds the static website.
 
-By default, these directories reside in a _site directory_ and are named
+By default, these directories reside in the _site directory_ and are named
 _content_, _template_ and _build_. The default locations can be changed using
 command-line options. For example, a single template directory can process
 multiple content directories just as a single content directory can be processed
@@ -279,20 +280,13 @@ site validation use a cross-site validator such as the
 Validity checks increase site build times.
 
 ### Build summary
-The printed build summary includes:
+A summary printed when the build command completes, it includes:
 
-_documents_:: The total number of content documents (including skipped drafts).
+_documents_:: The number of content documents processed.
 
-_drafts_:: The number of skipped draft documents. If the `-drafts` option is
-specified this will be zero.
-
-_static_:: The total number of static files.
-
-_document errors_:: The document error count (omitted if there are no errors).
+_static_:: The number of static files processed.
 
 _time_:: The execution time in seconds.
-
-The build summary does not include [excluded](#configuration-variables) files.
 
 
 ## Serve command
@@ -1010,7 +1004,7 @@ document [front matter `user` value](#front-matter-variables) with the document'
 [`user` configuration variable](#user).
 
 
-## Templates
+## Template files
 _hindsite_ uses Go templates from the site [_template directory_](#sites)
 to build webpages. There are two types of templates:
 
@@ -1172,28 +1166,26 @@ version checkout the version before running `go install ./...` e.g. `git
 checkout tags/v1.3.0`.
 
 
-## Glossary
-Site::
-Site directory::
-Site template::
-  Built-in template::
-Init directory::
-Build path::
-  Build file::
-Template directory::
-  Configuration file::
-  Template path::
-  Template file::
-    HTML template::
-    Text template::
-Content file::
-  Content path::
-  Document file::
-  Static file:
-Front matter variable::
-Configuration variable::
-~~Document~~ Content variable:: Variables, derived from font matter and configuration variables, made available to HTML and Text templates.
-Index::
-  Document index::
-  Tag index::
+## Vocabulary
+Links to explanatory documentation.
 
+- [Build path](#build-paths)
+- [Built-in site template](#built-in-site-templates)
+- [Configuration file](#configuration-files)
+- [Configuration variable](#configuration-variables)
+- [Content file](#content-files)
+- [Document file](#documents)
+- [Document index](#indexes)
+- [Document variable](#document-variables)
+- [Front matter variable](#front-matter-variables)
+- [HTML template](#html-templates)
+- [Index](#indexes)
+- [Init directory](#new-command)
+- [Site directory](#sites)
+- [Site](#sites)
+- [Site template](#sites)
+- [Static file](#static-files)
+- [Tag index](#indexes)
+- [Template directory](#sites)
+- [Template file](#template-files)
+- [Text template](#text-templates)
