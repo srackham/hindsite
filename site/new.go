@@ -50,6 +50,9 @@ func (site *site) new() (err error) {
 	if !fsx.PathIsInDir(newFile, site.contentDir) {
 		return fmt.Errorf("document must reside in content directory: %s", site.contentDir)
 	}
+	if err = site.parseConfigFiles(); err != nil {
+		return err
+	}
 	conf := site.configFor(newFile)
 	// Extract date and title into template data map.
 	date := time.Now()

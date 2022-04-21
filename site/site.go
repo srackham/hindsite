@@ -30,31 +30,33 @@ var (
 
 type site struct {
 	command       string
+	cmdargs       []string
 	executable    string
 	in            chan string
 	out           chan string
-	siteDir       string
-	contentDir    string
-	templateDir   string
-	buildDir      string
-	indexDir      string
-	initDir       string
-	from          string
-	drafts        bool
-	lint          bool
-	launch        bool
-	httpport      uint16
-	lrport        uint16
-	livereload    bool
-	navigate      bool
-	verbosity     int
-	cmdargs       []string
 	rootConf      config
 	confs         configs
 	docs          documentsLookup
 	idxs          indexes
 	htmlTemplates htmlTemplates
 	textTemplates textTemplates
+	// Command options
+	siteDir     string
+	contentDir  string
+	templateDir string
+	buildDir    string
+	indexDir    string
+	initDir     string
+	from        string
+	drafts      bool
+	lint        bool
+	launch      bool
+	httpport    uint16
+	lrport      uint16
+	livereload  bool
+	navigate    bool
+	verbosity   int
+	vars        rawConfig
 }
 
 func NewSite() site {
@@ -148,7 +150,7 @@ func (site *site) parseArgs(args []string) error {
 			site.verbosity++
 		case opt == "-vv":
 			site.verbosity += 2
-		case slice.New("-site", "-content", "-template", "-build", "-from", "-port").Has(opt):
+		case slice.New("-site", "-content", "-template", "-build", "-from", "-port", "-var").Has(opt):
 			// Process option argument.
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
@@ -184,6 +186,10 @@ func (site *site) parseArgs(args []string) error {
 						}
 						site.lrport = uint16(i)
 					}
+				}
+			case "-var":
+				if err := parseVar(&site.vars, arg); err != nil {
+					return err
 				}
 			default:
 				panic("unexpected option: " + opt)
@@ -425,23 +431,25 @@ func (site *site) configFor(p string) config {
 	if fsx.FileExists(p) {
 		dir = filepath.Dir(dir)
 	}
-	result := newConfig()
-	for _, conf := range site.confs {
+	// result := defaultConfig()
+	result := site.rootConf
+	for _, conf := range site.confs[1:] {
 		if fsx.PathIsInDir(dir, conf.origin) {
 			result.merge(conf)
 		}
 	}
 	// Global root configuration values.
-	result.exclude = site.rootConf.exclude
-	result.include = site.rootConf.include
-	result.homepage = site.rootConf.homepage
-	result.urlprefix = site.rootConf.urlprefix
+	// result.exclude = site.rootConf.exclude
+	// result.include = site.rootConf.include
+	// result.homepage = site.rootConf.homepage
+	// result.urlprefix = site.rootConf.urlprefix
 	return result
 }
 
-// parseConfig parses all configuration files from the site template
+// parseConfigFiles parses all configuration files from the site template
 // directory to site `confs`.
-func (site *site) parseConfigs() error {
+// Creates a root config from config defaults and the root config file.
+func (site *site) parseConfigFiles() error {
 	site.confs = configs{}
 	err := filepath.Walk(site.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -453,9 +461,15 @@ func (site *site) parseConfigs() error {
 		if !info.IsDir() {
 			return nil
 		}
-		conf := config{}
+		var conf config
+		var found bool
+		if f == site.templateDir {
+			conf = defaultConfig()
+			found = true
+		} else {
+			conf = config{}
+		}
 		conf.origin = f
-		found := false
 		for _, v := range []string{"config.toml", "config.yaml"} {
 			cf := filepath.Join(f, v)
 			if fsx.FileExists(cf) {
@@ -464,6 +478,7 @@ func (site *site) parseConfigs() error {
 				if err := conf.parseFile(site, cf); err != nil {
 					return fmt.Errorf("config file: %s: %s", cf, err.Error())
 				}
+				break
 			}
 		}
 		if found {
@@ -480,5 +495,16 @@ func (site *site) parseConfigs() error {
 	sort.Slice(site.confs, func(i, j int) bool {
 		return site.confs[i].origin < site.confs[j].origin
 	})
+	// Merge -var options into root config.
+	site.confs[0].mergeRaw(site, site.vars)
+	site.rootConf = site.confs[0] // TODO replace rootConf with confs[0]
+	site.verbose("root config: \n" + site.rootConf.String())
+	// Sanity checks.
+	if len(site.confs) == 0 {
+		panic("len(site.confs) == 0")
+	}
+	if site.confs[0].origin != site.templateDir {
+		panic("site.conf[0].origin != site.templateDir")
+	}
 	return nil
 }

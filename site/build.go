@@ -16,29 +16,10 @@ func (site *site) build() error {
 		return fmt.Errorf("to many command arguments")
 	}
 	startTime := time.Now()
-	// Parse configuration files.
-	if err := site.parseConfigs(); err != nil {
+	if err := site.parseConfigFiles(); err != nil {
 		return err
 	}
-	// Synthesize root config.
-	site.rootConf = newConfig()
-	if len(site.confs) > 0 && site.confs[0].origin == site.templateDir {
-		site.rootConf.merge(site.confs[0])
-	}
-	site.verbose2("root config: \n" + site.rootConf.String())
-	if !fsx.DirExists(site.buildDir) {
-		if err := os.Mkdir(site.buildDir, 0775); err != nil {
-			return err
-		}
-	}
 	site.docs = newDocumentsLookup()
-	// Delete everything in the build directory forcing a complete site rebuild.
-	files, _ := filepath.Glob(filepath.Join(site.buildDir, "*"))
-	for _, f := range files {
-		if err := os.RemoveAll(f); err != nil {
-			return err
-		}
-	}
 	// Parse all template files.
 	site.htmlTemplates = newHTMLTemplates(site.templateDir)
 	site.textTemplates = newTextTemplates(site.templateDir)
@@ -70,6 +51,18 @@ func (site *site) build() error {
 	})
 	if err != nil {
 		return err
+	}
+	if !fsx.DirExists(site.buildDir) {
+		if err := os.Mkdir(site.buildDir, 0775); err != nil {
+			return err
+		}
+	}
+	// Delete everything in the build directory forcing a complete site rebuild.
+	files, _ := filepath.Glob(filepath.Join(site.buildDir, "*"))
+	for _, f := range files {
+		if err := os.RemoveAll(f); err != nil {
+			return err
+		}
 	}
 	// Parse content directory documents and copy/render static files to the build directory.
 	docsCount := 0
@@ -148,7 +141,7 @@ func (site *site) build() error {
 	}
 	// Lint documents.
 	if site.lint {
-		errCount += site.lintLinks()
+		errCount += site.lintChecks()
 	}
 	// Print summary.
 	if errCount == 0 {

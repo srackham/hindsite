@@ -37,8 +37,27 @@ type config struct {
 
 type configs []config
 
+// Unvalidated configuration variable values.
+// Undefined configuration variables have a nil pointer value.
+type rawConfig struct {
+	Author     *string
+	Templates  *string
+	Exclude    *string
+	Include    *string
+	Homepage   *string
+	ID         *string
+	Permalink  *string
+	URLPrefix  *string
+	Paginate   *int
+	Timezone   *string
+	ShortDate  *string
+	MediumDate *string
+	LongDate   *string
+	User       map[string]string
+}
+
 // Return default configuration.
-func newConfig() config {
+func defaultConfig() config {
 	conf := config{
 		exclude:    []string{".*"},
 		id:         "optional",
@@ -52,54 +71,69 @@ func newConfig() config {
 	return conf
 }
 
+// parseVar parses the `NAME=VALUE` var argument `arg` into `vars`.
+func parseVar(vars *rawConfig, arg string) error {
+	s := strings.SplitN(arg, "=", 2)
+	if len(s) != 2 {
+		return fmt.Errorf("illegal -var syntax: %s", arg)
+	}
+	name := s[0]
+	val := s[1]
+	if strings.HasPrefix(name, "user.") {
+		name = strings.TrimPrefix(name, "user.")
+		vars.User[name] = val
+	} else {
+		switch name {
+		case "author":
+			vars.Author = &val
+		case "templates":
+			vars.Templates = &val
+		default:
+			return fmt.Errorf("illegal -var name: %s", name)
+		}
+	}
+	return nil
+}
+
 // parseFile parses a configuration file.
+// TODO refactor ->func parseFile(raw *rawConfig, f string) error {
 func (conf *config) parseFile(site *site, f string) error {
 	text, err := ioutil.ReadFile(f)
 	if err != nil {
 		return err
 	}
-	cf := struct {
-		Author     *string
-		Templates  *string
-		Exclude    *string
-		Include    *string
-		Homepage   string
-		ID         string
-		Permalink  string
-		URLPrefix  string
-		Paginate   int
-		Timezone   string
-		ShortDate  string
-		MediumDate string
-		LongDate   string
-		User       map[string]string
-	}{}
+	raw := rawConfig{}
 	switch filepath.Ext(f) {
 	case ".toml":
-		_, err := toml.Decode(string(text), &cf)
+		_, err := toml.Decode(string(text), &raw)
 		if err != nil {
 			return err
 		}
 	case ".yaml":
-		err := yaml.Unmarshal(text, &cf)
+		err := yaml.Unmarshal(text, &raw)
 		if err != nil {
 			return err
 		}
 	default:
 		panic("illegal configuration file extension: " + f)
 	}
+	return conf.mergeRaw(site, raw)
+}
+
+// mergeRaw validates raw configuration values and merges them into `conf`.
+func (conf *config) mergeRaw(site *site, raw rawConfig) error {
 	// Validate and merge parsed configuration.
-	if cf.Author != nil {
-		conf.author = cf.Author
+	if raw.Author != nil {
+		conf.author = raw.Author
 	}
-	if cf.Templates != nil {
-		conf.templates = splitPatterns(*cf.Templates)
+	if raw.Templates != nil {
+		conf.templates = splitPatterns(*raw.Templates)
 	}
-	if cf.Permalink != "" {
-		conf.permalink = cf.Permalink
+	if raw.Permalink != nil {
+		conf.permalink = *raw.Permalink
 	}
-	if cf.Homepage != "" {
-		home := cf.Homepage
+	if raw.Homepage != nil {
+		home := *raw.Homepage
 		home = filepath.FromSlash(home)
 		if !filepath.IsAbs(home) {
 			home = filepath.Join(site.buildDir, home)
@@ -114,49 +148,49 @@ func (conf *config) parseFile(site *site, f string) error {
 		}
 		conf.homepage = home
 	}
-	if cf.ID != "" {
-		switch cf.ID {
+	if raw.ID != nil {
+		switch *raw.ID {
 		case "optional", "mandatory", "urlpath":
-			conf.id = cf.ID
+			conf.id = *raw.ID
 		default:
-			return fmt.Errorf("illegal id: %s", cf.ID)
+			return fmt.Errorf("illegal id: %s", *raw.ID)
 		}
 	}
-	if cf.Paginate != 0 {
-		conf.paginate = cf.Paginate
+	if raw.Paginate != nil {
+		conf.paginate = *raw.Paginate
 	}
-	if cf.URLPrefix != "" {
-		value := cf.URLPrefix
+	if raw.URLPrefix != nil {
+		value := *raw.URLPrefix
 		re := regexp.MustCompile(`^((http|/)\S+|)$`)
 		if !re.MatchString(value) {
 			return fmt.Errorf("illegal urlprefix: %s", value)
 		}
 		conf.urlprefix = strings.TrimSuffix(value, "/")
 	}
-	if cf.Exclude != nil {
-		conf.exclude = append([]string{".*"}, splitPatterns(*cf.Exclude)...)
+	if raw.Exclude != nil {
+		conf.exclude = append([]string{".*"}, splitPatterns(*raw.Exclude)...)
 	}
-	if cf.Include != nil {
-		conf.include = splitPatterns(*cf.Include)
+	if raw.Include != nil {
+		conf.include = splitPatterns(*raw.Include)
 	}
-	if cf.Timezone != "" {
-		tz, err := time.LoadLocation(cf.Timezone)
+	if raw.Timezone != nil {
+		tz, err := time.LoadLocation(*raw.Timezone)
 		if err != nil {
 			return err
 		}
 		conf.timezone = tz
 	}
-	if cf.ShortDate != "" {
-		conf.shortdate = cf.ShortDate
+	if raw.ShortDate != nil {
+		conf.shortdate = *raw.ShortDate
 	}
-	if cf.MediumDate != "" {
-		conf.mediumdate = cf.MediumDate
+	if raw.MediumDate != nil {
+		conf.mediumdate = *raw.MediumDate
 	}
-	if cf.LongDate != "" {
-		conf.longdate = cf.LongDate
+	if raw.LongDate != nil {
+		conf.longdate = *raw.LongDate
 	}
-	if cf.User != nil {
-		conf.user = cf.User
+	if raw.User != nil {
+		conf.user = raw.User
 	}
 	return nil
 }
@@ -181,7 +215,7 @@ func (conf *config) data() templateData {
 	return data
 }
 
-// Return configuration as YAML formatted string.
+// String returns configuration as YAML formatted string.
 func (conf *config) String() (result string) {
 	d, _ := yaml.Marshal(conf.data())
 	return string(d)

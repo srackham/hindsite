@@ -1,5 +1,22 @@
 ## Ultricies lundium
 
+```
+Author: {{.author}}
+Templates: {{.templates}}
+Exclude: {{.exclude}}
+Include: {{.include}}
+Homepage: {{.homepage}}
+ID: {{.id}}
+Permalink: {{.id}}
+URLPrefix: {{.urlprefix}}
+Paginate: {{.paginate}}
+Timezone: {{.timezone}}
+ShortDate: {{.shortdate}}
+MediumDate: {{.mediumdate}}
+LongDate: {{.longdate}}
+User: {{.user}}
+```
+
 ### <a id="id1"> Header
 Arcu sed hac nisi _duis porta_, sociis pulvinar. Montes enim, facilisis urna?
 Augue vel, magnis montes sociis auctor, ut! Placerat porta etiam, aliquet?
