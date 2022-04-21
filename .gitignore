@@ -5,8 +5,8 @@ debug
 tmp/
 dist/
 build/
-!cmd/hindsite/testdata/blog/build/
-cmd/hindsite/builtin/blog/content/
-cmd/hindsite/builtin/docs/content/
-cmd/hindsite/builtin/hello/content/
+!site/testdata/blog/build/
+site/builtin/blog/content/
+site/builtin/docs/content/
+site/builtin/hello/content/
 hindsite-benchmark*
