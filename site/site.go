@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/srackham/hindsite/fsx"
 	"github.com/srackham/hindsite/slice"
@@ -443,7 +444,20 @@ func (site *site) configFor(p string) config {
 // directory to site `confs`.
 // Creates a root config from config defaults and the root config file.
 func (site *site) parseConfigFiles() error {
-	site.confs = configs{}
+	site.confs = []config{}
+	// Assign default root config.
+	site.confs = append(site.confs, config{
+		exclude:    []string{".*"},
+		id:         "optional",
+		paginate:   5,
+		shortdate:  "2006-01-02",
+		mediumdate: "2-Jan-2006",
+		longdate:   "Mon Jan 2, 2006",
+		user:       map[string]string{},
+	})
+	site.confs[0].timezone, _ = time.LoadLocation("Local")
+	site.confs[0].origin = site.templateDir
+	// Parse all config files.
 	err := filepath.Walk(site.templateDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -457,12 +471,11 @@ func (site *site) parseConfigFiles() error {
 		var conf config
 		var found bool
 		if f == site.templateDir {
-			conf = defaultConfig()
-			found = true
+			conf = site.confs[0]
 		} else {
 			conf = config{}
+			conf.origin = f
 		}
-		conf.origin = f
 		for _, v := range []string{"config.toml", "config.yaml"} {
 			cf := filepath.Join(f, v)
 			if fsx.FileExists(cf) {
@@ -475,7 +488,11 @@ func (site *site) parseConfigFiles() error {
 			}
 		}
 		if found {
-			site.confs = append(site.confs, conf)
+			if f == site.templateDir {
+				site.confs[0] = conf // Update root config.
+			} else {
+				site.confs = append(site.confs, conf)
+			}
 			site.verbose2(conf.String())
 		}
 		return nil

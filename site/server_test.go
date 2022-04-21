@@ -109,8 +109,8 @@ func TestServer(t *testing.T) {
 func TestHTTPHandlers(t *testing.T) {
 	site := NewSite()
 	site.buildDir = "./testdata/blog/build"
-	// site.confs[0] = defaultConfig()
-	site.confs = append(site.confs, defaultConfig())
+	site.templateDir = "./testdata/blog/template"
+	site.parseConfigFiles()
 	site.confs[0].urlprefix = "http:/example.com"
 	svr := newServer(&site)
 
