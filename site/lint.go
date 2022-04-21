@@ -114,7 +114,7 @@ func (site *site) lintChecks() (errCount int) {
 				if link.anchor != "" {
 					target, ok := site.docs.byBuildPath[link.target]
 					if !ok || !target.ids.Has(link.anchor) {
-						doc.site.logerror("%s: contains link to missing anchor: \"%s\"", doc.contentPath, strings.TrimPrefix(url, site.rootConf.urlprefix+string(filepath.Separator)))
+						doc.site.logerror("%s: contains link to missing anchor: \"%s\"", doc.contentPath, strings.TrimPrefix(url, site.confs[0].urlprefix+string(filepath.Separator)))
 						errCount++
 						continue
 					}

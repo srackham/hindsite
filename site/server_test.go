@@ -109,8 +109,9 @@ func TestServer(t *testing.T) {
 func TestHTTPHandlers(t *testing.T) {
 	site := NewSite()
 	site.buildDir = "./testdata/blog/build"
-	site.rootConf = defaultConfig()
-	site.rootConf.urlprefix = "http:/example.com"
+	// site.confs[0] = defaultConfig()
+	site.confs = append(site.confs, defaultConfig())
+	site.confs[0].urlprefix = "http:/example.com"
 	svr := newServer(&site)
 
 	// Create a request to pass to our handler. We don't have any query parameters for now, so we'll
@@ -144,7 +145,7 @@ func TestHTTPHandlers(t *testing.T) {
 	if !strings.Contains(got, wanted) {
 		t.Errorf("htmlFilter handler: response did not contain: %#v", wanted)
 	}
-	if strings.Contains(got, site.rootConf.urlprefix) {
-		t.Errorf("htmlFilter handler: response contains urlprefix: %#v", site.rootConf.urlprefix)
+	if strings.Contains(got, site.confs[0].urlprefix) {
+		t.Errorf("htmlFilter handler: response contains urlprefix: %#v", site.confs[0].urlprefix)
 	}
 }

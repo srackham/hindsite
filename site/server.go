@@ -86,7 +86,7 @@ func (svr *server) setNavigateURL(url string) {
 	if !svr.livereload || !svr.navigate {
 		return
 	}
-	path := strings.TrimPrefix(url, svr.rootConf.urlprefix)
+	path := strings.TrimPrefix(url, svr.confs[0].urlprefix)
 	svr.verbose("navigate to: " + path)
 	svr.mutex.Lock()
 	svr.browserURL = navigatePrefix + path
@@ -144,9 +144,9 @@ func (svr *server) htmlFilter(h http.Handler) http.Handler {
 				}
 			}
 			// Strip urlprefix from URLs.
-			if svr.rootConf.urlprefix != "" {
-				content = strings.Replace(content, "href=\""+svr.rootConf.urlprefix, "href=\"", -1)
-				content = strings.Replace(content, "src=\""+svr.rootConf.urlprefix, "src=\"", -1)
+			if svr.confs[0].urlprefix != "" {
+				content = strings.Replace(content, "href=\""+svr.confs[0].urlprefix, "href=\"", -1)
+				content = strings.Replace(content, "src=\""+svr.confs[0].urlprefix, "src=\"", -1)
 			}
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.Write([]byte(content))
@@ -341,9 +341,9 @@ func (svr *server) serve() error {
 				start := time.Now()
 				switch evt.Op {
 				case fsnotify.Create, fsnotify.Write:
-					t := fsx.FileModTime(svr.rootConf.homepage)
+					t := fsx.FileModTime(svr.confs[0].homepage)
 					err = svr.writeFile(evt.Name)
-					if err == nil && t.Before(fsx.FileModTime(svr.rootConf.homepage)) {
+					if err == nil && t.Before(fsx.FileModTime(svr.confs[0].homepage)) {
 						// homepage was modified by this event.
 						err = svr.copyHomePage()
 					}

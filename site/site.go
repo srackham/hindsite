@@ -34,7 +34,6 @@ type site struct {
 	executable    string
 	in            chan string
 	out           chan string
-	rootConf      config
 	confs         configs
 	docs          documentsLookup
 	idxs          indexes
@@ -409,7 +408,7 @@ func (site *site) match(f string, patterns []string) bool {
 
 // exclude returns true if content file `f` is skipped by the `build` command.
 func (site *site) exclude(f string) bool {
-	return site.match(f, site.rootConf.exclude) && !site.match(f, site.rootConf.include)
+	return site.match(f, site.confs[0].exclude) && !site.match(f, site.confs[0].include)
 }
 
 // configFor returns the merged configuration for content directory path p.
@@ -431,18 +430,12 @@ func (site *site) configFor(p string) config {
 	if fsx.FileExists(p) {
 		dir = filepath.Dir(dir)
 	}
-	// result := defaultConfig()
-	result := site.rootConf
+	result := site.confs[0]
 	for _, conf := range site.confs[1:] {
 		if fsx.PathIsInDir(dir, conf.origin) {
 			result.merge(conf)
 		}
 	}
-	// Global root configuration values.
-	// result.exclude = site.rootConf.exclude
-	// result.include = site.rootConf.include
-	// result.homepage = site.rootConf.homepage
-	// result.urlprefix = site.rootConf.urlprefix
 	return result
 }
 
@@ -497,8 +490,7 @@ func (site *site) parseConfigFiles() error {
 	})
 	// Merge -var options into root config.
 	site.confs[0].mergeRaw(site, site.vars)
-	site.rootConf = site.confs[0] // TODO replace rootConf with confs[0]
-	site.verbose("root config: \n" + site.rootConf.String())
+	site.verbose("root config: \n" + site.confs[0].String())
 	// Sanity checks.
 	if len(site.confs) == 0 {
 		panic("len(site.confs) == 0")
