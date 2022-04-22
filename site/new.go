@@ -29,19 +29,17 @@ func (site *site) new() (err error) {
 		return fmt.Errorf("to many command arguments")
 	}
 	newFile := site.cmdargs[0]
-	if site.command == "new" {
-		if newFile == "" {
-			return fmt.Errorf("new document has not been specified")
-		}
-		if fsx.DirExists(newFile) {
-			return fmt.Errorf("document is a directory: %s", newFile)
-		}
-		if d := filepath.Dir(newFile); !fsx.DirExists(d) {
-			return fmt.Errorf("missing document directory: %s", d)
-		}
-		if fsx.FileExists(newFile) {
-			return fmt.Errorf("document already exists: %s", newFile)
-		}
+	if newFile == "" {
+		return fmt.Errorf("new document has not been specified")
+	}
+	if fsx.DirExists(newFile) {
+		return fmt.Errorf("document is a directory: %s", newFile)
+	}
+	if d := filepath.Dir(newFile); !fsx.DirExists(d) {
+		return fmt.Errorf("missing document directory: %s", d)
+	}
+	if fsx.FileExists(newFile) {
+		return fmt.Errorf("document already exists: %s", newFile)
 	}
 	newFile, err = filepath.Abs(newFile)
 	if err != nil {
@@ -66,20 +64,33 @@ func (site *site) new() (err error) {
 	data["date"] = date.Format("2006-01-02T15:04:05-07:00")
 	data["title"] = title
 	site.verbose("document title: %s\ndocument date: %s", data["title"], data["date"])
-	// Search up the corresponding template directory path for the closest new.md template file.
 	text := defaultNewTemplate
-	for d := fsx.PathTranslate(filepath.Dir(newFile), site.contentDir, site.templateDir); ; {
-		if f := filepath.Join(d, "new.md"); fsx.FileExists(f) {
-			site.verbose("document template: %s", f)
-			if text, err = fsx.ReadFile(f); err != nil {
-				return err
+	if site.vars.Template != nil {
+		// Read document template file specified in `-var template=<template-file>` option.
+		f := *site.vars.Template
+		if !fsx.FileExists(f) {
+			return fmt.Errorf("missing document template file: %s", f)
+		}
+		if text, err = fsx.ReadFile(f); err != nil {
+			return err
+		}
+	} else {
+		// Attempt to read `new.md` document template file from site template
+		// directory by searching along the corresponding template directory path.
+		for d := fsx.PathTranslate(filepath.Dir(newFile), site.contentDir, site.templateDir); ; {
+			if f := filepath.Join(d, "new.md"); fsx.FileExists(f) {
+				site.verbose("document template: %s", f)
+				if text, err = fsx.ReadFile(f); err != nil {
+					return err
+				}
+				break
 			}
-			break
+			if d == site.templateDir {
+				break // No template file found.
+			}
+			d = filepath.Dir(d)
 		}
-		if d == site.templateDir {
-			break // No template file found.
-		}
-		d = filepath.Dir(d)
+
 	}
 	// Parse and execute template.
 	tmpl, err := template.New("new.md").Parse(text)

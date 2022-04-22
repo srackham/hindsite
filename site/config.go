@@ -6,6 +6,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -40,6 +41,7 @@ type configs []config
 // Unvalidated configuration variable values.
 // Undefined configuration variables have a nil pointer value.
 type rawConfig struct {
+	// Configuration variables
 	Author     *string
 	Templates  *string
 	Exclude    *string
@@ -48,27 +50,14 @@ type rawConfig struct {
 	ID         *string
 	Permalink  *string
 	URLPrefix  *string
-	Paginate   *int
+	Paginate   *string
 	Timezone   *string
 	ShortDate  *string
 	MediumDate *string
 	LongDate   *string
-	User       map[string]string
-}
-
-// Return default configuration.
-func defaultConfig() config {
-	conf := config{
-		exclude:    []string{".*"},
-		id:         "optional",
-		paginate:   5,
-		shortdate:  "2006-01-02",
-		mediumdate: "2-Jan-2006",
-		longdate:   "Mon Jan 2, 2006",
-		user:       map[string]string{},
-	}
-	conf.timezone, _ = time.LoadLocation("Local")
-	return conf
+	// Command specific variables
+	Template *string // new document template
+	User     map[string]string
 }
 
 // parseVar parses the `NAME=VALUE` var argument `arg` into `vars`.
@@ -88,6 +77,28 @@ func parseVar(vars *rawConfig, arg string) error {
 			vars.Author = &val
 		case "templates":
 			vars.Templates = &val
+		case "exclude":
+			vars.Exclude = &val
+		case "include":
+			vars.Include = &val
+		case "id":
+			vars.ID = &val
+		case "permalink":
+			vars.Permalink = &val
+		case "urlprefix":
+			vars.URLPrefix = &val
+		case "paginate":
+			vars.Paginate = &val
+		case "timezone":
+			vars.Timezone = &val
+		case "shortdate":
+			vars.ShortDate = &val
+		case "mediumdate":
+			vars.MediumDate = &val
+		case "longdate":
+			vars.LongDate = &val
+		case "template":
+			vars.Template = &val
 		default:
 			return fmt.Errorf("illegal -var name: %s", name)
 		}
@@ -155,7 +166,11 @@ func (conf *config) mergeRaw(site *site, raw rawConfig) error {
 		}
 	}
 	if raw.Paginate != nil {
-		conf.paginate = *raw.Paginate
+		if n, err := strconv.Atoi(*raw.Paginate); err != nil {
+			return fmt.Errorf("illegal paginate value: %s", *raw.Paginate)
+		} else {
+			conf.paginate = n
+		}
 	}
 	if raw.URLPrefix != nil {
 		value := *raw.URLPrefix

@@ -73,7 +73,7 @@ func (site *site) lintChecks() (errCount int) {
 		site.verbose("lint document: %s", doc.contentPath)
 		// Check for llicit or duplicate ids.
 		ids := set.New(doc.ids...)
-		for id, _ := range ids {
+		for id := range ids {
 			re := regexp.MustCompile(`^[A-Za-z][\w:.-]*$`) // https://www.w3.org/TR/html4/types.html
 			if !re.MatchString(id) {
 				doc.site.logerror("%s: contains illicit element id: \"%s\"", doc.contentPath, id)
