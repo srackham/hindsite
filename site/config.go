@@ -95,8 +95,6 @@ func parseVar(vars *rawConfig, arg string) error {
 	return nil
 }
 
-// parseFile parses a configuration file.
-// TODO refactor ->func parseFile(raw *rawConfig, f string) error {
 func (conf *config) parseFile(site *site, f string) error {
 	text, err := ioutil.ReadFile(f)
 	if err != nil {

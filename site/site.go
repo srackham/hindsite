@@ -441,8 +441,8 @@ func (site *site) configFor(p string) config {
 }
 
 // parseConfigFiles parses all configuration files from the site template
-// directory to site `confs`.
-// Creates a root config from config defaults and the root config file.
+// directory to site `confs` and adds in the -var and -config options.
+// It creates a root config from config defaults and the root config file.
 func (site *site) parseConfigFiles() error {
 	site.confs = []config{}
 	// Assign default root config.
@@ -509,9 +509,6 @@ func (site *site) parseConfigFiles() error {
 	site.confs[0].mergeRaw(site, site.vars)
 	site.verbose("root config: \n" + site.confs[0].String())
 	// Sanity checks.
-	if len(site.confs) == 0 {
-		panic("len(site.confs) == 0")
-	}
 	if site.confs[0].origin != site.templateDir {
 		panic("site.conf[0].origin != site.templateDir")
 	}

@@ -89,7 +89,6 @@ func newDocument(contentfile string, site *site) (document, error) {
 	if err := doc.extractFrontMatter(); err != nil {
 		return doc, parseError(fmt.Errorf("front matter: %s", err.Error()))
 	}
-	// TODO extract into doc.buildPath() function??? Note that site === doc.site.
 	// Synthesize build path and URL according to content path, permalink and slug values.
 	rel, _ := filepath.Rel(site.contentDir, doc.contentPath)
 	doc.templatePath = filepath.Join(site.templateDir, rel)
@@ -134,22 +133,16 @@ func newDocument(contentfile string, site *site) (document, error) {
 		}
 		doc.layout = site.htmlTemplates.name(layout)
 	}
-	urlpath := func() *string {
-		s := doc.trimUrlPrefix(doc.url)
-		return &s
-	}
-	if doc.id != nil && *doc.id == "urlpath" {
-		doc.id = urlpath()
-	}
 	switch doc.conf.id {
 	case "optional":
 	case "mandatory":
 		if doc.id == nil || *doc.id == "" {
-			return doc, parseError(fmt.Errorf("missing document id"))
+			return doc, parseError(fmt.Errorf("missing mandatory document id"))
 		}
 	case "urlpath":
 		if doc.id == nil {
-			doc.id = urlpath()
+			s := strings.TrimPrefix(doc.url, doc.conf.urlprefix)
+			doc.id = &s
 		}
 	default:
 		panic("illegal doc.conf.id for :" + doc.contentPath + ": " + doc.conf.id)
@@ -385,11 +378,6 @@ func (doc *document) updateFrom(src document) {
 // isDraft returns true if document is a draft and the drafts option is not true.
 func (doc *document) isDraft() bool {
 	return doc.draft && !doc.site.drafts
-}
-
-// TODO is this refactor worth it???
-func (doc *document) trimUrlPrefix(url string) string {
-	return strings.TrimPrefix(url, doc.conf.urlprefix)
 }
 
 /*
