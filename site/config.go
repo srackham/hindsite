@@ -50,7 +50,7 @@ type rawConfig struct {
 	ID         *string
 	Permalink  *string
 	URLPrefix  *string
-	Paginate   *string
+	Paginate   *int
 	Timezone   *string
 	ShortDate  *string
 	MediumDate *string
@@ -88,7 +88,11 @@ func parseVar(vars *rawConfig, arg string) error {
 		case "urlprefix":
 			vars.URLPrefix = &val
 		case "paginate":
-			vars.Paginate = &val
+			if n, err := strconv.Atoi(val); err != nil {
+				return fmt.Errorf("illegal paginate value: %s", val)
+			} else {
+				vars.Paginate = &n
+			}
 		case "timezone":
 			vars.Timezone = &val
 		case "shortdate":
@@ -166,11 +170,7 @@ func (conf *config) mergeRaw(site *site, raw rawConfig) error {
 		}
 	}
 	if raw.Paginate != nil {
-		if n, err := strconv.Atoi(*raw.Paginate); err != nil {
-			return fmt.Errorf("illegal paginate value: %s", *raw.Paginate)
-		} else {
-			conf.paginate = n
-		}
+		conf.paginate = *raw.Paginate
 	}
 	if raw.URLPrefix != nil {
 		value := *raw.URLPrefix

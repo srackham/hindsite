@@ -196,6 +196,22 @@ func TestExecuteArgs(t *testing.T) {
 	assert.FileExists(filepath.Join("build", "posts", "2018-12-01", "2018-12-01-new-test-file-two", "index.html"))
 	assert.Contains(out, "documents: 13\nstatic: 7")
 
+	os.Remove(f)
+	out, code = exec("hindsite new -var template=foobar " + f)
+	assert.Equal(1, code)
+	assert.Contains(out, "missing document template file: foobar\n")
+
+	f = filepath.Join("content", "posts", "2018-12-01-new-test-file-two.md")
+	template := filepath.Join("template", "posts", "new.md")
+	out, code = exec("hindsite new -var template=" + template + " " + f)
+	assert.Equal(0, code)
+	assert.Contains(out, "")
+	assert.True(fsx.FileExists(f))
+	text, _ = fsx.ReadFile(f)
+	assert.Contains(text, "title: New Test File Two")
+	assert.Contains(text, "date:  2018-12-01")
+	assert.Contains(text, "Test new template.")
+
 	out, code = exec("hindsite new " + tmpdir + " " + f) // Old v1 command syntax.
 	assert.Equal(1, code)
 	assert.Contains(out, "to many command arguments")
