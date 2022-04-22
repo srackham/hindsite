@@ -55,9 +55,7 @@ type rawConfig struct {
 	ShortDate  *string
 	MediumDate *string
 	LongDate   *string
-	// Command specific variables
-	Template *string // new document template
-	User     map[string]string
+	User       map[string]string
 }
 
 // parseVar parses the `NAME=VALUE` var argument `arg` into `vars`.
@@ -101,8 +99,6 @@ func parseVar(vars *rawConfig, arg string) error {
 			vars.MediumDate = &val
 		case "longdate":
 			vars.LongDate = &val
-		case "template":
-			vars.Template = &val
 		default:
 			return fmt.Errorf("illegal -var name: %s", name)
 		}

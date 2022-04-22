@@ -65,9 +65,9 @@ func (site *site) new() (err error) {
 	data["title"] = title
 	site.verbose("document title: %s\ndocument date: %s", data["title"], data["date"])
 	text := defaultNewTemplate
-	if site.vars.Template != nil {
+	if site.from != "" {
 		// Read document template file specified in `-var template=<template-file>` option.
-		f := *site.vars.Template
+		f := site.from
 		if !fsx.FileExists(f) {
 			return fmt.Errorf("missing document template file: %s", f)
 		}

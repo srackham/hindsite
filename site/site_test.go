@@ -197,13 +197,13 @@ func TestExecuteArgs(t *testing.T) {
 	assert.Contains(out, "documents: 13\nstatic: 7")
 
 	os.Remove(f)
-	out, code = exec("hindsite new -var template=foobar " + f)
+	out, code = exec("hindsite new -from foobar " + f)
 	assert.Equal(1, code)
 	assert.Contains(out, "missing document template file: foobar\n")
 
 	f = filepath.Join("content", "posts", "2018-12-01-new-test-file-two.md")
 	template := filepath.Join("template", "posts", "new.md")
-	out, code = exec("hindsite new -var template=" + template + " " + f)
+	out, code = exec("hindsite new -from " + template + " " + f)
 	assert.Equal(0, code)
 	assert.Contains(out, "")
 	assert.True(fsx.FileExists(f))
