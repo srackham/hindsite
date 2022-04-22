@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -13,7 +13,7 @@ import (
 )
 
 func TestServer(t *testing.T) {
-	tmpdir := path.Join(os.TempDir(), "hindsite-tests")
+	tmpdir := filepath.Join(os.TempDir(), "hindsite-tests")
 	// Initialize temporary directory with test blog.
 	os.RemoveAll(tmpdir)
 	fsx.MkMissingDir(tmpdir)
@@ -24,7 +24,7 @@ func TestServer(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("%s", cmd)
 	}
-	if fsx.DirCount(path.Join(tmpdir, "template")) != 9 {
+	if fsx.DirCount(filepath.Join(tmpdir, "template")) != 9 {
 		t.Fatalf("%s: unexpected number of files in template directory", cmd)
 	}
 	// Start server.
@@ -72,12 +72,12 @@ func TestServer(t *testing.T) {
 	}
 	waitFor("Press the Enter key to print help")
 	// Create new post with copy of existing post.
-	existingfile := path.Join(tmpdir, "content", "posts", "document-3.md")
+	existingfile := filepath.Join(tmpdir, "content", "posts", "document-3.md")
 	text, err := fsx.ReadFile(existingfile)
 	if err != nil {
 		t.Fatal(err)
 	}
-	newfile := path.Join(tmpdir, "content", "posts", "newfile.md")
+	newfile := filepath.Join(tmpdir, "content", "posts", "newfile.md")
 	updateAndWait(newfile, text, "content/posts/newfile.md: duplicate document build path in: content/posts/document-3.md")
 	// Fix post error.
 	text = strings.Replace(text, "slug: sed-sed", "slug: newfile", 1)
@@ -95,7 +95,7 @@ func TestServer(t *testing.T) {
 	waitFor("rebuilding...")
 	waitFor("documents: 11")
 	// New static file.
-	newfile = path.Join(tmpdir, "content", "newfile.txt")
+	newfile = filepath.Join(tmpdir, "content", "newfile.txt")
 	text = "Hello World!"
 	updateAndWait(newfile, text, "updated: content/newfile.txt")
 	// Remove static file.
