@@ -59,7 +59,7 @@ type rawConfig struct {
 }
 
 // parseVar parses the `NAME=VALUE` var argument `arg` into `vars`.
-func parseVar(raw *rawConfig, arg string) error {
+func (raw *rawConfig) parseVar(arg string) error {
 	s := strings.SplitN(arg, "=", 2)
 	if len(s) != 2 {
 		return fmt.Errorf("illegal -var syntax: %s", arg)
@@ -106,7 +106,7 @@ func parseVar(raw *rawConfig, arg string) error {
 	return nil
 }
 
-func parseConfigFile(raw *rawConfig, f string) (err error) {
+func (raw *rawConfig) parseConfigFile(f string) (err error) {
 	var text []byte
 	if text, err = ioutil.ReadFile(f); err != nil {
 		return err

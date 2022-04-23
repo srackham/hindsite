@@ -169,7 +169,7 @@ func (site *site) parseArgs(args []string) error {
 					}
 				}
 			case "-var":
-				if err := parseVar(&site.vars, arg); err != nil {
+				if err := site.vars.parseVar(arg); err != nil {
 					return err
 				}
 			default:
@@ -484,7 +484,7 @@ func (site *site) parseConfigFiles() error {
 				found = true
 				site.verbose("read config: " + cf)
 				raw := rawConfig{}
-				if err := parseConfigFile(&raw, cf); err != nil {
+				if err := raw.parseConfigFile(cf); err != nil {
 					return fmt.Errorf("config file: %s: %s", cf, err.Error())
 				}
 				if err := conf.mergeRaw(site, raw); err != nil {
