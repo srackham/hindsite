@@ -58,8 +58,8 @@ website:
 - A _content directory_ containing source [documents](#documents) and
   [static resource files](#static-files).
 - A _template directory_ (also called the _site template_) containing
-  [template](#template-files), [configuration](#configuration) and
-  [content initialisation](#new-command) files.
+  [template](#template-files) and [configuration](#configuration) files along
+  with optional [site initialisation](#init-command) files.
 - A _build directory_ where Hindsite builds the static website.
 
 By default, these directories reside in the _site directory_ and are named
@@ -142,11 +142,28 @@ Start the development webserver:
 ### Common command options
 All commands accept the following options:
 
-`-site SITE_DIR`:: The hindsite site directory (defaults to the current directory).
-`-content CONTENT_DIR`:: The site content directory (defaults to `SITE_DIR/content`).
-`-build BUILD_DIR`:: The site build directory (defaults to `SITE_DIR/build`).
-`-template TEMPLATE_DIR`:: The site template directory (defaults to `SITE_DIR/template`).
-`-v`:: Increase verbosity. `-vv` is an alias for `-v -v`.
+`-site SITE_DIR`::
+The hindsite site directory (defaults to the current directory).
+
+`-content CONTENT_DIR`::
+The site content directory (defaults to `SITE_DIR/content`).
+
+`-build BUILD_DIR`::
+The site build directory (defaults to `SITE_DIR/build`).
+j
+`-template TEMPLATE_DIR`::
+The site template directory (defaults to `SITE_DIR/template`).
+
+`-var NAME=VALUE`::
+Sets the [root configuration variable](#configuration-files) `NAME` to `VALUE`.
+It will often be necessary to shell-quote the `NAME=VALUE` argument. Examples
+
+  -var timezone=UTC
+  -var "templates=*.md"
+  -var "user.banner=News & Views"
+
+`-v`::
+Increase verbosity. `-vv` is an alias for `-v -v`.
 
 Note:
 
@@ -176,32 +193,34 @@ The _help_ command prints Hindsite documentation and version information.
 
 ## Init command
 The _init_ command creates a new site from another site template or from a
-built-in template. The _init_ command copies the source template to the
-site's template directory and initializes the site's content directory.
+built-in template. The source template is copied to the site's template
+directory then the site's content directory is initialised with the contents of
+the (optional) source template `init` directory.
+
+The inclusion of a template `init` directory allows documents and resources
+(images, CSS, JavaScript etc) to be shipped with and installed from a site
+template. Hindsite's [built-in templates](#built-in-templates) all include an
+`init` directory.
 
 ### Syntax
 
     hindsite init [OPTION]...
 
 ### Options
+[Common command options](#common-command-options) plus:
 
-    -site SITE_DIR
-    -content CONTENT_DIR
-    -template TEMPLATE_DIR
     -from SOURCE
-    -v
 
 - The `-from` option is mandatory and `SOURCE` is either the name of a [built-in
-  template](#built-in-site-templates) (`blog`, `docs`, `hello`) or the name
-  of a site template directory.
-- Non-empty target content and template directories are skipped.
+  template](#built-in-templates) (`blog`, `docs`, `hello`) or a site template
+  directory path.
+- Non-empty content and template target directories are skipped.
 
 ### Command execution
 1. The `SOURCE` template is copied to the site `TEMPLATE_DIR`.
 2. The template directory structure is recreated in the content directory.
 3. If the `TEMPLATE_DIR/init` directory exists its contents is copied to the
-   content directory. This feature allows example documents to be shipped with
-   and installed from a site template.
+   content directory.
 
 ### Examples
 - Install the built-in `blog` template to `./template` and initialize the
@@ -224,22 +243,18 @@ files from the _content_ and _template_ directories.
     hindsite build [OPTION]...
 
 ### Options
+[Common command options](#common-command-options) plus:
 
-    -site SITE_DIR
-    -content CONTENT_DIR
-    -template TEMPLATE_DIR
-    -build BUILD_DIR
     -drafts
-    -v
+    -lint
 
-- All files from the _content_ directory not that are not
-  [excluded](#configuration-variables) are rebuilt.
+- All non-excluded files from the _content_ directory are rebuilt.
 - If the `-drafts` option is specified [draft documents](#documents) are included
   in the built website.
 - The `-lint` option performs [validity checks](#validity-checks) on the generated HTML document files.
 - Content, build and template directories cannot overlap, with one exception:
   the content directory can be `TEMPLATE_DIR/init` (this is handy for testing
-  template initialization content).
+  content initialization).
 
 ### Command execution
 
@@ -301,17 +316,13 @@ live reloading.
     hindsite serve [OPTION]...
 
 ### Options
+[Common command options](#common-command-options) plus:
 
-    -site SITE_DIR
-    -content CONTENT_DIR
-    -template TEMPLATE_DIR
-    -build BUILD_DIR
     -drafts
-    -launch
     -lint
+    -launch
     -navigate
     -port [HTTP_PORT][:LR_PORT]
-    -v
 
 - If the `-drafts` option is specified [draft documents](#documents) are included
   in the built website.
@@ -370,29 +381,25 @@ structure).
 
 
 ## New command
-The _new_ command creates a new [document](#documents) file and automatically
-sets the [front matter](#front-matter) `date` and `title`.
+The _new_ command creates a new [document](#documents) file in the content
+directory. The new document's contents are initialised from a Go template.
 
 ### Syntax
 
     hindsite new [OPTION]... DOCUMENT
 
 ### Options
+[Common command options](#common-command-options) plus:
 
-    -site SITE_DIR
-    -content CONTENT_DIR
-    -template TEMPLATE_DIR
-    -v
+    -from SOURCE
 
-- `DOCUMENT` is the path of the new file which must reside in the _content
-  directory_.
-- The _new_ command searches along the corresponding _template directory_ path
-  for the first template named `new.md`  and uses it to create the new
-  `DOCUMENT` file in the _content directory_ i.e. it is the _content directory_
-  `DOCUMENT` path that determines which `new.md` template is chosen from the
-  _template directory_ tree.
-- If a `new.md` template is not found the default built-in template is
-  used.
+- `DOCUMENT` is the path name of the new file.
+- The `-from` option `SOURCE` is the name the template file that will be used to
+  initialise the new document.
+- If the `-from` option is not specified the _new_ command searches along the
+  document's corresponding _template directory_ path for the first template
+  named `new.md` which is then used to initialise the new document. If a
+  `new.md` template is not found the default built-in template is used.
 
 The following template variables are available to the new template:
 
@@ -408,7 +415,7 @@ title to `"Foofoo Valve History"` and the date to the current date and time:
 
     hindsite new ./content/posts/foofoo-valve-history.md
 
-The default new template:
+The default new template is:
 
 ```
 ---
@@ -421,7 +428,7 @@ Document content goes here.
 ```
 
 
-## Built-in site templates
+## Built-in templates
 Hindsite includes `blog`, `docs` and `hello` built-in site templates
 which can be installed using the Hindsite [init command](#init-command).
 
@@ -554,6 +561,12 @@ _template directory_ and subdirectories.
 
 - Configuration files are optional, though most sites will have at least one
   at the root of the template directory.
+
+- All sites have a _root configuration_ which is synthesised by merging (in
+  increasing order of precedence):
+  * Default configuration values.
+  * The root configuration file in the _template directory_.
+  * `-var` command-line options.
 
 -  Configuration files are TOML or YAML markup files named `config.toml` and
   `config.yaml` respectively.
@@ -743,7 +756,7 @@ Are available as these template variables:
 ```
 ..
 
-† Site-wide configuration variable.
+† Site-wide root configuration variable.
 
 
 ## Content files
@@ -1170,7 +1183,7 @@ checkout tags/v1.3.0`.
 Links to explanatory documentation.
 
 - [Build path](#build-paths)
-- [Built-in site template](#built-in-site-templates)
+- [Built-in site template](#built-in-templates)
 - [Configuration file](#configuration-files)
 - [Configuration variable](#configuration-variables)
 - [Content file](#content-files)
@@ -1181,6 +1194,7 @@ Links to explanatory documentation.
 - [HTML template](#html-templates)
 - [Index](#indexes)
 - [Init directory](#new-command)
+- [Root configuration](#configuration-files)
 - [Site directory](#sites)
 - [Site](#sites)
 - [Site template](#sites)

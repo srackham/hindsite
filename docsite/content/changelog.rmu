@@ -4,6 +4,10 @@ See the [Github commit logs]({hindsite-github}/commits/master) for a full list o
 
 
 ## Version 2.0.0 (2022-??-??)
+- Added `-from SOURCE` command-line option to the [new command]({reference}#new-command)
+  which sets the name of the document initialisatioin template file.
+- Added common `-var NAME=VALUE` command-line option to set [root configuration
+  variables]({reference}#configuration-files).
 - Added optional `COMMAND` parameter to the help command.
   If `COMMAND` is specified the command topic on the Hindsite documentation
   website is opened in the default web browser.

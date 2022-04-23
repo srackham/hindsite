@@ -332,6 +332,7 @@ Options:
     -content  CONTENT_DIR
     -template TEMPLATE_DIR
     -build    BUILD_DIR
+    -var      NAME=VALUE
     -port     [HTTP_PORT][:LR_PORT]
     -from     SOURCE
     -drafts

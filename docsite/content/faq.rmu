@@ -1,9 +1,9 @@
 # Hindsite FAQ
 
-## Does hindsite support themes?
-Themes are baked in. Every [site template directory]({reference}#sites), along
-with the built-in templates, is a theme. The Hindsite [init
-command]({reference}#init-command) is the "theme" installer.
+## Does hindsite support themes and skeletons?
+Use the Hindsite [init command]({reference}#init-command) to install website
+styling, content and structure from existing [site templates]({reference}#sites)
+or from [built-in templates]({reference}#built-in-templates).
 
 
 ## Why does the `serve` command sometimes fail a live reload?
@@ -95,9 +95,9 @@ That's it, all published documents with a non-blank [document
 
 - You can automatically assign document `id`s to all documents by setting the
   [`id` configuration variable]({reference}#id-configuration-variable) to
-  `urlpath`. To confine auto `id` assignment to a specific folder put the `id`
+  `urlpath`. To confine auto `id` assignment to a specific folder set the `id`
   variable in that folder's configuration file.
-- To disable comments on specific pages explicitly set the document `id` front
+- To disable Disqus comments on specific pages explicitly set the document `id` front
   matter value to a blank string.
 
 
