@@ -59,7 +59,7 @@ type site struct {
 	vars        rawConfig
 }
 
-// New creates a new site and initialises it with `args` command arguments.
+// New creates a new site.
 func New() site {
 	return site{
 		httpport:   1212,
@@ -68,8 +68,7 @@ func New() site {
 	}
 }
 
-// Execute runs a hindsite command specified by CLI args and returns a
-// non-zero exit code if an error occurred.
+// Execute runs a hindsite command specified by CLI args.
 func (site *site) Execute(args []string) error {
 	var err error
 	err = site.parseArgs(args)
@@ -98,7 +97,7 @@ func (site *site) Execute(args []string) error {
 	return err
 }
 
-// parseArgs parses the hindsite command-line arguments.
+// parseArgs parses and validates hindsite command-line arguments.
 func (site *site) parseArgs(args []string) error {
 	skip := false
 	for i, opt := range args {
@@ -443,8 +442,9 @@ func (site *site) configFor(p string) config {
 }
 
 // parseConfigFiles parses all configuration files from the site template
-// directory to site `confs` and adds in the -var and -config options.
-// It creates a root config from config defaults and the root config file.
+// directory to `site.confs`. The root configuration (site.confs[0]) is
+// synthesised by merging configuration defaults with the root configuration
+// file and -var options.
 func (site *site) parseConfigFiles() error {
 	site.confs = []config{}
 	// Assign default root config.
@@ -483,7 +483,11 @@ func (site *site) parseConfigFiles() error {
 			if fsx.FileExists(cf) {
 				found = true
 				site.verbose("read config: " + cf)
-				if err := conf.parseFile(site, cf); err != nil {
+				raw := rawConfig{}
+				if err := parseConfigFile(&raw, cf); err != nil {
+					return fmt.Errorf("config file: %s: %s", cf, err.Error())
+				}
+				if err := conf.mergeRaw(site, raw); err != nil {
 					return fmt.Errorf("config file: %s: %s", cf, err.Error())
 				}
 				break

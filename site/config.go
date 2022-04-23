@@ -59,7 +59,7 @@ type rawConfig struct {
 }
 
 // parseVar parses the `NAME=VALUE` var argument `arg` into `vars`.
-func parseVar(vars *rawConfig, arg string) error {
+func parseVar(raw *rawConfig, arg string) error {
 	s := strings.SplitN(arg, "=", 2)
 	if len(s) != 2 {
 		return fmt.Errorf("illegal -var syntax: %s", arg)
@@ -68,37 +68,37 @@ func parseVar(vars *rawConfig, arg string) error {
 	val := s[1]
 	if strings.HasPrefix(name, "user.") {
 		name = strings.TrimPrefix(name, "user.")
-		vars.User[name] = val
+		raw.User[name] = val
 	} else {
 		switch name {
 		case "author":
-			vars.Author = &val
+			raw.Author = &val
 		case "templates":
-			vars.Templates = &val
+			raw.Templates = &val
 		case "exclude":
-			vars.Exclude = &val
+			raw.Exclude = &val
 		case "include":
-			vars.Include = &val
+			raw.Include = &val
 		case "id":
-			vars.ID = &val
+			raw.ID = &val
 		case "permalink":
-			vars.Permalink = &val
+			raw.Permalink = &val
 		case "urlprefix":
-			vars.URLPrefix = &val
+			raw.URLPrefix = &val
 		case "paginate":
 			if n, err := strconv.Atoi(val); err != nil {
 				return fmt.Errorf("illegal paginate value: %s", val)
 			} else {
-				vars.Paginate = &n
+				raw.Paginate = &n
 			}
 		case "timezone":
-			vars.Timezone = &val
+			raw.Timezone = &val
 		case "shortdate":
-			vars.ShortDate = &val
+			raw.ShortDate = &val
 		case "mediumdate":
-			vars.MediumDate = &val
+			raw.MediumDate = &val
 		case "longdate":
-			vars.LongDate = &val
+			raw.LongDate = &val
 		default:
 			return fmt.Errorf("illegal -var name: %s", name)
 		}
@@ -106,27 +106,20 @@ func parseVar(vars *rawConfig, arg string) error {
 	return nil
 }
 
-func (conf *config) parseFile(site *site, f string) error {
-	text, err := ioutil.ReadFile(f)
-	if err != nil {
+func parseConfigFile(raw *rawConfig, f string) (err error) {
+	var text []byte
+	if text, err = ioutil.ReadFile(f); err != nil {
 		return err
 	}
-	raw := rawConfig{}
 	switch filepath.Ext(f) {
 	case ".toml":
-		_, err := toml.Decode(string(text), &raw)
-		if err != nil {
-			return err
-		}
+		_, err = toml.Decode(string(text), &raw)
 	case ".yaml":
-		err := yaml.Unmarshal(text, &raw)
-		if err != nil {
-			return err
-		}
+		err = yaml.Unmarshal(text, &raw)
 	default:
 		panic("illegal configuration file extension: " + f)
 	}
-	return conf.mergeRaw(site, raw)
+	return
 }
 
 // mergeRaw validates raw configuration values and merges them into `conf`.
