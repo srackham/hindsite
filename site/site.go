@@ -59,61 +59,43 @@ type site struct {
 	vars        rawConfig
 }
 
-func NewSite() site {
-	site := site{
+// New creates a new site and initialises it with `args` command arguments.
+func New() site {
+	return site{
 		httpport:   1212,
 		lrport:     35729,
 		livereload: true,
 	}
-	return site
 }
 
-// output prints a line to `out` if `-v` option verbosity is equal to or
-// greater than verbosity.
-func (site *site) output(out io.Writer, verbosity int, format string, v ...interface{}) {
-	if site.verbosity >= verbosity {
-		msg := fmt.Sprintf(format, v...)
-		// Strip leading site directory from path names to make message more readable.
-		if filepath.IsAbs(site.siteDir) {
-			msg = strings.Replace(msg, " "+site.siteDir+string(filepath.Separator), " ", -1)
-			msg = strings.TrimPrefix(msg, site.siteDir+string(filepath.Separator))
-		}
-		if site.out == nil {
-			fmt.Fprintln(out, msg)
-		} else {
-			site.out <- msg
+// Execute runs a hindsite command specified by CLI args and returns a
+// non-zero exit code if an error occurred.
+func (site *site) Execute(args []string) error {
+	var err error
+	err = site.parseArgs(args)
+	if err == nil {
+		switch site.command {
+		case "build":
+			err = site.build()
+		case "help":
+			err = site.help()
+		case "init":
+			err = site.init()
+		case "new":
+			err = site.new()
+		case "serve":
+			svr := newServer(site)
+			err = svr.serve()
+		case "nop":
+			// Do nothing, used by tests
+		default:
+			panic("illegal command: " + site.command)
 		}
 	}
-}
-
-// logconsole prints a line to logout.
-func (site *site) logconsole(format string, v ...interface{}) {
-	site.output(os.Stdout, 0, format, v...)
-}
-
-// verbose prints a line to logout if `-v` verbose option was specified.
-func (site *site) verbose(format string, v ...interface{}) {
-	site.output(os.Stdout, 1, format, v...)
-}
-
-// verbose2 prints a a line to logout the `-v` verbose option was specified more
-// than once.
-func (site *site) verbose2(format string, v ...interface{}) {
-	site.output(os.Stdout, 2, format, v...)
-}
-
-// logerror prints a line to stderr.
-func (site *site) logerror(format string, v ...interface{}) {
-	color.Set(color.FgRed, color.Bold)
-	site.output(os.Stderr, 0, format, v...)
-	color.Unset()
-}
-
-// warning prints a line to stdout.
-func (site *site) warning(format string, v ...interface{}) {
-	color.Set(color.Bold)
-	site.output(os.Stdout, 0, format, v...)
-	color.Unset()
+	if err != nil {
+		site.logerror(err.Error())
+	}
+	return err
 }
 
 // parseArgs parses the hindsite command-line arguments.
@@ -271,37 +253,56 @@ func (site *site) parseArgs(args []string) error {
 	return nil
 }
 
-func isCommand(name string) bool {
-	return slice.New("build", "help", "init", "new", "serve").Has(name)
-}
-
-// ExecuteArgs runs a hindsite command specified by CLI args and returns a
-// non-zero exit code if an error occurred.
-func (site *site) ExecuteArgs(args []string) int {
-	var err error
-	err = site.parseArgs(args)
-	if err == nil {
-		switch site.command {
-		case "build":
-			err = site.build()
-		case "help":
-			err = site.help()
-		case "init":
-			err = site.init()
-		case "new":
-			err = site.new()
-		case "serve":
-			svr := newServer(site)
-			err = svr.serve()
-		default:
-			panic("illegal command: " + site.command)
+// output prints a line to `out` if `-v` option verbosity is equal to or
+// greater than verbosity.
+func (site *site) output(out io.Writer, verbosity int, format string, v ...interface{}) {
+	if site.verbosity >= verbosity {
+		msg := fmt.Sprintf(format, v...)
+		// Strip leading site directory from path names to make message more readable.
+		if filepath.IsAbs(site.siteDir) {
+			msg = strings.Replace(msg, " "+site.siteDir+string(filepath.Separator), " ", -1)
+			msg = strings.TrimPrefix(msg, site.siteDir+string(filepath.Separator))
+		}
+		if site.out == nil {
+			fmt.Fprintln(out, msg)
+		} else {
+			site.out <- msg
 		}
 	}
-	if err != nil {
-		site.logerror(err.Error())
-		return 1
-	}
-	return 0
+}
+
+// logconsole prints a line to logout.
+func (site *site) logconsole(format string, v ...interface{}) {
+	site.output(os.Stdout, 0, format, v...)
+}
+
+// verbose prints a line to logout if `-v` verbose option was specified.
+func (site *site) verbose(format string, v ...interface{}) {
+	site.output(os.Stdout, 1, format, v...)
+}
+
+// verbose2 prints a a line to logout the `-v` verbose option was specified more
+// than once.
+func (site *site) verbose2(format string, v ...interface{}) {
+	site.output(os.Stdout, 2, format, v...)
+}
+
+// logerror prints a line to stderr.
+func (site *site) logerror(format string, v ...interface{}) {
+	color.Set(color.FgRed, color.Bold)
+	site.output(os.Stderr, 0, format, v...)
+	color.Unset()
+}
+
+// warning prints a line to stdout.
+func (site *site) warning(format string, v ...interface{}) {
+	color.Set(color.Bold)
+	site.output(os.Stdout, 0, format, v...)
+	color.Unset()
+}
+
+func isCommand(name string) bool {
+	return slice.New("build", "help", "init", "nop", "new", "serve").Has(name)
 }
 
 // help implements the help command.

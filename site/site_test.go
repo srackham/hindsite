@@ -13,92 +13,113 @@ import (
 
 func TestParseArgs(t *testing.T) {
 	assert := assert.New(t)
-	site := NewSite()
 
 	args := []string{"hindsite", "serve", "-site", "./testdata/blog", "-content", "./testdata/blog/template/init"}
-	assert.NoError(site.parseArgs(args))
+	site := New()
+	err := site.parseArgs(args)
+	assert.NoError(err)
 	assert.Equal(uint16(1212), site.httpport, "httpport")
 	assert.Equal(uint16(35729), site.lrport, "lrport")
 	assert.Equal(false, site.drafts, "drafts")
 	assert.Equal(true, site.livereload, "livereload")
 	assert.Equal(false, site.navigate, "navigate")
 
-	args = []string{"hindsite", "serve", "-site", "./testdata/blog", "-port", "1234"}
-	assert.NoError(site.parseArgs(args))
+	args = []string{"hindsite", "serve", "-site", "./testdata/blog", "-content", "./testdata/blog/template/init", "-port", "1234"}
+	site = New()
+	err = site.parseArgs(args)
+	assert.NoError(err)
 	assert.Equal(uint16(1234), site.httpport, "httpport")
 
-	args = []string{"hindsite", "serve", "-site", "./testdata/blog", "-port", "1234:8000", "-drafts"}
-	assert.NoError(site.parseArgs(args))
+	args = []string{"hindsite", "serve", "-site", "./testdata/blog", "-content", "./testdata/blog/template/init", "-port", "1234:8000", "-drafts"}
+	site = New()
+	err = site.parseArgs(args)
+	assert.NoError(err)
 	assert.Equal(uint16(1234), site.httpport, "httpport")
 	assert.Equal(uint16(8000), site.lrport, "lrport")
 	assert.Equal(true, site.drafts, "drafts")
 
-	args = []string{"hindsite", "serve", "-port", ":-1", "-drafts", "-navigate", "-site", "./testdata/blog"}
-	assert.NoError(site.parseArgs(args))
+	args = []string{"hindsite", "serve", "-port", ":-1", "-drafts", "-navigate", "-site", "./testdata/blog", "-content", "./testdata/blog/template/init"}
+	site = New()
+	err = site.parseArgs(args)
+	assert.NoError(err)
 	assert.Equal(true, site.drafts, "drafts")
 	assert.Equal(false, site.livereload, "livereload")
 	assert.Equal(true, site.navigate, "navigate")
 
 	args = []string{"hindsite", "illegal-command"}
-	assert.Equal("illegal command: illegal-command", site.parseArgs(args).Error())
+	site = New()
+	err = site.parseArgs(args)
+	assert.Equal("illegal command: illegal-command", err.Error())
 
 	args = []string{"hindsite", "serve", "-illegal-option"}
-	assert.Equal("illegal option: -illegal-option", site.parseArgs(args).Error())
+	site = New()
+	err = site.parseArgs(args)
+	assert.Equal("illegal option: -illegal-option", err.Error())
 
 	args = []string{"hindsite", "serve", "-site", "missing-site-dir"}
-	assert.Contains(site.parseArgs(args).Error(), "missing site directory: ")
+	site = New()
+	err = site.parseArgs(args)
+	assert.Contains(err.Error(), "missing site directory: ")
 
 	args = []string{"hindsite", "serve", "-site", ".", "-content", "missing-content-dir"}
-	assert.Contains(site.parseArgs(args).Error(), "missing content directory: ")
+	site = New()
+	err = site.parseArgs(args)
+	assert.Contains(err.Error(), "missing content directory: ")
 
 	args = []string{"hindsite", "serve", "-port"}
-	assert.Equal("missing -port argument value", site.parseArgs(args).Error())
+	site = New()
+	err = site.parseArgs(args)
+	assert.Equal("missing -port argument value", err.Error())
 
 	args = []string{"hindsite", "serve", "-site", "./testdata/blog", "-port", "99999999"}
-	assert.Equal("illegal -port: 99999999", site.parseArgs(args).Error())
+	site = New()
+	err = site.parseArgs(args)
+	assert.Equal("illegal -port: 99999999", err.Error())
 
 	args = []string{"hindsite", "serve", "-site", "./testdata/blog", "-port", ":99999999"}
-	assert.Equal("illegal -port: :99999999", site.parseArgs(args).Error())
+	site = New()
+	err = site.parseArgs(args)
+	assert.Equal("illegal -port: :99999999", err.Error())
 }
 
 func TestExecuteArgs(t *testing.T) {
 	tmpdir := filepath.Join(os.TempDir(), "hindsite-tests")
 	assert := assert.New(t)
 	var site site
-	exec := func(cmd string) (out string, code int) {
-		site = NewSite()
-		site.out = make(chan string, 100)
+	exec := func(cmd string) (out string, err error) {
 		args := strings.Split(cmd, " ")
-		code = site.ExecuteArgs(args)
+		site = New()
+		site.out = make(chan string, 100)
+		err = site.Execute(args)
 		close(site.out)
 		for line := range site.out {
 			out += line + "\n"
 		}
 		out = strings.Replace(out, `\`, `/`, -1) // Normalize MS Windows path separators.
-		return out, code
+		return
 	}
 
 	/*
 		Test help command.
 	*/
-	out, code := exec("hindsite")
-	assert.Equal(0, code)
+	out, err := exec("hindsite")
+	assert.NoError(err)
 	assert.Contains(out, "Hindsite is a static website generator")
 
-	out, code = exec("hindsite help")
-	assert.Equal(0, code)
+	out, err = exec("hindsite help")
+	assert.NoError(err)
 	assert.Contains(out, "Hindsite is a static website generator")
 
-	out, code = exec("hindsite help foobar")
-	assert.Equal(1, code)
+	out, err = exec("hindsite help foobar")
+	assert.Error(err)
 	assert.Contains(out, "illegal command: foobar")
 
-	out, code = exec("hindsite help foo bar")
-	assert.Equal(1, code)
+	out, err = exec("hindsite help foo bar")
+	assert.Error(err)
 	assert.Contains(out, "to many command arguments")
 
-	out, code = exec("hindsite build -site missing")
-	assert.Equal(1, code)
+	out, err = exec("hindsite build -site missing")
+	assert.Error(err)
 	assert.Contains(out, "missing site directory")
 
 	/*
@@ -106,34 +127,34 @@ func TestExecuteArgs(t *testing.T) {
 	*/
 	os.RemoveAll(tmpdir)
 	fsx.MkMissingDir(tmpdir)
-	out, code = exec("hindsite init -site " + tmpdir + " -from blog -v")
-	assert.Equal(0, code)
+	out, err = exec("hindsite init -site " + tmpdir + " -from blog -v")
+	assert.NoError(err)
 	assert.Contains(out, "installing builtin template: blog")
 	assert.Equal(6, fsx.DirCount(filepath.Join(tmpdir, "template")), "unexpected number of files in template directory")
 	assert.Equal(7, fsx.DirCount(filepath.Join(tmpdir, "content", "posts")), "unexpected number of files in content/posts directory")
 	assert.Equal(0, fsx.DirCount(filepath.Join(tmpdir, "build")), "unexpected number of files in build directory")
 
-	out, code = exec("hindsite build -site " + tmpdir + " -lint")
-	assert.Equal(0, code)
+	out, err = exec("hindsite build -site " + tmpdir + " -lint")
+	assert.NoError(err)
 	assert.Equal(7, fsx.DirCount(filepath.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
 	assert.Contains(out, "documents: 12\nstatic: 6")
 
-	out, code = exec("hindsite build " + tmpdir + " -lint") // Old v1 command syntax.
-	assert.Equal(1, code)
+	out, err = exec("hindsite build " + tmpdir + " -lint") // Old v1 command syntax.
+	assert.Error(err)
 	assert.Contains(out, "missing content directory: content")
 
 	os.RemoveAll(tmpdir)
 	fsx.MkMissingDir(tmpdir)
-	out, code = exec("hindsite init -site " + tmpdir + " -from ./testdata/blog/template -v")
-	assert.Equal(0, code)
+	out, err = exec("hindsite init -site " + tmpdir + " -from ./testdata/blog/template -v")
+	assert.NoError(err)
 	assert.Contains(out, "make directory: content/newsletters")
 
 	wd, _ := os.Getwd()
 	defer os.Chdir(wd)
 	os.Chdir(tmpdir)
 
-	out, code = exec("hindsite build -drafts")
-	assert.Equal(0, code)
+	out, err = exec("hindsite build -drafts")
+	assert.NoError(err)
 	assert.Equal(7, fsx.DirCount(filepath.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
 	assert.FileExists(filepath.Join("build", "posts", "2015-05-20", "tincidunt-cursus-pulvinar", "index.html"))
 	assert.Contains(out, "documents: 11\nstatic: 7")
@@ -142,8 +163,8 @@ func TestExecuteArgs(t *testing.T) {
 		Test build command -lint option.
 	*/
 	// The draft document contains invalid links.
-	out, code = exec("hindsite build -drafts -lint")
-	assert.Equal(1, code)
+	out, err = exec("hindsite build -drafts -lint")
+	assert.Error(err)
 	assert.Equal(7, fsx.DirCount(filepath.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
 	assert.Contains(out, `content/posts/links-test.md: contains duplicate element id: "id2"`)
 	assert.Contains(out, `content/posts/links-test.md: contains illicit element id: "-illicit-id"`)
@@ -157,14 +178,14 @@ func TestExecuteArgs(t *testing.T) {
 	/*
 		Test the new command
 	*/
-	out, code = exec("hindsite build")
-	assert.Equal(0, code)
+	out, err = exec("hindsite build")
+	assert.NoError(err)
 	assert.Equal(6, fsx.DirCount(filepath.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
 	assert.Contains(out, "documents: 11\nstatic: 7")
 
 	f := filepath.Join(tmpdir, "content", "new-test-file.md")
-	out, code = exec("hindsite new -site " + tmpdir + " " + f)
-	assert.Equal(0, code)
+	out, err = exec("hindsite new -site " + tmpdir + " " + f)
+	assert.NoError(err)
 	assert.Contains(out, "")
 	assert.True(fsx.FileExists(f))
 	text, _ := fsx.ReadFile(f)
@@ -172,13 +193,13 @@ func TestExecuteArgs(t *testing.T) {
 	assert.Contains(text, "date:  "+time.Now().Format("2006-01-02"))
 	assert.Contains(text, "Document content goes here.")
 
-	out, code = exec("hindsite build")
-	assert.Equal(0, code)
+	out, err = exec("hindsite build")
+	assert.NoError(err)
 	assert.Contains(out, "documents: 12\nstatic: 7")
 
 	f = filepath.Join("content", "posts", "2018-12-01-new-test-file-two.md")
-	out, code = exec("hindsite new " + f)
-	assert.Equal(0, code)
+	out, err = exec("hindsite new " + f)
+	assert.NoError(err)
 	assert.Contains(out, "")
 	assert.True(fsx.FileExists(f))
 	text, _ = fsx.ReadFile(f)
@@ -186,25 +207,25 @@ func TestExecuteArgs(t *testing.T) {
 	assert.Contains(text, "date:  2018-12-01")
 	assert.Contains(text, "Test new template.")
 
-	out, code = exec("hindsite new " + f)
-	assert.Equal(1, code)
+	out, err = exec("hindsite new " + f)
+	assert.Error(err)
 	assert.Contains(out, "document already exists: content/posts/2018-12-01-new-test-file-two.md")
 
-	out, code = exec("hindsite build -drafts")
-	assert.Equal(0, code)
+	out, err = exec("hindsite build -drafts")
+	assert.NoError(err)
 	assert.FileExists(filepath.Join("build", "new-test-file.html"))
 	assert.FileExists(filepath.Join("build", "posts", "2018-12-01", "2018-12-01-new-test-file-two", "index.html"))
 	assert.Contains(out, "documents: 13\nstatic: 7")
 
 	os.Remove(f)
-	out, code = exec("hindsite new -from foobar " + f)
-	assert.Equal(1, code)
+	out, err = exec("hindsite new -from foobar " + f)
+	assert.Error(err)
 	assert.Contains(out, "missing document template file: foobar\n")
 
 	f = filepath.Join("content", "posts", "2018-12-01-new-test-file-two.md")
 	template := filepath.Join("template", "posts", "new.md")
-	out, code = exec("hindsite new -from " + template + " " + f)
-	assert.Equal(0, code)
+	out, err = exec("hindsite new -from " + template + " " + f)
+	assert.NoError(err)
 	assert.Contains(out, "")
 	assert.True(fsx.FileExists(f))
 	text, _ = fsx.ReadFile(f)
@@ -212,7 +233,7 @@ func TestExecuteArgs(t *testing.T) {
 	assert.Contains(text, "date:  2018-12-01")
 	assert.Contains(text, "Test new template.")
 
-	out, code = exec("hindsite new " + tmpdir + " " + f) // Old v1 command syntax.
-	assert.Equal(1, code)
+	out, err = exec("hindsite new " + tmpdir + " " + f) // Old v1 command syntax.
+	assert.Error(err)
 	assert.Contains(out, "to many command arguments")
 }

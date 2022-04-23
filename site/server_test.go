@@ -17,25 +17,26 @@ func TestServer(t *testing.T) {
 	// Initialize temporary directory with test blog.
 	os.RemoveAll(tmpdir)
 	fsx.MkMissingDir(tmpdir)
-	site := NewSite()
 	cmd := "hindsite init -site " + tmpdir + " -from ./testdata/blog/template"
 	args := strings.Split(cmd, " ")
-	code := site.ExecuteArgs(args)
-	if code != 0 {
-		t.Fatalf("%s", cmd)
+	site := New()
+	err := site.Execute(args)
+	if err != nil {
+		t.Fatalf("%s: %s", cmd, err.Error())
 	}
 	if fsx.DirCount(filepath.Join(tmpdir, "template")) != 9 {
 		t.Fatalf("%s: unexpected number of files in template directory", cmd)
 	}
 	// Start server.
-	site = NewSite()
-	site.out = make(chan string, 100)
-	site.in = make(chan string, 1)
 	cmd = "hindsite serve -site " + tmpdir
 	args = strings.Split(cmd, " ")
-	if err := site.parseArgs(args); err != nil {
+	site = New()
+	err = site.parseArgs(args)
+	if err != nil {
 		t.Fatalf("serve error: %v", err.Error())
 	}
+	site.out = make(chan string, 100)
+	site.in = make(chan string, 1)
 	svr := newServer(&site)
 	go func() {
 		if err := svr.serve(); err != nil {
@@ -107,11 +108,17 @@ func TestServer(t *testing.T) {
 
 // Based onhttps://blog.questionable.services/article/testing-http-handlers-go/
 func TestHTTPHandlers(t *testing.T) {
-	site := NewSite()
-	site.buildDir = "./testdata/blog/build"
-	site.templateDir = "./testdata/blog/template"
-	site.parseConfigFiles()
-	site.confs[0].urlprefix = "http:/example.com"
+	cmd := "hindsite nop -site ./testdata/blog -content ./testdata/blog/template/init -var urlprefix=http:/example.com"
+	args := strings.Split(cmd, " ")
+	site := New()
+	err := site.parseArgs(args)
+	if err != nil {
+		t.Fatalf("%s: %s", cmd, err.Error())
+	}
+	err = site.parseConfigFiles()
+	if err != nil {
+		t.Fatalf("%s: %s", cmd, err.Error())
+	}
 	svr := newServer(&site)
 
 	// Create a request to pass to our handler. We don't have any query parameters for now, so we'll
