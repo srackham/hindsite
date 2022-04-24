@@ -66,6 +66,24 @@ func TestParseArgs(t *testing.T) {
 
 	parse("hindsite serve -site ./testdata/blog -port :99999999")
 	assert.Equal("illegal -port: :99999999", err.Error())
+
+	parse("hindsite build -site ./testdata/blog -var foobar")
+	assert.Contains("illegal -var syntax: foobar", err.Error())
+
+	parse("hindsite build -site ./testdata/blog -var foobar=42")
+	assert.Contains("illegal -var name: foobar", err.Error())
+
+	parse("hindsite build -site ./testdata/blog -var author=Joe-Bloggs")
+	assert.Equal("Joe-Bloggs", *site.vars.Author)
+
+	parse("hindsite build -site ./testdata/blog -var paginate=qux")
+	assert.Contains("illegal paginate value: qux", err.Error())
+
+	parse("hindsite build -site ./testdata/blog -var paginate=42")
+	assert.Equal(42, *site.vars.Paginate)
+
+	parse("hindsite build -site ./testdata/blog -var user.foo=bar")
+	assert.Equal("bar", site.vars.User["foo"])
 }
 
 func TestExecuteArgs(t *testing.T) {
