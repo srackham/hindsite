@@ -68,6 +68,9 @@ func (raw *rawConfig) parseVar(arg string) error {
 	val := s[1]
 	if strings.HasPrefix(name, "user.") {
 		name = strings.TrimPrefix(name, "user.")
+		if raw.User == nil {
+			raw.User = make(map[string]string)
+		}
 		raw.User[name] = val
 	} else {
 		switch name {
@@ -191,8 +194,8 @@ func (conf *config) mergeRaw(site *site, raw rawConfig) error {
 	if raw.LongDate != nil {
 		conf.longdate = *raw.LongDate
 	}
-	if raw.User != nil {
-		conf.user = raw.User
+	for k, v := range raw.User {
+		conf.user[k] = v
 	}
 	return nil
 }
