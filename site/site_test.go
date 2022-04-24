@@ -14,9 +14,15 @@ import (
 func TestParseArgs(t *testing.T) {
 	assert := assert.New(t)
 
-	args := []string{"hindsite", "serve", "-site", "./testdata/blog", "-content", "./testdata/blog/template/init"}
-	site := New()
-	err := site.parseArgs(args)
+	var site site
+	var err error
+	parse := func(cmd string) {
+		args := strings.Split(cmd, " ")
+		site = New()
+		err = site.parseArgs(args)
+	}
+
+	parse("hindsite serve -site ./testdata/blog -content ./testdata/blog/template/init")
 	assert.NoError(err)
 	assert.Equal(uint16(1212), site.httpport, "httpport")
 	assert.Equal(uint16(35729), site.lrport, "lrport")
@@ -24,61 +30,41 @@ func TestParseArgs(t *testing.T) {
 	assert.Equal(true, site.livereload, "livereload")
 	assert.Equal(false, site.navigate, "navigate")
 
-	args = []string{"hindsite", "serve", "-site", "./testdata/blog", "-content", "./testdata/blog/template/init", "-port", "1234"}
-	site = New()
-	err = site.parseArgs(args)
+	parse("hindsite serve -site ./testdata/blog -content ./testdata/blog/template/init -port 1234")
 	assert.NoError(err)
 	assert.Equal(uint16(1234), site.httpport, "httpport")
 
-	args = []string{"hindsite", "serve", "-site", "./testdata/blog", "-content", "./testdata/blog/template/init", "-port", "1234:8000", "-drafts"}
-	site = New()
-	err = site.parseArgs(args)
+	parse("hindsite serve -site ./testdata/blog -content ./testdata/blog/template/init -port 1234:8000 -drafts")
 	assert.NoError(err)
 	assert.Equal(uint16(1234), site.httpport, "httpport")
 	assert.Equal(uint16(8000), site.lrport, "lrport")
 	assert.Equal(true, site.drafts, "drafts")
 
-	args = []string{"hindsite", "serve", "-port", ":-1", "-drafts", "-navigate", "-site", "./testdata/blog", "-content", "./testdata/blog/template/init"}
-	site = New()
-	err = site.parseArgs(args)
+	parse("hindsite serve -port :-1 -drafts -navigate -site ./testdata/blog -content ./testdata/blog/template/init")
 	assert.NoError(err)
 	assert.Equal(true, site.drafts, "drafts")
 	assert.Equal(false, site.livereload, "livereload")
 	assert.Equal(true, site.navigate, "navigate")
 
-	args = []string{"hindsite", "illegal-command"}
-	site = New()
-	err = site.parseArgs(args)
+	parse("hindsite illegal-command")
 	assert.Equal("illegal command: illegal-command", err.Error())
 
-	args = []string{"hindsite", "serve", "-illegal-option"}
-	site = New()
-	err = site.parseArgs(args)
+	parse("hindsite serve -illegal-option")
 	assert.Equal("illegal option: -illegal-option", err.Error())
 
-	args = []string{"hindsite", "serve", "-site", "missing-site-dir"}
-	site = New()
-	err = site.parseArgs(args)
+	parse("hindsite serve -site missing-site-dir")
 	assert.Contains(err.Error(), "missing site directory: ")
 
-	args = []string{"hindsite", "serve", "-site", ".", "-content", "missing-content-dir"}
-	site = New()
-	err = site.parseArgs(args)
+	parse("hindsite serve -site . -content missing-content-dir")
 	assert.Contains(err.Error(), "missing content directory: ")
 
-	args = []string{"hindsite", "serve", "-port"}
-	site = New()
-	err = site.parseArgs(args)
+	parse("hindsite serve -port")
 	assert.Equal("missing -port argument value", err.Error())
 
-	args = []string{"hindsite", "serve", "-site", "./testdata/blog", "-port", "99999999"}
-	site = New()
-	err = site.parseArgs(args)
+	parse("hindsite serve -site ./testdata/blog -port 99999999")
 	assert.Equal("illegal -port: 99999999", err.Error())
 
-	args = []string{"hindsite", "serve", "-site", "./testdata/blog", "-port", ":99999999"}
-	site = New()
-	err = site.parseArgs(args)
+	parse("hindsite serve -site ./testdata/blog -port :99999999")
 	assert.Equal("illegal -port: :99999999", err.Error())
 }
 
