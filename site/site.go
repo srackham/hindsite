@@ -131,7 +131,7 @@ func (site *site) parseArgs(args []string) error {
 			site.verbosity++
 		case opt == "-vv":
 			site.verbosity += 2
-		case slice.New("-site", "-content", "-template", "-build", "-from", "-port", "-var").Has(opt):
+		case slice.New("-site", "-content", "-template", "-build", "-from", "-port", "-var", "-config").Has(opt):
 			// Process option argument.
 			if i+1 >= len(args) {
 				return fmt.Errorf("missing %s argument value", opt)
@@ -170,6 +170,10 @@ func (site *site) parseArgs(args []string) error {
 				}
 			case "-var":
 				if err := site.vars.parseVar(arg); err != nil {
+					return err
+				}
+			case "-config":
+				if err := site.vars.parseConfigFile(arg); err != nil {
 					return err
 				}
 			default:
