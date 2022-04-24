@@ -1,0 +1,5 @@
+author = "Bill Blow"
+
+[user]
+baz = "qux"
+foo = "qux2"

@@ -84,6 +84,12 @@ func TestParseArgs(t *testing.T) {
 
 	parse("hindsite build -site ./testdata/blog -var user.foo=bar")
 	assert.Equal("bar", site.vars.User["foo"])
+
+	parse("hindsite build -site ./testdata/blog -content ./testdata/blog/template/init -var user.foo=bar -config ./testdata/blog/template/config2.toml")
+	assert.NoError(err)
+	assert.Equal("Bill Blow", *site.vars.Author)
+	assert.Equal("qux", site.vars.User["baz"])
+	assert.Equal("qux2", site.vars.User["foo"])
 }
 
 func TestExecuteArgs(t *testing.T) {
