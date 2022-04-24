@@ -12,17 +12,18 @@ SHELL := bash
 
 GOFLAGS ?=
 PACKAGES = ./site ./fsx ./slice ./set
+XFLAG_PATH = github.com/srackham/hindsite/site
 
 .PHONY: install
 install:
-	LDFLAGS="-X main.BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)"
+	LDFLAGS="-X $(XFLAG_PATH).BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)"
 	# The version number is set to the tag of latest commit
 	VERS="$$(git tag --points-at HEAD)"
 	if [ -n "$$VERS" ]; then
 		[[ ! $$VERS =~ ^v[0-9]+\.[0-9]+\.[0-9]+$$ ]] && echo "illegal VERS=$$VERS " && exit 1
-		LDFLAGS="$$LDFLAGS -X main.VERS=$$VERS"
+		LDFLAGS="$$LDFLAGS -X $(XFLAG_PATH).VERS=$$VERS"
 	fi
-	LDFLAGS="$$LDFLAGS -X main.OS=$$(go env GOOS)/$$(go env GOARCH)"
+	LDFLAGS="$$LDFLAGS -X $(XFLAG_PATH).OS=$$(go env GOOS)/$$(go env GOARCH)"
 	go install -ldflags "$$LDFLAGS" ./...
 
 .PHONY: test
@@ -66,11 +67,11 @@ build-dist: clean test validate-docs
 	mkdir -p $(DIST_DIR)
 	BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)
 	COMMIT=$$(git rev-parse HEAD)
-	BUILD_FLAGS="-X main.BUILT=$$BUILT -X main.COMMIT=$$COMMIT -X main.VERS=$$VERS"
+	BUILD_FLAGS="-X $(XFLAG_PATH).BUILT=$$BUILT -X $(XFLAG_PATH).COMMIT=$$COMMIT -X $(XFLAG_PATH).VERS=$$VERS"
 	build () {
 		export GOOS=$$1
 		export GOARCH=$$2
-		LDFLAGS="$$BUILD_FLAGS -X main.OS=$$GOOS/$$GOARCH"
+		LDFLAGS="$$BUILD_FLAGS -X $(XFLAG_PATH).OS=$$GOOS/$$GOARCH"
 		LDFLAGS="$$LDFLAGS -s -w"	# Strip symbols to decrease executable size
 		NAME=hindsite-$$VERS-$$GOOS-$$GOARCH
 		EXE=$$NAME/hindsite
