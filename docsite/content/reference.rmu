@@ -143,16 +143,20 @@ Start the development webserver:
 All commands accept the following options:
 
 `-site SITE_DIR`::
-The hindsite site directory (defaults to the current directory).
+Set the hindsite site directory (defaults to the current directory).
 
 `-content CONTENT_DIR`::
-The site content directory (defaults to `SITE_DIR/content`).
+Set the site content directory (defaults to `SITE_DIR/content`).
 
 `-build BUILD_DIR`::
-The site build directory (defaults to `SITE_DIR/build`).
+Set the site build directory (defaults to `SITE_DIR/build`).
 j
 `-template TEMPLATE_DIR`::
-The site template directory (defaults to `SITE_DIR/template`).
+Set the site template directory (defaults to `SITE_DIR/template`).
+
+`-config CONFIG_FILE`::
+Merge the `CONFIG_FILE` [configuration file](#configuration-files) into the
+site's _root configuration_.
 
 `-var NAME=VALUE`::
 Sets the [root configuration variable](#configuration-files) `NAME` to `VALUE`.
@@ -173,6 +177,8 @@ Note:
 - Sites are not restricted to a single content, template and build directory.
   The `-content`, `-template` and `-build` options allow separate builds from
   differing combinations of build, content and template directories.
+- Multiple `-var` and `-config` options can be specified, they are
+  processed in the order they appear on the command-line.
 
 
 ## Help command
@@ -382,7 +388,7 @@ structure).
 
 ## New command
 The _new_ command creates a new [document](#documents) file in the content
-directory. The new document's contents are initialised from a Go template.
+directory. The new document's contents are initialised from a Go text template.
 
 ### Syntax
 
@@ -415,7 +421,7 @@ title to `"Foofoo Valve History"` and the date to the current date and time:
 
     hindsite new ./content/posts/foofoo-valve-history.md
 
-The default new template is:
+The default new document template is:
 
 ```
 ---
@@ -566,7 +572,7 @@ _template directory_ and subdirectories.
   increasing order of precedence):
   * Default configuration values.
   * The root configuration file in the _template directory_.
-  * `-var` command-line options.
+  * `-var` and `-config` [command-line options](#common-command-options).
 
 -  Configuration files are TOML or YAML markup files named `config.toml` and
   `config.yaml` respectively.
