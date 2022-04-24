@@ -11,7 +11,7 @@ SHELL := bash
  .SILENT:
 
 GOFLAGS ?=
-PACKAGES = ./site ./fsx ./slice ./set
+PACKAGES = ./...
 XFLAG_PATH = github.com/srackham/hindsite/site
 
 .PHONY: install
