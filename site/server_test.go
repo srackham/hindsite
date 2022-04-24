@@ -24,7 +24,7 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("%s: %s", cmd, err.Error())
 	}
-	if fsx.DirCount(filepath.Join(tmpdir, "template")) != 10 {
+	if fsx.DirCount(filepath.Join(tmpdir, "template")) != 11 {
 		t.Fatalf("%s: unexpected number of files in template directory", cmd)
 	}
 	// Start server.
