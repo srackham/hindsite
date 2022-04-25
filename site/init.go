@@ -21,7 +21,7 @@ func (site *site) init() error {
 	if fsx.DirCount(site.templateDir) > 0 {
 		site.warning("skipping non-empty target template directory: " + site.templateDir)
 	} else {
-		if slice.New("blog", "doc", "hello").Has(site.from) {
+		if slice.New("blog", "docs", "hello").Has(site.from) {
 			// Load template directory from the built-in site.
 			site.verbose("installing builtin template: " + site.from)
 			if err := restoreEmbeddedFS(embeddedFS, "builtin/"+site.from+"/template", site.templateDir); err != nil {
