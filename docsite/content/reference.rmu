@@ -156,10 +156,10 @@ Set the site template directory (defaults to `SITE_DIR/template`).
 
 `-config CONFIG_FILE`::
 Merge the `CONFIG_FILE` [configuration file](#configuration-files) into the
-site's _root configuration_.
+site's [root configuration](#root-configuration).
 
 `-var NAME=VALUE`::
-Sets the [root configuration variable](#configuration-files) `NAME` to `VALUE`.
+Sets the _root configuration_ variable `NAME` to `VALUE`.
 It will often be necessary to shell-quote the `NAME=VALUE` argument. Examples
 
   -var timezone=UTC
@@ -529,8 +529,9 @@ A minimal single-page built-in template consisting of a single
 `content/index.md` document and a single `template/layout.html` HTML template.
 
 ### Built-in template styling
-The `blog` and `docs` templates include the following block element CSS classes (in `main.css`)
-which are particularly useful for styling Rimu markup:
+The `blog` and `docs` templates include the following block element CSS classes
+(in `content/main.css`) which are particularly useful for styling Rimu
+markup:
 
 ```
 CSS class          Description
@@ -559,35 +560,38 @@ ___________________________________________________________
 
 ## Configuration
 Website generation is customized with configuration variables (named values)
-from one or more configuration files.
+from configuration files in the _template directory_ and from `-var` and
+`-config` [command-line options](#common-command-options).
 
 ### Configuration files
-A site can have multiple configuration files which reside in the site
-_template directory_ and subdirectories.
+Configuration files are optional, though most sites will have at least one
+at the root of the _template directory_.
 
-- Configuration files are optional, though most sites will have at least one
-  at the root of the template directory.
+- Configuration files are TOML or YAML markup files named `config.toml` and
+  `config.yaml` respectively (except for those explicitly named by `-config`
+  options).
 
+.#root-configuration
 - All sites have a _root configuration_ which is synthesised by merging (in
   increasing order of precedence):
   * Default configuration values.
   * The root configuration file in the _template directory_.
   * `-var` and `-config` [command-line options](#common-command-options).
 
--  Configuration files are TOML or YAML markup files named `config.toml` and
-  `config.yaml` respectively.
+- Non-root configuration files can located anywhere in the template directory
+  tree (except for the _init_ directory) and are applied to
+  [content files](#content-files) in the corresponding content directory.
 
-- Configuration files can located anywhere in the template directory tree
-  (except for the _init_ directory) and are applied [content files](#content-files)
-  in the corresponding content directory.
-
-- The configuration applied to a content file is computed by merging
-  configuration files lying along the corresponding _template directory_ path.
-  Configuration files closer to the document have higher precedence than those
-  further along the directory path. For example, the configuration applied to
-  `posts/foobar.md` in the content directory is computed by merging template
-  directory configuration files `posts/config.yaml` and `config.yaml` (the
-  former taking precedence over the latter).
+- The configuration applied to a content file is computed by merging the _root
+  configuration_ with configuration files lying along the corresponding
+  _template directory_ path. Configuration files closer to the document have
+  higher precedence than those further along the directory path.
+..
+For example, the configuration applied to document `CONTENT_DIR/posts/foobar.md`
+is computed by merging template directory configuration files
+in `TEMPLATE_DIR/posts/` with the _root configuration_ (the former taking
+precedence over the latter).
+..
 
 ### Configuration variables
 The `exclude`, `include`, `homepage` and `urlprefix` configuration variables
@@ -1200,7 +1204,7 @@ Links to explanatory documentation.
 - [HTML template](#html-templates)
 - [Index](#indexes)
 - [Init directory](#new-command)
-- [Root configuration](#configuration-files)
+- [Root configuration](#root-configuration)
 - [Site directory](#sites)
 - [Site](#sites)
 - [Site template](#sites)
