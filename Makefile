@@ -196,3 +196,9 @@ build-sitemap:
 .PHONY: submit-sitemap
 submit-sitemap:
 	curl https://www.google.com/ping?sitemap=$(HOMEPAGE)/sitemap.txt
+
+#
+# Build and validate docs and built-in templates.
+#
+.PHONY: validate-all
+validate-all: validate-docs validate-builtin-hello validate-builtin-blog  validate-builtin-docs 
