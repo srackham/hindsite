@@ -141,34 +141,43 @@ func TestExecuteArgs(t *testing.T) {
 	/*
 		Test init and build commands.
 	*/
-	os.RemoveAll(tmpdir)
-	fsx.MkMissingDir(tmpdir)
-	out, err = exec("hindsite init -site " + tmpdir + " -from blog -v")
-	assert.NoError(err)
-	assert.Contains(out, "installing builtin template: blog")
-	assert.Equal(6, fsx.DirCount(filepath.Join(tmpdir, "template")), "unexpected number of files in template directory")
-	assert.Equal(7, fsx.DirCount(filepath.Join(tmpdir, "content", "posts")), "unexpected number of files in content/posts directory")
-	assert.Equal(0, fsx.DirCount(filepath.Join(tmpdir, "build")), "unexpected number of files in build directory")
-
-	out, err = exec("hindsite build -site " + tmpdir + " -lint")
-	assert.NoError(err)
-	assert.Equal(7, fsx.DirCount(filepath.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
-	assert.Contains(out, "documents: 12\nstatic: 6")
-
-	out, err = exec("hindsite build " + tmpdir + " -lint") // Old v1 command syntax.
+	buildSiteFrom := func(from string, buildmsg string, templateCount int, contentCount int, buildCount int) {
+		os.RemoveAll(tmpdir)
+		fsx.MkMissingDir(tmpdir)
+		cmd := "hindsite init -site " + tmpdir + " -from " + from + " -v"
+		out, err = exec(cmd)
+		assert.NoError(err, "unexpected error: \""+cmd+"\"")
+		assert.Equal(templateCount, fsx.DirCount(filepath.Join(tmpdir, "template")), from+": unexpected number of files in template directory")
+		assert.Equal(contentCount, fsx.DirCount(filepath.Join(tmpdir, "content")), from+": unexpected number of files in content directory")
+		assert.Equal(0, fsx.DirCount(filepath.Join(tmpdir, "build")), from+": unexpected number of files in build directory")
+		out, err = exec("hindsite build -site " + tmpdir + " -lint -v")
+		assert.NoError(err)
+		assert.Equal(buildCount, fsx.DirCount(filepath.Join(tmpdir, "build")), from+": unexpected number of files in build directory")
+		assert.Contains(out, buildmsg)
+	}
+	out, err = exec("hindsite build " + tmpdir) // Old v1 command syntax.
 	assert.Error(err)
 	assert.Contains(out, "missing content directory: content")
 
-	os.RemoveAll(tmpdir)
-	fsx.MkMissingDir(tmpdir)
-	out, err = exec("hindsite init -site " + tmpdir + " -from ./testdata/blog/template -v")
-	assert.NoError(err)
-	assert.Contains(out, "make directory: content/newsletters")
+	// Test built-in templates.
+	buildSiteFrom("hello", "documents: 1\nstatic: 0", 2, 1, 1)
+	buildSiteFrom("blog", "documents: 12\nstatic: 6", 6, 7, 9)
+	assert.Equal(7, fsx.DirCount(filepath.Join(tmpdir, "content", "posts")), "unexpected number of files in content/posts directory")
+	buildSiteFrom("docs", "documents: 4\nstatic: 3", 4, 7, 7)
+
+	/*
+		Initialise and build the testdata site for subsequent tests.
+		NOTE: From here on the tests are performed in the tmp directory on the testdata site.
+	*/
+	buildSiteFrom("./testdata/blog/template", "documents: 11\nstatic: 7", 11, 8, 9)
 
 	wd, _ := os.Getwd()
 	defer os.Chdir(wd)
 	os.Chdir(tmpdir)
 
+	/*
+		Test drafts generation.
+	*/
 	out, err = exec("hindsite build -drafts")
 	assert.NoError(err)
 	assert.Equal(7, fsx.DirCount(filepath.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
@@ -242,7 +251,6 @@ func TestExecuteArgs(t *testing.T) {
 	template := filepath.Join("template", "posts", "new.md")
 	out, err = exec("hindsite new -from " + template + " " + f)
 	assert.NoError(err)
-	assert.Contains(out, "")
 	assert.True(fsx.FileExists(f))
 	text, _ = fsx.ReadFile(f)
 	assert.Contains(text, "title: New Test File Two")
