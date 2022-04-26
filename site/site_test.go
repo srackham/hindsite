@@ -67,6 +67,7 @@ func TestParseArgs(t *testing.T) {
 	parse("hindsite serve -site ./testdata/blog -port :99999999")
 	assert.Equal("illegal -port: :99999999", err.Error())
 
+	// -var option checks.
 	parse("hindsite build -site ./testdata/blog -var foobar")
 	assert.Contains("illegal -var syntax: foobar", err.Error())
 
@@ -76,15 +77,52 @@ func TestParseArgs(t *testing.T) {
 	parse("hindsite build -site ./testdata/blog -var author=Joe-Bloggs")
 	assert.Equal("Joe-Bloggs", *site.vars.Author)
 
+	parse("hindsite build -site ./testdata/blog -var exclude=*.tmp")
+	assert.Equal("*.tmp", *site.vars.Exclude)
+
+	parse("hindsite build -site ./testdata/blog -var homepage=posts/docs-1.html")
+	assert.Equal("posts/docs-1.html", *site.vars.Homepage)
+
+	parse("hindsite build -site ./testdata/blog -var id=1234")
+	assert.Equal("1234", *site.vars.ID)
+
+	parse("hindsite build -site ./testdata/blog -var include=test.tmp")
+	assert.Equal("test.tmp", *site.vars.Include)
+
+	parse("hindsite build -site ./testdata/blog -var longdate=Mon-Jan-2-2006")
+	assert.Equal("Mon-Jan-2-2006", *site.vars.LongDate)
+
+	parse("hindsite build -site ./testdata/blog -var mediumdate=2_Jan_2006")
+	assert.Equal("2_Jan_2006", *site.vars.MediumDate)
+
 	parse("hindsite build -site ./testdata/blog -var paginate=qux")
 	assert.Contains("illegal paginate value: qux", err.Error())
 
 	parse("hindsite build -site ./testdata/blog -var paginate=42")
 	assert.Equal(42, *site.vars.Paginate)
 
+	parse("hindsite build -site ./testdata/blog -var permalink=/posts/%y/%m/%d/%f")
+	assert.Equal("/posts/%y/%m/%d/%f", *site.vars.Permalink)
+
+	parse("hindsite build -site ./testdata/blog -var shortdate=2/1/2006")
+	assert.Equal("2/1/2006", *site.vars.ShortDate)
+
+	parse("hindsite build -site ./testdata/blog -var templates=*.md|*.txt|*.rmu")
+	assert.Equal("*.md|*.txt|*.rmu", *site.vars.Templates)
+
+	parse("hindsite build -site ./testdata/blog -var author=Joe-Bloggs")
+	assert.Equal("Joe-Bloggs", *site.vars.Author)
+
+	parse("hindsite build -site ./testdata/blog -var timezone=+0600")
+	assert.Equal("+0600", *site.vars.Timezone)
+
+	parse("hindsite build -site ./testdata/blog -var urlprefix=https://foobar")
+	assert.Equal("https://foobar", *site.vars.URLPrefix)
+
 	parse("hindsite build -site ./testdata/blog -var user.foo=bar")
 	assert.Equal("bar", site.vars.User["foo"])
 
+	// -config option checks.
 	parse("hindsite build -site ./testdata/blog -content ./testdata/blog/template/init -var user.foo=bar -config ./testdata/blog/template/config2.toml")
 	assert.NoError(err)
 	assert.Equal("Bill Blow", *site.vars.Author)

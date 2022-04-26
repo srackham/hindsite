@@ -43,18 +43,18 @@ type configs []config
 type rawConfig struct {
 	// Configuration variables
 	Author     *string
-	Templates  *string
 	Exclude    *string
-	Include    *string
 	Homepage   *string
 	ID         *string
-	Permalink  *string
-	URLPrefix  *string
-	Paginate   *int
-	Timezone   *string
-	ShortDate  *string
-	MediumDate *string
+	Include    *string
 	LongDate   *string
+	MediumDate *string
+	Paginate   *int
+	Permalink  *string
+	ShortDate  *string
+	Templates  *string
+	Timezone   *string
+	URLPrefix  *string
 	User       map[string]string
 }
 
@@ -76,32 +76,34 @@ func (raw *rawConfig) parseVar(arg string) error {
 		switch name {
 		case "author":
 			raw.Author = &val
-		case "templates":
-			raw.Templates = &val
 		case "exclude":
 			raw.Exclude = &val
-		case "include":
-			raw.Include = &val
+		case "homepage":
+			raw.Homepage = &val
 		case "id":
 			raw.ID = &val
-		case "permalink":
-			raw.Permalink = &val
-		case "urlprefix":
-			raw.URLPrefix = &val
+		case "include":
+			raw.Include = &val
+		case "longdate":
+			raw.LongDate = &val
+		case "mediumdate":
+			raw.MediumDate = &val
 		case "paginate":
 			if n, err := strconv.Atoi(val); err != nil {
 				return fmt.Errorf("illegal paginate value: %s", val)
 			} else {
 				raw.Paginate = &n
 			}
-		case "timezone":
-			raw.Timezone = &val
+		case "permalink":
+			raw.Permalink = &val
 		case "shortdate":
 			raw.ShortDate = &val
-		case "mediumdate":
-			raw.MediumDate = &val
-		case "longdate":
-			raw.LongDate = &val
+		case "templates":
+			raw.Templates = &val
+		case "timezone":
+			raw.Timezone = &val
+		case "urlprefix":
+			raw.URLPrefix = &val
 		default:
 			return fmt.Errorf("illegal -var name: %s", name)
 		}
