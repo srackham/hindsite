@@ -30,6 +30,7 @@ install:
 test: install
 	go vet $(PACKAGES)
 	go test -cover $(PACKAGES)
+	make validate-checksums > /dev/null
 
 .PHONY: clean
 clean: fmt
@@ -202,3 +203,20 @@ submit-sitemap:
 #
 .PHONY: validate-all
 validate-all: validate-docs validate-builtin-hello validate-builtin-blog  validate-builtin-docs 
+
+#
+# Create and validate build file checksums for the testdata site.
+#
+TEST_SITE = ./site/testdata/blog
+make-checksums:
+	tmpdir=$$(mktemp -d /tmp/hindsite-XXXXXXXX)
+	hindsite init -site $$tmpdir -from $(TEST_SITE)/template
+	hindsite build -site $$tmpdir
+	(cd $$tmpdir && sha256sum $$(find build -type f)) > $(TEST_SITE)/checksums.txt
+
+validate-checksums:
+	tmpdir=$$(mktemp -d /tmp/hindsite-XXXXXXXX)
+	hindsite init -site $$tmpdir -from $(TEST_SITE)/template
+	hindsite build -site $$tmpdir
+	f=$$(readlink -f $(TEST_SITE)/checksums.txt)
+	(cd $$tmpdir && sha256sum --quiet --check $$f)
