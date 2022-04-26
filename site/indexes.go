@@ -175,7 +175,7 @@ func (idx *index) build(doc *document) error {
 		// Build index tag slugs.
 		idx.slugs = map[string]string{}
 		slugs := []string{}
-		for tag := range idx.tagDocs {
+		for _, tag := range sortedKeys(idx.tagDocs) {
 			slug := slugify(tag, slugs)
 			slugs = append(slugs, slug)
 			idx.slugs[tag] = slug
@@ -197,7 +197,7 @@ func (idx *index) build(doc *document) error {
 			}
 		}
 		// Render per-tag document index pages.
-		for tag := range idx.tagDocs {
+		for _, tag := range sortedKeys(idx.tagDocs) {
 			pgs := idx.paginate(idx.tagDocs[tag], filepath.Join("tags", idx.slugs[tag]+"-%d.html"))
 			if err := renderPages(pgs, docsTemplate, templateData{"tag": tag}); err != nil {
 				return err

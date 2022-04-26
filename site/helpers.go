@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"regexp"
 	"runtime"
+	"sort"
 	"strings"
 	"time"
 
@@ -22,6 +23,15 @@ func nz(s *string) string {
 		return ""
 	}
 	return *s
+}
+
+// sortedKeys returns a sorted array of map string keys.
+func sortedKeys[T any](m map[string]T) (result []string) {
+	for k, _ := range m {
+		result = append(result, k)
+	}
+	sort.Strings(result)
+	return
 }
 
 // Transform text into a slug (lowercase alpha-numeric + hyphens).

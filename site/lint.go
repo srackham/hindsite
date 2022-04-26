@@ -69,7 +69,8 @@ func (doc *document) parseHTML(html string) {
 // lintChecks checks that all document intra-site URLs point to valid target
 // files and valid HTML id attributes.
 func (site *site) lintChecks() (errCount int) {
-	for _, doc := range site.docs.byContentPath {
+	for _, k := range sortedKeys(site.docs.byContentPath) {
+		doc := site.docs.byContentPath[k]
 		site.verbose("lint document: %s", doc.contentPath)
 		// Check for llicit or duplicate ids.
 		ids := set.New(doc.ids...)
