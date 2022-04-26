@@ -1000,6 +1000,8 @@ in the configuration [timezone](#timezone).
 
 `.date`:: [`date`](#front-matter-variables) front matter value ([time.Time](https://pkg.go.dev/time#Time) type).
 
+`.id`:: [`id`](#front-matter-variables) front matter value.
+
 `.layout`:: [`layout`](#front-matter-variables) front matter value.
 
 `.modtime`:: Document content file modification date and time ([time.Time](https://pkg.go.dev/time#Time) type).
