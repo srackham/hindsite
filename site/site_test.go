@@ -172,10 +172,6 @@ func TestExecuteArgs(t *testing.T) {
 	assert.Error(err)
 	assert.Contains(out, "to many command arguments")
 
-	out, err = exec("hindsite build -site missing")
-	assert.Error(err)
-	assert.Contains(out, "missing site directory")
-
 	/*
 		Test init and build commands.
 	*/
@@ -193,6 +189,11 @@ func TestExecuteArgs(t *testing.T) {
 		assert.Equal(buildCount, fsx.DirCount(filepath.Join(tmpdir, "build")), from+": unexpected number of files in build directory")
 		assert.Contains(out, buildmsg)
 	}
+
+	out, err = exec("hindsite build -site MISSING")
+	assert.Error(err)
+	assert.Contains(out, "missing site directory")
+
 	out, err = exec("hindsite build " + tmpdir) // Old v1 command syntax.
 	assert.Error(err)
 	assert.Contains(out, "missing content directory: content")
@@ -212,6 +213,11 @@ func TestExecuteArgs(t *testing.T) {
 	wd, _ := os.Getwd()
 	defer os.Chdir(wd)
 	os.Chdir(tmpdir)
+
+	/*
+		Miscellaneous tests.
+	*/
+	assert.FileExists(filepath.Join("build", "posts", "2016-08-05", "slug-test", "index.html"), "content/posts/document-5.md slug test")
 
 	/*
 		Test drafts generation.
@@ -247,11 +253,17 @@ func TestExecuteArgs(t *testing.T) {
 	assert.Contains(out, "documents: 11\nstatic: 7")
 
 	f := filepath.Join(tmpdir, "content", "new-test-file.md")
+	out, err = exec("hindsite new " + tmpdir + " " + f) // Old v1 command syntax.
+	assert.Error(err)
+	assert.Contains(out, "to many command arguments")
+
+	f = filepath.Join(tmpdir, "content", "new-test-file.md")
 	out, err = exec("hindsite new -site " + tmpdir + " " + f)
 	assert.NoError(err)
 	assert.Contains(out, "")
 	assert.True(fsx.FileExists(f))
-	text, _ := fsx.ReadFile(f)
+	text, err := fsx.ReadFile(f)
+	assert.NoError(err)
 	assert.Contains(text, "title: New Test File")
 	assert.Contains(text, "date:  "+time.Now().Format("2006-01-02"))
 	assert.Contains(text, "Document content goes here.")
@@ -265,7 +277,8 @@ func TestExecuteArgs(t *testing.T) {
 	assert.NoError(err)
 	assert.Contains(out, "")
 	assert.True(fsx.FileExists(f))
-	text, _ = fsx.ReadFile(f)
+	text, err = fsx.ReadFile(f)
+	assert.NoError(err)
 	assert.Contains(text, "title: New Test File Two")
 	assert.Contains(text, "date:  2018-12-01")
 	assert.Contains(text, "Test new template.")
@@ -290,12 +303,35 @@ func TestExecuteArgs(t *testing.T) {
 	out, err = exec("hindsite new -from " + template + " " + f)
 	assert.NoError(err)
 	assert.True(fsx.FileExists(f))
-	text, _ = fsx.ReadFile(f)
+	text, err = fsx.ReadFile(f)
+	assert.NoError(err)
 	assert.Contains(text, "title: New Test File Two")
 	assert.Contains(text, "date:  2018-12-01")
 	assert.Contains(text, "Test new template.")
 
-	out, err = exec("hindsite new " + tmpdir + " " + f) // Old v1 command syntax.
-	assert.Error(err)
-	assert.Contains(out, "to many command arguments")
+	/*
+		Test document variables.
+	*/
+	f = filepath.Join("build", "index.html")
+	out, err = exec("hindsite build -var templates=*.md")
+	assert.NoError(err)
+	text, err = fsx.ReadFile(f)
+	assert.NoError(err)
+	assert.Contains(text, `.author=Joe Bloggs
+.date=2015-05-20 12:15:23 +0000 +0000
+.description=&lt;p&gt;The about document.&lt;/p&gt;
+
+.id=/about.html
+.layout=layout.html
+.longdate=May 21, 2015
+.mediumdate=21-May-2015
+.permalink=
+.slug=
+.shortdate=2015-05-21
+.templates=*.md
+.tags=[]
+.title=About Test
+.url=http://example.com/about.html
+.urlprefix=http://example.com
+.user=map[banner:hindsite | blog]`)
 }

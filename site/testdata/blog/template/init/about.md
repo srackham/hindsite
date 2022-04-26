@@ -1,20 +1,28 @@
+---
+title: About Test
+date: 2015-05-20T12:15:23-00:00
+description: The about document.
+---
+
 ## Ultricies lundium
 
 ```
-Author: {{.author}}
-Templates: {{.templates}}
-Exclude: {{.exclude}}
-Include: {{.include}}
-Homepage: {{.homepage}}
-ID: {{.id}}
-Permalink: {{.id}}
-URLPrefix: {{.urlprefix}}
-Paginate: {{.paginate}}
-Timezone: {{.timezone}}
-ShortDate: {{.shortdate}}
-MediumDate: {{.mediumdate}}
-LongDate: {{.longdate}}
-User: {{.user}}
+.author={{.author}}
+.date={{.date}}
+.description={{.description}}
+.id={{.id}}
+.layout={{.layout}}
+.longdate={{.longdate}}
+.mediumdate={{.mediumdate}}
+.permalink={{.permalink}}
+.slug={{.slug}}
+.shortdate={{.shortdate}}
+.templates={{.templates}}
+.tags={{.tags}}
+.title={{.title}}
+.url={{.url}}
+.urlprefix={{.urlprefix}}
+.user={{.user}}
 ```
 
 ### <a id="id1"> Header
