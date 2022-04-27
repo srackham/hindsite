@@ -186,8 +186,9 @@ func TestExecuteArgs(t *testing.T) {
 		assert.Equal(templateCount, fsx.DirCount(filepath.Join(tmpdir, "template")), from+": unexpected number of files in template directory")
 		assert.Equal(contentCount, fsx.DirCount(filepath.Join(tmpdir, "content")), from+": unexpected number of files in content directory")
 		assert.Equal(0, fsx.DirCount(filepath.Join(tmpdir, "build")), from+": unexpected number of files in build directory")
-		out, err = exec("hindsite build -site " + tmpdir + " -lint -v")
-		assert.NoError(err)
+		cmd = "hindsite build -site " + tmpdir + " -lint -v"
+		out, err = exec(cmd)
+		assert.NoError(err, "unexpected error: \""+cmd+"\"")
 		assert.Equal(buildCount, fsx.DirCount(filepath.Join(tmpdir, "build")), from+": unexpected number of files in build directory")
 		assert.Contains(out, buildmsg)
 	}
@@ -209,22 +210,17 @@ func TestExecuteArgs(t *testing.T) {
 	/*
 		Initialise and build the testdata site for subsequent tests.
 	*/
-	text, err := fsx.ReadFile("./testdata/blog/checksums.txt")
-	assert.NoError(err)
 	buildSiteFrom("./testdata/blog/template", "documents: 11\nstatic: 7", 11, 8, 9)
-
-	// NOTE: From here on the tests are performed in the tmp directory on the testdata site.
-	wd, _ := os.Getwd()
-	defer os.Chdir(wd)
-	os.Chdir(tmpdir)
 
 	/*
 		Validate the checksums of the test site's built HTML files.
 	*/
+	text, err := fsx.ReadFile("./testdata/blog/checksums.txt")
+	assert.NoError(err)
 	lines := strings.Split(strings.TrimSpace(text), "\n")
 	for _, line := range lines {
 		sum, f, _ := strings.Cut(line, " ")
-		f = strings.TrimSpace(f)
+		f = filepath.Join(tmpdir, strings.TrimSpace(f))
 		if !fsx.FileExists(f) {
 			t.Logf("missing file: \"%s\"", f)
 			t.Fail()
@@ -242,6 +238,11 @@ func TestExecuteArgs(t *testing.T) {
 			t.Fail()
 		}
 	}
+
+	// NOTE: From here on the tests are performed in the tmp directory on the testdata site.
+	wd, _ := os.Getwd()
+	defer os.Chdir(wd)
+	os.Chdir(tmpdir)
 
 	/*
 		Miscellaneous tests.
