@@ -35,7 +35,7 @@ func normalizeNewlines(s string) (result string) {
 
 // sortedKeys returns a sorted array of map string keys.
 func sortedKeys[T any](m map[string]T) (result []string) {
-	for k, _ := range m {
+	for k := range m {
 		result = append(result, k)
 	}
 	sort.Strings(result)
