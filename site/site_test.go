@@ -253,8 +253,8 @@ func TestExecuteArgs(t *testing.T) {
 	out, err = exec("hindsite build -drafts -lint")
 	assert.Error(err)
 	assert.Equal(7, fsx.DirCount(filepath.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
-	assert.Contains(out, `content/posts/links-test.md: contains duplicate element id: "id2"
-content/posts/links-test.md: contains illicit element id: "-illicit-id"
+	assert.Contains(out, `content/posts/links-test.md: contains illicit element id: "-illicit-id"
+content/posts/links-test.md: contains duplicate element id: "id2"
 content/posts/links-test.md: contains illicit URL: ":invalid-url"
 content/posts/links-test.md: contains link to missing anchor: "#invalid-id"
 content/posts/links-test.md: contains link to missing file: "posts/2015-10-13/lorem-penatibus/missing-file.html"
