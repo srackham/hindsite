@@ -225,6 +225,7 @@ func (site *site) renderStaticFile(f string) error {
 		}
 	}
 	site.verbose("write static: " + doc.buildPath)
+	markup = normalizeNewlines(markup)
 	return fsx.WritePath(doc.buildPath, markup)
 }
 
@@ -252,6 +253,7 @@ func (site *site) renderDocument(doc *document) error {
 		// doc.parseHTML(string(data["body"].(template.HTML)))
 	}
 	site.verbose("write document: " + doc.buildPath)
+	html = normalizeNewlines(html)
 	if err = fsx.WritePath(doc.buildPath, html); err != nil {
 		return err
 	}

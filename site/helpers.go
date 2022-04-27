@@ -25,6 +25,14 @@ func nz(s *string) string {
 	return *s
 }
 
+// normalizeNewlines converts \r\n (Window) and \n (Mac OS) line teminations to
+// \n (UNIX) termination.
+func normalizeNewlines(s string) (result string) {
+	result = strings.ReplaceAll(s, "\r\n", "\n")
+	result = strings.ReplaceAll(result, "\r", "\n")
+	return
+}
+
 // sortedKeys returns a sorted array of map string keys.
 func sortedKeys[T any](m map[string]T) (result []string) {
 	for k, _ := range m {
