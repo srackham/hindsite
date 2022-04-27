@@ -219,17 +219,28 @@ func TestExecuteArgs(t *testing.T) {
 	os.Chdir(tmpdir)
 
 	/*
-		Validate test site build file checksums.
+		Validate the checksums of the test site's built HTML files.
 	*/
 	lines := strings.Split(strings.TrimSpace(text), "\n")
 	for _, line := range lines {
 		sum, f, _ := strings.Cut(line, " ")
 		f = strings.TrimSpace(f)
-		assert.True(fsx.FileExists(f), "checksum: missing file: \"%s\"", f)
-		b, err := os.ReadFile(f)
-		assert.NoError(err)
-		sha256 := fmt.Sprintf("%x", sha256.Sum256(b))
-		assert.Equal(sum, sha256, "checksum: invalid checksum for: \"%s\"", f)
+		if !fsx.FileExists(f) {
+			t.Logf("missing file: \"%s\"", f)
+			t.Fail()
+			continue
+		}
+		if text, err = fsx.ReadFile(f); err != nil {
+			t.Logf("error reading file: \"%s\": %s", f, err.Error())
+			t.Fail()
+			continue
+		}
+		text = normalizeNewlines(text)
+		sha256 := fmt.Sprintf("%x", sha256.Sum256([]byte(text)))
+		if sha256 != sum {
+			t.Logf("invalid checksum for: \"%s\"", f)
+			t.Fail()
+		}
 	}
 
 	/*

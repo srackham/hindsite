@@ -147,7 +147,6 @@ func (idx *index) build(doc *document) error {
 			if err != nil {
 				return err
 			}
-			html = normalizeNewlines(html)
 			if err = fsx.WritePath(pg.file, html); err != nil {
 				return err
 			}
@@ -193,7 +192,6 @@ func (idx *index) build(doc *document) error {
 				return err
 			}
 			idx.site.verbose2("write index: " + outfile)
-			html = normalizeNewlines(html)
 			if err = fsx.WritePath(outfile, html); err != nil {
 				return err
 			}

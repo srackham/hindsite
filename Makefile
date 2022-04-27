@@ -211,7 +211,7 @@ make-checksums:
 	tmpdir=$$(mktemp -d /tmp/hindsite-XXXXXXXX)
 	hindsite init -site $$tmpdir -from $(TEST_SITE)/template
 	hindsite build -site $$tmpdir
-	(cd $$tmpdir && sha256sum $$(find build -type f)) > $(TEST_SITE)/checksums.txt
+	(cd $$tmpdir && sha256sum $$(find build -name '*.html' -type f)) > $(TEST_SITE)/checksums.txt
 
 validate-checksums:
 	tmpdir=$$(mktemp -d /tmp/hindsite-XXXXXXXX)
