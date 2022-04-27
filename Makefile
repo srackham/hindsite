@@ -30,7 +30,6 @@ install:
 test: install
 	go vet $(PACKAGES)
 	go test -cover $(PACKAGES)
-	make validate-checksums > /dev/null
 
 .PHONY: clean
 clean: fmt

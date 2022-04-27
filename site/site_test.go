@@ -1,6 +1,8 @@
 package site
 
 import (
+	"crypto/sha256"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -206,13 +208,29 @@ func TestExecuteArgs(t *testing.T) {
 
 	/*
 		Initialise and build the testdata site for subsequent tests.
-		NOTE: From here on the tests are performed in the tmp directory on the testdata site.
 	*/
+	text, err := fsx.ReadFile("./testdata/blog/checksums.txt")
+	assert.NoError(err)
 	buildSiteFrom("./testdata/blog/template", "documents: 11\nstatic: 7", 11, 8, 9)
 
+	// NOTE: From here on the tests are performed in the tmp directory on the testdata site.
 	wd, _ := os.Getwd()
 	defer os.Chdir(wd)
 	os.Chdir(tmpdir)
+
+	/*
+		Validate test site build file checksums.
+	*/
+	lines := strings.Split(strings.TrimSpace(text), "\n")
+	for _, line := range lines {
+		sum, f, _ := strings.Cut(line, " ")
+		f = strings.TrimSpace(f)
+		assert.True(fsx.FileExists(f), "checksum: missing file: \"%s\"", f)
+		b, err := os.ReadFile(f)
+		assert.NoError(err)
+		sha256 := fmt.Sprintf("%x", sha256.Sum256(b))
+		assert.Equal(sum, sha256, "checksum: invalid checksum for: \"%s\"", f)
+	}
 
 	/*
 		Miscellaneous tests.
@@ -263,7 +281,7 @@ static: 7`)
 	assert.NoError(err)
 	assert.Contains(out, "")
 	assert.True(fsx.FileExists(f))
-	text, err := fsx.ReadFile(f)
+	text, err = fsx.ReadFile(f)
 	assert.NoError(err)
 	assert.Contains(text, "title: New Test File")
 	assert.Contains(text, "date:  "+time.Now().Format("2006-01-02"))
