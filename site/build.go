@@ -58,10 +58,12 @@ func (site *site) build() error {
 		}
 	}
 	// Delete everything in the build directory forcing a complete site rebuild.
-	files, _ := filepath.Glob(filepath.Join(site.buildDir, "*"))
-	for _, f := range files {
-		if err := os.RemoveAll(f); err != nil {
-			return err
+	if !site.keep {
+		files, _ := filepath.Glob(filepath.Join(site.buildDir, "*"))
+		for _, f := range files {
+			if err := os.RemoveAll(f); err != nil {
+				return err
+			}
 		}
 	}
 	// Parse content directory documents and copy/render static files to the build directory.

@@ -55,6 +55,7 @@ type site struct {
 	lrport      uint16
 	livereload  bool
 	navigate    bool
+	keep        bool
 	verbosity   int
 	vars        rawConfig
 }
@@ -127,6 +128,8 @@ func (site *site) parseArgs(args []string) error {
 			site.launch = true
 		case opt == "-navigate":
 			site.navigate = true
+		case opt == "-keep":
+			site.keep = true
 		case opt == "-v":
 			site.verbosity++
 		case opt == "-vv":
@@ -343,6 +346,7 @@ Options:
     -lint
     -launch
     -navigate
+    -keep
     -v
 
 Version:    ` + VERS + " (" + OS + ")" + `
