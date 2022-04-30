@@ -28,12 +28,12 @@ func (doc *document) parseLink(url string) (link documentLink, offsite bool) {
 	if len(s) > 1 {
 		link.anchor = s[1]
 	}
-	re := regexp.MustCompile(`(?i)^(?:` + regexp.QuoteMeta(doc.conf.urlprefix) + `)?/(.+)$`)
+	re := regexp.MustCompile(`(?i)^(?:` + regexp.QuoteMeta(doc.conf.urlprefix) + `)?/([^/].*)$`) // Extracts root-relative URLs.
 	matches := re.FindStringSubmatch(url)
-	if matches != nil { // Matches absolute or root-relative URL.
+	if matches != nil {
 		link.target = filepath.Join(doc.site.buildDir, matches[1])
-	} else { // Matches relative URLs.
-		re := regexp.MustCompile(`(?i)^([\w][\w./-]*)$`)
+	} else {
+		re := regexp.MustCompile(`(?i)^([\w][\w./-]*)$`) // Extracts page-relative URLs.
 		matches := re.FindStringSubmatch(url)
 		if matches != nil {
 			link.target = filepath.Join(filepath.Dir(doc.buildPath), matches[1])
