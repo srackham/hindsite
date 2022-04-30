@@ -214,6 +214,7 @@ func TestExecuteArgs(t *testing.T) {
 
 	/*
 		Validate the checksums of the test site's built HTML files.
+		The checksums.txt file is built with the Makefile make-checksums task.
 	*/
 	text, err := fsx.ReadFile("./testdata/blog/checksums.txt")
 	assert.NoError(err)
@@ -362,7 +363,7 @@ static: 7`)
 .templates=*.md
 .tags=[]
 .title=About Test
-.url=http://example.com/about.html
+.url=/about.html
 .urlprefix=http://example.com
 .user=map[banner:hindsite | blog]`)
 }

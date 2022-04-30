@@ -32,9 +32,6 @@ func (doc *document) parseLink(url string) (link documentLink, offsite bool) {
 	matches := re.FindStringSubmatch(url)
 	if matches != nil { // Matches absolute or root-relative URL.
 		link.target = filepath.Join(doc.site.buildDir, matches[1])
-		if fsx.DirExists(link.target) {
-			link.target = filepath.Join(link.target, "index.html")
-		}
 	} else { // Matches relative URLs.
 		re := regexp.MustCompile(`(?i)^([\w][\w./-]*)$`)
 		matches := re.FindStringSubmatch(url)
@@ -44,6 +41,9 @@ func (doc *document) parseLink(url string) (link documentLink, offsite bool) {
 			offsite = true
 		}
 	}
+	if !offsite && fsx.DirExists(link.target) {
+		link.target = filepath.Join(link.target, "index.html")
+	}
 	return
 }
 
@@ -52,15 +52,15 @@ func (doc *document) parseLink(url string) (link documentLink, offsite bool) {
 func (doc *document) parseHTML(html string) {
 	// Scan HTML element id attributes.
 	doc.ids = slice.Slice[string]{}
-	pat := regexp.MustCompile(`(?i)id="(.+?)"`)
-	matches := pat.FindAllStringSubmatch(html, -1)
+	re := regexp.MustCompile(`(?i)id="(.+?)"`)
+	matches := re.FindAllStringSubmatch(html, -1)
 	for _, match := range matches {
 		doc.ids = append(doc.ids, match[1])
 	}
 	// Scan HTML for href and src URL attributes.
 	doc.urls = slice.Slice[string]{}
-	pat = regexp.MustCompile(`(?i)(?:href|src)="(.+?)"`)
-	matches = pat.FindAllStringSubmatch(html, -1)
+	re = regexp.MustCompile(`(?i)(?:href|src)="(.+?)"`)
+	matches = re.FindAllStringSubmatch(html, -1)
 	for _, match := range matches {
 		doc.urls = append(doc.urls, match[1])
 	}

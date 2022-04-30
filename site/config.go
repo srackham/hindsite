@@ -290,7 +290,8 @@ func (conf *config) joinPrefix(elem ...string) string {
 	if strings.HasPrefix(elem[0], "/") {
 		panic("relative URL has '/' prefix: " + elem[0])
 	}
-	return conf.urlprefix + "/" + path.Join(elem...)
+	// return conf.urlprefix + "/" + path.Join(elem...)
+	return "/" + path.Join(elem...)
 }
 
 // splitPatterns splits `|` separated file patterns

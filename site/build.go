@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"time"
 
 	"github.com/fatih/color"
@@ -249,6 +250,7 @@ func (site *site) renderDocument(doc *document) error {
 	if err != nil {
 		return err
 	}
+	html = site.injectUrlprefix(html)
 	if site.lint {
 		doc.parseHTML(html)
 		// doc.parseHTML(string(data["body"].(template.HTML)))
@@ -259,4 +261,13 @@ func (site *site) renderDocument(doc *document) error {
 	}
 	site.verbose2(doc.String())
 	return nil
+}
+
+func (site *site) injectUrlprefix(html string) string {
+	if urlprefix := site.confs[0].urlprefix; urlprefix != "" {
+		// Prefix root-relative URLs with the urlprefix.
+		re := regexp.MustCompile(`(?i)(href|src)="(/.+?)"`)
+		html = re.ReplaceAllString(html, "$1=\""+urlprefix+"$2\"")
+	}
+	return html
 }

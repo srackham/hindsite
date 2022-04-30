@@ -5,21 +5,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width"/>
 <title>{{or .title .user.title}}</title>
-<link type="text/css" rel="stylesheet" href="{{.urlprefix}}/main.css">
+<link type="text/css" rel="stylesheet" href="/main.css">
 {{if eq .user.highlightjs "yes" -}}
 <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/default.min.css">
 {{- else}}{{end}}
 </head>
 <body>
 <div class="banner no-print">
-  <a href="{{.urlprefix}}/index.html">{{.user.banner}}</a>
+  <a href="/index.html">{{.user.banner}}</a>
 </div>
 <ul class="menu no-print">
-  <li><a href="{{.urlprefix}}/indexes/posts/docs-1.html">Posts</a></li>
-  <li><a href="{{.urlprefix}}/indexes/posts/tags.html">Tags</a></li>
-  <li><a href="{{.urlprefix}}/indexes/newsletters/docs-1.html">News</a></li>
-  <li><a href="{{.urlprefix}}/about.html">About</a></li>
-  <li><a href="{{.urlprefix}}/search.html">Search</a></li>
+  <li><a href="/indexes/posts/docs-1.html">Posts</a></li>
+  <li><a href="/indexes/posts/tags.html">Tags</a></li>
+  <li><a href="/indexes/newsletters/docs-1.html">News</a></li>
+  <li><a href="/about.html">About</a></li>
+  <li><a href="/search.html">Search</a></li>
 </ul>
 <div id="main">
 {{end}}

@@ -147,6 +147,7 @@ func (idx *index) build(doc *document) error {
 			if err != nil {
 				return err
 			}
+			html = idx.site.injectUrlprefix(html)
 			if err = fsx.WritePath(pg.file, html); err != nil {
 				return err
 			}
@@ -191,6 +192,7 @@ func (idx *index) build(doc *document) error {
 			if err != nil {
 				return err
 			}
+			html = idx.site.injectUrlprefix(html)
 			idx.site.verbose2("write index: " + outfile)
 			if err = fsx.WritePath(outfile, html); err != nil {
 				return err
