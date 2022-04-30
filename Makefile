@@ -169,16 +169,23 @@ HOMEPAGE = https://srackham.github.io/hindsite
 
 .PHONY: build-docs
 build-docs: install
-	hindsite build -site docsite -build docs -lint
+	rm -rf docs/*
+	mkdir -p docs/builtin/blog
+	hindsite build -site site/builtin/blog -content site/builtin/blog/template/init -build docs/builtin/blog -var urlprefix=/hindsite/builtin/blog -lint
+	mkdir -p docs/builtin/docs
+	hindsite build -site site/builtin/docs -content site/builtin/docs/template/init -build docs/builtin/docs -var urlprefix=/hindsite/builtin/docs -lint
+	mkdir -p docs/builtin/hello
+	hindsite build -site site/builtin/hello -content site/builtin/hello/template/init -build docs/builtin/hello -var urlprefix=/hindsite/builtin/hello -lint
+	hindsite build -site docsite -build docs -keep -lint
 	make build-sitemap
 
 .PHONY: serve-docs
 serve-docs: install
-	hindsite serve -site docsite -build docs -launch -navigate -lint -v
+	hindsite serve -site docsite -build docs -keep -launch -navigate -lint -v
 
 .PHONY: validate-docs
 validate-docs: build-docs
-	for f in $$(ls ./docs/{changelog,faq,index}.html); do echo $$f; html-validator --verbose --format text --file $$f; done
+	for f in $$(find ./docs -name '*.html' -not -name 'google*.html' -not -name 'search.html'); do echo $$f; html-validator --verbose --format text --file $$f; done
 
 # Build Google search engine site map (see https://support.google.com/webmasters/answer/183668)
 # index.html file URLs are converted to the canonical format with trailing slash character.
