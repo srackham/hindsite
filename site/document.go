@@ -111,14 +111,14 @@ func newDocument(contentfile string, site *site) (document, error) {
 		if strings.HasSuffix(link, "/") {
 			// "Pretty" URLs.
 			doc.buildPath = filepath.Join(site.buildDir, filepath.FromSlash(link), "index.html")
-			doc.url = doc.conf.joinPrefix(link) + "/"
+			doc.url = rootRelURL(link) + "/"
 		} else {
 			doc.buildPath = filepath.Join(site.buildDir, filepath.FromSlash(link))
-			doc.url = doc.conf.joinPrefix(link)
+			doc.url = rootRelURL(link)
 		}
 	} else {
 		doc.buildPath = filepath.Join(site.buildDir, filepath.Dir(rel), f)
-		doc.url = doc.conf.joinPrefix(path.Dir(filepath.ToSlash(rel)), f)
+		doc.url = rootRelURL(path.Dir(filepath.ToSlash(rel)), f)
 	}
 	if doc.layout == "" {
 		// Find nearest document layout template file.
@@ -252,7 +252,7 @@ func (doc *document) extractFrontMatter() error {
 		doc.id = fm.ID
 	}
 	if fm.Templates != nil {
-		doc.templates = splitPatterns(*fm.Templates)
+		doc.templates = splitWildcards(*fm.Templates)
 	}
 	if fm.Permalink != "" {
 		doc.permalink = fm.Permalink
@@ -299,7 +299,7 @@ func (doc *document) frontMatter() templateData {
 	for _, tag := range doc.tags {
 		url := ""
 		if doc.primaryIndex != nil {
-			url = doc.primaryIndex.conf.joinPrefix(doc.primaryIndex.url, "tags", doc.primaryIndex.slugs[tag]+"-1.html")
+			url = rootRelURL(doc.primaryIndex.url, "tags", doc.primaryIndex.slugs[tag]+"-1.html")
 		}
 		tags = append(tags, map[string]string{
 			"tag": tag,

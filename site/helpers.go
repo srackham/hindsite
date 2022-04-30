@@ -3,6 +3,8 @@ package site
 import (
 	"fmt"
 	"os/exec"
+	"path"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"sort"
@@ -42,7 +44,17 @@ func sortedKeys[T any](m map[string]T) (result []string) {
 	return
 }
 
-// Transform text into a slug (lowercase alpha-numeric + hyphens).
+// rootRelURL joins path elements and prefixes them with "/".
+func rootRelURL(elem ...string) string {
+	return "/" + path.Join(elem...)
+}
+
+// splitWildcards splits `|` separated file patterns.
+func splitWildcards(patterns string) []string {
+	return strings.Split(filepath.ToSlash(patterns), "|")
+}
+
+// slugify transforms text into a slug (lowercase alpha-numeric + hyphens).
 func slugify(text string, exclude slice.Slice[string]) string {
 	slug := text
 	slug = regexp.MustCompile(`\W+`).ReplaceAllString(slug, "-") // Replace non-alphanumeric characters with dashes.
@@ -95,7 +107,7 @@ func extractDateTitle(name string) (date string, title string) {
 /*
 Date/time functions.
 */
-// Parse date text. If timezone is not specified Local is assumed.
+// parseDate parses converts a date string to a time.Time. If timezone is not specified Local is assumed.
 func parseDate(text string, loc *time.Location) (time.Time, error) {
 	if loc == nil {
 		loc, _ = time.LoadLocation("Local")

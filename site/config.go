@@ -3,7 +3,6 @@ package site
 import (
 	"fmt"
 	"io/ioutil"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -134,7 +133,7 @@ func (conf *config) mergeRaw(site *site, raw rawConfig) error {
 		conf.author = raw.Author
 	}
 	if raw.Templates != nil {
-		conf.templates = splitPatterns(*raw.Templates)
+		conf.templates = splitWildcards(*raw.Templates)
 	}
 	if raw.Permalink != nil {
 		conf.permalink = *raw.Permalink
@@ -175,10 +174,10 @@ func (conf *config) mergeRaw(site *site, raw rawConfig) error {
 		conf.urlprefix = strings.TrimSuffix(value, "/")
 	}
 	if raw.Exclude != nil {
-		conf.exclude = append([]string{".*"}, splitPatterns(*raw.Exclude)...)
+		conf.exclude = append([]string{".*"}, splitWildcards(*raw.Exclude)...)
 	}
 	if raw.Include != nil {
-		conf.include = splitPatterns(*raw.Include)
+		conf.include = splitWildcards(*raw.Include)
 	}
 	if raw.Timezone != nil {
 		tz, err := time.LoadLocation(*raw.Timezone)
@@ -275,26 +274,4 @@ func (conf *config) merge(from config) {
 	for k, v := range from.user {
 		conf.user[k] = v
 	}
-}
-
-// joinPrefix joins path elements and prefixes them with the urlprefix. The
-// urlprefix cannot be processed by path.Join because it would replace '//' with
-// '/' in an absolute urlprefix (e.g. http://example.com),
-func (conf *config) joinPrefix(elem ...string) string {
-	if strings.HasSuffix(conf.urlprefix, "/") {
-		panic("urlprefix has '/' suffix: " + conf.urlprefix)
-	}
-	if len(elem[0]) == 0 {
-		panic("joinPrefix: missing argument")
-	}
-	if strings.HasPrefix(elem[0], "/") {
-		panic("relative URL has '/' prefix: " + elem[0])
-	}
-	// return conf.urlprefix + "/" + path.Join(elem...)
-	return "/" + path.Join(elem...)
-}
-
-// splitPatterns splits `|` separated file patterns
-func splitPatterns(patterns string) []string {
-	return strings.Split(filepath.ToSlash(patterns), "|")
 }

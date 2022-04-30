@@ -216,7 +216,7 @@ func (idx index) tagsData() templateData {
 	for tag, docs := range idx.tagDocs {
 		data := map[string]string{
 			"tag":   tag,
-			"url":   idx.conf.joinPrefix(idx.url, "tags", idx.slugs[tag]+"-1.html"),
+			"url":   rootRelURL(idx.url, "tags", idx.slugs[tag]+"-1.html"),
 			"count": strconv.Itoa(len(docs)),
 		}
 		tags = append(tags, data)
@@ -247,7 +247,7 @@ func (idx *index) paginate(docs documentsList, filename string) []page {
 		}
 		f := fmt.Sprintf(filename, pg.number)
 		pg.file = filepath.Join(idx.indexDir, f)
-		pg.url = idx.conf.joinPrefix(idx.url, filepath.ToSlash(f))
+		pg.url = rootRelURL(idx.url, filepath.ToSlash(f))
 		pgs = append(pgs, pg)
 	}
 	for i := range pgs {
