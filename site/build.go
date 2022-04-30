@@ -263,10 +263,12 @@ func (site *site) renderDocument(doc *document) error {
 	return nil
 }
 
+// injectUrlprefix prefixes root-relative URLs in HTML
+// href and and src attributes with the site `urlprefix`.
 func (site *site) injectUrlprefix(html string) string {
 	if urlprefix := site.confs[0].urlprefix; urlprefix != "" {
 		// Prefix root-relative URLs with the urlprefix.
-		re := regexp.MustCompile(`(?i)(href|src)="(/.+?)"`)
+		re := regexp.MustCompile(`(?i)(href|src)="(/[^/].*?)"`)
 		html = re.ReplaceAllString(html, "$1=\""+urlprefix+"$2\"")
 	}
 	return html
