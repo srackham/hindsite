@@ -164,17 +164,29 @@ func (site *site) build() error {
 // adds it to the list of built documents.
 func (site *site) copyHomePage() error {
 	if site.confs[0].homepage != "" {
-		src := site.confs[0].homepage
-		if !fsx.FileExists(src) {
-			return fmt.Errorf("homepage file missing: %s", src)
+		homepage := site.confs[0].homepage
+		homepage = filepath.FromSlash(homepage)
+		if !filepath.IsAbs(homepage) {
+			homepage = filepath.Join(site.buildDir, homepage)
+		} else {
+			return fmt.Errorf("homepage must be relative to the build directory: %s", site.buildDir)
+		}
+		if !fsx.PathIsInDir(homepage, site.buildDir) {
+			return fmt.Errorf("homepage must reside in build directory: %s", site.buildDir)
+		}
+		if fsx.DirExists(homepage) {
+			return fmt.Errorf("homepage cannot be a directory: %s", homepage)
+		}
+		if !fsx.FileExists(homepage) {
+			return fmt.Errorf("homepage file missing: %s", homepage)
 		}
 		dst := filepath.Join(site.buildDir, "index.html")
-		site.verbose2("copy homepage: " + src)
+		site.verbose2("copy homepage: " + homepage)
 		site.verbose("write homepage: " + dst)
-		if err := fsx.CopyFile(src, dst); err != nil {
+		if err := fsx.CopyFile(homepage, dst); err != nil {
 			return err
 		}
-		site.docs.byBuildPath[dst] = site.docs.byBuildPath[src]
+		site.docs.byBuildPath[dst] = site.docs.byBuildPath[homepage]
 	}
 	return nil
 }

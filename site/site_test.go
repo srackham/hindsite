@@ -126,9 +126,10 @@ func TestParseArgs(t *testing.T) {
 	assert.Equal("bar", site.vars.User["foo"])
 
 	// Configuration variable checks.
+	// TODO refactor to TestMergeRaw() and add test cases
 	config := config{}
 	s := "/"
-	err = config.mergeRaw(&site, rawConfig{URLPrefix: &s})
+	err = config.mergeRaw(rawConfig{URLPrefix: &s})
 	assert.Equal("illegal urlprefix: /", err.Error())
 
 	// -config option checks.

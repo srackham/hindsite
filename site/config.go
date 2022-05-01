@@ -9,8 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/srackham/hindsite/fsx"
-
 	"github.com/BurntSushi/toml"
 	yaml "gopkg.in/yaml.v3"
 )
@@ -127,7 +125,7 @@ func (raw *rawConfig) parseConfigFile(f string) (err error) {
 }
 
 // mergeRaw validates raw configuration values and merges them into `conf`.
-func (conf *config) mergeRaw(site *site, raw rawConfig) error {
+func (conf *config) mergeRaw(raw rawConfig) error {
 	// Validate and merge parsed configuration.
 	if raw.Author != nil {
 		conf.author = raw.Author
@@ -139,20 +137,7 @@ func (conf *config) mergeRaw(site *site, raw rawConfig) error {
 		conf.permalink = *raw.Permalink
 	}
 	if raw.Homepage != nil {
-		home := *raw.Homepage
-		home = filepath.FromSlash(home)
-		if !filepath.IsAbs(home) {
-			home = filepath.Join(site.buildDir, home)
-		} else {
-			return fmt.Errorf("homepage must be relative to the build directory: %s", site.buildDir)
-		}
-		if !fsx.PathIsInDir(home, site.buildDir) {
-			return fmt.Errorf("homepage must reside in build directory: %s", site.buildDir)
-		}
-		if fsx.DirExists(home) {
-			return fmt.Errorf("homepage cannot be a directory: %s", home)
-		}
-		conf.homepage = home
+		conf.homepage = *raw.Homepage
 	}
 	if raw.ID != nil {
 		switch *raw.ID {

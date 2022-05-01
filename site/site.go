@@ -495,7 +495,7 @@ func (site *site) parseConfigFiles() error {
 				if err := raw.parseConfigFile(cf); err != nil {
 					return fmt.Errorf("config file: %s: %s", cf, err.Error())
 				}
-				if err := conf.mergeRaw(site, raw); err != nil {
+				if err := conf.mergeRaw(raw); err != nil {
 					return fmt.Errorf("config file: %s: %s", cf, err.Error())
 				}
 				break
@@ -520,7 +520,7 @@ func (site *site) parseConfigFiles() error {
 		return site.confs[i].origin < site.confs[j].origin
 	})
 	// Merge -var options into root config.
-	if err := site.confs[0].mergeRaw(site, site.vars); err != nil {
+	if err := site.confs[0].mergeRaw(site.vars); err != nil {
 		return fmt.Errorf("config variable: %s", err.Error())
 	}
 	site.verbose("root config: \n" + site.confs[0].String())
