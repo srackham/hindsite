@@ -1,7 +1,7 @@
 2342d98f1fba710ce9149b4d34a3a8975e034c7be8cf1b47664da4777e383863  build/newsletters/sed-ac-nisi-porttitor.html
 662f7d800f0048fc9553138e2ffac9f828b81de08935405ae38c76fbdcb8d8a0  build/newsletters/cras-est.html
 62ae4bf5d325256ab5681e03ce9bcd3352d97a01fef01422d01859bd3841d46f  build/newsletters/natoque-pulvinar-vel-porttitor-cras.html
-2e3b207b178f6f9a1e9c2dda82863ea94452a45a9b5d4f0e194196d67e22e08b  build/index.html
+d841294321c7bcb236860147be832a7bd4ee3bbf812610a2af1e1d824338dc53  build/index.html
 bc6374cfc0094f5c9f52abd0e3164029b393b12b31e63190216510501e947e65  build/indexes/newsletters/docs-1.html
 f30869731329a7589ac81d04c5ef741da5a2be9b5288a7a5a9bbb44fb0cb9ff4  build/indexes/posts/tags.html
 5f19b32ee6e7a1e70f188205ccda13803b4f7a36b0c7e1368cc13a65f5dd4ede  build/indexes/posts/docs-2.html
@@ -36,4 +36,4 @@ a5fd310987cdf9e7a3c2279ce839349bed34c0e2ae27383f5d1e56bd0724e5b5  build/posts/20
 ec1f87c561f80aa714a60e69f2506824efaaed2f2950f3f87e75ea0386d104af  build/posts/2016-10-18/sed-sed/index.html
 b8e6a9cf9c09070d135c45c46728e82f8709657951300e048b3b4908236446d6  build/posts/2015-05-20/tincidunt-cursus-pulvinar/index.html
 907948180d5f1e459ef4daa9b5a6a76ae0e4526f0fc2f3bdb3c3149b77555dc0  build/posts/2016-09-21/parturient-sed/index.html
-2e3b207b178f6f9a1e9c2dda82863ea94452a45a9b5d4f0e194196d67e22e08b  build/about.html
+d841294321c7bcb236860147be832a7bd4ee3bbf812610a2af1e1d824338dc53  build/about.html

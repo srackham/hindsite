@@ -30,6 +30,8 @@ description: The about document.
 
 [valid off-site absolute URL](http://foobar.com/index.html)
 
+[valid off-site absolute URL](https://foobar.com/index.html)
+
 [valid off-site absolute (with current schema) URL](//foobar.com/index.html)
 
 Arcu sed hac nisi _duis porta_, sociis pulvinar. Montes enim, facilisis urna?
