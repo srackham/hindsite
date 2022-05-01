@@ -26,6 +26,12 @@ description: The about document.
 ```
 
 ### <a id="id1"> Header
+[valid page-relative URL](index.html#id1)
+
+[valid off-site absolute URL](http://foobar.com/index.html)
+
+[valid off-site absolute (with current schema) URL](//foobar.com/index.html)
+
 Arcu sed hac nisi _duis porta_, sociis pulvinar. Montes enim, facilisis urna?
 Augue vel, magnis montes sociis auctor, ut! Placerat porta etiam, aliquet?
 
