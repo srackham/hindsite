@@ -21,6 +21,7 @@ func TestParseArgs(t *testing.T) {
 	parse := func(cmd string) {
 		args := strings.Split(cmd, " ")
 		site = New()
+		site.confs = append(site.confs, config{})
 		err = site.parseArgs(args)
 	}
 
@@ -71,10 +72,10 @@ func TestParseArgs(t *testing.T) {
 
 	// -var option checks.
 	parse("hindsite build -site ./testdata/blog -var foobar")
-	assert.Contains("illegal -var syntax: foobar", err.Error())
+	assert.Equal("illegal -var syntax: foobar", err.Error())
 
 	parse("hindsite build -site ./testdata/blog -var foobar=42")
-	assert.Contains("illegal -var name: foobar", err.Error())
+	assert.Equal("illegal -var name: foobar", err.Error())
 
 	parse("hindsite build -site ./testdata/blog -var author=Joe-Bloggs")
 	assert.Equal("Joe-Bloggs", *site.vars.Author)
@@ -98,7 +99,7 @@ func TestParseArgs(t *testing.T) {
 	assert.Equal("2_Jan_2006", *site.vars.MediumDate)
 
 	parse("hindsite build -site ./testdata/blog -var paginate=qux")
-	assert.Contains("illegal paginate value: qux", err.Error())
+	assert.Equal("illegal paginate value: qux", err.Error())
 
 	parse("hindsite build -site ./testdata/blog -var paginate=42")
 	assert.Equal(42, *site.vars.Paginate)
@@ -123,6 +124,12 @@ func TestParseArgs(t *testing.T) {
 
 	parse("hindsite build -site ./testdata/blog -var user.foo=bar")
 	assert.Equal("bar", site.vars.User["foo"])
+
+	// Configuration variable checks.
+	config := config{}
+	s := "/"
+	err = config.mergeRaw(&site, rawConfig{URLPrefix: &s})
+	assert.Equal("illegal urlprefix: /", err.Error())
 
 	// -config option checks.
 	parse("hindsite build -site ./testdata/blog -content ./testdata/blog/template/init -var user.foo=bar -config ./testdata/blog/template/config2.toml")

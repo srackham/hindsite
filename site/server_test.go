@@ -108,7 +108,7 @@ func TestServer(t *testing.T) {
 
 // Based onhttps://blog.questionable.services/article/testing-http-handlers-go/
 func TestHTTPHandlers(t *testing.T) {
-	cmd := "hindsite nop -site ./testdata/blog -content ./testdata/blog/template/init -var urlprefix=http:/example.com"
+	cmd := "hindsite nop -site ./testdata/blog -content ./testdata/blog/template/init -var urlprefix=http://example.com"
 	args := strings.Split(cmd, " ")
 	site := New()
 	err := site.parseArgs(args)
