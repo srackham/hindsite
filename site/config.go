@@ -167,11 +167,11 @@ func (conf *config) mergeRaw(site *site, raw rawConfig) error {
 	}
 	if raw.URLPrefix != nil {
 		value := *raw.URLPrefix
-		re := regexp.MustCompile(`^((http|/)\S+|)$`)
+		re := regexp.MustCompile(`^(http[s]?://|/)\S*[^/]$`)
 		if !re.MatchString(value) {
 			return fmt.Errorf("illegal urlprefix: %s", value)
 		}
-		conf.urlprefix = strings.TrimSuffix(value, "/")
+		conf.urlprefix = value
 	}
 	if raw.Exclude != nil {
 		conf.exclude = append([]string{".*"}, splitWildcards(*raw.Exclude)...)
