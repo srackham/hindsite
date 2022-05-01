@@ -520,7 +520,9 @@ func (site *site) parseConfigFiles() error {
 		return site.confs[i].origin < site.confs[j].origin
 	})
 	// Merge -var options into root config.
-	site.confs[0].mergeRaw(site, site.vars)
+	if err := site.confs[0].mergeRaw(site, site.vars); err != nil {
+		return fmt.Errorf("config variable: %s", err.Error())
+	}
 	site.verbose("root config: \n" + site.confs[0].String())
 	// Sanity checks.
 	if site.confs[0].origin != site.templateDir {
