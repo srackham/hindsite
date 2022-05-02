@@ -152,7 +152,7 @@ func (conf *config) mergeRaw(raw rawConfig) error {
 	}
 	if raw.URLPrefix != nil {
 		value := *raw.URLPrefix
-		re := regexp.MustCompile(`^(http[s]?://|/)\S*[^/]$`)
+		re := regexp.MustCompile(`^(http[s]?://|/)[\w.~/-]*[^/]$`) // See also RFC 3986.
 		if !re.MatchString(value) {
 			return fmt.Errorf("illegal urlprefix: %s", value)
 		}
