@@ -8,10 +8,9 @@
 {--header-ids} = 'yes'
 {--header-links} = 'yes'
 
-{urlprefix} = '/hindsite'
-{faq} = '{urlprefix}/faq.html'
-{changelog} = '{urlprefix}/changelog.html'
-{reference} = '{urlprefix}/index.html'
+{faq} = '/faq.html'
+{changelog} = '/changelog.html'
+{reference} = '/index.html'
 {hindsite-github} = 'https://github.com/srackham/hindsite'
 {rimu-github} = 'https://github.com/srackham/rimu'
 
