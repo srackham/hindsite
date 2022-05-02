@@ -29,30 +29,29 @@ commands:
 
 1. Download the binary for your platform from the [releases
    page]({hindsite-github}/releases) and extract the
-   `hindsite` executable (see [_Building hindsite_](#building-hindsite) if you
+   `hindsite` executable (see [Building hindsite](#building-hindsite) if you
    prefer to build and install from source).
 
-2. Create a new Hindsite site directory and install the [built-in `blog`
-   template]({hindsite-github}/tree/master/site/builtin/blog/template)
-   using the hindsite [init command](#init-command):
+2. Create a new Hindsite site directory and install the
+   [built-in `blog` template](#blog-built-in-template) using the
+   hindsite [init command](#init-command):
 
-    mkdir mysite
-    hindsite init mysite -from blog
+    mkdir myblog
+    cd myblog
+    hindsite init -from blog
 
 3. Build the website, start the hindsite web server and open it in the browser:
 
-    hindsite serve mysite -launch
+    hindsite serve -launch
 
-Include the `-v` (verbose) command option to see what's going on. The best way
-to start learning hindsite is to browse the blog [site directory](#sites).
-
+Include the `-v` (verbose) command option to see what's going on.
 If you are familiar with Jekyll or Hugo you'll be right a home (hindsite can
 read Jekyll and Hugo Markdown document [front matter](#front-matter)).
 
 
 ## Sites
 A Hindsite site consists of three separate directory trees containing all the
-source document, templates and resources to build, maintain and test a static
+source documents, templates and resources to build, maintain and test a static
 website:
 
 - A _content directory_ containing source [documents](#documents) and
@@ -69,7 +68,7 @@ multiple content directories just as a single content directory can be processed
 by multiple template directories. The _build_, _content_ and _template_
 directories must be mutually exclusive (not contained within one another).
 
-For example, here's the built-in blog site structure:
+For example, here's the built-in blog site directory structure:
 
 ```
 ├── build
@@ -101,14 +100,13 @@ The `build/indexes` directory contains the generated document and tag index
 pages.
 
 The `template/init` directory is optional, it contains static resources and
-example documents which serve as a starting point for new sites (see the [init
+example documents which are used to initialise new sites (see the [init
 command](#init-command)). In all other respects it is just like any other
 content directory.
 
 File and directory names should only contain lower case alpha numeric and hyphen
 characters. This convention is not enforced but is recommended because it
-ensures consistent, readable URLs without ugly encodings for illegal URL
-characters.
+ensures consistent, readable URLs without ugly encodings.
 
 
 ## Commands
@@ -199,14 +197,14 @@ The _help_ command prints Hindsite documentation and version information.
 
 ## Init command
 The _init_ command creates a new site from another site template or from a
-built-in template. The source template is copied to the site's template
-directory then the site's content directory is initialised with the contents of
-the (optional) source template `init` directory.
+[built-in template](#built-in-templates). The source template is copied to the template
+directory then the content directory is initialised with the contents of
+the source template `init` directory.
 
-The inclusion of a template `init` directory allows documents and resources
-(images, CSS, JavaScript etc) to be shipped with and installed from a site
-template. Hindsite's [built-in templates](#built-in-templates) all include an
-`init` directory.
+The inclusion of a template `init` directory allows [documents](#documents) and
+[static files](#static-files) (images, CSS, JavaScript etc) to be shipped with
+and installed from a site template. Hindsite's [built-in
+templates](#built-in-templates) all include an `init` directory.
 
 ### Syntax
 
@@ -241,8 +239,8 @@ template. Hindsite's [built-in templates](#built-in-templates) all include an
 
 
 ## Build command
-The _build_ command generates a static website in the _build_ directory using
-files from the _content_ and _template_ directories.
+The _build_ command builds a website in the _build_ directory using
+files from the [_content_ and _template_ directories](#sites).
 
 ### Syntax
 
@@ -252,34 +250,35 @@ files from the _content_ and _template_ directories.
 [Common command options](#common-command-options) plus:
 
     -drafts
+    -keep
     -lint
 
 - All non-excluded files from the _content_ directory are rebuilt.
 - If the `-drafts` option is specified [draft documents](#documents) are included
   in the built website.
+- If the `-keep` option is specified the contents of the build directory are not
+  deleted prior to building the site.
 - The `-lint` option performs [validity checks](#validity-checks) on the generated HTML document files.
 - Content, build and template directories cannot overlap, with one exception:
-  the content directory can be `TEMPLATE_DIR/init` (this is handy for testing
+  the content directory can be `TEMPLATE_DIR/init` (this is useful for testing
   content initialization).
 
 ### Command execution
-
 . Configuration files (`config.toml` and `config.yaml` files) in the template directory tree are parsed.
-. All files and folders in the build directory are deleted.
+. All files and folders in the build directory are deleted (unless the `-keep`
+  option has been specified).
 . HTML and text templates (`*.html` and `*.txt` files) in the template directory tree are parsed.
-. The content files are processed:
+. [Static files](#static-files) are processed.
+. Document [indexes](#indexes) are built.
+. Documents (`*.md` and `*.rmu` files) are processed:
 ."list-style:lower-roman"
-  .. Front matter headers are parsed and document variables are computed.
-  .. Files classified as [templates](#text-templates) are expanded.
-  .. [Static files](#static-files) are copied to their corresponding build
-     directories.
-. Document indexes are built.
-. Document webpages are built:
-."list-style:lower-roman"
-  .. Document content is rendered to HTML and assigned to the `.body` document variable.
-  .. The document's `layout.html` template is rendered and saved to the document's build directory.
-. If a [homepage](#homepage) is specified it is copied to the root of the build
-  directory and named `index.html`.
+  .. [Front matter](#front-matter) headers are parsed and [document variables](#document-variables) are computed.
+  .. If the document is classified as a [text template](#templates-conf) it is expanded.
+  .. The document markup is then rendered to HTML and assigned to the `.body` [document variable](#document-variables).
+  .. The document's [layout template](#layout-html) is rendered and root-relative URLs are prefixed with the [urlprefix](#urlprefix).
+  .. The resulting HTML webpage is written to its corresponding build directory.
+. If a [homepage](#homepage) is specified it is copied to the root of the build directory and named `index.html`.
+. If the `-lint` option was specified document webpages are [validated](#validity-checks).
 
 ### Validity checks
 Following a site rebuild the `-lint` option carries out validity checks on the
@@ -288,7 +287,7 @@ generated HTML document files.
 - HTML `href` and `src` attribute URL values are checked to ensure:
   . URL syntax is valid.
   . URL target resource files exist.
-  . URL fragment identifiers have a matching HTML `id` attribute in the target resource file.
+  . URL fragment identifiers have a matching HTML `id` attribute in the target file.
 
 - HTML `id` attributes are checked to ensure:
   . ID syntax is valid.
@@ -325,6 +324,7 @@ live reloading.
 [Common command options](#common-command-options) plus:
 
     -drafts
+    -keep
     -lint
     -launch
     -navigate
@@ -333,8 +333,10 @@ live reloading.
 - If the `-drafts` option is specified [draft documents](#documents) are included
   in the built website.
 - The `-launch` option opens the site home page in the default web browser.
-- Use the `-lint` option to check [link validity](#validity-checks) in generated HTML document files
-  following a site rebuild.
+- If the `-keep` option is specified the contents of the build directory are not
+  deleted prior to building the site.
+- Use the `-lint` option to check [validity](#validity-checks) of generated
+  document webpages following a site rebuild.
 - The `-navigate` option causes the browser to automatically navigate to new and
   updated [documents](#documents).
 - The `-port` option sets the server HTTP port number (`HTTP_PORT`) and/or the
@@ -354,11 +356,11 @@ live reloading.
   command in the background you need to assign `/dev/null` to its standard
   input. For example:
 
-  hindsite serve mysite < /dev/null &
+  hindsite serve < /dev/null &
 
-- The server strips the `urlprefix` from URLs in HTML files before sending them
-  to the browser. This allows the site to be tested locally irrespective of the
-  `urlprefix` value.
+- The server strips the [`urlprefix`](#urlprefix) from URLs in HTML files before
+  sending them to the browser. This allows the site to be tested locally
+  irrespective of the `urlprefix` value.
 - To enable browser live reloads the server injects the
   [LiveReload](http://livereload.com/) script into HTML files prior to sending
   them to the browser.
@@ -435,8 +437,11 @@ Document content goes here.
 
 
 ## Built-in templates
-Hindsite includes `blog`, `docs` and `hello` built-in site templates
-which can be installed using the Hindsite [init command](#init-command).
+Hindsite includes
+[blog](#blog-built-in-template),
+[docs](#docs-built-in-template) and
+[hello](#hello-built-in-template)
+built-in site templates which are installed using the Hindsite [init command](#init-command):
 
 To create a site using a built-in template:
 
@@ -447,14 +452,15 @@ To create a site using a built-in template:
 For example:
 
 ```
-mkdir hindsite-blog
-cd hindsite-blog
+mkdir myblog
+cd myblog
 hindsite init -from blog
 hindsite serve -launch
 ```
 
 ### `blog` built-in template
-A template to create a websites for blog posts and newsletters.
+A template to create a websites for blog posts and newsletters
+(view the built site <a href="/builtin/blog" target="_blank">here</a>).
 
 Customisation notes:
 
@@ -484,8 +490,8 @@ Customisation notes:
 
 ### `docs` built-in template
 A template to create sites that have a fixed, relatively small, number of pages.
-Ideal for building documentation sites for user guides, FAQs and reference
-manuals.
+Ideal for building documentation sites for user guides, FAQs and reference manuals
+(view the built site <a href="/builtin/docs" target="_blank">here</a>).
 
 The [Hindsite documentation site](https://srackham.github.io/hindsite/) is based
 on this template.
@@ -526,7 +532,8 @@ if x == 1:
 
 ### `hello` built-in template
 A minimal single-page built-in template consisting of a single
-`content/index.md` document and a single `template/layout.html` HTML template.
+`content/index.md` document and a single `template/layout.html` HTML template
+(view the built site <a href="/builtin/hello" target="_blank">here</a>).
 
 ### Built-in template styling
 The `blog` and `docs` templates include the following block element CSS classes
@@ -595,7 +602,7 @@ precedence over the latter).
 
 ### Configuration variables
 The `exclude`, `include`, `homepage` and `urlprefix` configuration variables
-are site-wide and must reside in the template directory root configuration file.
+are site-wide and must reside in the [root configuration](#root-configuration).
 All other configuration variables can occur in any configuration file.
 
 Valid configuration variables are:
@@ -669,6 +676,8 @@ function](https://golang.org/pkg/time/#Time.Format). The default values are:
 name of a file, relative to the build directory, that is copied by the `build`
 command to the root of the build directory and named `index.html`. Use the slash
 (`/`) character as the path separator to ensure cross-platform compatibility.
+The main use-case for this feature is for assigning an index file as the site's
+home page.
 TOML example:
 
     homepage = "indexes/posts/docs-1.html"
@@ -733,8 +742,9 @@ the [content files](#content-files) that undergo [text template](#text-templates
   timezone = "Pacific/Auckland"
 
 .#urlprefix
-`urlprefix` †:: This variable is prepended to all synthesized document and index
-page [URLs](#urls). Its default value is a blank string. TOML examples:
+`urlprefix` †:: This variable is automatically prepended to all root-relative [URLs](#url-generation).
+This allows a site to be rooted in any web server directory without having to hard-wire server paths into URLs.
+The `urlprefix` defaults to a blank string. TOML examples:
 
     urlprefix = "/blog"                     # Root-relative URL prefix.
     urlprefix = "https://www.example.com"   # Absolute URL prefix.
@@ -793,6 +803,16 @@ The [build command](#build-command) renders the document with its [layout
 template](#html-templates) and writes the resulting HTML webpage to the
 document's [build path](#build-paths).
 
+If a document file is classified as a template (see the
+[`templates`](#templates-conf) configuration variable) then it
+undergoes [text template](#text-templates)
+expansion prior to being rendered to HTML.
+
+### Document tags
+TODO
+A document tag is a keyword or phrase used to categorise a document in some way.
+Document tags are set with the front matter [tags
+variable](#front-matter-variables) and each document can have multiple tags.,f#
 
 ### Static files
 Static files typically include website resources such as CSS, JavaScript and
@@ -808,7 +828,14 @@ expansion prior to being written to the _build directory_.
 
 
 ## Indexes
-The hindsite build command generates paginated document and tag HTML index files.
+The hindsite build command generates paginated document and tag index files.
+
+A _document index_ is a paginated list of [documents](#documents).
+
+A _tag index_ is a paginated list of TODO
+
+Document and tag indexes are built with [HTML templates](#html-templates).
+Document and tag indexes are built with [HTML templates](#html-templates).
 
 - A content directory is indexed when the corresponding template directory
   contains a [`docs.html` template](#html-templates). The `docs.html` template
@@ -942,8 +969,7 @@ within a site. Used in situations requiring a unique document ID.
   - If a document has no explicit `id` value then the default value is determined
     by the [`id` configuration variable](#id-configuration-variable).
 
-`layout`:: The name of the template used to render the document. `layout`
-defaults to the closest `layout.html` [HTML template](#html-templates).
+`layout`:: The name of the document's [layout template](#layout-html).
 
 `permalink`:: Sets the document `permalink` value. It defaults to the
 [`permalink`](#permalink) configuration value.
@@ -1049,7 +1075,17 @@ assigned the name `posts/layout.html`.
 Both HTML and text templates use the [Go template
 syntax](https://golang.org/pkg/text/template/).
 
-### HTML templates
+
+## Text templates
+All `.txt` files in the _template directory_ (excluding the `init`
+directory) contribute to the set of named text templates which are available during
+[document file](#documents) and [static file](#static-files) template expansion.
+
+By default there is no document or static file template expansion -- it must be
+enabled by the [`templates`](#templates-conf) configuration variable.
+
+
+## HTML templates
 HTML layout and index templates are used to build HTML webpages and document
 indexes. All the `.html` files in the site _template directory_ (excluding
 the `init` directory) contribute to the set of named HTML templates made
@@ -1058,7 +1094,8 @@ namespace.
 
 The following template files have special significance:
 
-`layout.html`:: Templates with the file name `layout.html` are used to generate
+### layout.html
+Templates with the file name `layout.html` are used to generate
 content document webpages. A site can have one or more layout templates. The
 selected layout template is the one closest to the content document on the
 corresponding _template directory_ path (but this can be overridden using the
@@ -1066,10 +1103,11 @@ document [front matter `layout` value](#front-matter-variables)). These conventi
 allow document layouts to be assigned per directory and per document. Layouts
 are rendered with the document's [document template variables](#document-variables).
 
-`docs.html`:: This template generates a paginated document index page. The
+### docs.html
+The `docs.html` template generates a paginated document index page. The
 presence of a `docs.html` template file specifies that the corresponding content
 directory is indexed.
-..
+
 `docs.html` templates are rendered with the following template variables:
 
 `.docs`:: An iterable list of index page documents. Each list item contains a
@@ -1077,26 +1115,24 @@ set of [document template variables](#document-variables).
 
 `.count`:: The total number of documents in the index.
 
-`.page`:: Document index page variables:
+`.page.number`:: The page number.
 
-      `.number`::: The page number.
+`.page.url`:: The page URL.
 
-      `.url`::: The page URL.
-
-      `.prev`, `.next`, `.first`, `.last`::: These items include the page `.number` and
-       `.url` of the previous, next, first and last index pages. For example
-      `.page.prev.number` is the page number (1...) of the previous document index page.
-      `.prev` is `nil` on the first last index page, `.next` is `nil` on the last last index page.
+`.page.prev`,`.page.next`, `.page.first`, `.page.last`::
+These items include the page `.number` and
+`.url` of the previous, next, first and last index pages. For example
+`.page.prev.number` is the page number (1...) of the previous document index page.
+`.page.prev` is `nil` on the first last index page, `.page.next` is `nil` on the last last index page.
 
 `.urlprefix`:: The [`urlprefix`](#urlprefix) configuration value.
 
 `.user`:: The index configuration [`user`](#user) key/value map.
-..
 
-`tags.html`:: This optional index template is used to build a `tags.html` tags
+### tags.html
+The optional `tags.html` index template is used to build a `tags.html` tags
 index webpage. If it is not present the tags index files are not built.
 `tags.html` templates are rendered with the following template variables:
-..
 
 `.tags`:: An iterable list, each list item contains:
 
@@ -1107,16 +1143,6 @@ index webpage. If it is not present the tags index files are not built.
 `.urlprefix`:: The [`urlprefix`](#urlprefix) configuration value.
 
 `.user`:: The index configuration [`user`](#user) key/value map.
-..
-
-
-### Text templates
-All `.txt` files in the _template directory_ (excluding the `init`
-directory) contribute to the set of named text templates which are available during
-[document file](#documents) and [static file](#static-files) template expansion.
-
-By default there is no document or static file template expansion -- it must be
-enabled by the [`templates`](#templates-conf) configuration variable.
 
 
 ## Build paths
@@ -1144,35 +1170,59 @@ ________________________________________________________________
 /posts/%y-%m-%d/%p/             /posts/2022-03-11/foo/index.html 
 /posts/%y-%m-%d/%p/   bar       /posts/2022-03-11/bar/index.html 
 /index.html                     /index.html
-/index.html           bar       /index.html ???
+/index.html           bar       /index.html
 ________________________________________________________________
 ```
+
+
 ## URLs
-Hindsite synthesizes URLs and assigns them to [HTML template](#html-templates)
-variables. The URLs are used for site navigation. For example:
+URLs are used to link webpages, they occur in documents and HTML templates.
+URLs are either _external_ (references to off-site resources) or _internal_
+(references to resources within the site).
+
+The different URL types are _absolute_, _absolute with current schema_, _root
+relative_ and _page relative_. Examples:
+
+```
+http://yourdomain.com/images/example.png    # absolute
+//yourdomain.com/images/example.png         # absolute with current schema
+/images/example.png                         # root-relative
+images/example.png                          # page-relative
+
+```
+Internal URLs should be _root-relative_ or _page-relative_. As a general rule
+you should just stick to using root-relative URLS.
+
+### URL generation
+Hindsite automatically prefixes all root-relative URLs with the
+[`urlprefix`](#urlprefix) configuration value. This allows a site to be rooted
+anywhere on the web server without having to hard-wire server paths into URLs.
+
+Webpage URLs are synthesized by prefixing the webpage [build path](#build-paths)
+(relative to the [build directory](#sites)) with the `urlprefix`. File
+path separators are translated to slash characters.
+
+For example, if the build directory is `C:\mysite\build` and the generated
+webpage is `C:\mysite\build\posts\foo.html` then:
+
+- If no `urlprefix` is specified the URL will be `/posts/foo.html`.
+- If the `urlprefix` is `/blog` then the URL will be `/blog/posts/foo.html`
+- If the `urlprefix` is `https://example.com` then the URL will be `https://example.com/posts/foo.html`
+
+If you are deploying to a web server subdirectory then you need to set the
+`urlprefix` configuration variable to ensure that URLs are rooted correctly. For
+example, if you are deploying to the server directory `http://example.com/blog`
+you will need to set `urlprefix` to either `/blog` (to generate root-relative
+URLs) or `http://example.com/blog` (to generate absolute URLs).
+
+### Navigation URLs
+Hindsite synthesizes root-relative navigation URLs and assigns them to [HTML
+template](#html-templates) variables. For example:
 
 - The `.next` [document template variable](#document-variables) is used
   to link to the next document in document `layout.html` templates.
 - The `.page.next` [HTML template](#html-templates) variable is used to link to
   the next page of documents in `docs.html` document index templates.
-
-A URL is synthesized by taking the document's [build path](#build-paths)
-(relative to the [build directory](#sites)) and prefixing it with the
-[`urlprefix`](#urlprefix) configuration value. File path separators are
-translated to slash characters.
-
-For example, if the build directory is `/mysite/build` and the generated web
-page is `/mysite/build/posts/foo.html` then:
-
-- The default document URL will be `/posts/foo.html` (URLs are root-relative by default).
-- If the `urlprefix` is `/blog` then the URL would be `/blog/posts/foo.html`
-- If the `urlprefix` is `https://example.com` then the URL would be `https://example.com/posts/foo.html`
-
-If you are deploying to a web server subdirectory then you need to set the
-`urlprefix` configuration variable to ensure synthesized URLs are rooted
-correctly. For example, if you are deploying to the server `http://example.com/blog`
-URL you need to set `urlprefix` to either `/blog` (to generate
-root-relative URLs) or `http://example.com/blog` (to generate absolute URLs).
 
 
 ## Building hindsite
@@ -1211,6 +1261,7 @@ Links to explanatory documentation.
 - [Site](#sites)
 - [Site template](#sites)
 - [Static file](#static-files)
+- [Tag](#document-tags)
 - [Tag index](#indexes)
 - [Template directory](#sites)
 - [Template file](#template-files)

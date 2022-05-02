@@ -4,6 +4,19 @@ See the [Github commit logs]({hindsite-github}/commits/master) for a full list o
 
 
 ## Version 2.0.0 (2022-??-??)
+Version 2 add three major features:
+
+TODO
+
+. Linting
+. Automated `urlprefix` injection
+. Expanded documentation
+
+TODO Upgrading from Hindsite version 1 to version 2
+
+- BREAKING CHANGE: Automated `urlprefix` injection so that it's no longer
+  necessary to explicitly prefix document and template root-relative URLs.
+- Added the `-keep` command-line option to `build` and `serve` commands.
 - Added the `-config CONFIG_FILE` [command-line option]({reference}#common-command-options)
   which augments the site [root configuration]({reference}#configuration-files).
 - Added the `-from SOURCE` command-line option to the [new command]({reference}#new-command)
