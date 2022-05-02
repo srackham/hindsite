@@ -7,19 +7,23 @@ slug: lorem-penatibus
 draft: true
 ***/
 
-[MALFORMED URL](:invalid-url)
+[malformed url](:invalid-url)
 
-[MISSING FRAGMENT ID](#invalid-id)
+[missing fragment id](#invalid-id)
 
 [valid fragment ID](#id1)
 
-[MISSING TARGET FILE](missing-file.html)
+[missing target file](missing-file.html)
+
+<a href="/missing-file-2.html">missing target file</a>
+
+<a href='missing-file-3.html'>single-quotes skip lint checks</a>
 
 [valid target file](http://example.com/index.html)
 
-[MISSING TARGET FRAGMENT ID](http://example.com/index.html#invalid-id)
+[missing target fragment id](http://example.com/index.html#invalid-id)
 
-[valid target fragment ID](http://example.com/index.html#id1)
+[valid target fragment id](http://example.com/index.html#id1)
 
 
 ## <a id="id1"> Header
