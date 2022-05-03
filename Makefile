@@ -226,3 +226,8 @@ validate-checksums:
 	hindsite build -site $$tmpdir
 	f=$$(readlink -f $(TEST_SITE)/checksums.txt)
 	(cd $$tmpdir && sha256sum --quiet --check $$f)
+
+serve-testdata:
+	tmpdir=$$(mktemp -d /tmp/hindsite-XXXXXXXX)
+	hindsite init -site $$tmpdir -from $(TEST_SITE)/template
+	hindsite serve -site $$tmpdir -launch -lint
