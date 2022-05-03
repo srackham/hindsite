@@ -1,3 +1,7 @@
+---
+user:
+  highlightjs: yes
+---
 # Hindsite FAQ
 
 ## Does hindsite support themes and skeletons?
@@ -165,22 +169,13 @@ extended to create multiple additional indexes over a the same indexed document
 set.
 
 
-## Relative or root-relative intra-site links?
-TODO Update this topic
+## How can I skip a lint link check
+Quote the link's `href` or `src` attribute with single quotes instead of double
+quotes, for example:
 
-A relative link is a URL equivalent to a relative directory path e.g.
-`./images/beach.jpg`. A root-relative link is relative to the website root and
-begins with a slash e.g. `/images/beach.jpg`.
-
-- Relative links are not subject to the `urlprefix` whereas root-relative links
-  are.
-- Relative links are broken by when the location of target documents change,
-  root-relative links are not.
-- Links can also be broken if the `urlprefix` configuration variable changes.
-  For this reason it's best not to hardcode the `urlprefix` into your documents
-  (render it with the `{{.urlprefix}}` template field).
-- Changing the `permalink` variable can also break intra-site links. It probably
-  won't change much but it's something to be aware of.
+``` html
+<a href='foobar.html'>single-quotes skip lint checks</a>
+```
 
 
 ## Aren't single-hyphen command options non-standard?

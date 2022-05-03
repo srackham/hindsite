@@ -458,7 +458,7 @@ hindsite init -from blog
 hindsite serve -launch
 ```
 
-### `blog` built-in template
+### blog built-in template
 A template to create a websites for blog posts and newsletters
 (view the built site <a href="/builtin/blog" target="_blank">here</a>).
 
@@ -488,7 +488,7 @@ Customisation notes:
 - The example content pages are written in Markdown but you could also use [Rimu markup]({rimu-github}).
 
 
-### `docs` built-in template
+### docs built-in template
 A template to create sites that have a fixed, relatively small, number of pages.
 Ideal for building documentation sites for user guides, FAQs and reference manuals
 (view the built site <a href="/builtin/docs" target="_blank">here</a>).
@@ -530,7 +530,7 @@ if x == 1:
 - _user_ template variable values can be set per document (in document
   front matter) or per directory (in site configuration files).
 
-### `hello` built-in template
+### hello built-in template
 A minimal single-page built-in template consisting of a single
 `content/index.md` document and a single `template/layout.html` HTML template
 (view the built site <a href="/builtin/hello" target="_blank">here</a>).
@@ -742,7 +742,7 @@ the [content files](#content-files) that undergo [text template](#text-templates
   timezone = "Pacific/Auckland"
 
 .#urlprefix
-`urlprefix` †:: This variable is automatically prepended to all root-relative [URLs](#url-generation).
+`urlprefix` †:: This variable is automatically prepended to all root-relative [URLs](#urls).
 This allows a site to be rooted in any web server directory without having to hard-wire server paths into URLs.
 The `urlprefix` defaults to a blank string. TOML examples:
 
@@ -809,10 +809,13 @@ undergoes [text template](#text-templates)
 expansion prior to being rendered to HTML.
 
 ### Document tags
-TODO
-A document tag is a keyword or phrase used to categorise a document in some way.
-Document tags are set with the front matter [tags
-variable](#front-matter-variables) and each document can have multiple tags.,f#
+A document tag is a keyword or phrase used to categorise a document in some
+way.
+
+Hindsite can create tag [indexes](#indexes) and per-tag paginated lists of documents.
+
+Document tags are assigned to the front matter [tags variable](#tags).
+A document can have multiple tags.
 
 ### Static files
 Static files typically include website resources such as CSS, JavaScript and
@@ -828,24 +831,26 @@ expansion prior to being written to the _build directory_.
 
 
 ## Indexes
-The hindsite build command generates paginated document and tag index files.
+The hindsite build command generates optional paginated document and [document tag](#document-tags) index files.
+Multiple indexes are supported -- each folder in the content directory can have
+its own document and tag index.
 
 A _document index_ is a paginated list of [documents](#documents).
 
-A _tag index_ is a paginated list of TODO
+A _tag index_ is a list of document tags, each tag in the index is linked to a
+tag-specific document index.
 
-Document and tag indexes are built with [HTML templates](#html-templates).
 Document and tag indexes are built with [HTML templates](#html-templates).
 
 - A content directory is indexed when the corresponding template directory
-  contains a [`docs.html` template](#html-templates). The `docs.html` template
-  generates HTML document index files. If a [`tags.html` template](#html-templates) is
+  contains a [`docs.html` template](#docs-html). The `docs.html` template
+  generates HTML document index files. If a [`tags.html` template](#tags-html) is
   present they are used to generate HTML tag index files.
 - Documents from the indexed content directory and its subdirectories contribute
   to the index.
 - A site can contain any number of indexed content directories.
 - Indexes can be nested. This allows categorized document subdirectories to have
-  separate indexes along with aggregated parent directory indexes.
+  separate indexes.
 - A _primary index_ is an index that is not nested (has no parent index). A
   document can only belong to one primary index.
 - Generated index pages are written to a directory named `indexes` located at
@@ -857,17 +862,45 @@ The following HTML index files are built for each index:
   `docs-1.html`, `docs-2.html` ...:: Paginated document index files. The number
   of documents per index page is set by the
   [`paginate`](#configuration-variables) configuration variable.
-  Rendered with the corresponding [docs.html](#html-templates) template.
+  These files are rendered with the corresponding [docs.html](#docs-html) template.
 
-  `tags.html`:: A list of document tags linked to paginated per-tag document
-  index files in the `tags` subdirectory. Rendered with the corresponding
-  [tags.html](#html-templates) template.
+  `tags.html`:: A list of [document tags](#document-tags) linked to paginated per-tag document
+  index files in the `tags` subdirectory. `tags.html` is rendered with the corresponding
+  [tags.html](#tags-html) template.
 
   `tags/<tag>-1.html`, `tags/<tag>-2.html` ...:: Paginated per-tag document
   index files. The number of documents per index page is set by the
-  [`paginate`](#configuration-variables) configuration variable. Rendered with
-  the corresponding [docs.html](#html-templates) template.
+  [`paginate`](#configuration-variables) configuration variable. These files are
+  rendered with the corresponding [docs.html](#docs-html) template.
 
+### Example indexes
+The [built-in blog template](#blog-built-in-template) generates document and tag
+indexes for documents in the `content/posts` directory. It does this because the
+corresponding template directory (`template/posts`) contains `docs.html` and
+`tags.html` template files. The index webpages are written to the
+`build/indexes/posts` directory:
+
+```
+├── build/                    # Site build directory
+:   :
+│   └── indexes/              # Site indexes
+│       └── posts/            # Indexes for `content/posts`
+│           docs-1.html       # Documents index page 1 (built with `docs.html` template)
+│           docs-2.html       # Documents index page 2 (built with `docs.html` template)
+│           └── tags/         # Tags indexes
+│               tags.html     # Tags index (built with `tags.html` template)
+│               lorem-1.html  # `lorem` tag index page 1 (built with `docs.html` template)
+:                 :
+├── content/                  # Site content directory
+:   :
+│   └── posts/                # Indexed documents
+:
+└── template/                 # Site template directory
+    :
+    └── posts/
+        docs.html             # Documents index template
+        tags.html             # Tags index template
+```
 
 
 ## Front matter
@@ -974,7 +1007,8 @@ within a site. Used in situations requiring a unique document ID.
 `permalink`:: Sets the document `permalink` value. It defaults to the
 [`permalink`](#permalink) configuration value.
 
-`tags`:: A list of tag keywords and phrases. Examples:
+.#tags
+`tags`:: A list of [document tags](#document-tags). Examples:
 ```
 # TOML
 tags = ["foo foo valve", "qux", "baz"]
@@ -1190,10 +1224,12 @@ http://yourdomain.com/images/example.png    # absolute
 images/example.png                          # page-relative
 
 ```
-Internal URLs should be _root-relative_ or _page-relative_. As a general rule
-you should just stick to using root-relative URLS.
+Internal URLs should be _root-relative_ or _page-relative_. Root-relative URLs
+are recommended because they are independent of the host webpage build path. For
+this reason, [HTML templates](#html-templates) should always employ
+root-relative URLs.
 
-### URL generation
+### URL synthesis
 Hindsite automatically prefixes all root-relative URLs with the
 [`urlprefix`](#urlprefix) configuration value. This allows a site to be rooted
 anywhere on the web server without having to hard-wire server paths into URLs.
@@ -1214,6 +1250,8 @@ If you are deploying to a web server subdirectory then you need to set the
 example, if you are deploying to the server directory `http://example.com/blog`
 you will need to set `urlprefix` to either `/blog` (to generate root-relative
 URLs) or `http://example.com/blog` (to generate absolute URLs).
+
+To bypass `urlprefix` injection use absolute or page-relative URLs.
 
 ### Navigation URLs
 Hindsite synthesizes root-relative navigation URLs and assigns them to [HTML
