@@ -1,8 +1,7 @@
 ---
 title: Tincidunt Cursus Pulvinar
 date: 2015-05-20T12:15:23-00:00
-tags: [a,lectus,in]
-slug: tincidunt-cursus-pulvinar
+tags: [Example tag phrase,a,lectus,in]
 ---
 
 Parturient porttitor parturient diam sed cursus diam Amet vel montes

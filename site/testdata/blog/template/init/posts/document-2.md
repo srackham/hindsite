@@ -1,8 +1,8 @@
 ---
-title: Cursus Diam Cras Tincidunt
+title: Text Template Test
 date: 2016-12-16T16:11:42-00:00
 tags: [cras,hac,sagittis,penatibus,dolor,integer]
-slug: cursus-diam-cras-tincidunt
+templates: "*"
 ---
 
 {{template "text-template.txt"}}

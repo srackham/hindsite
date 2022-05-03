@@ -264,7 +264,7 @@ func TestExecuteArgs(t *testing.T) {
 	out, err = exec("hindsite build -drafts")
 	assert.NoError(err)
 	assert.Equal(7, fsx.DirCount(filepath.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
-	assert.FileExists(filepath.Join("build", "posts", "2015-05-20", "tincidunt-cursus-pulvinar", "index.html"))
+	assert.FileExists(filepath.Join("build", "posts", "2015-05-20", "document-1", "index.html"))
 	assert.Contains(out, "documents: 11\nstatic: 7")
 
 	/*

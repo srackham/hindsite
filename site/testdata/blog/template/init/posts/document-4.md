@@ -1,10 +1,10 @@
----
+<!--
+# YAML front matter.
 title: Parturient Sed
 date: 2016-09-21T09:45:14-00:00
 description: Mattis mattis a natoque pulvinar placerat.
 tags: [montes,arcu,lectus,pulvinar]
-slug: parturient-sed
----
+-->
 
 Vel lectus et integer montes sed ac et penatibus ac et Amet purus
 purus sed Amet arcu tincidunt diam lorem a est pulvinar dolor arcu
