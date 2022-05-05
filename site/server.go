@@ -171,12 +171,13 @@ func (svr *server) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotify.
 			if !ok {
 				return // Watcher has closed.
 			}
+			svr.verbose("fsnotify: " + time.Now().Format("15:04:05.000") + ": " + evt.Op.String() + ": " + evt.Name)
 			accepted := false
 			var msg string
 			switch {
 			case evt.Op == fsnotify.Chmod:
 				msg = "ignored"
-			case svr.exclude(evt.Name):
+			case fsx.PathIsInDir(evt.Name, svr.contentDir) && svr.exclude(evt.Name):
 				msg = "excluded"
 			case fsx.DirExists(evt.Name):
 				msg = "ignored"
@@ -187,7 +188,7 @@ func (svr *server) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotify.
 				msg = "accepted"
 				accepted = true
 			}
-			svr.verbose("fsnotify: " + time.Now().Format("15:04:05.000") + ": " + msg + ": " + evt.Op.String() + ": " + evt.Name)
+			svr.verbose("fsnotify: " + msg)
 			if accepted {
 				if prev.Op == fsnotify.Rename && prev.Name != evt.Name {
 					// A rename has occurred within the watched directories
@@ -406,7 +407,7 @@ func (svr *server) createFile(f string) error {
 	case fsx.PathIsInDir(f, svr.contentDir):
 		return svr.buildStaticFile(f)
 	case fsx.PathIsInDir(f, svr.templateDir):
-		return svr.build()
+		return svr.build() // Rebuild the site if a file in the template directory is changed.
 	default:
 		panic("file is not in watched directories: " + f)
 	}
