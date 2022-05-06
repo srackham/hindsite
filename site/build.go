@@ -228,19 +228,19 @@ func (site *site) renderStaticFile(f string) error {
 	if err != nil {
 		return err
 	}
-	// Render document markup as a text template.
+	// Render file as a text template.
 	site.verbose2("render static: " + doc.contentPath)
 	site.verbose2(doc.String())
-	markup := doc.content
+	content := doc.content
 	if site.match(doc.contentPath, doc.templates) {
 		data := doc.frontMatter()
-		markup, err = site.textTemplates.renderText("staticFile", markup, data)
+		content, err = site.textTemplates.renderText("staticFile", content, data)
 		if err != nil {
 			return err
 		}
 	}
 	site.verbose("write static: " + doc.buildPath)
-	return fsx.WritePath(doc.buildPath, markup)
+	return fsx.WritePath(doc.buildPath, content)
 }
 
 func (site *site) renderDocument(doc *document) error {
