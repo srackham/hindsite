@@ -127,5 +127,32 @@ func (site *site) lintChecks() (errCount int) {
 			}
 		}
 	}
+	// Check document URL path names are lowercase alphanumeric with hyphens.
+	for p := range site.docs.byBuildPath {
+		p, _ = filepath.Rel(site.buildDir, p)
+		p = filepath.ToSlash(p)
+		re := regexp.MustCompile(`^[\da-z-/.]+$`)
+		// println(p)
+		if !re.MatchString(p) {
+			site.logerror("lint: URL path name: \"%s\"", p)
+			errCount++
+		}
+	}
+	// err := filepath.Walk(site.buildDir, func(f string, info os.FileInfo, err error) error {
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	println(f)
+
+	// 	// re := regexp.MustCompile(`^[\w]+$`)
+	// 	// if !re.MatchString(f) {
+	// 	// 	site.logerror("lint: path name: \"%s\"", f)
+	// 	// 	errCount++
+	// 	// }
+	// 	return nil
+	// })
+	// if err != nil {
+	// 	site.logerror("lint: %s", err.Error())
+	// }
 	return
 }
