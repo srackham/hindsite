@@ -278,11 +278,13 @@ func TestExecuteArgs(t *testing.T) {
 content/posts/links-test.md: contains duplicate element id: "id2"
 content/posts/links-test.md: contains illicit URL: ":invalid-url"
 content/posts/links-test.md: contains link to missing anchor: "#invalid-id"
-content/posts/links-test.md: contains link to missing file: "posts/2015-10-13/lorem-penatibus/missing-file.html"
+content/posts/links-test.md: contains link to missing file: "posts/2015-10-13/LOREM-PENATIBUS/missing-file.html"
 content/posts/links-test.md: contains link to missing file: "missing-file-2.html"
 content/posts/links-test.md: contains link to missing anchor: "index.html#invalid-id"
+dubious URL path name: "posts/2015-10-13/LOREM-PENATIBUS/index.html"
 documents: 11
 static: 7`)
+	assert.Contains(out, "warnings: 1")
 	assert.Contains(out, "errors: 7")
 
 	/*

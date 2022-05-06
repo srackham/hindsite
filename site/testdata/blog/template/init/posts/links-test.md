@@ -3,7 +3,7 @@ title: Lorem Penatibus
 date: 2015-10-13T19:35:18-00:00
 description: Ac montes hac scelerisque pulvinar.
 tags: [natoque,mattis,cursus,lectus,dolor,integer,placerat]
-slug: lorem-penatibus
+slug: LOREM-PENATIBUS
 draft: true
 ***/
 
