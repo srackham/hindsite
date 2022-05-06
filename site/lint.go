@@ -69,7 +69,7 @@ func (doc *document) parseHTML(html string) {
 
 // lintChecks checks that all document intra-site URLs point to valid target
 // files and valid HTML id attributes.
-func (site *site) lintChecks() (errCount int) {
+func (site *site) lintChecks() (errCount int, warnCount int) {
 	for _, k := range sortedKeys(site.docs.byContentPath) {
 		doc := site.docs.byContentPath[k]
 		site.verbose("lint document: %s", doc.contentPath)
@@ -132,27 +132,10 @@ func (site *site) lintChecks() (errCount int) {
 		p, _ = filepath.Rel(site.buildDir, p)
 		p = filepath.ToSlash(p)
 		re := regexp.MustCompile(`^[\da-z-/.]+$`)
-		// println(p)
 		if !re.MatchString(p) {
-			site.logerror("lint: URL path name: \"%s\"", p)
-			errCount++
+			site.warning("dubious URL path name: \"%s\"", p)
+			warnCount++
 		}
 	}
-	// err := filepath.Walk(site.buildDir, func(f string, info os.FileInfo, err error) error {
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	println(f)
-
-	// 	// re := regexp.MustCompile(`^[\w]+$`)
-	// 	// if !re.MatchString(f) {
-	// 	// 	site.logerror("lint: path name: \"%s\"", f)
-	// 	// 	errCount++
-	// 	// }
-	// 	return nil
-	// })
-	// if err != nil {
-	// 	site.logerror("lint: %s", err.Error())
-	// }
 	return
 }

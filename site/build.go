@@ -71,6 +71,7 @@ func (site *site) build() error {
 	docsCount := 0
 	staticCount := 0
 	errCount := 0
+	warnCount := 0
 	err = filepath.Walk(site.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -144,7 +145,9 @@ func (site *site) build() error {
 	}
 	// Lint documents.
 	if site.lint {
-		errCount += site.lintChecks()
+		e, w := site.lintChecks()
+		errCount += e
+		warnCount += w
 	}
 	// Print summary.
 	if errCount == 0 {
@@ -154,6 +157,9 @@ func (site *site) build() error {
 	site.logconsole("static: %d", staticCount)
 	site.logconsole("time: %.2fs", time.Since(startTime).Seconds())
 	color.Unset()
+	if warnCount > 0 {
+		site.warning("warnings: %d", warnCount)
+	}
 	if errCount > 0 {
 		return fmt.Errorf("document errors: %d", errCount)
 	}
