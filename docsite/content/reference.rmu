@@ -11,7 +11,7 @@ lightweight static website generator. It builds static websites with optional
 document and tag indexes from [Markdown](https://en.wikipedia.org/wiki/Markdown)
 and [Rimu]({rimu-github}) source documents.
 
-The hindsite stand-alone executable includes a built-in development web server
+The Hindsite stand-alone executable includes a built-in development web server
 with Live Reload, a file watcher and incremental rebuilds.
 
 .note
@@ -24,28 +24,28 @@ This documentation is written in Rimu.
 
 
 ## Quick Start
-Create a fully functional blog and newsletter website with just two hindsite
+Create a fully functional blog and newsletter website with just two Hindsite
 commands:
 
 1. Download the binary for your platform from the [releases
    page]({hindsite-github}/releases) and extract the
-   `hindsite` executable (see [Building hindsite](#building-hindsite) if you
+   `hindsite` executable (see [Building Hindsite](#building-hindsite) if you
    prefer to build and install from source).
 
 2. Create a new Hindsite site directory and install the
    [built-in `blog` template](#blog-built-in-template) using the
-   hindsite [init command](#init-command):
+   Hindsite [init command](#init-command):
 
     mkdir myblog
     cd myblog
     hindsite init -from blog
 
-3. Build the website, start the hindsite web server and open it in the browser:
+3. Build the website, start the Hindsite web server and open it in the browser:
 
     hindsite serve -launch
 
 Include the `-v` (verbose) command option to see what's going on.
-If you are familiar with Jekyll or Hugo you'll be right a home (hindsite can
+If you are familiar with Jekyll or Hugo you'll be right a home (Hindsite can
 read Jekyll and Hugo Markdown document [front matter](#front-matter)).
 
 
@@ -57,16 +57,13 @@ website:
 - A _content directory_ containing source [documents](#documents) and
   [static resource files](#static-files).
 - A _template directory_ (also called the _site template_) containing
-  [template](#template-files) and [configuration](#configuration) files along
-  with optional [site initialisation](#init-command) files.
+  [template](#template-files), [configuration](#configuration) files and
+  optional [site initialisation](#init-command) files.
 - A _build directory_ where Hindsite builds the static website.
 
 By default, these directories reside in the _site directory_ and are named
 _content_, _template_ and _build_. The default locations can be changed using
-command-line options. For example, a single template directory can process
-multiple content directories just as a single content directory can be processed
-by multiple template directories. The _build_, _content_ and _template_
-directories must be mutually exclusive (not contained within one another).
+[command-line options](#common-command-options).
 
 For example, here's the built-in blog site directory structure:
 
@@ -96,13 +93,18 @@ between content documents, their layout templates and their configuration files.
 For example, layout templates and configuration files in `template/posts` are
 applied to content files in `content/posts`
 
-The `build/indexes` directory contains the generated document and tag index
-pages.
+A single template directory can process multiple content directories just as a
+single content directory can be processed by multiple template directories. The
+_build_, _content_ and _template_ directories must be mutually exclusive (not
+contained within one another).
 
-The `template/init` directory is optional, it contains static resources and
-example documents which are used to initialise new sites (see the [init
-command](#init-command)). In all other respects it is just like any other
-content directory.
+The `build/indexes` directory contains the generated document and tag
+[index pages](#indexes).
+
+The `template/init` directory is optional, it contains
+[content-files](#content-files) which are used to initialise new sites (see the
+[init command](#init-command)). In all other respects the `init` directory is
+just like any other content directory.
 
 File and directory names should only contain lower case alpha numeric and hyphen
 characters. This convention is not enforced but is recommended because it
@@ -141,7 +143,7 @@ Start the development webserver:
 All commands accept the following options:
 
 `-site SITE_DIR`::
-Set the hindsite site directory (defaults to the current directory).
+Set the Hindsite site directory (defaults to the current directory).
 
 `-content CONTENT_DIR`::
 Set the site content directory (defaults to `SITE_DIR/content`).
@@ -167,8 +169,8 @@ It will often be necessary to shell-quote the `NAME=VALUE` argument. Examples
 `-v`::
 Increase verbosity. `-vv` is an alias for `-v -v`.
 
-Note:
-
+.note
+..
 - Content, build and template directories are mutually exclusive and cannot
   overlap, with one exception: the content directory can be `TEMPLATE_DIR/init`.
   This is handy for testing site template initialization content.
@@ -177,6 +179,7 @@ Note:
   differing combinations of build, content and template directories.
 - Multiple `-var` and `-config` options can be specified, they are
   processed in the order they appear on the command-line.
+..
 
 
 ## Help command
@@ -189,22 +192,22 @@ The _help_ command prints Hindsite documentation and version information.
 ### Options
 - `hindsite`, `hindsite -h` and `hindsite --help` are aliases for `hindsite help`.
 - `COMMAND` is a Hindsite command name.
-- If `COMMAND` is not specified a brief help summary and version information is
-  printed to the console.
 - If `COMMAND` is specified the command topic on the Hindsite documentation
   website is opened in the default web browser.
+- If `COMMAND` is not specified a brief help summary and version information is
+  printed to the console.
 
 
 ## Init command
-The _init_ command creates a new site from another site template or from a
-[built-in template](#built-in-templates). The source template is copied to the template
+The _init_ command creates a new site from a site template or from a
+[built-in template](#built-in-templates). The `SOURCE` template is copied to the template
 directory then the content directory is initialised with the contents of
 the source template `init` directory.
 
 The inclusion of a template `init` directory allows [documents](#documents) and
-[static files](#static-files) (images, CSS, JavaScript etc) to be shipped with
-and installed from a site template. Hindsite's [built-in
-templates](#built-in-templates) all include an `init` directory.
+[static files](#static-files) to be shipped with and installed from a site
+template. Hindsite's [built-in templates](#built-in-templates) all include an
+`init` directory.
 
 ### Syntax
 
@@ -220,7 +223,7 @@ templates](#built-in-templates) all include an `init` directory.
   directory path.
 - Non-empty content and template target directories are skipped.
 
-### Command execution
+### Execution
 1. The `SOURCE` template is copied to the site `TEMPLATE_DIR`.
 2. The template directory structure is recreated in the content directory.
 3. If the `TEMPLATE_DIR/init` directory exists its contents is copied to the
@@ -263,7 +266,7 @@ files from the [_content_ and _template_ directories](#sites).
   the content directory can be `TEMPLATE_DIR/init` (this is useful for testing
   content initialization).
 
-### Command execution
+### Execution
 . Configuration files (`config.toml` and `config.yaml` files) in the template directory tree are parsed.
 . All files and folders in the build directory are deleted (unless the `-keep`
   option has been specified).
@@ -273,7 +276,7 @@ files from the [_content_ and _template_ directories](#sites).
 . Documents (`*.md` and `*.rmu` files) are processed:
 ."list-style:lower-roman"
   .. [Front matter](#front-matter) headers are parsed and [document variables](#document-variables) are computed.
-  .. If the document is classified as a [text template](#templates-conf) it is expanded.
+  .. [Text file preprocessing](#text-file-preprocessing) is performed.
   .. The document markup is then rendered to HTML and assigned to the `.body` [document variable](#document-variables).
   .. The document's [layout template](#layout-html) is rendered and root-relative URLs are prefixed with the [urlprefix](#urlprefix).
   .. The resulting HTML webpage is written to its corresponding build directory.
@@ -282,7 +285,7 @@ files from the [_content_ and _template_ directories](#sites).
 
 ### Validity checks
 Following a site rebuild the `-lint` option carries out validity checks on the
-generated HTML document files.
+generated HTML webpages.
 
 - HTML `href` and `src` attribute URL values are checked to ensure:
   . URL syntax is valid.
@@ -291,7 +294,7 @@ generated HTML document files.
 
 - HTML `id` attributes are checked to ensure:
   . ID syntax is valid.
-  . There are no duplicate intra-document IDs.
+  . Webpages do not contain duplicate IDs.
 
 The existence of external (off-site) URL resources is not checked -- for full
 site validation use a cross-site validator such as the
@@ -368,15 +371,15 @@ live reloading.
 ### Partial rebuilds
 To speed up live reloads and to make the content creation process easier and
 more responsive the _serve_ command automatically performs partial builds when
-content files are modified, added or deleted.
+files in the content and template directories are modified, added or deleted.
 
 The amount of processing required will depend on the size of your site and the
 type of change. Most content updates are very fast but processing times increase
 if:
 
 - Indexed documents are added or deleted (necessitating full index rebuild).
-- A configuration file or template file is added, changed or removed
-  (necessitating a full site rebuild).
+- Files in the template directory are added, changed or removed (necessitating a
+  full site rebuild).
 
 Partial rebuilds do not perform `-lint` option checks -- you can run them
 manually while the server is running with the "R" (Rebuild) keyboard command.
@@ -639,9 +642,9 @@ from the site content directory that are excluded from processing. TOML example:
 ..
 
 `include` †:: A `|` separated list of file and directory paths specifying files
-that are processed unconditionally i.e. irrespective of the `exclude` variable.
-`include` values have the same syntax as the `exclude` values. TOML
-example:
+from the content directory that are processed unconditionally i.e. irrespective
+of the `exclude` variable.  `include` values have the same syntax as the
+`exclude` values. TOML example:
 
     include = ".htaccess"
 
@@ -703,7 +706,7 @@ computed by substituting the following `permalink` placeholders:
 
 - Publication date substitutions are rendered in the publication date
   timezone, this ensures permalinks do not change if the `timezone` is changed.
-- If the permalink ends with a trailing slash then hindsite creates "pretty"
+- If the permalink ends with a trailing slash then Hindsite creates "pretty"
   URLs (the expanded permalink is the build file directory path; the build file
   is named `index.html`).
 - A document specific `permalink` can be specified in the document [front
@@ -720,10 +723,10 @@ computed by substituting the following `permalink` placeholders:
     permalink = "/posts/%y-%m-%d/%p/"
 ..
 
-.#templates-conf
+.#templates
 `templates`:: A `|` separated list of file and directory patterns specifying
-the [content files](#content-files) that undergo [text template](#text-templates) expansion. The
-`templates` configuration variable has the same syntax as the
+the names of [content files](#content-files) that undergo [text template](#text-templates) expansion.
+The `templates` configuration variable has the same syntax as the
 [`exclude`](#exclude) configuration variable. TOML example:
 
     templates = "*.css|*.js"
@@ -780,58 +783,62 @@ Are available as these template variables:
 
 
 ## Content files
-Content files are the source files residing in the site [content directory](#sites).
-They are used to build the website.
+Content files provide viewable website content (images, text and styling).
 
+- Content files reside in the site [content directory](#sites).
 - There are two types of content file: [documents](#documents) and [static files](#static-files).
-- Content files can include an optional [front matter header](#front-matter-header).
-- If a content file is classified as a template (see the
-  [`templates`](#templates-conf) configuration variable) then it undergoes
-  [template](#text-templates) expansion prior to any other build processing.
-
 
 ### Documents
 Documents are are [Markdown](https://en.wikipedia.org/wiki/Markdown) (`.md`) or
-[Rimu]({rimu-github}) (`.rmu`) [content files](#content-files). Each document
-generates a webpage. Examples include blog posts, newsletters and articles.
+[Rimu]({rimu-github}) (`.rmu`) files. Each document
+generates a webpage. Website authoring consists mostly of creating and editing
+document files. Examples include blog posts, newsletters and articles.
 
-Documents with the [draft](#front-matter-variables) front matter value set to
-`true` will not be included in the built website unless the [build
-command](#build-command) `-drafts` command option is specified.
+The Hindsite [build command](#build-command) converts document markup to HTML
+which is then rendered to an HTML webpage using the document's
+[layout template](#html-templates). The resulting webpage is written to the site [build
+directory](#build-paths).
 
-The [build command](#build-command) renders the document with its [layout
-template](#html-templates) and writes the resulting HTML webpage to the
-document's [build path](#build-paths).
-
-If a document file is classified as a template (see the
-[`templates`](#templates-conf) configuration variable) then it
-undergoes [text template](#text-templates)
-expansion prior to being rendered to HTML.
-
-### Document tags
-A document tag is a keyword or phrase used to categorise a document in some
-way.
-
-Hindsite can create tag [indexes](#indexes) and per-tag paginated lists of documents.
-
-Document tags are assigned to the front matter [tags variable](#tags).
-A document can have multiple tags.
+A _draft document_ is a document with the [draft](#draft) front matter value set to
+`true`. Draft documents are not be included in the built website unless the [build
+command](#build-command) `-drafts` option is specified.
 
 ### Static files
-Static files typically include website resources such as CSS, JavaScript and
+Static files provide additional website resources such as CSS, JavaScript and
 image files.
 
 The [build command](#build-command) copies static files to the corresponding
 location in the _build directory_.
 
-If a static file is classified as a template (see the
-[`templates`](#templates-conf) configuration variable) then optional front matter is
-parsed and the remainder of the file undergoes [text template](#text-templates)
-expansion prior to being written to the _build directory_.
+### Text file preprocessing
+Text files in the content directory can also undergo optional preprocessing:
+
+- [Front matter](#front-matter) headers are parsed.
+- [Document template variables](#document-variables) are computed.
+- The file undergoes [text template](#text-templates) expansion.
+
+To qualify for text template expansion the content file's name must match the
+[`templates`](#templates) configuration variable.
+
+Text file preprocessing use-cases include:
+
+- Content file parameterization.
+- Dynamic content generation.
+- Text file inclusion.
+
+
+## Document tags
+A document tag is a keyword or phrase used to categorise a document in some
+way.
+
+Hindsite can create tag [indexes](#indexes) linked to per-tag paginated lists of documents.
+
+Document tags are assigned using the front matter [tags variable](#tags).
+A document can have multiple tags.
 
 
 ## Indexes
-The hindsite build command generates optional paginated document and [document tag](#document-tags) index files.
+The Hindsite build command generates optional paginated document and [document tag](#document-tags) index files.
 Multiple indexes are supported -- each folder in the content directory can have
 its own document and tag index.
 
@@ -950,8 +957,7 @@ draft = true
 
 ### Front matter variables
 Front matter variables are exposed as
-[document template variables](#document-variables) during webpage
-template expansion.
+[document template variables](#document-variables) during template expansion.
 
 `author`:: The document author. If not specified it defaults to the
 [`author`](#configuration-variables) configuration value.
@@ -989,6 +995,7 @@ defaults to the content up to the first `<!--more-->` tag or blank if there is
 no `<!--more-->` tag. The `<!--more-->` tag must appear alone on a separate
 line. The description is processed as Markdown.
 
+.#draft
 `draft`:: If set to `true` then the document will not be processed. This can be
 overridden with the [build](#build-command) and [serve](#serve-command) command
 `-drafts` option. Defaults to `false`.
@@ -1017,7 +1024,7 @@ tags = ["foo foo valve", "qux", "baz"]
 tags: [foo foo valve, qux, baz]
 ```
 
-`templates`:: Defaults to the [`templates`](#templates-conf) configuration
+`templates`:: Defaults to the [`templates`](#templates) configuration
 value. Setting it to `*` will ensure the document undergoes template expansion;
 setting it to a blank string will suppress template expansion.
 
@@ -1090,43 +1097,39 @@ document [front matter `user` value](#front-matter-variables) with the document'
 
 
 ## Template files
-_hindsite_ uses Go templates from the site [_template directory_](#sites)
-to build webpages. There are two types of templates:
+_Hindsite_ uses [Go templates](https://pkg.go.dev/text/template) to build
+webpages.
 
-- [HTML templates](#html-templates) which are used to build indexes and document
-  HTML webpages.
-- Optional [Text templates](#text-templates) are used to preprocess content
-  documents and static files.
+There are two template name spaces, one for [HTML templates](#html-templates)
+and the other for [Text templates](#text-templates). Each template file
+contributes one or more named templates (the file itself plus any nested
+template definitions within the file).
 
-There are two template name spaces, one for _HTML templates_ and the other for
-_Text templates_. Each template file contributes one or more named templates
-(the file itself plus any explicitly declared templates within the file). The
-implicit template name is its file name relative to the _template directory_
-using the slash (`/`) path separator character. For example the
-`/blog/template/posts/layout.html` template in the `/blog/template` directory is
-assigned the name `posts/layout.html`.
+A file's template name is its file name relative to the _template directory_
+with the slash path separator. For example:
 
-Both HTML and text templates use the [Go template
-syntax](https://golang.org/pkg/text/template/).
+```
+Template directory:   C:\blog\template
+Template file:        C:\blog\template\posts\layout.html   
+Template name:        posts/layout.html
+```
 
 
 ## Text templates
-All `.txt` files in the _template directory_ (excluding the `init`
-directory) contribute to the set of named text templates which are available during
-[document file](#documents) and [static file](#static-files) template expansion.
+Text templates are [Go text templates](https://pkg.go.dev/text/template). They
+are optional and are used to [preprocess content files](#text-file-preprocessing).
 
-By default there is no document or static file template expansion -- it must be
-enabled by the [`templates`](#templates-conf) configuration variable.
+All `.txt` files in the _template directory_ contribute to the set of named text
+templates.
 
 
 ## HTML templates
-HTML layout and index templates are used to build HTML webpages and document
-indexes. All the `.html` files in the site _template directory_ (excluding
-the `init` directory) contribute to the set of named HTML templates made
-available to layout and index templates. All HTML templates share the same
-namespace.
+[Go HTML templates](https://pkg.go.dev/html/template) are used to transform
+[documents](#documents) into HTML webpages and [indexes](#indexes).
 
-The following template files have special significance:
+All `.html` files in the site _template directory_ (excluding the `init`
+directory) contribute to the set of named HTML templates.
+The following HTML template files have special significance:
 
 ### layout.html
 Templates with the file name `layout.html` are used to generate
@@ -1263,12 +1266,12 @@ template](#html-templates) variables. For example:
   the next page of documents in `docs.html` document index templates.
 
 
-## Building hindsite
+## Building Hindsite
 .note
 Requires Go 1.18 or better.
 
-To compile hindsite from source code run the following commands to download,
-compile and install hindsite:
+To compile Hindsite from source code run the following commands to download,
+compile and install Hindsite:
 
     git clone https://github.com/srackham/hindsite.git
     cd hindsite
