@@ -1,7 +1,6 @@
 ---
 permalink: /index.html
 ---
-
 # Hindsite Reference
 
 
@@ -57,7 +56,7 @@ website:
 - A _content directory_ containing source [documents](#documents) and
   [static resource files](#static-files).
 - A _template directory_ (also called the _site template_) containing
-  [template](#template-files), [configuration](#configuration) files and
+  [template](#template-files) files, [configuration](#configuration) files and
   optional [site initialisation](#init-command) files.
 - A _build directory_ where Hindsite builds the static website.
 
@@ -106,10 +105,6 @@ The `template/init` directory is optional, it contains
 [init command](#init-command)). In all other respects the `init` directory is
 just like any other content directory.
 
-File and directory names should only contain lower case alpha numeric and hyphen
-characters. This convention is not enforced but is recommended because it
-ensures consistent, readable URLs without ugly encodings.
-
 
 ## Commands
 Hindsite implements the following commands:
@@ -150,7 +145,7 @@ Set the site content directory (defaults to `SITE_DIR/content`).
 
 `-build BUILD_DIR`::
 Set the site build directory (defaults to `SITE_DIR/build`).
-j
+
 `-template TEMPLATE_DIR`::
 Set the site template directory (defaults to `SITE_DIR/template`).
 
@@ -159,7 +154,7 @@ Merge the `CONFIG_FILE` [configuration file](#configuration-files) into the
 site's [root configuration](#root-configuration).
 
 `-var NAME=VALUE`::
-Sets the _root configuration_ variable `NAME` to `VALUE`.
+Sets the [root configuration](#root-configuration) variable `NAME` to `VALUE`.
 It will often be necessary to shell-quote the `NAME=VALUE` argument. Examples
 
   -var timezone=UTC
@@ -204,10 +199,10 @@ The _init_ command creates a new site from a site template or from a
 directory then the content directory is initialised with the contents of
 the source template `init` directory.
 
-The inclusion of a template `init` directory allows [documents](#documents) and
-[static files](#static-files) to be shipped with and installed from a site
-template. Hindsite's [built-in templates](#built-in-templates) all include an
-`init` directory.
+The inclusion of a template `init` directory allows example [documents](#documents) and
+[static files](#static-files) to be installed along with the site
+template. Hindsite's [built-in templates](#built-in-templates) all include
+`init` directories.
 
 ### Syntax
 
@@ -221,7 +216,7 @@ template. Hindsite's [built-in templates](#built-in-templates) all include an
 - The `-from` option is mandatory and `SOURCE` is either the name of a [built-in
   template](#built-in-templates) (`blog`, `docs`, `hello`) or a site template
   directory path.
-- Non-empty content and template target directories are skipped.
+- Non-empty content and template target directories are skipped along with a warning.
 
 ### Execution
 1. The `SOURCE` template is copied to the site `TEMPLATE_DIR`.
@@ -267,19 +262,19 @@ files from the [_content_ and _template_ directories](#sites).
   content initialization).
 
 ### Execution
-. Configuration files (`config.toml` and `config.yaml` files) in the template directory tree are parsed.
+. [Configuration files](#configuration-files) (`config.toml` and `config.yaml` files) in the template directory tree are parsed.
 . All files and folders in the build directory are deleted (unless the `-keep`
   option has been specified).
 . HTML and text templates (`*.html` and `*.txt` files) in the template directory tree are parsed.
 . [Static files](#static-files) are processed.
 . Document [indexes](#indexes) are built.
-. Documents (`*.md` and `*.rmu` files) are processed:
+. [Documents](#documents) (`*.md` and `*.rmu` files) are processed:
 ."list-style:lower-roman"
   .. [Front matter](#front-matter) headers are parsed and [document variables](#document-variables) are computed.
   .. [Text file preprocessing](#text-file-preprocessing) is performed.
   .. The document markup is then rendered to HTML and assigned to the `.body` [document variable](#document-variables).
   .. The document's [layout template](#layout-html) is rendered and root-relative URLs are prefixed with the [urlprefix](#urlprefix).
-  .. The resulting HTML webpage is written to its corresponding build directory.
+  .. The resulting HTML webpage is written to its [build path](#build-paths).
 . If a [homepage](#homepage) is specified it is copied to the root of the build directory and named `index.html`.
 . If the `-lint` option was specified document webpages are [validated](#validity-checks).
 
@@ -295,6 +290,9 @@ generated HTML webpages.
 - HTML `id` attributes are checked to ensure:
   . ID syntax is valid.
   . Webpages do not contain duplicate IDs.
+
+- A warning is issued if a document [URL path name](#url-synthesis) is not
+  confined to lowercase alphanumeric, hyphen, period or slash characters.
 
 The existence of external (off-site) URL resources is not checked -- for full
 site validation use a cross-site validator such as the
@@ -313,11 +311,10 @@ _time_:: The execution time in seconds.
 
 
 ## Serve command
-The _serve_ command rebuilds the site then starts the built-in webserver on
-the site _build directory_. If files in the _content_ or _template
-directories_ changed the _serve_ command automatically
-[rebuilds](#partial-rebuilds) affected webpages. The server also handles browser
-live reloading.
+The _serve_ command rebuilds the site then starts the built-in webserver in the
+site _build directory_. If files in the _content_ or _template directories_
+change the _serve_ command automatically [rebuilds](#partial-rebuilds) affected
+webpages. The server also handles browser live reloading.
 
 ### Syntax
 
@@ -339,7 +336,8 @@ live reloading.
 - If the `-keep` option is specified the contents of the build directory are not
   deleted prior to building the site.
 - Use the `-lint` option to check [validity](#validity-checks) of generated
-  document webpages following a site rebuild.
+  document webpages following a full site rebuild
+  ([parital rebuilds](#partial-rebuilds) do not trigger lint checks).
 - The `-navigate` option causes the browser to automatically navigate to new and
   updated [documents](#documents).
 - The `-port` option sets the server HTTP port number (`HTTP_PORT`) and/or the
@@ -418,8 +416,8 @@ The following template variables are available to the new template:
 date prefix. If there is no prefix it defaults to the current date and time.
 
 `.title`:: The document title is set to the `DOCUMENT` file name stripped of the
-date prefix (if there is one) and the file name extension; hyphens replaced by
-spaces; then capitalized.
+date prefix and the file name extension; hyphens replaced by spaces; then
+capitalized.
 
 For example, the following _new_ command will set the
 title to `"Foofoo Valve History"` and the date to the current date and time:
@@ -1255,6 +1253,11 @@ you will need to set `urlprefix` to either `/blog` (to generate root-relative
 URLs) or `http://example.com/blog` (to generate absolute URLs).
 
 To bypass `urlprefix` injection use absolute or page-relative URLs.
+
+It is recommended that document path names only contain lower case alphanumeric, hyphen and period
+characters. This ensures consistent, readable URLs without ugly encodings.
+This convention is not enforced but does generate [validity check](#validity-checks) warnings.
+
 
 ### Navigation URLs
 Hindsite synthesizes root-relative navigation URLs and assigns them to [HTML
