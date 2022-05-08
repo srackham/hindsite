@@ -314,7 +314,11 @@ func (doc *document) frontMatter() templateData {
 	if doc.next != nil {
 		data["next"] = templateData{"url": doc.next.url}
 	}
-	user := doc.conf.user
+	// Merge document front matter user variable into the lower precedence config user variable.
+	user := map[string]string{}
+	for k, v := range doc.conf.user {
+		user[k] = v
+	}
 	for k, v := range doc.user {
 		user[k] = v
 	}
