@@ -54,6 +54,7 @@ adipiscing, aenean ut.
 Some ~~strike through~~ and no_intra_emphasis.
 
 #### Sub heading with ID
+#### Sub heading with ID
 A table:
 
 Name    | Age
