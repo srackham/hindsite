@@ -356,7 +356,7 @@ static: 7`)
 		Test document variables.
 	*/
 	f = filepath.Join("build", "index.html")
-	out, err = exec("hindsite build -var templates=*.md")
+	out, err = exec("hindsite build")
 	assert.NoError(err)
 	text, err = fsx.ReadFile(f)
 	assert.NoError(err)
@@ -371,10 +371,10 @@ static: 7`)
 .permalink=
 .slug=
 .shortdate=2015-05-21
-.templates=*.md
+.templates=*
 .tags=[]
 .title=About Test
 .url=/about.html
 .urlprefix=http://example.com
-.user=map[banner:hindsite | blog]`)
+.user=map[banner:hindsite | blog highlightjs:yes]`)
 }

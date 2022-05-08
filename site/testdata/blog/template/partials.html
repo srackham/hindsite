@@ -6,6 +6,9 @@
 <meta name="viewport" content="width=device-width"/>
 <title>{{or .title "Title"}}</title>
 <link type="text/css" rel="stylesheet" href="/main.css">
+{{if eq .user.highlightjs "yes" -}}
+<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/default.min.css">
+{{- else}}{{end}}
 </head>
 <body>
 <div class="banner no-print">
@@ -22,6 +25,13 @@
 
 {{define "footer"}}
     </div>
+{{if eq .user.highlightjs "yes" -}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
+<script>
+hljs.configure({languages: []}); {{- /* Disable language auto-detection */}}
+hljs.highlightAll();
+</script>
+{{- else}}{{end}}
 </body>
 </html>
 {{end}}
