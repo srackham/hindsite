@@ -340,7 +340,8 @@ func (doc *document) render(text string) template.HTML {
 	var html string
 	switch filepath.Ext(doc.contentPath) {
 	case ".md":
-		html = string(blackfriday.Run([]byte(text)))
+		opts := blackfriday.WithExtensions(blackfriday.AutoHeadingIDs | blackfriday.CommonExtensions)
+		html = string(blackfriday.Run([]byte(text), opts))
 	case ".rmu":
 		conf, err := fsx.ReadFile(filepath.Join(doc.site.contentDir, "config.rmu"))
 		if err == nil {
