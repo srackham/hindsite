@@ -28,8 +28,8 @@ user:
 .user={{.user}}
 ```
 
-### <a id="id1"> Header with HTML anchor
-[valid page-relative URL](index.html#id1)
+### Header with HTML anchor
+[valid page-relative URL](index.html#sub-heading-with-id)
 
 [valid off-site absolute URL](http://foobar.com/index.html)
 

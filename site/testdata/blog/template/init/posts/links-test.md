@@ -23,7 +23,7 @@ draft: true
 
 [missing target fragment id](http://example.com/index.html#invalid-id)
 
-[valid target fragment id](http://example.com/index.html#id1)
+[valid target fragment id](http://example.com/index.html#sub-heading-with-id)
 
 
 ## <a id="id1"> Header
