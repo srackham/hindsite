@@ -134,7 +134,7 @@ func (idx *index) build(doc *document) error {
 			fm := pg.docs.frontMatter()
 			fm["count"] = strconv.Itoa(count)
 			fm["page"] = pg.frontMatter()
-			fm.merge(data)
+			mergeMap(fm, data)
 			// Merge applicable configuration variables.
 			fm["urlprefix"] = idx.conf.urlprefix
 			fm["user"] = idx.conf.user

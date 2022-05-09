@@ -178,9 +178,7 @@ func (conf *config) mergeRaw(raw rawConfig) error {
 	if raw.LongDate != nil {
 		conf.longdate = *raw.LongDate
 	}
-	for k, v := range raw.User {
-		conf.user[k] = v
-	}
+	mergeMap(conf.user, raw.User)
 	return nil
 }
 
@@ -254,7 +252,5 @@ func (conf *config) merge(from config) {
 	if from.include != nil {
 		conf.include = from.include
 	}
-	for k, v := range from.user {
-		conf.user[k] = v
-	}
+	mergeMap(conf.user, from.user)
 }

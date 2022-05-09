@@ -316,9 +316,7 @@ func (doc *document) frontMatter() templateData {
 	}
 	// Merge document front matter user variable into the lower precedence config user variable.
 	user := copyMap(doc.conf.user)
-	for k, v := range doc.user {
-		user[k] = v
-	}
+	mergeMap(user, doc.user)
 	data["user"] = user
 	// Process description as a text template before rendering to HTML.
 	description := doc.description

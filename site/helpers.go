@@ -53,6 +53,15 @@ func copyMap[T any](m map[string]T) (result map[string]T) {
 	return
 }
 
+// mergeMap merges maps into dst map.
+func mergeMap[T any](dst map[string]T, maps ...map[string]T) {
+	for _, m := range maps {
+		for k, v := range m {
+			dst[k] = v
+		}
+	}
+}
+
 // rootRelURL joins path elements and prefixes them with "/".
 func rootRelURL(elem ...string) string {
 	return "/" + path.Join(elem...)

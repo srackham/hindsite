@@ -10,13 +10,6 @@ import (
 
 type templateData map[string]interface{}
 
-// merge merges in data from another data map.
-func (data templateData) merge(from templateData) {
-	for k, v := range from {
-		data[k] = v
-	}
-}
-
 type htmlTemplates struct {
 	templateDir string
 	layouts     []string // Layout templates file names.
