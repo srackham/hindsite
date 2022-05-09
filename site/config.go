@@ -33,8 +33,6 @@ type config struct {
 	longdate   string
 }
 
-type configs []config
-
 // Unvalidated configuration variable values.
 // Undefined configuration variables have a nil pointer value.
 type rawConfig struct {

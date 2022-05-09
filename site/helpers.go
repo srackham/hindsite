@@ -44,6 +44,15 @@ func sortedKeys[T any](m map[string]T) (result []string) {
 	return
 }
 
+// copyMap returns a copy of a map.
+func copyMap[T any](m map[string]T) (result map[string]T) {
+	result = map[string]T{}
+	for k, v := range m {
+		result[k] = v
+	}
+	return
+}
+
 // rootRelURL joins path elements and prefixes them with "/".
 func rootRelURL(elem ...string) string {
 	return "/" + path.Join(elem...)

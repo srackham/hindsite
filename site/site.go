@@ -35,7 +35,7 @@ type site struct {
 	executable    string
 	in            chan string
 	out           chan string
-	confs         configs
+	confs         []config
 	docs          documentsLookup
 	idxs          indexes
 	htmlTemplates htmlTemplates
@@ -441,6 +441,7 @@ func (site *site) configFor(p string) config {
 		dir = filepath.Dir(dir)
 	}
 	result := site.confs[0]
+	result.user = copyMap(site.confs[0].user)
 	for _, conf := range site.confs[1:] {
 		if fsx.PathIsInDir(dir, conf.origin) {
 			result.merge(conf)

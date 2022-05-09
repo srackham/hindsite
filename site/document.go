@@ -315,10 +315,7 @@ func (doc *document) frontMatter() templateData {
 		data["next"] = templateData{"url": doc.next.url}
 	}
 	// Merge document front matter user variable into the lower precedence config user variable.
-	user := map[string]string{}
-	for k, v := range doc.conf.user {
-		user[k] = v
-	}
+	user := copyMap(doc.conf.user)
 	for k, v := range doc.user {
 		user[k] = v
 	}
@@ -377,7 +374,7 @@ func (doc *document) updateFrom(src document) {
 	doc.slug = src.slug
 	doc.layout = src.layout
 	doc.id = src.id
-	doc.user = src.user
+	doc.user = copyMap(src.user)
 }
 
 // isDraft returns true if document is a draft and the drafts option is not true.
