@@ -292,7 +292,7 @@ generated HTML webpages.
   . Webpages do not contain duplicate IDs.
 
 - A warning is issued if a document [URL path name](#url-synthesis) is not
-  confined to lowercase alphanumeric, hyphen, period or slash characters.
+  confined to lowercase alphanumeric, hyphen, period and slash characters.
 
 The existence of external (off-site) URL resources is not checked -- for full
 site validation use a cross-site validator such as the
@@ -447,8 +447,8 @@ built-in site templates which are installed using the Hindsite [init command](#i
 To create a site using a built-in template:
 
 . Create a directory for the new site (optional).
-. Install the built-in template with the `hindsite init -from <template-name>` command.
-. Build the site and open it the browser with the `hindsite serve -launch` command.
+. Install the built-in template with the Hindsite [init](#init-command) command.
+. Build the site and open it the browser with the Hindsite [build](#build-command) command.
 
 For example:
 
@@ -469,10 +469,10 @@ Customisation notes:
 
 - The `template/partials.html` header template will include the
   [highlight.js](https://highlightjs.org/) source code highlighter if the
-  `.user.highlightjs` template variable is set to `"yes"`.
+  `.user.highlightjs` [document variable](#document-variables) is set to `"yes"`.
 
-- _user_ template variable values can be set per document (in document
-  front matter) or per directory (in site configuration files).
+- [_user_](#user) template variable values can be set per document (in document
+  [front matter](#front-matter)) or per directory (in site configuration files).
 
 - The template includes an example _Search_ page (`content/search.md`) that
   leverages Google Programable Searches. To use this functionality in your own
@@ -481,21 +481,20 @@ Customisation notes:
   * [Programmable Search Engine](https://developers.google.com/custom-search)
   * [Google Search Console](https://search.google.com/search-console/about)
 
-- The global site [configuration file]({reference}#configuration) is
-  `template/config.toml`.
+- The site [configuration file]({reference}#configuration) is `template/config.toml`.
 
-- The directory layout is documented in the [Hindsite Reference]({reference}#sites).
+- The directory layout is documented in the [_Sites_ section]({reference}#sites).
 
-- The example content pages are written in Markdown but you could also use [Rimu markup]({rimu-github}).
+- The example content pages are written in Markdown but you could also use
+  <a href="{rimu-github}" target="_blank">Rimu markup</a>).
 
 
 ### docs built-in template
-A template to create sites that have a fixed, relatively small, number of pages.
-Ideal for building documentation sites for user guides, FAQs and reference manuals
+A template to create sites that have a fixed, relatively small number of pages.
+Ideal for building documentation sites or user guides, FAQs and reference manuals
 (view the built site <a href="/builtin/docs" target="_blank">here</a>).
 
-The [Hindsite documentation site](https://srackham.github.io/hindsite/) is based
-on this template.
+This documentation is based on the `docs` template.
 
 Customisation notes:
 
@@ -505,22 +504,21 @@ Customisation notes:
   (either in document front matter or site configuration files) to any value
   other than `"yes"`.
 
-- The example content pages are written in [Rimu
-  markup](https://srackham.github.io/rimu/). Rimu generates the header IDs which
-  are used for table of contents generation. You could use Markdown instead of
-  Rimu so long as all TOC headings have `id` attributes (some ,g).
+- The home page and FAQ documents are written in [Rimu markup]({rimu-github}),
+  the changelog is written in Markdown. Rimu and Markdown processors are
+  configured to auto-generate the HTML header element ID attributes which are
+  used for table of contents generation.
 
-- The global site [configuration file](#configuration) is
-  `template/config.yaml`.
+- The site [configuration file](#configuration) is `template/config.yaml`.
 
-- If you set the `.user.toc` template variable to any value other than `"yes"`
+- If you set the `.user.toc` document variable to any value other than `"yes"`
   the TOC will not be displayed.
 
-- The `template/partials.html` header template will include the
+- The nested `header` template in `template/partials.html` includes the
   [highlight.js](https://highlightjs.org/) source code highlighter if the
-  `.user.highlightjs` template variable is set to `"yes"`. Highlight.js language
-  auto-detection is not enabled and code blocks must specify the language
-  explicitly. For example:
+  `.user.highlightjs` document variable is set to `"yes"`. _Highlight.js_
+  language auto-detection is not enabled and code blocks must specify the
+  language explicitly. For example:
 ``
 ```python
 x = 1
@@ -528,7 +526,7 @@ if x == 1:
   print "x is 1."
 ```
 ``
-- _user_ template variable values can be set per document (in document
+- [_user_](#user) document variable values can be set per document (in document
   front matter) or per directory (in site configuration files).
 
 ### hello built-in template
@@ -568,17 +566,19 @@ ___________________________________________________________
 
 ## Configuration
 Website generation is customized with configuration variables (named values)
-from configuration files in the _template directory_ and from `-var` and
-`-config` [command-line options](#common-command-options).
+from YAML or TOML formatted configuration files in the [site template directory](#sites)
+and from `-var` and `-config` [command-line options](#common-command-options).
 
 ### Configuration files
 Configuration files are optional, though most sites will have at least one
-at the root of the _template directory_.
+at the root of the _template directory_. Additional configuration files can be put
+in template subdirectories.
 
-- Configuration files are TOML or YAML markup files named `config.toml` and
-  `config.yaml` respectively (except for those explicitly named by `-config`
-  options).
-
+- <a href="https://toml.io" target="_blank">TOML</a> and
+  <a href="https://en.wikipedia.org/wiki/YAML" target="_blank">YAML</a>
+  configuration files named `config.toml` and `config.yaml` respectively are
+  loaded automatically.
+  
 .#root-configuration
 - All sites have a _root configuration_ which is synthesised by merging (in
   increasing order of precedence):
@@ -588,7 +588,7 @@ at the root of the _template directory_.
 
 - Non-root configuration files can located anywhere in the template directory
   tree (except for the _init_ directory) and are applied to
-  [content files](#content-files) in the corresponding content directory.
+  [content files](#content-files) from the corresponding content directory.
 
 - The configuration applied to a content file is computed by merging the _root
   configuration_ with configuration files lying along the corresponding
@@ -1036,9 +1036,9 @@ file name stripped of the date prefix (if there is one), with hyphens replaced
 by spaces, then capitalized.
 
 `user`:: `user` is a user defined key/value map. It is merged with the lower
-precedence [`user` configuration variable](#user) and assigned to the `.user`
-[template variable](#document-variables). If `user` is not specified in
-the document front matter it defaults to the `user` configuration value.
+precedence [`user` configuration variable](#user) and assigned to the
+[`.user`](#user) document variable. If `user` is not specified in the document
+front matter it defaults to the `user` configuration value.
 
 
 ## Document variables
@@ -1091,7 +1091,7 @@ tag) and `.url` (the tag index URL).
 
 `.user`:: This key/value map is synthesized by merging the (higher precedence)
 document [front matter `user` value](#front-matter-variables) with the document's
-[`user` configuration variable](#user).
+[`user`](#user) configuration variable.
 
 
 ## Template files
