@@ -380,6 +380,11 @@ func (site *site) isDocument(f string) bool {
 	return (ext == ".md" || ext == ".rmu") && fsx.PathIsInDir(f, site.contentDir)
 }
 
+// urlprefix returns the site-wide root configuration `urlprefix` variable.
+func (site *site) urlprefix() string {
+	return site.confs[0].urlprefix
+}
+
 // match returns true if content file `f` matches one of the `patterns`.
 // A blank pattern matches nothing.
 // NOTE: Used for matching configuration `exclude`, `include`, `templates`
@@ -494,10 +499,25 @@ func (site *site) parseConfigFiles() error {
 				site.verbose("read config: " + cf)
 				raw := rawConfig{}
 				if err := raw.parseConfigFile(cf); err != nil {
-					return fmt.Errorf("config file: %s: %s", cf, err.Error())
+					return fmt.Errorf("config file: \"%s\": %s", cf, err.Error())
 				}
 				if err := conf.mergeRaw(raw); err != nil {
-					return fmt.Errorf("config file: %s: %s", cf, err.Error())
+					return fmt.Errorf("config file: \"%s\": %s", cf, err.Error())
+				}
+				if f != site.templateDir {
+					msg := "root config variable \"%s\" in non-root config file: \"%s\""
+					if conf.homepage != "" {
+						site.warning(msg, "homepage", cf)
+					}
+					if conf.urlprefix != "" {
+						site.warning(msg, "urlprefix", cf)
+					}
+					if conf.exclude != nil {
+						site.warning(msg, "exclude", cf)
+					}
+					if conf.include != nil {
+						site.warning(msg, "include", cf)
+					}
 				}
 				break
 			}

@@ -28,7 +28,7 @@ func (doc *document) parseLink(url string) (link documentLink, offsite bool) {
 	if len(s) > 1 {
 		link.anchor = s[1]
 	}
-	re := regexp.MustCompile(`(?i)^(?:` + regexp.QuoteMeta(doc.conf.urlprefix) + `)?/([^/].*)$`) // Extracts root-relative URLs.
+	re := regexp.MustCompile(`(?i)^(?:` + regexp.QuoteMeta(doc.site.urlprefix()) + `)?/([^/].*)$`) // Extracts root-relative URLs.
 	matches := re.FindStringSubmatch(url)
 	if matches != nil {
 		link.target = filepath.Join(doc.site.buildDir, matches[1])
@@ -118,7 +118,7 @@ func (site *site) lintChecks() (errCount int, warnCount int) {
 				if link.anchor != "" {
 					target, ok := site.docs.byBuildPath[link.target]
 					if !ok || !target.ids.Has(link.anchor) {
-						doc.site.logerror("%s: contains link to missing anchor: \"%s\"", doc.contentPath, strings.TrimPrefix(url, site.confs[0].urlprefix+"/"))
+						doc.site.logerror("%s: contains link to missing anchor: \"%s\"", doc.contentPath, strings.TrimPrefix(url, site.urlprefix()+"/"))
 						errCount++
 						continue
 					}

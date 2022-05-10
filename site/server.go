@@ -86,7 +86,7 @@ func (svr *server) setNavigateURL(url string) {
 	if !svr.livereload || !svr.navigate {
 		return
 	}
-	path := strings.TrimPrefix(url, svr.confs[0].urlprefix)
+	path := strings.TrimPrefix(url, svr.urlprefix())
 	svr.verbose("navigate to: " + path)
 	svr.mutex.Lock()
 	svr.browserURL = navigatePrefix + path
@@ -144,9 +144,9 @@ func (svr *server) htmlFilter(h http.Handler) http.Handler {
 				}
 			}
 			// Strip urlprefix from URLs.
-			if svr.confs[0].urlprefix != "" {
-				content = strings.Replace(content, "href=\""+svr.confs[0].urlprefix, "href=\"", -1)
-				content = strings.Replace(content, "src=\""+svr.confs[0].urlprefix, "src=\"", -1)
+			if svr.urlprefix() != "" {
+				content = strings.Replace(content, "href=\""+svr.urlprefix(), "href=\"", -1)
+				content = strings.Replace(content, "src=\""+svr.urlprefix(), "src=\"", -1)
 			}
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.Write([]byte(content))
@@ -215,6 +215,7 @@ func (svr *server) serve() error {
 	}
 	// Full rebuild to initialize document and index structures.
 	if err := svr.build(); err != nil {
+		// TODO should exit instead of carrying on if there is an error.
 		svr.logerror(err.Error())
 	}
 	// Create file system watcher.

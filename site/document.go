@@ -141,7 +141,7 @@ func newDocument(contentfile string, site *site) (document, error) {
 		}
 	case "urlpath":
 		if doc.id == nil {
-			s := strings.TrimPrefix(doc.url, doc.conf.urlprefix)
+			s := strings.TrimPrefix(doc.url, doc.site.urlprefix())
 			doc.id = &s
 		}
 	default:

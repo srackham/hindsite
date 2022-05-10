@@ -117,7 +117,7 @@ func TestHTTPHandlers(t *testing.T) {
 	}
 	err = site.parseConfigFiles()
 	if err != nil {
-		t.Fatalf("%s: %s", cmd, err.Error())
+		t.Fatalf("unexpected error: %s", err.Error())
 	}
 	svr := newServer(&site)
 
@@ -152,7 +152,7 @@ func TestHTTPHandlers(t *testing.T) {
 	if !strings.Contains(got, wanted) {
 		t.Errorf("htmlFilter handler: response did not contain: %#v", wanted)
 	}
-	if strings.Contains(got, site.confs[0].urlprefix) {
-		t.Errorf("htmlFilter handler: response contains urlprefix: %#v", site.confs[0].urlprefix)
+	if strings.Contains(got, site.urlprefix()) {
+		t.Errorf("htmlFilter handler: response contains urlprefix: %#v", site.urlprefix())
 	}
 }

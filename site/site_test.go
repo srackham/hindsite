@@ -196,7 +196,9 @@ func TestExecuteArgs(t *testing.T) {
 		assert.Equal(0, fsx.DirCount(filepath.Join(tmpdir, "build")), from+": unexpected number of files in build directory")
 		cmd = "hindsite build -site " + tmpdir + " -lint -v"
 		out, err = exec(cmd)
-		assert.NoError(err, "unexpected error: \""+cmd+"\"")
+		if err != nil {
+			t.Fatalf("unexpected error executing \"%s\": %s", cmd, err.Error())
+		}
 		assert.Equal(buildCount, fsx.DirCount(filepath.Join(tmpdir, "build")), from+": unexpected number of files in build directory")
 		assert.Contains(out, buildmsg)
 	}
@@ -286,6 +288,10 @@ documents: 11
 static: 7`)
 	assert.Contains(out, "warnings: 1")
 	assert.Contains(out, "errors: 7")
+	assert.Contains(out, "root config variable \"homepage\" in non-root config file")
+	assert.Contains(out, "root config variable \"urlprefix\" in non-root config file")
+	assert.Contains(out, "root config variable \"exclude\" in non-root config file")
+	assert.Contains(out, "root config variable \"include\" in non-root config file")
 
 	/*
 		Test the new command
