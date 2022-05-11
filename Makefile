@@ -132,9 +132,9 @@ release:
 
 # Generate build, serve and validate rules for builtin templates:
 #
-#	build-builtin-hello, server-builtin-hello, validate-builtin-hello
-#	build-builtin-blog, server-builtin-blog, validate-builtin-blog
-#	build-builtin-docs, server-builtin-docs, validate-builtin-docs
+#	build-builtin-hello, serve-builtin-hello, validate-builtin-hello
+#	build-builtin-blog, serve-builtin-blog, validate-builtin-blog
+#	build-builtin-docs, serve-builtin-docs, validate-builtin-docs
 
 # Rule templates.
 define rules_template

@@ -128,6 +128,7 @@ func (site *site) lintChecks() (errCount int, warnCount int) {
 		}
 	}
 	// Check document URL path names are lowercase alphanumeric with hyphens.
+	site.verbose("lint URL paths")
 	for p := range site.docs.byBuildPath {
 		p, _ = filepath.Rel(site.buildDir, p)
 		p = filepath.ToSlash(p)

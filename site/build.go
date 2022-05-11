@@ -212,7 +212,7 @@ func (site *site) copyStaticFile(srcFile string) error {
 		panic("static file is outside content directory: " + srcFile)
 	}
 	dstFile := fsx.PathTranslate(srcFile, site.contentDir, site.buildDir)
-	site.verbose("copy static:  " + srcFile)
+	site.verbose("copy static: " + srcFile)
 	err := fsx.MkMissingDir(filepath.Dir(dstFile))
 	if err != nil {
 		return err
