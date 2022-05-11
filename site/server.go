@@ -343,9 +343,9 @@ func (svr *server) serve() error {
 				start := time.Now()
 				switch evt.Op {
 				case fsnotify.Create, fsnotify.Write:
-					t := fsx.FileModTime(svr.confs[0].homepage)
+					t := fsx.FileModTime(svr.homepage())
 					err = svr.writeFile(evt.Name)
-					if err == nil && t.Before(fsx.FileModTime(svr.confs[0].homepage)) {
+					if err == nil && t.Before(fsx.FileModTime(svr.homepage())) {
 						// homepage was modified by this event.
 						err = svr.copyHomePage()
 					}

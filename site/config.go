@@ -208,49 +208,49 @@ func (conf *config) String() (result string) {
 	return string(d)
 }
 
-// merge merges "non-zero" configuration variables into configuration.
-func (conf *config) merge(from config) {
-	if from.origin != "" {
-		conf.origin = from.origin
+// merge merges "non-zero" `src` configuration variables into configuration.
+func (conf *config) merge(src config) {
+	if src.origin != "" {
+		conf.origin = src.origin
 	}
-	if from.author != nil {
-		conf.author = from.author
+	if src.author != nil {
+		conf.author = src.author
 	}
-	if from.id != "" {
-		conf.id = from.id
+	if src.id != "" {
+		conf.id = src.id
 	}
-	if from.templates != nil {
-		conf.templates = from.templates
+	if src.templates != nil {
+		conf.templates = src.templates
 	}
-	if from.permalink != "" {
-		conf.permalink = from.permalink
+	if src.permalink != "" {
+		conf.permalink = src.permalink
 	}
-	if from.paginate != 0 {
-		conf.paginate = from.paginate
+	if src.paginate != 0 {
+		conf.paginate = src.paginate
 	}
-	if from.timezone != nil {
-		conf.timezone = from.timezone
+	if src.timezone != nil {
+		conf.timezone = src.timezone
 	}
-	if from.shortdate != "" {
-		conf.shortdate = from.shortdate
+	if src.shortdate != "" {
+		conf.shortdate = src.shortdate
 	}
-	if from.mediumdate != "" {
-		conf.mediumdate = from.mediumdate
+	if src.mediumdate != "" {
+		conf.mediumdate = src.mediumdate
 	}
-	if from.longdate != "" {
-		conf.longdate = from.longdate
+	if src.longdate != "" {
+		conf.longdate = src.longdate
 	}
-	if from.homepage != "" {
-		conf.homepage = from.homepage
+	if src.homepage != "" {
+		conf.homepage = src.homepage
 	}
-	if from.urlprefix != "" {
-		conf.urlprefix = from.urlprefix
+	if src.urlprefix != "" {
+		conf.urlprefix = src.urlprefix
 	}
-	if from.exclude != nil {
-		conf.exclude = from.exclude
+	if src.exclude != nil {
+		conf.exclude = src.exclude
 	}
-	if from.include != nil {
-		conf.include = from.include
+	if src.include != nil {
+		conf.include = src.include
 	}
-	mergeMap(conf.user, from.user)
+	mergeMap(conf.user, src.user)
 }

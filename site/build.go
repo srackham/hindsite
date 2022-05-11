@@ -169,8 +169,8 @@ func (site *site) build() error {
 // copyHomePage copies the `homepage` config variable file to `/index.html` and
 // adds it to the list of built documents.
 func (site *site) copyHomePage() error {
-	if site.confs[0].homepage != "" {
-		homepage := site.confs[0].homepage
+	if site.homepage() != "" {
+		homepage := site.homepage()
 		homepage = filepath.FromSlash(homepage)
 		if !filepath.IsAbs(homepage) {
 			homepage = filepath.Join(site.buildDir, homepage)

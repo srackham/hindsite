@@ -380,6 +380,11 @@ func (site *site) isDocument(f string) bool {
 	return (ext == ".md" || ext == ".rmu") && fsx.PathIsInDir(f, site.contentDir)
 }
 
+// homepage returns the site-wide root configuration `homepage` variable.
+func (site *site) homepage() string {
+	return site.confs[0].homepage
+}
+
 // urlprefix returns the site-wide root configuration `urlprefix` variable.
 func (site *site) urlprefix() string {
 	return site.confs[0].urlprefix
