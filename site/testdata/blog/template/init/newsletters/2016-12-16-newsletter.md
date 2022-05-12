@@ -1,8 +1,9 @@
 ---
-title: Cras Est
+title: Slug with spaces
 date: 2016-12-16T16:11:42-00:00
 description: A pulvinar cras integer penatibus sed a vel.
-slug: cras-est
+# slug: cras-est
+slug: slug with spaces
 ---
 
 Lectus natoque montes vel est arcu diam tincidunt porttitor natoque

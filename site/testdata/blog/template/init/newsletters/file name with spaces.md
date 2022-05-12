@@ -1,6 +1,6 @@
 ---
-title: Sed Ac Nisi Porttitor
-date: 2016-10-18T18:52:58-00:00
+title: File name with spaces
+date: 2016-10-18
 description: A integer est parturient.
 slug: sed-ac-nisi-porttitor
 ---

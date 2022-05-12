@@ -29,6 +29,10 @@ user:
 ```
 
 ### Header with HTML anchor
+[URL with spaces newsletter](/newsletters/slug with spaces.html)
+
+[Encoded URL with spaces newsletter](/newsletters/slug%20with%20spaces.html)
+
 [valid page-relative URL](index.html#sub-heading-with-id)
 
 [valid off-site absolute URL](http://foobar.com/index.html)

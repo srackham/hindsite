@@ -276,22 +276,24 @@ func TestExecuteArgs(t *testing.T) {
 	out, err = exec("hindsite build -drafts -lint")
 	assert.Error(err)
 	assert.Equal(7, fsx.DirCount(filepath.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
-	assert.Contains(out, `content/posts/links-test.md: contains illicit element id: "-illicit-id"
-content/posts/links-test.md: contains duplicate element id: "id2"
-content/posts/links-test.md: contains illicit URL: ":invalid-url"
-content/posts/links-test.md: contains link to missing anchor: "#invalid-id"
-content/posts/links-test.md: contains link to missing file: "posts/2015-10-13/LOREM-PENATIBUS/missing-file.html"
-content/posts/links-test.md: contains link to missing file: "missing-file-2.html"
-content/posts/links-test.md: contains link to missing anchor: "index.html#invalid-id"
-dubious URL path name: "posts/2015-10-13/LOREM-PENATIBUS/index.html"
-documents: 11
-static: 7`)
-	assert.Contains(out, "warnings: 1")
-	assert.Contains(out, "errors: 7")
-	assert.Contains(out, "root config variable \"homepage\" in non-root config file")
-	assert.Contains(out, "root config variable \"urlprefix\" in non-root config file")
-	assert.Contains(out, "root config variable \"exclude\" in non-root config file")
-	assert.Contains(out, "root config variable \"include\" in non-root config file")
+	assert.Contains(out, `content/posts/links-test.md: contains illicit element id: "-illicit-id"`)
+	assert.Contains(out, `content/posts/links-test.md: contains duplicate element id: "id2"`)
+	assert.Contains(out, `content/posts/links-test.md: contains illicit URL: ":invalid-url"`)
+	assert.Contains(out, `content/posts/links-test.md: contains link to missing anchor: "#invalid-id"`)
+	assert.Contains(out, `content/posts/links-test.md: contains link to missing file: "posts/2015-10-13/LOREM-PENATIBUS/missing-file.html"`)
+	assert.Contains(out, `content/posts/links-test.md: contains link to missing file: "missing-file-2.html"`)
+	assert.Contains(out, `content/posts/links-test.md: contains link to missing anchor: "index.html#invalid-id"`)
+	// assert.Contains(out, `dubious URL path name: "posts/2015-10-13/LOREM-PENATIBUS/index.html"`)
+	assert.Contains(out, `unhygienic document URL path: "/posts/2015-10-13/LOREM-PENATIBUS/"`)
+	assert.Contains(out, `unhygienic document URL path: "/newsletters/slug with spaces.html"`)
+	assert.Contains(out, `documents: 11`)
+	assert.Contains(out, `static: 7`)
+	// assert.Contains(out, `warnings: 1`)
+	assert.Contains(out, `errors: 7`)
+	assert.Contains(out, `root config variable "homepage" in non-root config file`)
+	assert.Contains(out, `root config variable "urlprefix" in non-root config file`)
+	assert.Contains(out, `root config variable "exclude" in non-root config file`)
+	assert.Contains(out, `root config variable "include" in non-root config file`)
 
 	/*
 		Test the new command
