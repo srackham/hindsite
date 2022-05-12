@@ -2,6 +2,7 @@ package site
 
 import (
 	"fmt"
+	"net/url"
 	"os/exec"
 	"path"
 	"path/filepath"
@@ -65,6 +66,25 @@ func mergeMap[T any](dst map[string]T, maps ...map[string]T) {
 // rootRelURL joins path elements and prefixes them with "/".
 func rootRelURL(elem ...string) string {
 	return "/" + path.Join(elem...)
+}
+
+// escapeURL encodes URL reserved characters.
+func escapeURL(rawURL string) string {
+	u, _ := url.Parse(rawURL)
+	return u.String()
+}
+
+// unescapeURL encodes URL reserved characters.
+func unescapeURL(escapedURL string) string {
+	u, _ := url.Parse(escapedURL)
+	return u.Path
+}
+
+// cleanURLPath returns true if the document URL path only contains lower-case
+// alphanumeric, hyphen, slash and dot characters.
+func cleanURLPath(urlPath string) bool {
+	re := regexp.MustCompile(`^[\da-z-/.]+$`)
+	return re.MatchString(urlPath)
 }
 
 // splitWildcards splits `|` separated file patterns.

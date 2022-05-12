@@ -31,12 +31,12 @@ func (doc *document) parseLink(url string) (link documentLink, offsite bool) {
 	re := regexp.MustCompile(`(?i)^(?:` + regexp.QuoteMeta(doc.site.urlprefix()) + `)?/([^/].*)$`) // Extracts root-relative URLs.
 	matches := re.FindStringSubmatch(url)
 	if matches != nil {
-		link.target = filepath.Join(doc.site.buildDir, matches[1])
+		link.target = filepath.Join(doc.site.buildDir, unescapeURL(matches[1]))
 	} else {
 		re := regexp.MustCompile(`(?i)^([\w][\w./-]*)$`) // Extracts page-relative URLs.
 		matches := re.FindStringSubmatch(url)
 		if matches != nil {
-			link.target = filepath.Join(filepath.Dir(doc.buildPath), matches[1])
+			link.target = filepath.Join(filepath.Dir(doc.buildPath), unescapeURL(matches[1]))
 		} else {
 			offsite = true
 		}
@@ -127,16 +127,16 @@ func (site *site) lintChecks() (errCount int, warnCount int) {
 			}
 		}
 	}
+	// TODO this will be unnecessary, convert it to isValidPath(docPath string) helper
 	// Check document URL path names are lowercase alphanumeric with hyphens.
-	site.verbose("lint URL paths")
-	for p := range site.docs.byBuildPath {
-		p, _ = filepath.Rel(site.buildDir, p)
-		p = filepath.ToSlash(p)
-		re := regexp.MustCompile(`^[\da-z-/.]+$`)
-		if !re.MatchString(p) {
-			site.warning("dubious URL path name: \"%s\"", p)
-			warnCount++
-		}
-	}
+	// site.verbose("lint URL paths")
+	// for p := range site.docs.byBuildPath {
+	// 	p, _ = filepath.Rel(site.buildDir, p)
+	// 	p = filepath.ToSlash(p)
+	// 	if !isCleanURLPath(p) {
+	// 		site.warning("dubious URL path name: \"%s\"", p)
+	// 		warnCount++
+	// 	}
+	// }
 	return
 }

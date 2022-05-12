@@ -41,7 +41,7 @@ type document struct {
 	id          *string // Unique document ID.
 	templates   []string
 	description string
-	url         string // Synthesized document URL.
+	url         string // Raw document root-relative URL (relative tto build directory).
 	tags        []string
 	draft       bool
 	permalink   string // URL template.
@@ -146,6 +146,10 @@ func newDocument(contentfile string, site *site) (document, error) {
 		}
 	default:
 		panic("illegal doc.conf.id for :" + doc.contentPath + ": " + doc.conf.id)
+	}
+	if !cleanURLPath(doc.url) {
+		doc.site.warning("\"%s\": unhygienic document URL path: \"%s\"", contentfile, doc.url) // Non-fatal error.
+		doc.url = escapeURL(doc.url)
 	}
 	return doc, nil
 }
