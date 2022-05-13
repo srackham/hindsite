@@ -41,7 +41,7 @@ type document struct {
 	id          *string // Unique document ID.
 	templates   []string
 	description string
-	url         string // Raw document root-relative URL (relative tto build directory).
+	url         string // Raw document root-relative URL.
 	tags        []string
 	draft       bool
 	permalink   string // URL template.
@@ -89,7 +89,7 @@ func newDocument(contentfile string, site *site) (document, error) {
 	if err := doc.extractFrontMatter(); err != nil {
 		return doc, parseError(fmt.Errorf("front matter: %s", err.Error()))
 	}
-	// Synthesize build path and URL according to content path, permalink and slug values.
+	// Synthesize template path, build path and URL from content path, permalink and slug values.
 	rel, _ := filepath.Rel(site.contentDir, doc.contentPath)
 	doc.templatePath = filepath.Join(site.templateDir, rel)
 	f := filepath.Base(rel)

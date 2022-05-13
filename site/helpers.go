@@ -93,7 +93,8 @@ func splitWildcards(patterns string) []string {
 }
 
 // slugify transforms text into a slug (lowercase alpha-numeric + hyphens).
-func slugify(text string, exclude slice.Slice[string]) string {
+// If the slug is already taken then add a numeric suffix to ensure the slug is unique.
+func slugify(text string, taken slice.Slice[string]) string {
 	slug := text
 	slug = regexp.MustCompile(`\W+`).ReplaceAllString(slug, "-") // Replace non-alphanumeric characters with dashes.
 	slug = regexp.MustCompile(`-+`).ReplaceAllString(slug, "-")  // Replace multiple dashes with single dash.
@@ -102,9 +103,9 @@ func slugify(text string, exclude slice.Slice[string]) string {
 	if slug == "" {
 		slug = "x"
 	}
-	if exclude.IndexOf(slug) > -1 {
+	if taken.IndexOf(slug) > -1 {
 		i := 2
-		for exclude.IndexOf(slug+"-"+fmt.Sprint(i)) > -1 {
+		for taken.IndexOf(slug+"-"+fmt.Sprint(i)) > -1 {
 			i++
 		}
 		slug += "-" + fmt.Sprint(i)

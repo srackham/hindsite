@@ -92,7 +92,7 @@ func (site *site) Execute(args []string) error {
 			panic("illegal command: " + site.command)
 		}
 	}
-	if err != nil {
+	if err != nil && err != ErrNonFatal {
 		site.logerror(err.Error())
 	}
 	return err
@@ -302,8 +302,8 @@ func (site *site) logerror(format string, v ...interface{}) {
 
 // warning prints a line to stdout.
 func (site *site) warning(format string, v ...interface{}) {
-	color.Set(color.Bold)
-	site.output(os.Stdout, 0, format, v...)
+	color.Set(color.FgRed)
+	site.output(os.Stdout, 0, "warning: "+format, v...)
 	color.Unset()
 }
 

@@ -214,9 +214,9 @@ func (svr *server) serve() error {
 		return fmt.Errorf("to many command arguments")
 	}
 	// Full rebuild to initialize document and index structures.
-	if err := svr.build(); err != nil {
-		// TODO should exit instead of carrying on if there is an error.
-		svr.logerror(err.Error())
+	err := svr.build()
+	if err != nil && err != ErrNonFatal {
+		return err
 	}
 	// Create file system watcher.
 	watcher, err := fsnotify.NewWatcher()
@@ -321,7 +321,7 @@ func (svr *server) serve() error {
 				case "R": // Rebuild.
 					svr.logconsole("rebuilding...")
 					err = svr.build()
-					if err != nil {
+					if err != nil && err != ErrNonFatal {
 						svr.logerror(err.Error())
 					}
 					if svr.livereload {

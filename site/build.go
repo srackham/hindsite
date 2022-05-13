@@ -1,6 +1,7 @@
 package site
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,6 +11,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/srackham/hindsite/fsx"
 )
+
+var ErrNonFatal = errors.New("recoverable build errors")
 
 // build implements the build command.
 func (site *site) build() error {
@@ -71,7 +74,6 @@ func (site *site) build() error {
 	docsCount := 0
 	staticCount := 0
 	errCount := 0
-	warnCount := 0
 	err = filepath.Walk(site.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -145,9 +147,7 @@ func (site *site) build() error {
 	}
 	// Lint documents.
 	if site.lint {
-		e, w := site.lintChecks()
-		errCount += e
-		warnCount += w
+		errCount += site.lintChecks()
 	}
 	// Print summary.
 	if errCount == 0 {
@@ -157,11 +157,8 @@ func (site *site) build() error {
 	site.logconsole("static: %d", staticCount)
 	site.logconsole("time: %.2fs", time.Since(startTime).Seconds())
 	color.Unset()
-	if warnCount > 0 {
-		site.warning("warnings: %d", warnCount)
-	}
 	if errCount > 0 {
-		return fmt.Errorf("document errors: %d", errCount)
+		return ErrNonFatal
 	}
 	return nil
 }
