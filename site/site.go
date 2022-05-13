@@ -93,7 +93,7 @@ func (site *site) Execute(args []string) error {
 		}
 	}
 	if err != nil && err != ErrNonFatal {
-		site.logerror(err.Error())
+		site.logError(err.Error())
 	}
 	return err
 }
@@ -211,7 +211,7 @@ func (site *site) parseArgs(args []string) error {
 	if err != nil {
 		return err
 	}
-	site.verbose2("content directory: " + site.contentDir)
+	site.logVerbose2("content directory: " + site.contentDir)
 	if site.command != "init" && !fsx.DirExists(site.contentDir) {
 		return fmt.Errorf("missing content directory: " + site.contentDir)
 	}
@@ -219,7 +219,7 @@ func (site *site) parseArgs(args []string) error {
 	if err != nil {
 		return err
 	}
-	site.verbose2("template directory: " + site.templateDir)
+	site.logVerbose2("template directory: " + site.templateDir)
 	if site.command != "init" && !fsx.DirExists(site.templateDir) {
 		return fmt.Errorf("missing template directory: " + site.templateDir)
 	}
@@ -227,7 +227,7 @@ func (site *site) parseArgs(args []string) error {
 	if err != nil {
 		return err
 	}
-	site.verbose2("build directory: " + site.buildDir)
+	site.logVerbose2("build directory: " + site.buildDir)
 	// init and indexes directories are hardwired.
 	site.indexDir = filepath.Join(site.buildDir, "indexes")
 	site.initDir = filepath.Join(site.templateDir, "init")
@@ -277,31 +277,31 @@ func (site *site) output(out io.Writer, verbosity int, format string, v ...inter
 	}
 }
 
-// logconsole prints a line to logout.
-func (site *site) logconsole(format string, v ...interface{}) {
+// logConsole prints a line to logout.
+func (site *site) logConsole(format string, v ...interface{}) {
 	site.output(os.Stdout, 0, format, v...)
 }
 
-// verbose prints a line to logout if `-v` verbose option was specified.
-func (site *site) verbose(format string, v ...interface{}) {
+// logVerbose prints a line to logout if `-v` logVerbose option was specified.
+func (site *site) logVerbose(format string, v ...interface{}) {
 	site.output(os.Stdout, 1, format, v...)
 }
 
-// verbose2 prints a a line to logout the `-v` verbose option was specified more
+// logVerbose2 prints a a line to logout the `-v` verbose option was specified more
 // than once.
-func (site *site) verbose2(format string, v ...interface{}) {
+func (site *site) logVerbose2(format string, v ...interface{}) {
 	site.output(os.Stdout, 2, format, v...)
 }
 
-// logerror prints a line to stderr.
-func (site *site) logerror(format string, v ...interface{}) {
+// logError prints a line to stderr.
+func (site *site) logError(format string, v ...interface{}) {
 	color.Set(color.FgRed, color.Bold)
 	site.output(os.Stderr, 0, format, v...)
 	color.Unset()
 }
 
-// warning prints a line to stdout.
-func (site *site) warning(format string, v ...interface{}) {
+// logWarning prints a line to stdout.
+func (site *site) logWarning(format string, v ...interface{}) {
 	color.Set(color.FgRed)
 	site.output(os.Stdout, 0, "warning: "+format, v...)
 	color.Unset()
@@ -370,7 +370,7 @@ Docs:       ` + docsite + ``
 			}
 		}
 	default:
-		site.logconsole(summary)
+		site.logConsole(summary)
 	}
 	return err
 }
@@ -501,7 +501,7 @@ func (site *site) parseConfigFiles() error {
 			cf := filepath.Join(f, v)
 			if fsx.FileExists(cf) {
 				found = true
-				site.verbose("read config: " + cf)
+				site.logVerbose("read config: " + cf)
 				raw := rawConfig{}
 				if err := raw.parseConfigFile(cf); err != nil {
 					return fmt.Errorf("config file: \"%s\": %s", cf, err.Error())
@@ -512,16 +512,16 @@ func (site *site) parseConfigFiles() error {
 				if f != site.templateDir {
 					msg := "root config variable \"%s\" in non-root config file: \"%s\""
 					if conf.homepage != "" {
-						site.warning(msg, "homepage", cf)
+						site.logWarning(msg, "homepage", cf)
 					}
 					if conf.urlprefix != "" {
-						site.warning(msg, "urlprefix", cf)
+						site.logWarning(msg, "urlprefix", cf)
 					}
 					if conf.exclude != nil {
-						site.warning(msg, "exclude", cf)
+						site.logWarning(msg, "exclude", cf)
 					}
 					if conf.include != nil {
-						site.warning(msg, "include", cf)
+						site.logWarning(msg, "include", cf)
 					}
 				}
 				break
@@ -533,7 +533,7 @@ func (site *site) parseConfigFiles() error {
 			} else {
 				site.confs = append(site.confs, conf)
 			}
-			site.verbose2(conf.String())
+			site.logVerbose2(conf.String())
 		}
 		return nil
 	})
@@ -549,7 +549,7 @@ func (site *site) parseConfigFiles() error {
 	if err := site.confs[0].mergeRaw(site.vars); err != nil {
 		return fmt.Errorf("config variable: %s", err.Error())
 	}
-	site.verbose("root config: \n" + site.confs[0].String())
+	site.logVerbose("root config: \n" + site.confs[0].String())
 	// Sanity checks.
 	if site.confs[0].origin != site.templateDir {
 		panic("site.conf[0].origin != site.templateDir")

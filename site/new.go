@@ -63,7 +63,7 @@ func (site *site) new() (err error) {
 	data := templateData{}
 	data["date"] = date.Format("2006-01-02T15:04:05-07:00")
 	data["title"] = title
-	site.verbose("document title: %s\ndocument date: %s", data["title"], data["date"])
+	site.logVerbose("document title: %s\ndocument date: %s", data["title"], data["date"])
 	text := defaultNewTemplate
 	if site.from != "" {
 		// Read document template file specified in `-var template=<template-file>` option.
@@ -79,7 +79,7 @@ func (site *site) new() (err error) {
 		// directory by searching along the corresponding template directory path.
 		for d := fsx.PathTranslate(filepath.Dir(newFile), site.contentDir, site.templateDir); ; {
 			if f := filepath.Join(d, "new.md"); fsx.FileExists(f) {
-				site.verbose("document template: %s", f)
+				site.logVerbose("document template: %s", f)
 				if text, err = fsx.ReadFile(f); err != nil {
 					return err
 				}
@@ -101,9 +101,9 @@ func (site *site) new() (err error) {
 	if err := tmpl.Execute(&output, data); err != nil {
 		return err
 	}
-	site.verbose2("document text: %#v", output.String())
+	site.logVerbose2("document text: %#v", output.String())
 	// Write the new document file.
-	site.verbose("document file: %s", newFile)
+	site.logVerbose("document file: %s", newFile)
 	if err := fsx.WriteFile(newFile, output.String()); err != nil {
 		return err
 	}

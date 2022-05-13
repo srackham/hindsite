@@ -43,11 +43,11 @@ func (site *site) build() error {
 				// Skip configuration file.
 			case ".html":
 				// Compile HTML template.
-				site.verbose("parse template: " + f)
+				site.logVerbose("parse template: " + f)
 				err = site.htmlTemplates.add(f)
 			case ".txt":
 				// Compile text template.
-				site.verbose("parse template: " + f)
+				site.logVerbose("parse template: " + f)
 				err = site.textTemplates.add(f)
 			}
 		}
@@ -82,7 +82,7 @@ func (site *site) build() error {
 			return nil
 		}
 		if site.exclude(f) {
-			site.verbose("exclude: " + f)
+			site.logVerbose("exclude: " + f)
 			if info.IsDir() {
 				return filepath.SkipDir
 			}
@@ -96,23 +96,23 @@ func (site *site) build() error {
 				doc, err := newDocument(f, site)
 				if err != nil {
 					errCount++
-					site.logerror(err.Error())
+					site.logError(err.Error())
 					return nil
 				}
 				if doc.isDraft() {
-					site.verbose("skip draft: " + f)
+					site.logVerbose("skip draft: " + f)
 					return nil
 				}
 				if err := site.docs.add(&doc); err != nil {
 					errCount++
-					site.logerror(err.Error())
+					site.logError(err.Error())
 					return nil
 				}
 			default:
 				staticCount++
 				if err := site.buildStaticFile(f); err != nil {
 					errCount++
-					site.logerror(err.Error())
+					site.logError(err.Error())
 					return nil
 				}
 			}
@@ -153,9 +153,9 @@ func (site *site) build() error {
 	if errCount == 0 {
 		color.Set(color.FgGreen, color.Bold)
 	}
-	site.logconsole("documents: %d", docsCount)
-	site.logconsole("static: %d", staticCount)
-	site.logconsole("time: %.2fs", time.Since(startTime).Seconds())
+	site.logConsole("documents: %d", docsCount)
+	site.logConsole("static: %d", staticCount)
+	site.logConsole("time: %.2fs", time.Since(startTime).Seconds())
 	color.Unset()
 	if errCount > 0 {
 		return ErrNonFatal
@@ -184,8 +184,8 @@ func (site *site) copyHomePage() error {
 			return fmt.Errorf("homepage file missing: %s", homepage)
 		}
 		dst := filepath.Join(site.buildDir, "index.html")
-		site.verbose2("copy homepage: " + homepage)
-		site.verbose("write homepage: " + dst)
+		site.logVerbose2("copy homepage: " + homepage)
+		site.logVerbose("write homepage: " + dst)
 		if err := fsx.CopyFile(homepage, dst); err != nil {
 			return err
 		}
@@ -209,7 +209,7 @@ func (site *site) copyStaticFile(srcFile string) error {
 		panic("static file is outside content directory: " + srcFile)
 	}
 	dstFile := fsx.PathTranslate(srcFile, site.contentDir, site.buildDir)
-	site.verbose("copy static: " + srcFile)
+	site.logVerbose("copy static: " + srcFile)
 	err := fsx.MkMissingDir(filepath.Dir(dstFile))
 	if err != nil {
 		return err
@@ -218,7 +218,7 @@ func (site *site) copyStaticFile(srcFile string) error {
 	if err != nil {
 		return err
 	}
-	site.verbose2("write static: " + dstFile)
+	site.logVerbose2("write static: " + dstFile)
 	return nil
 }
 
@@ -232,8 +232,8 @@ func (site *site) renderStaticFile(f string) error {
 		return err
 	}
 	// Render file as a text template.
-	site.verbose2("render static: " + doc.contentPath)
-	site.verbose2(doc.String())
+	site.logVerbose2("render static: " + doc.contentPath)
+	site.logVerbose2(doc.String())
 	content := doc.content
 	if site.match(doc.contentPath, doc.templates) {
 		data := doc.frontMatter()
@@ -242,7 +242,7 @@ func (site *site) renderStaticFile(f string) error {
 			return err
 		}
 	}
-	site.verbose("write static: " + doc.buildPath)
+	site.logVerbose("write static: " + doc.buildPath)
 	return fsx.WritePath(doc.buildPath, content)
 }
 
@@ -252,14 +252,14 @@ func (site *site) renderDocument(doc *document) error {
 	markup := doc.content
 	// Render document markup as a text template.
 	if site.match(doc.contentPath, doc.templates) {
-		site.verbose2("render template: " + doc.contentPath)
+		site.logVerbose2("render template: " + doc.contentPath)
 		markup, err = site.textTemplates.renderText("documentMarkup", markup, data)
 		if err != nil {
 			return err
 		}
 	}
 	// Convert markup to HTML then render document layout to build directory.
-	site.verbose2("render document: " + doc.contentPath)
+	site.logVerbose2("render document: " + doc.contentPath)
 	data["body"] = doc.render(markup)
 	html, err := site.htmlTemplates.render(doc.layout, data)
 	if err != nil {
@@ -270,11 +270,11 @@ func (site *site) renderDocument(doc *document) error {
 		doc.parseHTML(html)
 		// doc.parseHTML(string(data["body"].(template.HTML)))
 	}
-	site.verbose("write document: " + doc.buildPath)
+	site.logVerbose("write document: " + doc.buildPath)
 	if err = fsx.WritePath(doc.buildPath, html); err != nil {
 		return err
 	}
-	site.verbose2(doc.String())
+	site.logVerbose2(doc.String())
 	return nil
 }
 

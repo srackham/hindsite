@@ -68,14 +68,14 @@ func rootRelURL(elem ...string) string {
 	return "/" + path.Join(elem...)
 }
 
-// escapeURL encodes URL reserved characters.
-func escapeURL(rawURL string) string {
+// encodeURL encodes URL reserved characters.
+func encodeURL(rawURL string) string {
 	u, _ := url.Parse(rawURL)
 	return u.String()
 }
 
-// unescapeURL encodes URL reserved characters.
-func unescapeURL(escapedURL string) string {
+// decodeURL encodes URL reserved characters.
+func decodeURL(escapedURL string) string {
 	u, _ := url.Parse(escapedURL)
 	return u.Path
 }

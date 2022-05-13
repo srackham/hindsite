@@ -117,7 +117,7 @@ func (idxs indexes) build() error {
 // If doc is not nil then only those document index pages containing doc are rendered.
 func (idx *index) build(doc *document) error {
 	if doc == nil {
-		idx.site.verbose("build index: " + idx.indexDir)
+		idx.site.logVerbose("build index: " + idx.indexDir)
 	}
 	tmpls := &idx.site.htmlTemplates // Lexical shortcut.
 	// renderPages renders paginated document pages with named template.
@@ -139,9 +139,9 @@ func (idx *index) build(doc *document) error {
 			fm["urlprefix"] = idx.conf.urlprefix
 			fm["user"] = idx.conf.user
 			if doc != nil {
-				idx.site.verbose("write index: " + pg.file)
+				idx.site.logVerbose("write index: " + pg.file)
 			} else {
-				idx.site.verbose2("write index: " + pg.file)
+				idx.site.logVerbose2("write index: " + pg.file)
 			}
 			html, err := tmpls.render(tmpl, fm)
 			if err != nil {
@@ -193,7 +193,7 @@ func (idx *index) build(doc *document) error {
 				return err
 			}
 			html = idx.site.injectUrlprefix(html)
-			idx.site.verbose2("write index: " + outfile)
+			idx.site.logVerbose2("write index: " + outfile)
 			if err = fsx.WritePath(outfile, html); err != nil {
 				return err
 			}

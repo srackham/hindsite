@@ -148,8 +148,8 @@ func newDocument(contentfile string, site *site) (document, error) {
 		panic("illegal doc.conf.id for :" + doc.contentPath + ": " + doc.conf.id)
 	}
 	if !cleanURLPath(doc.url) {
-		doc.site.warning("\"%s\": unhygienic document URL path: \"%s\"", contentfile, doc.url) // Non-fatal error.
-		doc.url = escapeURL(doc.url)
+		doc.site.logWarning("\"%s\": unhygienic document URL path: \"%s\"", contentfile, doc.url) // Non-fatal error.
+		doc.url = encodeURL(doc.url)
 	}
 	return doc, nil
 }

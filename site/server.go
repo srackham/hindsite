@@ -69,7 +69,7 @@ func (svr *server) close(err error) {
 }
 
 func (svr *server) help() {
-	svr.logconsole(`Serving build directory %q on %q
+	svr.logConsole(`Serving build directory %q on %q
 
 Press the R key followed by the Enter key to force a complete site rebuild
 Press the D key followed by the Enter key to toggle the server -drafts option
@@ -87,7 +87,7 @@ func (svr *server) setNavigateURL(url string) {
 		return
 	}
 	path := strings.TrimPrefix(url, svr.urlprefix())
-	svr.verbose("navigate to: " + path)
+	svr.logVerbose("navigate to: " + path)
 	svr.mutex.Lock()
 	svr.browserURL = navigatePrefix + path
 	svr.mutex.Unlock()
@@ -96,7 +96,7 @@ func (svr *server) setNavigateURL(url string) {
 // logRequest server request handler logs browser requests.
 func (svr *server) logRequest(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		svr.verbose("request: " + r.URL.Path)
+		svr.logVerbose("request: " + r.URL.Path)
 		h.ServeHTTP(w, r)
 	})
 }
@@ -171,7 +171,7 @@ func (svr *server) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotify.
 			if !ok {
 				return // Watcher has closed.
 			}
-			svr.verbose("fsnotify: " + time.Now().Format("15:04:05.000") + ": " + evt.Op.String() + ": " + evt.Name)
+			svr.logVerbose("fsnotify: " + time.Now().Format("15:04:05.000") + ": " + evt.Op.String() + ": " + evt.Name)
 			accepted := false
 			var msg string
 			switch {
@@ -188,7 +188,7 @@ func (svr *server) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotify.
 				msg = "accepted"
 				accepted = true
 			}
-			svr.verbose("fsnotify: " + msg)
+			svr.logVerbose("fsnotify: " + msg)
 			if accepted {
 				if prev.Op == fsnotify.Rename && prev.Name != evt.Name {
 					// A rename has occurred within the watched directories
@@ -226,7 +226,7 @@ func (svr *server) serve() error {
 	defer watcher.Close()
 	// Watch content and template directories.
 	watcherAddDir := func(dir string) error {
-		svr.verbose("watching: " + dir)
+		svr.logVerbose("watching: " + dir)
 		return filepath.Walk(dir, func(f string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -304,9 +304,9 @@ func (svr *server) serve() error {
 	// Launch browser.
 	if svr.launch {
 		go func() {
-			svr.verbose("launching browser: " + svr.rootURL)
+			svr.logVerbose("launching browser: " + svr.rootURL)
 			if err := launchBrowser(svr.rootURL); err != nil {
-				svr.logerror(err.Error())
+				svr.logError(err.Error())
 			}
 		}()
 	}
@@ -319,21 +319,21 @@ func (svr *server) serve() error {
 			case line := <-kb:
 				switch strings.ToUpper(strings.TrimSpace(line)) {
 				case "R": // Rebuild.
-					svr.logconsole("rebuilding...")
+					svr.logConsole("rebuilding...")
 					err = svr.build()
 					if err != nil && err != ErrNonFatal {
-						svr.logerror(err.Error())
+						svr.logError(err.Error())
 					}
 					if svr.livereload {
 						lr.Reload(svr.browserURL)
 					}
-					svr.logconsole("")
+					svr.logConsole("")
 				case "D": // Toggle -drafts option.
 					svr.drafts = !svr.drafts
-					svr.logconsole("drafts: %t\n", svr.drafts)
+					svr.logConsole("drafts: %t\n", svr.drafts)
 				case "N": // Toggle -navigate option.
 					svr.navigate = !svr.navigate
-					svr.logconsole("navigation: %t\n", svr.navigate)
+					svr.logConsole("navigation: %t\n", svr.navigate)
 				case "Q":
 					svr.close(nil)
 				default:
@@ -349,19 +349,19 @@ func (svr *server) serve() error {
 						// homepage was modified by this event.
 						err = svr.copyHomePage()
 					}
-					svr.logconsole(start.Format("15:04:05") + ": updated: " + evt.Name)
+					svr.logConsole(start.Format("15:04:05") + ": updated: " + evt.Name)
 				case fsnotify.Remove, fsnotify.Rename:
 					err = svr.removeFile(evt.Name)
-					svr.logconsole(start.Format("15:04:05") + ": removed: " + evt.Name)
+					svr.logConsole(start.Format("15:04:05") + ": removed: " + evt.Name)
 				default:
 					panic("unexpected event: " + evt.Op.String() + ": " + evt.Name)
 				}
 				if err != nil {
-					svr.logerror(err.Error())
+					svr.logError(err.Error())
 				} else {
 					color.Set(color.FgGreen, color.Bold)
 				}
-				svr.logconsole("time: %.3fs\n", (time.Since(start) + watcherLullTime).Seconds())
+				svr.logConsole("time: %.3fs\n", (time.Since(start) + watcherLullTime).Seconds())
 				color.Unset()
 				if svr.livereload {
 					lr.Reload(svr.browserURL)
@@ -388,7 +388,7 @@ func (svr *server) createFile(f string) error {
 			return err
 		}
 		if doc.isDraft() {
-			svr.verbose("skip draft: " + f)
+			svr.logVerbose("skip draft: " + f)
 			return nil
 		}
 		if err := svr.docs.add(&doc); err != nil {
@@ -435,13 +435,13 @@ func (svr *server) removeFile(f string) error {
 				}
 			}
 		}
-		svr.verbose("delete document: " + doc.buildPath)
+		svr.logVerbose("delete document: " + doc.buildPath)
 		return os.Remove(doc.buildPath)
 	case fsx.PathIsInDir(f, svr.contentDir):
 		f := fsx.PathTranslate(f, svr.contentDir, svr.buildDir)
 		// The deleted content may have been a directory.
 		if fsx.FileExists(f) {
-			svr.verbose("delete static: " + f)
+			svr.logVerbose("delete static: " + f)
 			return os.Remove(f)
 		}
 		return nil
@@ -465,7 +465,7 @@ func (svr *server) writeFile(f string) error {
 		if doc == nil {
 			if newDoc.isDraft() {
 				// Draft document updated, don't do anything.
-				svr.verbose("skip draft: " + f)
+				svr.logVerbose("skip draft: " + f)
 				return nil
 			}
 			// Document has just been created and written or was a draft and has changed to non-draft.
@@ -474,7 +474,7 @@ func (svr *server) writeFile(f string) error {
 		// Arrive here if an existing published document has been updated.
 		if newDoc.isDraft() {
 			// Document changed to draft.
-			svr.verbose("skip draft: " + f)
+			svr.logVerbose("skip draft: " + f)
 			return svr.removeFile(f)
 		}
 		oldDoc := *doc
