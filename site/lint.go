@@ -12,37 +12,24 @@ import (
 	"github.com/srackham/hindsite/slice"
 )
 
-// documentLink represents an intra-site document link.
-type documentLink struct {
-	target string // Target build fle path
-	anchor string // URL fragment
-}
-
-// parseLink computes the URL's target build file path and URL anchor fragment from
-// `url` and returns them in `link`.
-// `offsite` is returned set to `true` if `url` refers to an external resource.
-func (doc *document) parseLink(url string) (link documentLink, offsite bool) {
-	// Split into URL and anchor.
-	s := strings.Split(url, "#")
-	url = s[0]
-	if len(s) > 1 {
-		link.anchor = s[1]
-	}
+// linkTarget computes the URL's target build file path.
+// Returns blank string if the URL is off-site.
+func (doc *document) linkTarget(u *urlpkg.URL) (target string) {
+	url := u.String()
+	url = strings.TrimSuffix(url, "#"+u.Fragment)
 	re := regexp.MustCompile(`(?i)^(?:` + regexp.QuoteMeta(doc.site.urlprefix()) + `)?/([^/].*)$`) // Extracts root-relative URLs.
 	matches := re.FindStringSubmatch(url)
 	if matches != nil {
-		link.target = filepath.Join(doc.site.buildDir, unescapeURL(matches[1]))
+		target = filepath.Join(doc.site.buildDir, unescapeURL(matches[1]))
 	} else {
 		re := regexp.MustCompile(`(?i)^([\w][\w./-]*)$`) // Extracts page-relative URLs.
 		matches := re.FindStringSubmatch(url)
 		if matches != nil {
-			link.target = filepath.Join(filepath.Dir(doc.buildPath), unescapeURL(matches[1]))
-		} else {
-			offsite = true
+			target = filepath.Join(filepath.Dir(doc.buildPath), unescapeURL(matches[1]))
 		}
 	}
-	if !offsite && fsx.DirExists(link.target) {
-		link.target = filepath.Join(link.target, "index.html")
+	if target != "" && fsx.DirExists(target) {
+		target = filepath.Join(target, "index.html")
 	}
 	return
 }
@@ -90,7 +77,7 @@ func (site *site) lintChecks() (errCount int, warnCount int) {
 		}
 		// Iterate the document's href/src attribute URLs.
 		for _, url := range doc.urls {
-			_, err := urlpkg.Parse(url)
+			u, err := urlpkg.Parse(url)
 			if err != nil {
 				doc.site.logerror("%s: contains illicit URL: \"%s\"", doc.contentPath, url)
 				errCount++
@@ -103,21 +90,21 @@ func (site *site) lintChecks() (errCount int, warnCount int) {
 					continue
 				}
 			} else {
-				link, offsite := doc.parseLink(url)
-				if offsite {
+				target := doc.linkTarget(u)
+				if target == "" { // Off-site URL.
 					site.verbose2("lint: %s: skipped offsite link: \"%s\"", doc.contentPath, url)
 					continue
 				}
 				// Check the target URL file exists.
-				if !fsx.FileExists(link.target) {
-					doc.site.logerror("%s: contains link to missing file: \"%s\"", doc.contentPath, strings.TrimPrefix(link.target, site.buildDir+string(filepath.Separator)))
+				if !fsx.FileExists(target) {
+					doc.site.logerror("%s: contains link to missing file: \"%s\"", doc.contentPath, strings.TrimPrefix(target, site.buildDir+string(filepath.Separator)))
 					errCount++
 					continue
 				}
 				// Check the URL anchor has a matching HTML id attribute in the target document.
-				if link.anchor != "" {
-					target, ok := site.docs.byBuildPath[link.target]
-					if !ok || !target.ids.Has(link.anchor) {
+				if u.Fragment != "" {
+					targetDoc, ok := site.docs.byBuildPath[target]
+					if !ok || !targetDoc.ids.Has(u.Fragment) {
 						doc.site.logerror("%s: contains link to missing anchor: \"%s\"", doc.contentPath, strings.TrimPrefix(url, site.urlprefix()+"/"))
 						errCount++
 						continue
@@ -127,16 +114,5 @@ func (site *site) lintChecks() (errCount int, warnCount int) {
 			}
 		}
 	}
-	// TODO this will be unnecessary, convert it to isValidPath(docPath string) helper
-	// Check document URL path names are lowercase alphanumeric with hyphens.
-	// site.verbose("lint URL paths")
-	// for p := range site.docs.byBuildPath {
-	// 	p, _ = filepath.Rel(site.buildDir, p)
-	// 	p = filepath.ToSlash(p)
-	// 	if !isCleanURLPath(p) {
-	// 		site.warning("dubious URL path name: \"%s\"", p)
-	// 		warnCount++
-	// 	}
-	// }
 	return
 }
