@@ -19,11 +19,11 @@ func (site *site) init() error {
 		return fmt.Errorf("-from option source has not been specified")
 	}
 	if fsx.DirCount(site.templateDir) > 0 {
-		site.logWarning("skipping non-empty target template directory: " + site.templateDir)
+		site.logWarning("skipping non-empty target template directory: %q", site.templateDir)
 	} else {
 		if slice.New("blog", "docs", "hello").Has(site.from) {
 			// Load template directory from the built-in site.
-			site.logVerbose("installing builtin template: " + site.from)
+			site.logVerbose("installing builtin template: %q", site.from)
 			if err := restoreEmbeddedFS(embeddedFS, "builtin/"+site.from+"/template", site.templateDir); err != nil {
 				return err
 			}
@@ -44,13 +44,13 @@ func (site *site) init() error {
 			// Copy the contents of the source template directory to the template
 			// directory.
 			if !fsx.DirExists(site.from) {
-				return fmt.Errorf("missing source template '%s'", site.from)
+				return fmt.Errorf("missing source template: %q", site.from)
 			}
 			if fsx.PathIsInDir(site.from, site.templateDir) {
-				return fmt.Errorf("source template directory '%s' cannot reside inside target template directory '%s'", site.from, site.templateDir)
+				return fmt.Errorf("source template directory %q cannot reside inside target template directory %q", site.from, site.templateDir)
 			}
 			if !fsx.DirExists(site.templateDir) {
-				site.logVerbose("make directory: " + site.templateDir)
+				site.logVerbose("make directory: %q", site.templateDir)
 				if err := fsx.MkMissingDir(site.templateDir); err != nil {
 					return err
 				}
@@ -61,7 +61,7 @@ func (site *site) init() error {
 		}
 	}
 	if fsx.DirCount(site.contentDir) > 0 {
-		site.logWarning("skipping non-empty target content directory: " + site.contentDir)
+		site.logWarning("skipping non-empty target content directory: %q", site.contentDir)
 	} else {
 		// Create the template directory structure in the content directory.
 		if err := fsx.MkMissingDir(site.contentDir); err != nil {
@@ -79,7 +79,7 @@ func (site *site) init() error {
 			}
 			if info.IsDir() {
 				dst := fsx.PathTranslate(f, site.templateDir, site.contentDir)
-				site.logVerbose("make directory: " + dst)
+				site.logVerbose("make directory: %q", dst)
 				err = fsx.MkMissingDir(dst)
 			}
 			return err
@@ -138,12 +138,12 @@ func (site *site) copyDirContents(fromDir, toDir string) error {
 		dst := fsx.PathTranslate(f, fromDir, toDir)
 		if info.IsDir() {
 			if !fsx.DirExists(dst) {
-				site.logVerbose("make directory: " + dst)
+				site.logVerbose("make directory: %q", dst)
 				err = fsx.MkMissingDir(dst)
 			}
 		} else {
-			site.logVerbose2("copy: " + f)
-			site.logVerbose("write: " + dst)
+			site.logVerbose2("copy: %q", f)
+			site.logVerbose("write: %q", dst)
 			err = fsx.CopyFile(f, dst)
 		}
 		return err

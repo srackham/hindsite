@@ -60,7 +60,7 @@ func newIndexes(site *site) (indexes, error) {
 			}
 			idx.contentDir = filepath.Join(site.contentDir, p)
 			if !fsx.DirExists(idx.contentDir) {
-				return fmt.Errorf("missing indexed content directory: %s", idx.contentDir)
+				return fmt.Errorf("missing indexed content directory: %q", idx.contentDir)
 			}
 			idx.indexDir = filepath.Join(site.indexDir, p)
 			p, err = filepath.Rel(site.buildDir, idx.indexDir)
@@ -117,7 +117,7 @@ func (idxs indexes) build() error {
 // If doc is not nil then only those document index pages containing doc are rendered.
 func (idx *index) build(doc *document) error {
 	if doc == nil {
-		idx.site.logVerbose("build index: " + idx.indexDir)
+		idx.site.logVerbose("build index: %q", idx.indexDir)
 	}
 	tmpls := &idx.site.htmlTemplates // Lexical shortcut.
 	// renderPages renders paginated document pages with named template.
@@ -139,9 +139,9 @@ func (idx *index) build(doc *document) error {
 			fm["urlprefix"] = idx.conf.urlprefix
 			fm["user"] = idx.conf.user
 			if doc != nil {
-				idx.site.logVerbose("write index: " + pg.file)
+				idx.site.logVerbose("write index: %q", pg.file)
 			} else {
-				idx.site.logVerbose2("write index: " + pg.file)
+				idx.site.logVerbose2("write index: %q", pg.file)
 			}
 			html, err := tmpls.render(tmpl, fm)
 			if err != nil {
@@ -193,7 +193,7 @@ func (idx *index) build(doc *document) error {
 				return err
 			}
 			html = idx.site.injectUrlprefix(html)
-			idx.site.logVerbose2("write index: " + outfile)
+			idx.site.logVerbose2("write index: %q", outfile)
 			if err = fsx.WritePath(outfile, html); err != nil {
 				return err
 			}

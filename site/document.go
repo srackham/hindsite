@@ -53,7 +53,7 @@ type document struct {
 // Parse document content and front matter.
 func newDocument(contentfile string, site *site) (document, error) {
 	parseError := func(err error) error {
-		return fmt.Errorf("%s: %s", contentfile, err.Error())
+		return fmt.Errorf("%q: %s", contentfile, err.Error())
 	}
 	if !fsx.PathIsInDir(contentfile, site.contentDir) {
 		panic("document is outside content directory: " + contentfile)
@@ -196,7 +196,7 @@ func (doc *document) extractFrontMatter() error {
 		return err
 	}
 	if eof {
-		return fmt.Errorf("missing closing delimiter: %s", end)
+		return fmt.Errorf("missing closing delimiter: %q", end)
 	}
 	description, eof, err := readTo("<!--more-->", scanner)
 	if err != nil {
@@ -460,7 +460,7 @@ func newDocumentsLookup() documentsLookup {
 func (lookup *documentsLookup) add(doc *document) error {
 	d := lookup.byBuildPath[doc.buildPath]
 	if d != nil {
-		return fmt.Errorf("%s: duplicate document build path in: %s", doc.contentPath, d.contentPath)
+		return fmt.Errorf("%q: duplicate document build path in: %q", doc.contentPath, d.contentPath)
 	}
 	d = lookup.byContentPath[doc.contentPath]
 	if d != nil {
@@ -469,7 +469,7 @@ func (lookup *documentsLookup) add(doc *document) error {
 	if doc.id != nil && *doc.id != "" {
 		d = lookup.byID[*doc.id]
 		if d != nil {
-			return fmt.Errorf("%s: duplicate document id in: %s", doc.contentPath, d.contentPath)
+			return fmt.Errorf("%q: duplicate document id in: %q", doc.contentPath, d.contentPath)
 		}
 	}
 	lookup.byBuildPath[doc.buildPath] = doc

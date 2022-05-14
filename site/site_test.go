@@ -50,10 +50,10 @@ func TestParseArgs(t *testing.T) {
 	assert.Equal(true, site.navigate, "navigate")
 
 	parse("hindsite illegal-command")
-	assert.Equal("illegal command: illegal-command", err.Error())
+	assert.Equal(`illegal command: "illegal-command"`, err.Error())
 
 	parse("hindsite serve -illegal-option")
-	assert.Equal("illegal option: -illegal-option", err.Error())
+	assert.Equal(`illegal option: "-illegal-option"`, err.Error())
 
 	parse("hindsite serve -site missing-site-dir")
 	assert.Contains(err.Error(), "missing site directory: ")
@@ -65,17 +65,17 @@ func TestParseArgs(t *testing.T) {
 	assert.Equal("missing -port argument value", err.Error())
 
 	parse("hindsite serve -site ./testdata/blog -port 99999999")
-	assert.Equal("illegal -port: 99999999", err.Error())
+	assert.Equal(`illegal -port: "99999999"`, err.Error())
 
 	parse("hindsite serve -site ./testdata/blog -port :99999999")
-	assert.Equal("illegal -port: :99999999", err.Error())
+	assert.Equal(`illegal -port: ":99999999"`, err.Error())
 
 	// -var option checks.
 	parse("hindsite build -site ./testdata/blog -var foobar")
-	assert.Equal("illegal -var syntax: foobar", err.Error())
+	assert.Equal(`illegal -var syntax: "foobar"`, err.Error())
 
 	parse("hindsite build -site ./testdata/blog -var foobar=42")
-	assert.Equal("illegal -var name: foobar", err.Error())
+	assert.Equal(`illegal -var name: "foobar"`, err.Error())
 
 	parse("hindsite build -site ./testdata/blog -var author=Joe-Bloggs")
 	assert.Equal("Joe-Bloggs", *site.vars.Author)
@@ -99,7 +99,7 @@ func TestParseArgs(t *testing.T) {
 	assert.Equal("2_Jan_2006", *site.vars.MediumDate)
 
 	parse("hindsite build -site ./testdata/blog -var paginate=qux")
-	assert.Equal("illegal paginate value: qux", err.Error())
+	assert.Equal(`illegal paginate value: "qux"`, err.Error())
 
 	parse("hindsite build -site ./testdata/blog -var paginate=42")
 	assert.Equal(42, *site.vars.Paginate)
@@ -130,7 +130,7 @@ func TestParseArgs(t *testing.T) {
 	config := config{}
 	s := "/"
 	err = config.mergeRaw(rawConfig{URLPrefix: &s})
-	assert.Equal("illegal urlprefix: /", err.Error())
+	assert.Equal(`illegal urlprefix: "/"`, err.Error())
 
 	// -config option checks.
 	parse("hindsite build -site ./testdata/blog -content ./testdata/blog/template/init -var user.foo=bar -config ./testdata/blog/template/config2.toml")
@@ -176,7 +176,7 @@ func TestExecuteArgs(t *testing.T) {
 
 	out, err = exec("hindsite help foobar")
 	assert.Error(err)
-	assert.Contains(out, "illegal command: foobar")
+	assert.Contains(out, `illegal command: "foobar"`)
 
 	out, err = exec("hindsite help foo bar")
 	assert.Error(err)
@@ -209,7 +209,7 @@ func TestExecuteArgs(t *testing.T) {
 
 	out, err = exec("hindsite build " + tmpdir) // Old v1 command syntax.
 	assert.Error(err)
-	assert.Contains(out, "missing content directory: content")
+	assert.Contains(out, `missing content directory: "content"`)
 
 	// Test built-in templates.
 	buildSiteFrom("hello", "documents: 1\nstatic: 0", 2, 1, 1)
@@ -333,7 +333,7 @@ func TestExecuteArgs(t *testing.T) {
 
 	out, err = exec("hindsite new " + f)
 	assert.Error(err)
-	assert.Contains(out, "document already exists: content/posts/2018-12-01-new-test-file-two.md")
+	assert.Contains(out, `document already exists: "content/posts/2018-12-01-new-test-file-two.md"`)
 
 	out, err = exec("hindsite build -drafts")
 	assert.NoError(err)
@@ -344,7 +344,7 @@ func TestExecuteArgs(t *testing.T) {
 	os.Remove(f)
 	out, err = exec("hindsite new -from foobar " + f)
 	assert.Error(err)
-	assert.Contains(out, "missing document template file: foobar\n")
+	assert.Contains(out, `missing document template file: "foobar"`)
 
 	f = filepath.Join("content", "posts", "2018-12-01-new-test-file-two.md")
 	template := filepath.Join("template", "posts", "new.md")

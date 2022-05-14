@@ -79,18 +79,18 @@ func TestServer(t *testing.T) {
 		t.Fatal(err)
 	}
 	newfile := filepath.Join(tmpdir, "content", "posts", "newfile.md")
-	updateAndWait(newfile, text, "content/posts/newfile.md: duplicate document build path in: content/posts/document-3.md")
+	updateAndWait(newfile, text, `"content/posts/newfile.md": duplicate document build path in: "content/posts/document-3.md"`)
 	// Fix post error.
 	text = strings.Replace(text, "slug: sed-sed", "slug: newfile", 1)
-	updateAndWait(newfile, text, "updated: content/posts/newfile.md")
+	updateAndWait(newfile, text, `updated: "content/posts/newfile.md"`)
 	// Change post title.
 	text = strings.Replace(text, "title: Sed Sed", "title: New File", 1)
-	updateAndWait(newfile, text, "updated: content/posts/newfile.md")
+	updateAndWait(newfile, text, `updated: "content/posts/newfile.md"`)
 	// Add post tag.
 	text = strings.Replace(text, "tags: [integer,est,sed,tincidunt]", "tags: [integer,est,sed,tincidunt,newfile]", 1)
-	updateAndWait(newfile, text, "updated: content/posts/newfile.md")
+	updateAndWait(newfile, text, `updated: "content/posts/newfile.md"`)
 	// Remove post.
-	removeAndWait(existingfile, "removed: content/posts/document-3.md")
+	removeAndWait(existingfile, `removed: "content/posts/document-3.md"`)
 	// Rebuild.
 	svr.in <- "R\n"
 	waitFor("rebuilding...")
@@ -98,9 +98,9 @@ func TestServer(t *testing.T) {
 	// New static file.
 	newfile = filepath.Join(tmpdir, "content", "newfile.txt")
 	text = "Hello World!"
-	updateAndWait(newfile, text, "updated: content/newfile.txt")
+	updateAndWait(newfile, text, `updated: "content/newfile.txt"`)
 	// Remove static file.
-	removeAndWait(newfile, "removed: content/newfile.txt")
+	removeAndWait(newfile, `removed: "content/newfile.txt"`)
 	// Stop serve command.
 	svr.close(nil)
 	time.Sleep(50 * time.Millisecond) // Allow time for serve goroutines to execute cleanup code.

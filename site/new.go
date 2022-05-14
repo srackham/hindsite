@@ -33,20 +33,20 @@ func (site *site) new() (err error) {
 		return fmt.Errorf("new document has not been specified")
 	}
 	if fsx.DirExists(newFile) {
-		return fmt.Errorf("document is a directory: %s", newFile)
+		return fmt.Errorf("document is a directory: %q", newFile)
 	}
 	if d := filepath.Dir(newFile); !fsx.DirExists(d) {
-		return fmt.Errorf("missing document directory: %s", d)
+		return fmt.Errorf("missing document directory: %q", d)
 	}
 	if fsx.FileExists(newFile) {
-		return fmt.Errorf("document already exists: %s", newFile)
+		return fmt.Errorf("document already exists: %q", newFile)
 	}
 	newFile, err = filepath.Abs(newFile)
 	if err != nil {
 		return err
 	}
 	if !fsx.PathIsInDir(newFile, site.contentDir) {
-		return fmt.Errorf("document must reside in content directory: %s", site.contentDir)
+		return fmt.Errorf("document must reside in content directory: %q", site.contentDir)
 	}
 	if err = site.parseConfigFiles(); err != nil {
 		return err
@@ -69,7 +69,7 @@ func (site *site) new() (err error) {
 		// Read document template file specified in `-var template=<template-file>` option.
 		f := site.from
 		if !fsx.FileExists(f) {
-			return fmt.Errorf("missing document template file: %s", f)
+			return fmt.Errorf("missing document template file: %q", f)
 		}
 		if text, err = fsx.ReadFile(f); err != nil {
 			return err
