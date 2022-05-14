@@ -264,12 +264,9 @@ func (site *site) parseArgs(args []string) error {
 func (site *site) output(out io.Writer, verbosity int, format string, v ...interface{}) {
 	if site.verbosity >= verbosity {
 		msg := fmt.Sprintf(format, v...)
-		// Strip leading site directory from path names to make message more readable.
+		// Strip leading site directory from quoted path names to make message more readable.
 		if filepath.IsAbs(site.siteDir) {
-			// TODO use regexp to replace
-			msg = strings.Replace(msg, " "+site.siteDir+string(filepath.Separator), " ", -1)
 			msg = strings.Replace(msg, `"`+site.siteDir+string(filepath.Separator), `"`, -1)
-			msg = strings.TrimPrefix(msg, site.siteDir+string(filepath.Separator))
 		}
 		if site.out == nil {
 			fmt.Fprintln(out, msg)
