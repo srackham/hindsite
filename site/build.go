@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/srackham/hindsite/fsx"
 )
 
@@ -19,6 +18,8 @@ func (site *site) build() error {
 	if len(site.cmdargs) > 0 {
 		return fmt.Errorf("to many command arguments")
 	}
+	site.errors = 0
+	site.warnings = 0
 	startTime := time.Now()
 	if err := site.parseConfigFiles(); err != nil {
 		return err
@@ -73,7 +74,6 @@ func (site *site) build() error {
 	// Parse content directory documents and copy/render static files to the build directory.
 	docsCount := 0
 	staticCount := 0
-	errCount := 0
 	err = filepath.Walk(site.contentDir, func(f string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -95,7 +95,6 @@ func (site *site) build() error {
 				// Parse document.
 				doc, err := newDocument(f, site)
 				if err != nil {
-					errCount++
 					site.logError(err.Error())
 					return nil
 				}
@@ -104,14 +103,12 @@ func (site *site) build() error {
 					return nil
 				}
 				if err := site.docs.add(&doc); err != nil {
-					errCount++
 					site.logError(err.Error())
 					return nil
 				}
 			default:
 				staticCount++
 				if err := site.buildStaticFile(f); err != nil {
-					errCount++
 					site.logError(err.Error())
 					return nil
 				}
@@ -147,17 +144,17 @@ func (site *site) build() error {
 	}
 	// Lint documents.
 	if site.lint {
-		errCount += site.lintChecks()
+		site.lintChecks()
 	}
 	// Print summary.
-	if errCount == 0 {
-		color.Set(color.FgGreen, color.Bold)
+	site.logHighlight("documents: %d", docsCount)
+	site.logHighlight("static: %d", staticCount)
+	site.logHighlight("time: %.2fs", time.Since(startTime).Seconds())
+	if site.warnings > 0 {
+		site.logColorize(warningColor, "warnings: %d", site.warnings)
 	}
-	site.logConsole("documents: %d", docsCount)
-	site.logConsole("static: %d", staticCount)
-	site.logConsole("time: %.2fs", time.Since(startTime).Seconds())
-	color.Unset()
-	if errCount > 0 {
+	if site.errors > 0 {
+		site.logColorize(errorColor, "errors: %d", site.errors)
 		return ErrNonFatal
 	}
 	return nil

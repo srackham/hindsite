@@ -12,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/fsnotify/fsnotify"
 	"github.com/jaschaephraim/lrserver"
 	"github.com/srackham/hindsite/fsx"
@@ -358,11 +357,8 @@ func (svr *server) serve() error {
 				}
 				if err != nil {
 					svr.logError(err.Error())
-				} else {
-					color.Set(color.FgGreen, color.Bold)
 				}
-				svr.logConsole("time: %.3fs\n", (time.Since(start) + watcherLullTime).Seconds())
-				color.Unset()
+				svr.logHighlight("time: %.3fs\n", (time.Since(start) + watcherLullTime).Seconds())
 				if svr.livereload {
 					lr.Reload(svr.browserURL)
 				}

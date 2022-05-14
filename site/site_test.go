@@ -287,6 +287,8 @@ func TestExecuteArgs(t *testing.T) {
 	assert.Contains(out, `unhygienic document URL path: "/newsletters/slug with spaces.html"`)
 	assert.Contains(out, `documents: 11`)
 	assert.Contains(out, `static: 7`)
+	assert.Contains(out, `errors: 7`)
+	assert.Contains(out, `warnings: 6`)
 	assert.Contains(out, `root config variable "homepage" in non-root config file`)
 	assert.Contains(out, `root config variable "urlprefix" in non-root config file`)
 	assert.Contains(out, `root config variable "exclude" in non-root config file`)

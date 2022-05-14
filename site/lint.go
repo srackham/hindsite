@@ -56,7 +56,7 @@ func (doc *document) parseHTML(html string) {
 
 // lintChecks checks that all document intra-site URLs point to valid target
 // files and valid HTML id attributes.
-func (site *site) lintChecks() (errCount int) {
+func (site *site) lintChecks() {
 	for _, k := range sortedKeys(site.docs.byContentPath) {
 		doc := site.docs.byContentPath[k]
 		site.logVerbose("lint document: %q", doc.contentPath)
@@ -68,11 +68,9 @@ func (site *site) lintChecks() (errCount int) {
 			re := regexp.MustCompile(`^[A-Za-z][\w:.-]*$`) // https://www.w3.org/TR/html4/types.html
 			if !re.MatchString(id) {
 				doc.site.logError("%q: contains illicit element id: %q", doc.contentPath, id)
-				errCount++
 			}
 			if ids.Count(id) > 1 {
 				doc.site.logError("%q: contains duplicate element id: %q", doc.contentPath, id)
-				errCount++
 			}
 		}
 		// Iterate the document's href/src attribute URLs.
@@ -80,13 +78,11 @@ func (site *site) lintChecks() (errCount int) {
 			u, err := urlpkg.Parse(url)
 			if err != nil {
 				doc.site.logError("%q: contains illicit URL: %q", doc.contentPath, url)
-				errCount++
 				continue
 			}
 			if strings.HasPrefix(url, "#") { // Intra-document URL fragment.
 				if !doc.ids.Has(url[1:]) {
 					doc.site.logError("%q: contains link to missing anchor: %q", doc.contentPath, url)
-					errCount++
 					continue
 				}
 			} else {
@@ -98,7 +94,6 @@ func (site *site) lintChecks() (errCount int) {
 				// Check the target URL file exists.
 				if !fsx.FileExists(target) {
 					doc.site.logError("%q: contains link to missing file: %q", doc.contentPath, strings.TrimPrefix(target, site.buildDir+string(filepath.Separator)))
-					errCount++
 					continue
 				}
 				// Check the URL anchor has a matching HTML id attribute in the target document.
@@ -106,7 +101,6 @@ func (site *site) lintChecks() (errCount int) {
 					targetDoc, ok := site.docs.byBuildPath[target]
 					if !ok || !targetDoc.ids.Has(u.Fragment) {
 						doc.site.logError("%q: contains link to missing anchor: %q", doc.contentPath, strings.TrimPrefix(url, site.urlprefix()+"/"))
-						errCount++
 						continue
 					}
 				}

@@ -2,7 +2,6 @@ package site
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -13,8 +12,6 @@ import (
 
 	"github.com/srackham/hindsite/fsx"
 	"github.com/srackham/hindsite/slice"
-
-	"github.com/fatih/color"
 )
 
 // Build ldflags.
@@ -58,6 +55,8 @@ type site struct {
 	keep        bool
 	verbosity   int
 	vars        rawConfig
+	errors      int //Non fatal error count.
+	warnings    int //Warnings count.
 }
 
 // New creates a new site.
@@ -257,53 +256,6 @@ func (site *site) parseArgs(args []string) error {
 		return err
 	}
 	return nil
-}
-
-// output prints a line to `out` if `-v` option verbosity is equal to or
-// greater than verbosity.
-func (site *site) output(out io.Writer, verbosity int, format string, v ...interface{}) {
-	if site.verbosity >= verbosity {
-		msg := fmt.Sprintf(format, v...)
-		// Strip leading site directory from quoted path names to make message more readable.
-		if filepath.IsAbs(site.siteDir) {
-			msg = strings.Replace(msg, `"`+site.siteDir+string(filepath.Separator), `"`, -1)
-		}
-		if site.out == nil {
-			fmt.Fprintln(out, msg)
-		} else {
-			site.out <- msg
-		}
-	}
-}
-
-// logConsole prints a line to logout.
-func (site *site) logConsole(format string, v ...interface{}) {
-	site.output(os.Stdout, 0, format, v...)
-}
-
-// logVerbose prints a line to logout if `-v` logVerbose option was specified.
-func (site *site) logVerbose(format string, v ...interface{}) {
-	site.output(os.Stdout, 1, format, v...)
-}
-
-// logVerbose2 prints a a line to logout the `-v` verbose option was specified more
-// than once.
-func (site *site) logVerbose2(format string, v ...interface{}) {
-	site.output(os.Stdout, 2, format, v...)
-}
-
-// logError prints a line to stderr.
-func (site *site) logError(format string, v ...interface{}) {
-	color.Set(color.FgRed, color.Bold)
-	site.output(os.Stderr, 0, "error: "+format, v...)
-	color.Unset()
-}
-
-// logWarning prints a line to stdout.
-func (site *site) logWarning(format string, v ...interface{}) {
-	color.Set(color.FgRed)
-	site.output(os.Stdout, 0, "warning: "+format, v...)
-	color.Unset()
 }
 
 func isCommand(name string) bool {
