@@ -509,7 +509,7 @@ func (site *site) parseConfigFiles() error {
 					return fmt.Errorf("config file: %q: %s", cf, err.Error())
 				}
 				if f != site.templateDir {
-					msg := "root config variable \"%s\" in non-root config file: \"%s\""
+					msg := "root config variable %q in non-root config file: %q"
 					if conf.homepage != "" {
 						site.logWarning(msg, "homepage", cf)
 					}
