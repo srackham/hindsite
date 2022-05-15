@@ -68,7 +68,7 @@ func (svr *server) close(err error) {
 }
 
 func (svr *server) help() {
-	svr.logConsole(`Serving build directory %q on %q
+	svr.logConsole(`serving directory %q on %q
 
 Press the R key followed by the Enter key to force a complete site rebuild
 Press the D key followed by the Enter key to toggle the server -drafts option
@@ -225,7 +225,7 @@ func (svr *server) serve() error {
 	defer watcher.Close()
 	// Watch content and template directories.
 	watcherAddDir := func(dir string) error {
-		svr.logVerbose("watching: %q", dir)
+		svr.logVerbose("watching directory: %q", dir)
 		return filepath.Walk(dir, func(f string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
