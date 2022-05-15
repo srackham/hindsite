@@ -3,7 +3,6 @@ permalink: /index.html
 ---
 # Hindsite Reference
 
-
 Hindsite is a
 [fast]({faq}#how-fast-is-hindsite),
 lightweight static website generator. It builds static websites with optional
@@ -300,6 +299,15 @@ site validation use a cross-site validator such as the
 
 Validity checks increase site build times.
 
+### Errors and warnings
+Warnings are indicative of potential problems. Errors are problems that require
+attention.
+
+- Errors and warnings print single-line colorized messages to the console.
+- Hindsite exits immediately if a serious build error occurs.
+- If a recoverable error occurs Hindsite will attempt to continue processing.
+- If any errors occur the Hindsite exit code will be non-zero.
+
 ### Build summary
 A summary printed when the build command completes, it includes:
 
@@ -506,8 +514,8 @@ Customisation notes:
 
 - The home page and FAQ documents are written in [Rimu markup]({rimu-github}),
   the changelog is written in Markdown. Rimu and Markdown processors are
-  configured to auto-generate the HTML header element ID attributes which are
-  used for table of contents generation.
+  configured to auto-generate HTML header element ID attributes which are
+  used to dynamically build the table of contents.
 
 - The site [configuration file](#configuration) is `template/config.yaml`.
 
@@ -593,7 +601,7 @@ in template subdirectories.
 - The configuration applied to a content file is computed by merging the _root
   configuration_ with configuration files lying along the corresponding
   _template directory_ path. Configuration files closer to the document have
-  higher precedence than those further along the directory path.
+  higher precedence than those further up the directory path.
 ..
 For example, the configuration applied to document `CONTENT_DIR/posts/foobar.md`
 is computed by merging template directory configuration files
@@ -603,7 +611,7 @@ precedence over the latter).
 
 ### Configuration variables
 The `exclude`, `include`, `homepage` and `urlprefix` configuration variables
-are site-wide and must reside in the [root configuration](#root-configuration).
+are site-wide and can only reside in the [root configuration](#root-configuration).
 All other configuration variables can occur in any configuration file.
 
 Valid configuration variables are:
@@ -777,7 +785,7 @@ Are available as these template variables:
 ```
 ..
 
-† Site-wide root configuration variable.
+† Site-wide [root configuration](#root-configuration) variable.
 
 
 ## Content files
@@ -1027,8 +1035,9 @@ value. Setting it to `*` will ensure the document undergoes template expansion;
 setting it to a blank string will suppress template expansion.
 
 .#slug
-`slug`:: The slug replaces the document file name (minus file name extension) in
-generated [build paths](#build-paths) and [URLs](#urls).
+`slug`:: The slug replaces the document file name
+ in generated [build paths](#build-paths) and [URLs](#urls). The file name
+ extension is unchanged.
 
 
 `title`:: The document title. If not specified `title` defaults the document
