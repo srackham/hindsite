@@ -234,7 +234,7 @@ func (site *site) renderStaticFile(f string) error {
 	content := doc.content
 	if site.match(doc.contentPath, doc.templates) {
 		data := doc.frontMatter()
-		content, err = site.textTemplates.renderText("staticFile", content, data)
+		content, err = site.textTemplates.render("staticFile", content, data)
 		if err != nil {
 			return err
 		}
@@ -250,7 +250,7 @@ func (site *site) renderDocument(doc *document) error {
 	// Render document markup as a text template.
 	if site.match(doc.contentPath, doc.templates) {
 		site.logVerbose2("render template: %q", doc.contentPath)
-		markup, err = site.textTemplates.renderText("documentMarkup", markup, data)
+		markup, err = site.textTemplates.render("documentMarkup", markup, data)
 		if err != nil {
 			return err
 		}

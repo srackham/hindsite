@@ -325,7 +325,7 @@ func (doc *document) frontMatter() templateData {
 	// Process description as a text template before rendering to HTML.
 	description := doc.description
 	if doc.site.match(doc.contentPath, doc.templates) {
-		description, _ = doc.site.textTemplates.renderText("documentDescription", description, data)
+		description, _ = doc.site.textTemplates.render("documentDescription", description, data)
 	}
 	data["description"] = doc.render(description)
 	return data

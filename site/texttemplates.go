@@ -46,7 +46,7 @@ func (tmpls *textTemplates) add(tmplfile string) error {
 }
 
 // render returns named template text rendered with data.
-func (tmpls textTemplates) renderText(name, text string, data templateData) (string, error) {
+func (tmpls textTemplates) render(name, text string, data templateData) (string, error) {
 	tmpl, err := tmpls.templates.New(name).Parse(text)
 	if err != nil {
 		return "", err
