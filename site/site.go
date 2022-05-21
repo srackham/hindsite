@@ -500,7 +500,7 @@ func (site *site) parseConfigFiles() error {
 	if err := site.confs[0].mergeRaw(site.vars); err != nil {
 		return fmt.Errorf("config variable: %s", err.Error())
 	}
-	site.logVerbose("root config: \n" + site.confs[0].String())
+	site.logVerbose2("root config: \n" + site.confs[0].String())
 	// Sanity checks.
 	if site.confs[0].origin != site.templateDir {
 		panic("site.conf[0].origin != site.templateDir")
