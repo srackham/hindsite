@@ -358,6 +358,9 @@ func (svr *server) serve() error {
 				if err != nil {
 					svr.logError(err.Error())
 				}
+				if svr.lint {
+					svr.lintChecks()
+				}
 				svr.logHighlight("time: %.3fs\n", (time.Since(start) + watcherLullTime).Seconds())
 				if svr.livereload {
 					lr.Reload(svr.browserURL)
