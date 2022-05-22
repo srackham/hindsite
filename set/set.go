@@ -12,8 +12,7 @@ and updated to work with Go 1.18 and added Count method.
 type Set[T comparable] map[T]int
 
 // Constructor to create new set
-// Example :-  New[int]() to create a int set
-// New(string)() to create a string set
+// Example: New[int]() to create a int set
 func New[T comparable](values ...T) Set[T] {
 	s := make(Set[T])
 	s.Add(values...)

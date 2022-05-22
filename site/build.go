@@ -265,7 +265,6 @@ func (site *site) renderDocument(doc *document) error {
 	html = site.injectUrlprefix(html)
 	if site.lint {
 		doc.parseHTML(html)
-		// doc.parseHTML(string(data["body"].(template.HTML)))
 	}
 	site.logVerbose("write document: %q", doc.buildPath)
 	if err = fsx.WritePath(doc.buildPath, html); err != nil {
