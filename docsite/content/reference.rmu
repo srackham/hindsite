@@ -55,7 +55,7 @@ website:
 - A _content directory_ containing source [documents](#documents) and
   [static resource files](#static-files).
 - A _template directory_ (also called the _site template_) containing
-  [template](#template-files) files, [configuration](#configuration) files and
+  [template](#templates) files, [configuration](#configuration) files and
   optional [site initialisation](#init-command) files.
 - A _build directory_ where Hindsite builds the static website.
 
@@ -729,7 +729,7 @@ computed by substituting the following `permalink` placeholders:
     permalink = "/posts/%y-%m-%d/%p/"
 ..
 
-.#templates
+.#templates-conf
 `templates`:: A `|` separated list of file and directory patterns specifying
 the names of [content files](#content-files) that undergo [text template](#text-templates) expansion.
 The `templates` configuration variable has the same syntax as the
@@ -789,7 +789,7 @@ Are available as these template variables:
 
 
 ## Content files
-Content files provide viewable website content (images, text and styling).
+Content files are the source files that are used to build the static website.
 
 - Content files reside in the site [content directory](#sites).
 - There are two types of content file: [documents](#documents) and [static files](#static-files).
@@ -824,7 +824,7 @@ Text files in the content directory can also undergo optional preprocessing:
 - The file undergoes [text template](#text-templates) expansion.
 
 To qualify for text template expansion the content file's name must match the
-[`templates`](#templates) configuration variable.
+[`templates`](#templates-conf) configuration variable.
 
 Text file preprocessing use-cases include:
 
@@ -858,7 +858,7 @@ Document and tag indexes are built with [HTML templates](#html-templates).
 - A content directory is indexed when the corresponding template directory
   contains a [`docs.html` template](#docs-html). The `docs.html` template
   generates HTML document index files. If a [`tags.html` template](#tags-html) is
-  present they are used to generate HTML tag index files.
+  present it is used to generate an HTML tag index file.
 - Documents from the indexed content directory and its subdirectories contribute
   to the index.
 - A site can contain any number of indexed content directories.
@@ -1015,9 +1015,9 @@ within a site. Used in situations requiring a unique document ID.
   - If a document has no explicit `id` value then the default value is determined
     by the [`id` configuration variable](#id-configuration-variable).
 
-`layout`:: The name of the document's [layout template](#layout-html).
+`layout`:: Overrides the document's default [layout template](#layout-html).
 
-`permalink`:: Sets the document `permalink` value. It defaults to the
+`permalink`:: Sets the document `permalink` value, overriding the
 [`permalink`](#permalink) configuration value.
 
 .#tags
@@ -1030,24 +1030,24 @@ tags = ["foo foo valve", "qux", "baz"]
 tags: [foo foo valve, qux, baz]
 ```
 
-`templates`:: Defaults to the [`templates`](#templates) configuration
+`templates`:: Overrides the [`templates`](#templates-conf) configuration
 value. Setting it to `*` will ensure the document undergoes template expansion;
 setting it to a blank string will suppress template expansion.
 
 .#slug
 `slug`:: The slug replaces the document file name
  in generated [build paths](#build-paths) and [URLs](#urls). The file name
- extension is unchanged.
+ extension is left unchanged.
 
 
+.#title
 `title`:: The document title. If not specified `title` defaults the document
-file name stripped of the date prefix (if there is one), with hyphens replaced
-by spaces, then capitalized.
+file name stripped of the [date prefix](#publication-date) (if there is one),
+with hyphens replaced by spaces, then capitalized.
 
 `user`:: `user` is a user defined key/value map. It is merged with the lower
-precedence [`user` configuration variable](#user) and assigned to the
-[`.user`](#user) document variable. If `user` is not specified in the document
-front matter it defaults to the `user` configuration value.
+precedence [`user` configuration variable](#user) and assigned to the `.user`
+[document variable](#document-variables).
 
 
 ## Document variables
@@ -1055,19 +1055,19 @@ Document variables are a combination of document [front matter
 variables](#front-matter-variables), document [configuration
 variables](#configuration-variables) and synthesized variables. They are used in
 layout and index page [HTML templates](#html-templates) and in [text
-templates](#text-templates).
-Front matter variables take precedence over configuration variables.
+templates](#text-templates). Front matter variables take precedence over
+configuration variables.
 
 Template variables are Go strings unless otherwise noted.
 
-`.author`:: Document author.
+`.author`:: [`author`](#front-matter-variables) front matter value.
 
 `.body`:: The document body rendered as HTML.
 
 `.description`:: The document [`description`](#front-matter-variables) front matter
 value rendered as HTML.
 
-`.shortdate`, `.mediumdate`, `.longdate`:: These are document publication date
+`.shortdate`, `.mediumdate`, `.longdate`:: These are synthesised document publication date
 strings, formatted using the `shortdate`, `mediumdate` and `longdate`
 [configuration variables](#configuration-variables) respectively and rendered
 in the configuration [timezone](#timezone).
@@ -1078,9 +1078,9 @@ in the configuration [timezone](#timezone).
 
 `.layout`:: [`layout`](#front-matter-variables) front matter value.
 
-`.modtime`:: Document content file modification date and time ([time.Time](https://pkg.go.dev/time#Time) type).
+`.modtime`:: Source document content file modification date and time ([time.Time](https://pkg.go.dev/time#Time) type).
 
-`.next`, `.prev`:: The next and previous document URLs in primary index order.
+`.next`, `.prev`:: The next and previous document [URLs](#urls) in primary index order.
 `.prev` is `nil` in the first document, `.next` is `nil` in the last document.
 
 `.permalink`:: [`permalink`](#front-matter-variables) front matter value.
@@ -1089,12 +1089,12 @@ in the configuration [timezone](#timezone).
 
 `.url`:: Synthesized document [URL](#urls).
 
-`.tags`:: An iterable list of tags. Each item contains the variable `.tag` (the
-tag) and `.url` (the tag index URL).
+`.tags`:: An iterable list of document [tags](#document-tags). Each item
+contains the variable `.tag` (the tag) and `.url` (the tag index URL).
 
 `.templates`:: [`templates`](#front-matter-variables) configuration variable.
 
-`.title`:: Document title.
+`.title`:: [`title`](#title) front matter value.
 
 `.urlprefix`:: [`urlprefix`](#urlprefix) configuration value.
 
@@ -1103,12 +1103,15 @@ document [front matter `user` value](#front-matter-variables) with the document'
 [`user`](#user) configuration variable.
 
 
-## Template files
-_Hindsite_ uses [Go templates](https://pkg.go.dev/text/template) to build
-webpages.
+## Templates
+_Hindsite_ uses [Go templates](https://pkg.go.dev/text/template) to build HTML
+build webpages and to inject dynamic content into [content files](#content-files). A template
+ contains `{{` and `}}` delimited data evaluations
+and control structures which are expanded with [document
+variable](#document-variables) values.
 
-There are two template name spaces, one for [HTML templates](#html-templates)
-and the other for [Text templates](#text-templates). Each template file
+There are two sets of templates, [HTML templates](#html-templates)
+and [Text templates](#text-templates). Each template file
 contributes one or more named templates (the file itself plus any nested
 template definitions within the file).
 
@@ -1132,20 +1135,25 @@ templates.
 
 ## HTML templates
 [Go HTML templates](https://pkg.go.dev/html/template) are used to transform
-[documents](#documents) into HTML webpages and [indexes](#indexes).
+[documents](#documents) into HTML webpages and to create [index](#indexes) HTML
+webpages.
 
-All `.html` files in the site _template directory_ (excluding the `init`
-directory) contribute to the set of named HTML templates.
-The following HTML template files have special significance:
+All `.html` files in the site _template directory_ contribute to the set of
+named HTML templates. The following HTML template files have special
+significance:
 
 ### layout.html
-Templates with the file name `layout.html` are used to generate
-content document webpages. A site can have one or more layout templates. The
+Templates with the file name `layout.html` are used to generate content document
+webpages.
+
+Layouts are rendered with the document's [document template
+variables](#document-variables).
+
+A site can have one or more layout templates. The
 selected layout template is the one closest to the content document on the
 corresponding _template directory_ path (but this can be overridden using the
 document [front matter `layout` value](#front-matter-variables)). These conventions
-allow document layouts to be assigned per directory and per document. Layouts
-are rendered with the document's [document template variables](#document-variables).
+allow document layouts to be assigned per directory and per document.
 
 ### docs.html
 The `docs.html` template generates a paginated document index page. The
@@ -1235,16 +1243,18 @@ images/example.png                          # page-relative
 
 ```
 Internal URLs should be _root-relative_ or _page-relative_. Root-relative URLs
-are recommended because they are independent of the host webpage build path. For
-this reason, [HTML templates](#html-templates) should always employ
-root-relative URLs.
+are recommended because they remain the same regardless of the file's location.
+For this reason, [HTML templates](#html-templates) should always employ
+root-relative URLs. Root-relative URLs are also independent of the host domain
+name.
 
 ### URL synthesis
 Hindsite automatically prefixes all root-relative URLs with the
 [`urlprefix`](#urlprefix) configuration value. This allows a site to be rooted
-anywhere on the web server without having to hard-wire server paths into URLs.
+anywhere on the web server without having to hard-wire server paths into
+document URLs.
 
-Webpage URLs are synthesized by prefixing the webpage [build path](#build-paths)
+Document URLs are synthesized by prefixing the webpage [build path](#build-paths)
 (relative to the [build directory](#sites)) with the `urlprefix`. File
 path separators are translated to slash characters.
 
@@ -1308,7 +1318,7 @@ Links to explanatory documentation.
 - [Front matter variable](#front-matter-variables)
 - [HTML template](#html-templates)
 - [Index](#indexes)
-- [Init directory](#new-command)
+- [Init directory](#init-command)
 - [Root configuration](#root-configuration)
 - [Site directory](#sites)
 - [Site](#sites)
@@ -1317,5 +1327,5 @@ Links to explanatory documentation.
 - [Tag](#document-tags)
 - [Tag index](#indexes)
 - [Template directory](#sites)
-- [Template file](#template-files)
+- [Template](#templates)
 - [Text template](#text-templates)
