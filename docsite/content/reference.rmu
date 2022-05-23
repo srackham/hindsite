@@ -255,7 +255,8 @@ files from the [_content_ and _template_ directories](#sites).
   in the built website.
 - If the `-keep` option is specified the contents of the build directory are not
   deleted prior to building the site.
-- The `-lint` option performs [validity checks](#validity-checks) on the generated HTML document files.
+- The `-lint` option performs [validity checks](#validity-checks) on the
+  generated HTML document files.
 - Content, build and template directories cannot overlap, with one exception:
   the content directory can be `TEMPLATE_DIR/init` (this is useful for testing
   content initialization).
@@ -275,7 +276,7 @@ files from the [_content_ and _template_ directories](#sites).
   .. The document's [layout template](#layout-html) is rendered and root-relative URLs are prefixed with the [urlprefix](#urlprefix).
   .. The resulting HTML webpage is written to its [build path](#build-paths).
 . If a [homepage](#homepage) is specified it is copied to the root of the build directory and named `index.html`.
-. If the `-lint` option was specified document webpages are [validated](#validity-checks).
+. If the `-lint` option is specified document webpages are [validated](#validity-checks).
 
 ### Validity checks
 Following a site rebuild the `-lint` option carries out validity checks on the
@@ -343,9 +344,8 @@ webpages. The server also handles browser live reloading.
 - The `-launch` option opens the site home page in the default web browser.
 - If the `-keep` option is specified the contents of the build directory are not
   deleted prior to building the site.
-- Use the `-lint` option to check [validity](#validity-checks) of generated
-  document webpages following a full site rebuild
-  ([parital rebuilds](#partial-rebuilds) do not trigger lint checks).
+- The `-lint` option performs [validity checks](#validity-checks) on the
+  generated HTML document files.
 - The `-navigate` option causes the browser to automatically navigate to new and
   updated [documents](#documents).
 - The `-port` option sets the server HTTP port number (`HTTP_PORT`) and/or the
@@ -386,9 +386,6 @@ if:
 - Indexed documents are added or deleted (necessitating full index rebuild).
 - Files in the template directory are added, changed or removed (necessitating a
   full site rebuild).
-
-Partial rebuilds do not perform `-lint` option checks -- you can run them
-manually while the server is running with the "R" (Rebuild) keyboard command.
 
 .important
 To ensure build integrity you should always perform a complete
