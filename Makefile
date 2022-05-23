@@ -56,14 +56,34 @@ DIST_DIR := ./dist
 
 .PHONY: build-dist
 # Build executable distributions and compress them to Zip files.
-# Because the distribution is built from the working directory the working directory cannot contain
-# uncommitted changes and the latest commit must be tagged with a release version number.
-build-dist: clean test validate-docs
-	[[ -n "$$(git status --porcelain)" ]] && echo "error: there are uncommitted changes in the working directory" && exit 1
-	VERS="$$(git tag --points-at HEAD)"
-	[[ -z "$$VERS" ]] && echo "error: the latest commit has not been tagged" && exit 1
+# The VERS environment variable sets version number.
+# If VERS is not set the version number defaults to v0.0.0 and version tag
+# checks are skipped (v0.0.0 is reserved for testing only).
+#
+# Normally you want to build from a version-tagged commit, if it
+# is not the current head then: stash current changes; temporarily checkout the
+# tagged commit; run the build-dist task; revert to previous commit; pop the
+# stash e.g. to make a distribution for version v.1.4.0:
+#
+#   git stash       	# Stash working directory changes
+#   git checkout v1.4.0
+#   make build-dist
+#   git checkout master	# Restore previous commit
+#   git stash pop   	# Restore previous working directory changes
+
+# build-dist: clean test validate-docs
+build-dist:
+	VERS=$${VERS:-v0.0.0}	# v0.0.0 is for testing.
 	[[ ! $$VERS =~ ^v[0-9]+\.[0-9]+\.[0-9]+$$ ]] && echo "error: illegal version tag: $$VERS " && exit 1
-	[[ $$(ls $(DIST_DIR)/hindsite-$$VERS* 2>/dev/null | wc -w) -gt 0 ]] && echo "error: built version $$VERS already exists" && exit 1
+	if [[ $$VERS != "v0.0.0" ]]; then
+		[[ $$(ls $(DIST_DIR)/hindsite-$$VERS* 2>/dev/null | wc -w) -gt 0 ]] && echo "error: built version $$VERS already exists" && exit 1
+		headtag="$$(git tag --points-at HEAD)"
+		[[ -z "$$headtag" ]] && echo "error: the latest commit has not been tagged" && exit 1
+		[[ $$headtag != $$VERS ]] && echo "error: the latest commit tag does not equal $$VERS" && exit 1
+		[[ -n "$$(git status --porcelain)" ]] && echo "error: changes in the working directory" && exit 1
+	else
+		echo "WARNING: no VERS env variable specified, defaulting to v0.0.0 test build"
+	fi
 	mkdir -p $(DIST_DIR)
 	BUILT=$$(date +%Y-%m-%dT%H:%M:%S%:z)
 	COMMIT=$$(git rev-parse HEAD)
@@ -84,7 +104,7 @@ build-dist: clean test validate-docs
 		mkdir $$NAME
 		cp ../LICENSE $$NAME
 		cp ../README.md $$NAME/README.txt
-		go build -ldflags "$$LDFLAGS" -o $$EXE ../...
+		go build -ldflags "$$LDFLAGS" -o $$EXE ..
 		zip $$ZIP $$NAME/*
 	}
 	cd $(DIST_DIR)
@@ -181,7 +201,7 @@ build-docs: install
 
 .PHONY: serve-docs
 serve-docs: install
-	hindsite serve -site docsite -build docs -keep -launch -navigate -lint -v
+	hindsite serve -site docsite -build docs -keep -launch -navigate -lint
 
 .PHONY: validate-docs
 validate-docs: build-docs
