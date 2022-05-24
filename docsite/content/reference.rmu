@@ -357,8 +357,6 @@ webpages. The server also handles browser live reloading.
   * Examples: `-port 1213`, `-port 1213:35730`, `-port :-1`.
 - The server responds to the following keyboard commands:
   * Press the R key followed by the Enter key to force a complete site rebuild
-  * Press the D key followed by the Enter key to toggle the server -drafts option
-  * Press the N key followed by the Enter key to toggle the server -navigate option
   * Press the Q key followed by the Enter key to exit
   * Press the Enter key to print help
 - The _serve command_ commandeers keyboard input -- if you want to run the server

@@ -71,8 +71,6 @@ func (svr *server) help() {
 	svr.logConsole(`serving directory %q on %q
 
 Press the R key followed by the Enter key to force a complete site rebuild
-Press the D key followed by the Enter key to toggle the server -drafts option
-Press the N key followed by the Enter key to toggle the server -navigate option
 Press the Q key followed by the Enter key to exit
 Press the Enter key to print help
 `, svr.buildDir, svr.rootURL)
@@ -327,12 +325,6 @@ func (svr *server) serve() error {
 						lr.Reload(svr.browserURL)
 					}
 					svr.logConsole("")
-				case "D": // Toggle -drafts option.
-					svr.drafts = !svr.drafts
-					svr.logConsole("drafts: %t\n", svr.drafts)
-				case "N": // Toggle -navigate option.
-					svr.navigate = !svr.navigate
-					svr.logConsole("navigation: %t\n", svr.navigate)
 				case "Q":
 					svr.close(nil)
 				default:
