@@ -67,13 +67,39 @@ func (svr *server) close(err error) {
 	close(svr.quit)
 }
 
-func (svr *server) help() {
-	svr.logConsole(`serving directory %q on %q
+func (svr *server) info() {
+	cmd := fmt.Sprintf("%v", os.Args)
+	cmd = cmd[1 : len(cmd)-1]
+	rc := svr.confs[0]
+	s := fmt.Sprintf(`
+server URL:          %s
+command line:        %s 
+build directory:     %s
+content directory:   %s
+template directory:  %s
+urlprefix:           %s
+exclude:             %s
+include:             %s
+`,
+		svr.rootURL,
+		cmd,
+		svr.buildDir,
+		svr.contentDir,
+		svr.templateDir,
+		rc.urlprefix,
+		strings.Join(rc.exclude, "|"),
+		strings.Join(rc.include, "|"),
+	)
+	svr.logConsole(s)
+}
 
-Press the R key followed by the Enter key to force a complete site rebuild
+func (svr *server) help() {
+	svr.logConsole(`
+Press the R key followed by the Enter key to force a full site rebuild
+Press the I key followed by the Enter key to print configuration information
 Press the Q key followed by the Enter key to exit
 Press the Enter key to print help
-`, svr.buildDir, svr.rootURL)
+`)
 }
 
 // setNavigateURL sets the document navigation URL that will be processed by the
@@ -325,6 +351,8 @@ func (svr *server) serve() error {
 						lr.Reload(svr.browserURL)
 					}
 					svr.logConsole("")
+				case "I":
+					svr.info()
 				case "Q":
 					svr.close(nil)
 				default:
