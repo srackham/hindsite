@@ -70,25 +70,18 @@ func (svr *server) close(err error) {
 func (svr *server) info() {
 	cmd := fmt.Sprintf("%v", os.Args)
 	cmd = cmd[1 : len(cmd)-1]
-	rc := svr.confs[0]
 	s := fmt.Sprintf(`
 server URL:          %s
 command line:        %s 
 build directory:     %s
 content directory:   %s
 template directory:  %s
-urlprefix:           %s
-exclude:             %s
-include:             %s
 `,
 		svr.rootURL,
 		cmd,
 		svr.buildDir,
 		svr.contentDir,
 		svr.templateDir,
-		rc.urlprefix,
-		strings.Join(rc.exclude, "|"),
-		strings.Join(rc.include, "|"),
 	)
 	svr.logConsole(s)
 }
@@ -285,6 +278,7 @@ func (svr *server) serve() error {
 	}
 	// Start Web server.
 	go func() {
+		svr.logConsole("\nserver started: %s", svr.rootURL)
 		svr.help()
 		handler := http.FileServer(http.Dir(svr.buildDir))
 		handler = svr.htmlFilter(handler)
