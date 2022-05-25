@@ -24,7 +24,7 @@ install:
 		LDFLAGS="$$LDFLAGS -X $(XFLAG_PATH).VERS=$$VERS"
 	fi
 	LDFLAGS="$$LDFLAGS -X $(XFLAG_PATH).OS=$$(go env GOOS)/$$(go env GOARCH)"
-	go install -ldflags "$$LDFLAGS" ./...
+	go install -ldflags "$$LDFLAGS"
 
 .PHONY: test
 test: install
