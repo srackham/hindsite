@@ -9,8 +9,11 @@ lightweight static website generator. It builds static websites with optional
 document and tag indexes from [Markdown](https://en.wikipedia.org/wiki/Markdown)
 and [Rimu]({rimu-github}) source documents.
 
-The Hindsite stand-alone executable includes a built-in development web server
-with Live Reload, a file watcher and incremental rebuilds.
+The Hindsite stand-alone executable includes:
+
+- Built-in site templates to get you up and running quickly.
+- A development web server with live reload and incremental rebuilds.
+- A linter for validating generated webpages.
 
 .note
 ..
@@ -21,14 +24,27 @@ This documentation is written in Rimu.
 ..
 
 
+## Installation
+If you have <a href="https://go.dev/" target="_blank">Go</a> installed on your
+system then you can download and compile the latest version with this command:
+
+  go install github.com/srackham/hindsite@latest
+
+.note
+Requires at least Go 1.18.
+
+Pre-compiled binaries are also available on the
+<a href="{hindsite-github}/releases" target="_blank">Hindsite releases page</a>.
+Download the relevant release and extract the `hindsite` executable.
+
+The source code is available on Github and can be downloaded using Git:
+
+  git clone https://github.com/srackham/hindsite.git
+
+
 ## Quick Start
 Create a fully functional blog and newsletter website with just two Hindsite
 commands:
-
-1. Download the binary for your platform from the [releases
-   page]({hindsite-github}/releases) and extract the
-   `hindsite` executable (see [Building Hindsite](#building-hindsite) if you
-   prefer to build and install from source).
 
 2. Create a new Hindsite site directory and install the
    [built-in `blog` template](#blog-built-in-template) using the
@@ -48,9 +64,7 @@ read Jekyll and Hugo Markdown document [front matter](#front-matter)).
 
 
 ## Sites
-A Hindsite site consists of three separate directory trees containing all the
-source documents, templates and resources to build, maintain and test a static
-website:
+A Hindsite site consists of three separate directories:
 
 - A _content directory_ containing source [documents](#documents) and
   [static resource files](#static-files).
@@ -91,7 +105,7 @@ between content documents, their layout templates and their configuration files.
 For example, layout templates and configuration files in `template/posts` are
 applied to content files in `content/posts`
 
-A single template directory can process multiple content directories just as a
+A single template directory can process multiple content directories, similarly a
 single content directory can be processed by multiple template directories. The
 _build_, _content_ and _template_ directories must be mutually exclusive (not
 contained within one another).
@@ -114,7 +128,7 @@ Build the website:
     hindsite build [OPTION]...
 
 [help](#help-command)::
-Display usage summary:
+Display usage documentation:
 
     hindsite help [COMMAND]
 
@@ -570,8 +584,9 @@ ___________________________________________________________
 
 ## Configuration
 Website generation is customized with configuration variables (named values)
-from YAML or TOML formatted configuration files in the [site template directory](#sites)
-and from `-var` and `-config` [command-line options](#common-command-options).
+from YAML or TOML formatted [configuration files](#configuration-files) in the
+[site template directory](#sites) and from `-var` and `-config` [command-line
+options](#common-command-options).
 
 ### Configuration files
 Configuration files are optional, though most sites will have at least one
@@ -587,7 +602,7 @@ in template subdirectories.
 - All sites have a _root configuration_ which is synthesised by merging (in
   increasing order of precedence):
   * Default configuration values.
-  * The root configuration file in the _template directory_.
+  * The root configuration file (in the _template directory_).
   * `-var` and `-config` [command-line options](#common-command-options).
 
 - Non-root configuration files can located anywhere in the template directory
@@ -618,8 +633,8 @@ document's [`author` front matter value](#front-matter-variables). TOML example:
     author = "Joe Bloggs"
 
 .#exclude
-`exclude` †:: A `|` separated list of file and directory paths specifying files
-from the site content directory that are excluded from processing. TOML example:
+`exclude` †:: A pipe (`|`) separated list of file and directory paths specifying files
+from the content directory that are excluded from processing. TOML example:
 ..
     exclude = "config.rmu|*~|4913"
 
@@ -630,7 +645,7 @@ from the site content directory that are excluded from processing. TOML example:
 - The file paths can contain wildcard patterns conforming to patterns matched by
   the Go [path.Match() function](https://golang.org/pkg/path/#Match).
 - If the path contains no path separators then it is matched against all file
-  names e.g. `*.swp` will match all files in the content directory
+  names e.g. `*.swp` will match all files in the content directory and subdirectories
   with the `.swp` file name extension.
 - If the path contains path separators then it is matched against the file path
   e.g. `posts/*.md` will only match files with the `.md` extension from the
@@ -643,7 +658,7 @@ from the site content directory that are excluded from processing. TOML example:
   if it is in the root content directory.
 ..
 
-`include` †:: A `|` separated list of file and directory paths specifying files
+`include` †:: A pip (`|`) separated list of file and directory paths specifying files
 from the content directory that are processed unconditionally i.e. irrespective
 of the `exclude` variable.  `include` values have the same syntax as the
 `exclude` values. TOML example:
@@ -827,89 +842,6 @@ Text file preprocessing use-cases include:
 - Content file parameterization.
 - Dynamic content generation.
 - Text file inclusion.
-
-
-## Document tags
-A document tag is a keyword or phrase used to categorise a document in some
-way.
-
-Hindsite can create tag [indexes](#indexes) linked to per-tag paginated lists of documents.
-
-Document tags are assigned using the front matter [tags variable](#tags).
-A document can have multiple tags.
-
-
-## Indexes
-The Hindsite build command generates optional paginated document and [document tag](#document-tags) index files.
-Multiple indexes are supported -- each folder in the content directory can have
-its own document and tag index.
-
-A _document index_ is a paginated list of [documents](#documents).
-
-A _tag index_ is a list of document tags, each tag in the index is linked to a
-tag-specific document index.
-
-Document and tag indexes are built with [HTML templates](#html-templates).
-
-- A content directory is indexed when the corresponding template directory
-  contains a [`docs.html` template](#docs-html). The `docs.html` template
-  generates HTML document index files. If a [`tags.html` template](#tags-html) is
-  present it is used to generate an HTML tag index file.
-- Documents from the indexed content directory and its subdirectories contribute
-  to the index.
-- A site can contain any number of indexed content directories.
-- Indexes can be nested. This allows categorized document subdirectories to have
-  separate indexes.
-- A _primary index_ is an index that is not nested (has no parent index). A
-  document can only belong to one primary index.
-- Generated index pages are written to a directory named `indexes` located at
-  the root of the _build directory_.
-- The `indexes` directory structure mirrors the _templates_ directory structure.
-
-The following HTML index files are built for each index:
-
-  `docs-1.html`, `docs-2.html` ...:: Paginated document index files. The number
-  of documents per index page is set by the
-  [`paginate`](#configuration-variables) configuration variable.
-  These files are rendered with the corresponding [docs.html](#docs-html) template.
-
-  `tags.html`:: A list of [document tags](#document-tags) linked to paginated per-tag document
-  index files in the `tags` subdirectory. `tags.html` is rendered with the corresponding
-  [tags.html](#tags-html) template.
-
-  `tags/<tag>-1.html`, `tags/<tag>-2.html` ...:: Paginated per-tag document
-  index files. The number of documents per index page is set by the
-  [`paginate`](#configuration-variables) configuration variable. These files are
-  rendered with the corresponding [docs.html](#docs-html) template.
-
-### Example indexes
-The [built-in blog template](#blog-built-in-template) generates document and tag
-indexes for documents in the `content/posts` directory. It does this because the
-corresponding template directory (`template/posts`) contains `docs.html` and
-`tags.html` template files. The index webpages are written to the
-`build/indexes/posts` directory:
-
-```
-├── build/                    # Site build directory
-:   :
-│   └── indexes/              # Site indexes
-│       └── posts/            # Indexes for `content/posts`
-│           docs-1.html       # Documents index page 1 (built with `docs.html` template)
-│           docs-2.html       # Documents index page 2 (built with `docs.html` template)
-│           └── tags/         # Tags indexes
-│               tags.html     # Tags index (built with `tags.html` template)
-│               lorem-1.html  # `lorem` tag index page 1 (built with `docs.html` template)
-:                 :
-├── content/                  # Site content directory
-:   :
-│   └── posts/                # Indexed documents
-:
-└── template/                 # Site template directory
-    :
-    └── posts/
-        docs.html             # Documents index template
-        tags.html             # Tags index template
-```
 
 
 ## Front matter
@@ -1099,6 +1031,16 @@ document [front matter `user` value](#front-matter-variables) with the document'
 [`user`](#user) configuration variable.
 
 
+## Document tags
+A document tag is a keyword or phrase used to categorise a document in some
+way.
+
+Hindsite can create tag [indexes](#indexes) linked to per-tag paginated lists of documents.
+
+Document tags are assigned using the front matter [tags variable](#tags).
+A document can have multiple tags.
+
+
 ## Templates
 _Hindsite_ uses [Go templates](https://pkg.go.dev/text/template) to build HTML
 build webpages and to inject dynamic content into [content files](#content-files). A template
@@ -1193,6 +1135,79 @@ index webpage. If it is not present the tags index files are not built.
 `.user`:: The index configuration [`user`](#user) key/value map.
 
 
+## Indexes
+The Hindsite build command generates optional paginated document and [document tag](#document-tags) index files.
+Multiple indexes are supported -- each folder in the content directory can have
+its own document and tag index.
+
+A _document index_ is a paginated list of [documents](#documents).
+
+A _tag index_ is a list of document tags, each tag in the index is linked to a
+tag-specific document index.
+
+Document and tag indexes are built with [HTML templates](#html-templates).
+
+- A content directory is indexed when the corresponding template directory
+  contains a [`docs.html` template](#docs-html). The `docs.html` template
+  generates HTML document index files. If a [`tags.html` template](#tags-html) is
+  present it is used to generate an HTML tag index file.
+- Documents from the indexed content directory and its subdirectories contribute
+  to the index.
+- A site can contain any number of indexed content directories.
+- Indexes can be nested. This allows categorized document subdirectories to have
+  separate indexes.
+- A _primary index_ is an index that is not nested (has no parent index). A
+  document can only belong to one primary index.
+- Generated index pages are written to a directory named `indexes` located at
+  the root of the _build directory_.
+- The `indexes` directory structure mirrors the _templates_ directory structure.
+
+The following HTML index files are built for each index:
+
+  `docs-1.html`, `docs-2.html` ...:: Paginated document index files. The number
+  of documents per index page is set by the
+  [`paginate`](#configuration-variables) configuration variable.
+  These files are rendered with the corresponding [docs.html](#docs-html) template.
+
+  `tags.html`:: A list of [document tags](#document-tags) linked to paginated per-tag document
+  index files in the `tags` subdirectory. `tags.html` is rendered with the corresponding
+  [tags.html](#tags-html) template.
+
+  `tags/<tag>-1.html`, `tags/<tag>-2.html` ...:: Paginated per-tag document
+  index files. The number of documents per index page is set by the
+  [`paginate`](#configuration-variables) configuration variable. These files are
+  rendered with the corresponding [docs.html](#docs-html) template.
+
+### Example indexes
+The [built-in blog template](#blog-built-in-template) generates document and tag
+indexes for documents in the `content/posts` directory. It does this because the
+corresponding template directory (`template/posts`) contains `docs.html` and
+`tags.html` template files. The index webpages are written to the
+`build/indexes/posts` directory:
+
+```
+├── build/                    # Site build directory
+:   :
+│   └── indexes/              # Site indexes
+│       └── posts/            # Indexes for `content/posts`
+│           docs-1.html       # Documents index page 1 (built with `docs.html` template)
+│           docs-2.html       # Documents index page 2 (built with `docs.html` template)
+│           └── tags/         # Tags indexes
+│               tags.html     # Tags index (built with `tags.html` template)
+│               lorem-1.html  # `lorem` tag index page 1 (built with `docs.html` template)
+:                 :
+├── content/                  # Site content directory
+:   :
+│   └── posts/                # Indexed documents
+:
+└── template/                 # Site template directory
+    :
+    └── posts/
+        docs.html             # Documents index template
+        tags.html             # Tags index template
+```
+
+
 ## Build paths
 A document's _build path_ is the file path of its generated web page.
 
@@ -1284,29 +1299,15 @@ template](#html-templates) variables. For example:
   the next page of documents in `docs.html` document index templates.
 
 
-## Building Hindsite
-.note
-Requires Go 1.18 or better.
-
-To compile Hindsite from source code run the following commands to download,
-compile and install Hindsite:
-
-    git clone https://github.com/srackham/hindsite.git
-    cd hindsite
-    go install ./...
-
-This will build the latest commit (`master` branch). If you want a specific
-version checkout the version before running `go install ./...` e.g. `git
-checkout tags/v1.3.0`.
-
-
 ## Vocabulary
 Links to explanatory documentation.
 
+- [Build directory](#sites)
 - [Build path](#build-paths)
 - [Built-in site template](#built-in-templates)
 - [Configuration file](#configuration-files)
 - [Configuration variable](#configuration-variables)
+- [Content directory](#sites)
 - [Content file](#content-files)
 - [Document file](#documents)
 - [Document index](#indexes)
