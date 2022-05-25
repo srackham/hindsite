@@ -89,7 +89,7 @@ template directory:  %s
 func (svr *server) help() {
 	svr.logConsole(`
 Press the R key followed by the Enter key to force a full site rebuild
-Press the I key followed by the Enter key to print configuration information
+Press the I key followed by the Enter key to print server information
 Press the Q key followed by the Enter key to exit
 Press the Enter key to print help
 `)
