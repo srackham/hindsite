@@ -108,5 +108,4 @@ func (site *site) lintChecks() {
 			}
 		}
 	}
-	return
 }
