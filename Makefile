@@ -8,7 +8,7 @@ SHELL := bash
 .DELETE_ON_ERROR:
 .SUFFIXES:
 .ONESHELL:
- .SILENT:
+.SILENT:
 
 GOFLAGS ?=
 PACKAGES = ./...
@@ -50,7 +50,7 @@ tag:
 .PHONY: push
 push: test validate-docs
 	git push -u --tags origin master
-	make submit-sitemap
+	make --silent submit-sitemap
 
 DIST_DIR := ./dist
 
@@ -197,7 +197,7 @@ build-docs: install
 	mkdir -p docs/builtin/hello
 	hindsite build -site site/builtin/hello -content site/builtin/hello/template/init -build docs/builtin/hello -var urlprefix=/hindsite/builtin/hello -lint
 	hindsite build -site docsite -build docs -keep -lint
-	make build-sitemap
+	make --silent build-sitemap
 
 .PHONY: serve-docs
 serve-docs: install
