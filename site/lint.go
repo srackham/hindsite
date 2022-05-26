@@ -88,9 +88,10 @@ func (site *site) lintChecks() {
 			} else {
 				target := doc.linkTarget(u)
 				if target == "" { // Off-site URL.
-					site.logVerbose2("lint: \"%s\": skipped offsite link: \"%s\"", doc.contentPath, url)
+					site.logVerbose2("lint: \"%s\": skipped off-site link: \"%s\"", doc.contentPath, url)
 					continue
 				}
+				url = strings.TrimPrefix(url, site.urlprefix())
 				// Check the target URL file exists.
 				if !fsx.FileExists(target) {
 					doc.site.logError("\"%s\": contains link to missing file: \"%s\"", doc.contentPath, target)
@@ -100,7 +101,7 @@ func (site *site) lintChecks() {
 				if u.Fragment != "" {
 					targetDoc, ok := site.docs.byBuildPath[target]
 					if !ok || !targetDoc.ids.Has(u.Fragment) {
-						doc.site.logError("\"%s\": contains link to missing anchor: \"%s\"", doc.contentPath, strings.TrimPrefix(url, site.urlprefix()))
+						doc.site.logError("\"%s\": contains link to missing anchor: \"%s\"", doc.contentPath, url)
 						continue
 					}
 				}
