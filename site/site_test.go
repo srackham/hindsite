@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -162,6 +163,10 @@ func TestExecuteArgs(t *testing.T) {
 		out = strings.Replace(out, `\`, `/`, -1) // Normalize MS Windows path separators.
 		return
 	}
+	assertContainsPattern := func(s string, pattern string) {
+		matched, _ := regexp.MatchString(pattern, s)
+		assert.True(matched, "%q does not contain pattern %q", s, pattern)
+	}
 
 	/*
 		Test help command.
@@ -209,7 +214,7 @@ func TestExecuteArgs(t *testing.T) {
 
 	out, err = exec("hindsite build " + tmpdir) // Old v1 command syntax.
 	assert.Error(err)
-	assert.Contains(out, `missing content directory: "content"`)
+	assertContainsPattern(out, `missing content directory: ".*/content"`)
 
 	// Test built-in templates.
 	buildSiteFrom("hello", "documents: 1\nstatic: 0", 2, 1, 1)
@@ -276,15 +281,15 @@ func TestExecuteArgs(t *testing.T) {
 	out, err = exec("hindsite build -drafts -lint")
 	assert.Error(err)
 	assert.Equal(7, fsx.DirCount(filepath.Join(tmpdir, "build", "posts")), "unexpected number of files in build/posts directory")
-	assert.Contains(out, `"content/posts/links-test.md": contains illicit element id: "-illicit-id"`)
-	assert.Contains(out, `"content/posts/links-test.md": contains duplicate element id: "id2"`)
-	assert.Contains(out, `"content/posts/links-test.md": contains illicit URL: ":invalid-url"`)
-	assert.Contains(out, `"content/posts/links-test.md": contains link to missing anchor: "#invalid-id"`)
-	assert.Contains(out, `"content/posts/links-test.md": contains link to missing file: "posts/2015-10-13/LOREM-PENATIBUS/missing-file.html"`)
-	assert.Contains(out, `"content/posts/links-test.md": contains link to missing file: "missing-file-2.html"`)
-	assert.Contains(out, `"content/posts/links-test.md": contains link to missing anchor: "index.html#invalid-id"`)
-	assert.Contains(out, `unhygienic document URL path: "/posts/2015-10-13/LOREM-PENATIBUS/"`)
-	assert.Contains(out, `unhygienic document URL path: "/newsletters/slug with spaces.html"`)
+	assertContainsPattern(out, `".*/content/posts/links-test.md": contains illicit element id: "-illicit-id"`)
+	assertContainsPattern(out, `".*/content/posts/links-test.md": contains duplicate element id: "id2"`)
+	assertContainsPattern(out, `".*/content/posts/links-test.md": contains illicit URL: ":invalid-url"`)
+	assertContainsPattern(out, `".*/content/posts/links-test.md": contains link to missing anchor: "#invalid-id"`)
+	assertContainsPattern(out, `".*/content/posts/links-test.md": contains link to missing file: ".*/posts/2015-10-13/LOREM-PENATIBUS/missing-file.html"`)
+	assertContainsPattern(out, `".*/content/posts/links-test.md": contains link to missing file: ".*/missing-file-2.html"`)
+	assertContainsPattern(out, `".*/content/posts/links-test.md": contains link to missing anchor: "/index.html#invalid-id"`)
+	assertContainsPattern(out, `unhygienic document URL path: ".*/posts/2015-10-13/LOREM-PENATIBUS/"`)
+	assertContainsPattern(out, `unhygienic document URL path: ".*/newsletters/slug with spaces.html"`)
 	assert.Contains(out, `documents: 11`)
 	assert.Contains(out, `static: 7`)
 	assert.Contains(out, `errors: 7`)

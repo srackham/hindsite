@@ -93,14 +93,14 @@ func (site *site) lintChecks() {
 				}
 				// Check the target URL file exists.
 				if !fsx.FileExists(target) {
-					doc.site.logError("\"%s\": contains link to missing file: \"%s\"", doc.contentPath, strings.TrimPrefix(target, site.buildDir+string(filepath.Separator)))
+					doc.site.logError("\"%s\": contains link to missing file: \"%s\"", doc.contentPath, target)
 					continue
 				}
 				// Check the URL anchor has a matching HTML id attribute in the target document.
 				if u.Fragment != "" {
 					targetDoc, ok := site.docs.byBuildPath[target]
 					if !ok || !targetDoc.ids.Has(u.Fragment) {
-						doc.site.logError("\"%s\": contains link to missing anchor: \"%s\"", doc.contentPath, strings.TrimPrefix(url, site.urlprefix()+"/"))
+						doc.site.logError("\"%s\": contains link to missing anchor: \"%s\"", doc.contentPath, strings.TrimPrefix(url, site.urlprefix()))
 						continue
 					}
 				}

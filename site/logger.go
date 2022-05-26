@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/fatih/color"
 )
@@ -22,15 +20,11 @@ func colorize(attributes []color.Attribute, fn func()) {
 }
 
 // output prints a line to `out` if `site.verbosity` is greater than equal or
-// equal to `verbosity`. If `site.out` is set then the line is written to it
+// equal to `verbosity`. If `site.out` is not nil then the line is written to it
 // instead of `out` (this feature is used for testing purposes).
 func (site *site) output(out io.Writer, verbosity int, format string, v ...interface{}) {
 	if site.verbosity >= verbosity {
 		msg := fmt.Sprintf(format, v...)
-		// Strip leading site directory from quoted path names to make message more readable.
-		if filepath.IsAbs(site.siteDir) {
-			msg = strings.Replace(msg, `"`+site.siteDir+string(filepath.Separator), `"`, -1)
-		}
 		if site.out == nil {
 			fmt.Fprintln(out, msg)
 		} else {
