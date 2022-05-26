@@ -57,7 +57,7 @@ type rawConfig struct {
 func (raw *rawConfig) parseVar(arg string) error {
 	s := strings.SplitN(arg, "=", 2)
 	if len(s) != 2 {
-		return fmt.Errorf("illegal -var syntax: %q", arg)
+		return fmt.Errorf("illegal -var syntax: \"%s\"", arg)
 	}
 	name := s[0]
 	val := s[1]
@@ -85,7 +85,7 @@ func (raw *rawConfig) parseVar(arg string) error {
 			raw.MediumDate = &val
 		case "paginate":
 			if n, err := strconv.Atoi(val); err != nil {
-				return fmt.Errorf("illegal paginate value: %q", val)
+				return fmt.Errorf("illegal paginate value: \"%s\"", val)
 			} else {
 				raw.Paginate = &n
 			}
@@ -100,7 +100,7 @@ func (raw *rawConfig) parseVar(arg string) error {
 		case "urlprefix":
 			raw.URLPrefix = &val
 		default:
-			return fmt.Errorf("illegal -var name: %q", name)
+			return fmt.Errorf("illegal -var name: \"%s\"", name)
 		}
 	}
 	return nil
@@ -152,7 +152,7 @@ func (conf *config) mergeRaw(raw rawConfig) error {
 		value := *raw.URLPrefix
 		re := regexp.MustCompile(`^(http[s]?://|/)[\w.~/-]*[^/]$`) // See also RFC 3986.
 		if !re.MatchString(value) {
-			return fmt.Errorf("illegal urlprefix: %q", value)
+			return fmt.Errorf("illegal urlprefix: \"%s\"", value)
 		}
 		conf.urlprefix = value
 	}

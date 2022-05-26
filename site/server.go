@@ -103,7 +103,7 @@ func (svr *server) setNavigateURL(url string) {
 		return
 	}
 	path := strings.TrimPrefix(url, svr.urlprefix())
-	svr.logVerbose("navigate to: %q", path)
+	svr.logVerbose("navigate to: \"%s\"", path)
 	svr.mutex.Lock()
 	svr.browserURL = navigatePrefix + path
 	svr.mutex.Unlock()
@@ -112,7 +112,7 @@ func (svr *server) setNavigateURL(url string) {
 // logRequest server request handler logs browser requests.
 func (svr *server) logRequest(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		svr.logVerbose("request: %q", r.URL.Path)
+		svr.logVerbose("request: \"%s\"", r.URL.Path)
 		h.ServeHTTP(w, r)
 	})
 }
@@ -187,7 +187,7 @@ func (svr *server) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotify.
 			if !ok {
 				return // Watcher has closed.
 			}
-			svr.logVerbose("fsnotify: %s: %s: %q", time.Now().Format("15:04:05.000"), evt.Op.String(), evt.Name)
+			svr.logVerbose("fsnotify: %s: %s: \"%s\"", time.Now().Format("15:04:05.000"), evt.Op.String(), evt.Name)
 			accepted := false
 			var msg string
 			switch {
@@ -242,7 +242,7 @@ func (svr *server) serve() error {
 	defer watcher.Close()
 	// Watch content and template directories.
 	watcherAddDir := func(dir string) error {
-		svr.logVerbose("watching directory: %q", dir)
+		svr.logVerbose("watching directory: \"%s\"", dir)
 		return filepath.Walk(dir, func(f string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -321,7 +321,7 @@ func (svr *server) serve() error {
 	// Launch browser.
 	if svr.launch {
 		go func() {
-			svr.logVerbose("launching browser: %q", svr.rootURL)
+			svr.logVerbose("launching browser: \"%s\"", svr.rootURL)
 			if err := launchBrowser(svr.rootURL); err != nil {
 				svr.logError(err.Error())
 			}
@@ -362,12 +362,12 @@ func (svr *server) serve() error {
 						// homepage was modified by this event.
 						err = svr.copyHomePage()
 					}
-					svr.logConsole("%s: updated: %q", start.Format("15:04:05"), evt.Name)
+					svr.logConsole("%s: updated: \"%s\"", start.Format("15:04:05"), evt.Name)
 				case fsnotify.Remove, fsnotify.Rename:
 					err = svr.removeFile(evt.Name)
-					svr.logConsole("%s: removed: %q", start.Format("15:04:05"), evt.Name)
+					svr.logConsole("%s: removed: \"%s\"", start.Format("15:04:05"), evt.Name)
 				default:
-					panic(fmt.Sprintf("unexpected event: %s: %q", evt.Op.String(), evt.Name))
+					panic(fmt.Sprintf("unexpected event: %s: \"%s\"", evt.Op.String(), evt.Name))
 				}
 				if err != nil {
 					svr.logError(err.Error())
@@ -401,7 +401,7 @@ func (svr *server) createFile(f string) error {
 			return err
 		}
 		if doc.isDraft() {
-			svr.logVerbose("skip draft: %q", f)
+			svr.logVerbose("skip draft: \"%s\"", f)
 			return nil
 		}
 		if err := svr.docs.add(&doc); err != nil {
@@ -448,13 +448,13 @@ func (svr *server) removeFile(f string) error {
 				}
 			}
 		}
-		svr.logVerbose("delete document: %q", doc.buildPath)
+		svr.logVerbose("delete document: \"%s\"", doc.buildPath)
 		return os.Remove(doc.buildPath)
 	case fsx.PathIsInDir(f, svr.contentDir):
 		f := fsx.PathTranslate(f, svr.contentDir, svr.buildDir)
 		// The deleted content may have been a directory.
 		if fsx.FileExists(f) {
-			svr.logVerbose("delete static: %q", f)
+			svr.logVerbose("delete static: \"%s\"", f)
 			return os.Remove(f)
 		}
 		return nil
@@ -478,7 +478,7 @@ func (svr *server) writeFile(f string) error {
 		if doc == nil {
 			if newDoc.isDraft() {
 				// Draft document updated, don't do anything.
-				svr.logVerbose("skip draft: %q", f)
+				svr.logVerbose("skip draft: \"%s\"", f)
 				return nil
 			}
 			// Document has just been created and written or was a draft and has changed to non-draft.
@@ -487,7 +487,7 @@ func (svr *server) writeFile(f string) error {
 		// Arrive here if an existing published document has been updated.
 		if newDoc.isDraft() {
 			// Document changed to draft.
-			svr.logVerbose("skip draft: %q", f)
+			svr.logVerbose("skip draft: \"%s\"", f)
 			return svr.removeFile(f)
 		}
 		oldDoc := *doc

@@ -59,7 +59,7 @@ func (doc *document) parseHTML(html string) {
 func (site *site) lintChecks() {
 	for _, k := range sortedKeys(site.docs.byContentPath) {
 		doc := site.docs.byContentPath[k]
-		site.logVerbose("lint document: %q", doc.contentPath)
+		site.logVerbose("lint document: \"%s\"", doc.contentPath)
 		// Check for illicit or duplicate ids.
 		ids := set.New(doc.ids...)
 		sortedIds := ids.Values()
@@ -67,44 +67,44 @@ func (site *site) lintChecks() {
 		for _, id := range sortedIds {
 			re := regexp.MustCompile(`^[A-Za-z][\w:.-]*$`) // https://www.w3.org/TR/html4/types.html
 			if !re.MatchString(id) {
-				doc.site.logError("%q: contains illicit element id: %q", doc.contentPath, id)
+				doc.site.logError("\"%s\": contains illicit element id: \"%s\"", doc.contentPath, id)
 			}
 			if ids.Count(id) > 1 {
-				doc.site.logError("%q: contains duplicate element id: %q", doc.contentPath, id)
+				doc.site.logError("\"%s\": contains duplicate element id: \"%s\"", doc.contentPath, id)
 			}
 		}
 		// Iterate the document's href/src attribute URLs.
 		for _, url := range doc.urls {
 			u, err := urlpkg.Parse(url)
 			if err != nil {
-				doc.site.logError("%q: contains illicit URL: %q", doc.contentPath, url)
+				doc.site.logError("\"%s\": contains illicit URL: \"%s\"", doc.contentPath, url)
 				continue
 			}
 			if strings.HasPrefix(url, "#") { // Intra-document URL fragment.
 				if !doc.ids.Has(url[1:]) {
-					doc.site.logError("%q: contains link to missing anchor: %q", doc.contentPath, url)
+					doc.site.logError("\"%s\": contains link to missing anchor: \"%s\"", doc.contentPath, url)
 					continue
 				}
 			} else {
 				target := doc.linkTarget(u)
 				if target == "" { // Off-site URL.
-					site.logVerbose2("lint: %q: skipped offsite link: %q", doc.contentPath, url)
+					site.logVerbose2("lint: \"%s\": skipped offsite link: \"%s\"", doc.contentPath, url)
 					continue
 				}
 				// Check the target URL file exists.
 				if !fsx.FileExists(target) {
-					doc.site.logError("%q: contains link to missing file: %q", doc.contentPath, strings.TrimPrefix(target, site.buildDir+string(filepath.Separator)))
+					doc.site.logError("\"%s\": contains link to missing file: \"%s\"", doc.contentPath, strings.TrimPrefix(target, site.buildDir+string(filepath.Separator)))
 					continue
 				}
 				// Check the URL anchor has a matching HTML id attribute in the target document.
 				if u.Fragment != "" {
 					targetDoc, ok := site.docs.byBuildPath[target]
 					if !ok || !targetDoc.ids.Has(u.Fragment) {
-						doc.site.logError("%q: contains link to missing anchor: %q", doc.contentPath, strings.TrimPrefix(url, site.urlprefix()+"/"))
+						doc.site.logError("\"%s\": contains link to missing anchor: \"%s\"", doc.contentPath, strings.TrimPrefix(url, site.urlprefix()+"/"))
 						continue
 					}
 				}
-				site.logVerbose2("lint: %q: validated link: %q", doc.contentPath, url)
+				site.logVerbose2("lint: \"%s\": validated link: \"%s\"", doc.contentPath, url)
 			}
 		}
 	}

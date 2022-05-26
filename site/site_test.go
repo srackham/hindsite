@@ -197,7 +197,7 @@ func TestExecuteArgs(t *testing.T) {
 		cmd = "hindsite build -site " + tmpdir + " -lint -v"
 		out, err = exec(cmd)
 		if err != nil {
-			t.Fatalf("unexpected error executing %q: %s", cmd, err.Error())
+			t.Fatalf("unexpected error executing \"%s\": %s", cmd, err.Error())
 		}
 		assert.Equal(buildCount, fsx.DirCount(filepath.Join(tmpdir, "build")), from+": unexpected number of files in build directory")
 		assert.Contains(out, buildmsg)
@@ -233,19 +233,19 @@ func TestExecuteArgs(t *testing.T) {
 		sum, f, _ := strings.Cut(line, " ")
 		f = filepath.Join(tmpdir, strings.TrimSpace(f))
 		if !fsx.FileExists(f) {
-			t.Logf("missing file: %q", f)
+			t.Logf("missing file: \"%s\"", f)
 			t.Fail()
 			continue
 		}
 		if text, err = fsx.ReadFile(f); err != nil {
-			t.Logf("error reading file: %q: %s", f, err.Error())
+			t.Logf("error reading file: \"%s\": %s", f, err.Error())
 			t.Fail()
 			continue
 		}
 		text = normalizeNewlines(text)
 		sha256 := fmt.Sprintf("%x", sha256.Sum256([]byte(text)))
 		if sha256 != sum {
-			t.Logf("invalid checksum for: %q", f)
+			t.Logf("invalid checksum for: \"%s\"", f)
 			t.Fail()
 		}
 	}

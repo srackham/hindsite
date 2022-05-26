@@ -116,7 +116,7 @@ func (site *site) parseArgs(args []string) error {
 				opt = "help"
 			}
 			if !isCommand(opt) {
-				return fmt.Errorf("illegal command: %q", opt)
+				return fmt.Errorf("illegal command: \"%s\"", opt)
 			}
 			site.command = opt
 		case opt == "-drafts":
@@ -155,7 +155,7 @@ func (site *site) parseArgs(args []string) error {
 				if len(ports) > 0 && ports[0] != "" {
 					i, err := strconv.ParseUint(ports[0], 10, 16)
 					if err != nil {
-						return fmt.Errorf("illegal -port: %q", arg)
+						return fmt.Errorf("illegal -port: \"%s\"", arg)
 					}
 					site.httpport = uint16(i)
 				}
@@ -165,7 +165,7 @@ func (site *site) parseArgs(args []string) error {
 					} else {
 						i, err := strconv.ParseUint(ports[1], 10, 16)
 						if err != nil {
-							return fmt.Errorf("illegal -port: %q", arg)
+							return fmt.Errorf("illegal -port: \"%s\"", arg)
 						}
 						site.lrport = uint16(i)
 					}
@@ -183,7 +183,7 @@ func (site *site) parseArgs(args []string) error {
 			}
 			skip = true
 		case strings.HasPrefix(opt, "-"):
-			return fmt.Errorf("illegal option: %q", opt)
+			return fmt.Errorf("illegal option: \"%s\"", opt)
 		default:
 			site.cmdargs = append(site.cmdargs, opt)
 		}
@@ -204,29 +204,29 @@ func (site *site) parseArgs(args []string) error {
 		return err
 	}
 	if !fsx.DirExists(site.siteDir) {
-		return fmt.Errorf("missing site directory: %q", site.siteDir)
+		return fmt.Errorf("missing site directory: \"%s\"", site.siteDir)
 	}
 	site.contentDir, err = getPath(site.contentDir, filepath.Join(site.siteDir, "content"))
 	if err != nil {
 		return err
 	}
-	site.logVerbose2("content directory: %q", site.contentDir)
+	site.logVerbose2("content directory: \"%s\"", site.contentDir)
 	if site.command != "init" && !fsx.DirExists(site.contentDir) {
-		return fmt.Errorf("missing content directory: %q", site.contentDir)
+		return fmt.Errorf("missing content directory: \"%s\"", site.contentDir)
 	}
 	site.templateDir, err = getPath(site.templateDir, filepath.Join(site.siteDir, "template"))
 	if err != nil {
 		return err
 	}
-	site.logVerbose2("template directory: %q", site.templateDir)
+	site.logVerbose2("template directory: \"%s\"", site.templateDir)
 	if site.command != "init" && !fsx.DirExists(site.templateDir) {
-		return fmt.Errorf("missing template directory: %q", site.templateDir)
+		return fmt.Errorf("missing template directory: \"%s\"", site.templateDir)
 	}
 	site.buildDir, err = getPath(site.buildDir, filepath.Join(site.siteDir, "build"))
 	if err != nil {
 		return err
 	}
-	site.logVerbose2("build directory: %q", site.buildDir)
+	site.logVerbose2("build directory: \"%s\"", site.buildDir)
 	// init and indexes directories are hardwired.
 	site.indexDir = filepath.Join(site.buildDir, "indexes")
 	site.initDir = filepath.Join(site.templateDir, "init")
@@ -312,12 +312,12 @@ Docs:       ` + docsite + ``
 	case len(site.cmdargs) == 1:
 		cmd := site.cmdargs[0]
 		if !isCommand(cmd) {
-			err = fmt.Errorf("illegal command: %q", cmd)
+			err = fmt.Errorf("illegal command: \"%s\"", cmd)
 		} else {
 			url := fmt.Sprintf("%s#%s-command", docsite, cmd)
 			err = launchBrowser(url)
 			if err != nil {
-				err = fmt.Errorf("failed to open %q in web browser: %s", url, err.Error())
+				err = fmt.Errorf("failed to open \"%s\" in web browser: %s", url, err.Error())
 			}
 		}
 	default:
@@ -452,16 +452,16 @@ func (site *site) parseConfigFiles() error {
 			cf := filepath.Join(f, v)
 			if fsx.FileExists(cf) {
 				found = true
-				site.logVerbose("read config: %q", cf)
+				site.logVerbose("read config: \"%s\"", cf)
 				raw := rawConfig{}
 				if err := raw.parseConfigFile(cf); err != nil {
-					return fmt.Errorf("config file: %q: %s", cf, err.Error())
+					return fmt.Errorf("config file: \"%s\": %s", cf, err.Error())
 				}
 				if err := conf.mergeRaw(raw); err != nil {
-					return fmt.Errorf("config file: %q: %s", cf, err.Error())
+					return fmt.Errorf("config file: \"%s\": %s", cf, err.Error())
 				}
 				if f != site.templateDir {
-					msg := "root config variable %q in non-root config file: %q"
+					msg := "root config variable \"%s\" in non-root config file: \"%s\""
 					if conf.homepage != "" {
 						site.logWarning(msg, "homepage", cf)
 					}

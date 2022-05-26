@@ -44,11 +44,11 @@ func (site *site) build() error {
 				// Skip configuration file.
 			case ".html":
 				// Compile HTML template.
-				site.logVerbose("parse template: %q", f)
+				site.logVerbose("parse template: \"%s\"", f)
 				err = site.htmlTemplates.add(f)
 			case ".txt":
 				// Compile text template.
-				site.logVerbose("parse template: %q", f)
+				site.logVerbose("parse template: \"%s\"", f)
 				err = site.textTemplates.add(f)
 			}
 		}
@@ -82,7 +82,7 @@ func (site *site) build() error {
 			return nil
 		}
 		if site.exclude(f) {
-			site.logVerbose("exclude: %q", f)
+			site.logVerbose("exclude: \"%s\"", f)
 			if info.IsDir() {
 				return filepath.SkipDir
 			}
@@ -99,7 +99,7 @@ func (site *site) build() error {
 					return nil
 				}
 				if doc.isDraft() {
-					site.logVerbose("skip draft: %q", f)
+					site.logVerbose("skip draft: \"%s\"", f)
 					return nil
 				}
 				if err := site.docs.add(&doc); err != nil {
@@ -169,20 +169,20 @@ func (site *site) copyHomePage() error {
 		if !filepath.IsAbs(homepage) {
 			homepage = filepath.Join(site.buildDir, homepage)
 		} else {
-			return fmt.Errorf("homepage must be relative to the build directory: %q", site.buildDir)
+			return fmt.Errorf("homepage must be relative to the build directory: \"%s\"", site.buildDir)
 		}
 		if !fsx.PathIsInDir(homepage, site.buildDir) {
-			return fmt.Errorf("homepage must reside in build directory: %q", site.buildDir)
+			return fmt.Errorf("homepage must reside in build directory: \"%s\"", site.buildDir)
 		}
 		if fsx.DirExists(homepage) {
-			return fmt.Errorf("homepage cannot be a directory: %q", homepage)
+			return fmt.Errorf("homepage cannot be a directory: \"%s\"", homepage)
 		}
 		if !fsx.FileExists(homepage) {
-			return fmt.Errorf("homepage file missing: %q", homepage)
+			return fmt.Errorf("homepage file missing: \"%s\"", homepage)
 		}
 		dst := filepath.Join(site.buildDir, "index.html")
-		site.logVerbose2("copy homepage: %q", homepage)
-		site.logVerbose("write homepage: %q", dst)
+		site.logVerbose2("copy homepage: \"%s\"", homepage)
+		site.logVerbose("write homepage: \"%s\"", dst)
 		if err := fsx.CopyFile(homepage, dst); err != nil {
 			return err
 		}
@@ -206,7 +206,7 @@ func (site *site) copyStaticFile(srcFile string) error {
 		panic("static file is outside content directory: " + srcFile)
 	}
 	dstFile := fsx.PathTranslate(srcFile, site.contentDir, site.buildDir)
-	site.logVerbose("copy static: %q", srcFile)
+	site.logVerbose("copy static: \"%s\"", srcFile)
 	err := fsx.MkMissingDir(filepath.Dir(dstFile))
 	if err != nil {
 		return err
@@ -215,7 +215,7 @@ func (site *site) copyStaticFile(srcFile string) error {
 	if err != nil {
 		return err
 	}
-	site.logVerbose2("write static: %q", dstFile)
+	site.logVerbose2("write static: \"%s\"", dstFile)
 	return nil
 }
 
@@ -229,7 +229,7 @@ func (site *site) renderStaticFile(f string) error {
 		return err
 	}
 	// Render file as a text template.
-	site.logVerbose2("render static: %q", doc.contentPath)
+	site.logVerbose2("render static: \"%s\"", doc.contentPath)
 	site.logVerbose2(doc.String())
 	content := doc.content
 	if site.match(doc.contentPath, doc.templates) {
@@ -239,7 +239,7 @@ func (site *site) renderStaticFile(f string) error {
 			return err
 		}
 	}
-	site.logVerbose("write static: %q", doc.buildPath)
+	site.logVerbose("write static: \"%s\"", doc.buildPath)
 	return fsx.WritePath(doc.buildPath, content)
 }
 
@@ -249,14 +249,14 @@ func (site *site) renderDocument(doc *document) error {
 	markup := doc.content
 	// Render document markup as a text template.
 	if site.match(doc.contentPath, doc.templates) {
-		site.logVerbose2("render template: %q", doc.contentPath)
+		site.logVerbose2("render template: \"%s\"", doc.contentPath)
 		markup, err = site.textTemplates.render("documentMarkup", markup, data)
 		if err != nil {
 			return err
 		}
 	}
 	// Convert markup to HTML then render document layout to build directory.
-	site.logVerbose2("render document: %q", doc.contentPath)
+	site.logVerbose2("render document: \"%s\"", doc.contentPath)
 	data["body"] = doc.render(markup)
 	html, err := site.htmlTemplates.render(doc.layout, data)
 	if err != nil {
@@ -266,7 +266,7 @@ func (site *site) renderDocument(doc *document) error {
 	if site.lint {
 		doc.parseHTML(html)
 	}
-	site.logVerbose("write document: %q", doc.buildPath)
+	site.logVerbose("write document: \"%s\"", doc.buildPath)
 	if err = fsx.WritePath(doc.buildPath, html); err != nil {
 		return err
 	}

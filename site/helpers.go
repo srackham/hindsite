@@ -161,7 +161,7 @@ func parseDate(text string, loc *time.Location) (time.Time, error) {
 		}
 	}
 	if err != nil {
-		err = fmt.Errorf("illegal date value: %q", text)
+		err = fmt.Errorf("illegal date value: \"%s\"", text)
 	}
 	return d, err
 }
