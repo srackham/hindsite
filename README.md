@@ -28,5 +28,4 @@ commands:
 ## Learn more
 - [Documentation](https://srackham.github.io/hindsite)
 - [Change log](https://srackham.github.io/hindsite/changelog.html)
-- [Downloads](https://github.com/srackham/hindsite/releases)
 - [Github repository](https://github.com/srackham/hindsite)
