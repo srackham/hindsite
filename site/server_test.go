@@ -108,8 +108,17 @@ func TestServer(t *testing.T) {
 	time.Sleep(50 * time.Millisecond) // Allow time for serve goroutines to execute cleanup code.
 }
 
-// Based onhttps://blog.questionable.services/article/testing-http-handlers-go/
+// quiet helper suppresses stdout.
+func quiet() func() {
+	s := os.Stdout
+	null, _ := os.Open(os.DevNull)
+	os.Stdout = null
+	return func() { os.Stdout = s }
+}
+
+// Based on https://blog.questionable.services/article/testing-http-handlers-go/
 func TestHTTPHandlers(t *testing.T) {
+	defer quiet()()
 	cmd := "hindsite nop -site ./testdata/blog -content ./testdata/blog/template/init -var urlprefix=http://example.com"
 	args := strings.Split(cmd, " ")
 	site := New()

@@ -30,7 +30,8 @@ TOML example:
 ## How can I add site search to my website?
 An easy way to add a site search feature is to use the Google [Programmable
 Search Engine](https://programmablesearchengine.google.com/about/). For example,
-the hindsite built-in `blog` site template includes a Google PSE search page.
+the hindsite built-in [`blog` template]({reference}#blog-built-in-template)
+includes a Google PSE search page.
 
 .note
 Google can take many days to index new and updated Web pages and even
@@ -40,8 +41,8 @@ Google](https://support.google.com/webmasters/answer/34397).
 
 .#disqus-howto
 ## How do I include Disqus comments in my website?
-The recipe described below is taken from the hindsite [built-in `blog`
-site]({hindsite-github}/tree/master/site/builtin/blog/template).
+The recipe described below is taken from the hindsite built-in
+[`blog` template]({reference}#blog-built-in-template).
 If you [initialized your site]({reference}#init-command) with the built-in
 `blog` template then you already have the Disqus template and steps 3 and 4
 below are redundant.
@@ -81,7 +82,7 @@ below are redundant.
 {{end}}
 ```
 
-4. Include the Disqus template in your web pages by adding this line to the end
+4. Include the Disqus template in your web pages by adding this line at the end
    of the HTML body in your document footer template:
 
    {{template "disqus" .}}
@@ -94,8 +95,8 @@ below are redundant.
     [user]
     shortname = "disqus-shortname-goes-here"
 
-That's it, all published documents with a non-blank [document
-`id`]({reference}#document-id) will now include Disqus comments.
+That's it, all published documents with a non-blank
+[document `id`]({reference}#document-id) will now include Disqus comments.
 
 - You can automatically assign document `id`s to all documents by setting the
   [`id` configuration variable]({reference}#id-configuration-variable) to
