@@ -2,6 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/srackham/hindsite)](https://goreportcard.com/report/github.com/srackham/hindsite)
 
+**Hindsite version 2 released May 2022**
 
 ## Overview
 Hindsite is a

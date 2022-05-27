@@ -3,18 +3,22 @@
 See the [Github commit logs]({hindsite-github}/commits/master) for a full list of changes.
 
 
-## Version 2.0.0 (2022-??-??)
-Version 2 add three major features:
+## Version 2.0.0 (2022-05-29)
+#### Major new features
+- A built-in lint checker for validating generated webpages.
+- New command-line options: `-site`, `-config`, `-var`, `-keep`, `-lint`, `-from`
+- Command-line configuration files and configuration variables.
+- Added the `docs` built-in site template for building documentation sites. This
+  documentation is based on the `docs` template.
+- Enhanced `help` command.
+- Expanded documentation
 
-TODO
+#### Upgrading from version 1 to version 2
+See the _BREAKING CHANGE_ items in the details below.
 
-. Linting
-. Automated `urlprefix` injection
-. Expanded documentation
-Plus bug fixes
+#### Details
 
-TODO Upgrading from Hindsite version 1 to version 2
-
+- Added server _I_ (Info) keyboard command.
 - BREAKING CHANGE: Automated `urlprefix` injection so that it's no longer
   necessary to explicitly prefix document and template root-relative URLs.
 - Added the `-keep` command-line option to `build` and `serve` commands.
@@ -47,7 +51,7 @@ TODO Upgrading from Hindsite version 1 to version 2
 - Rename built-in _minimal_ site template to _hello_.
 - Add help to hindsite `serve` command: prints help if any key other than the _R_,
   _D_, _N_ keys are entered while the serve command is running.
-- Add Rimu CSS admonition classes to Hindsite documentation website.
+- Add Rimu CSS admonition classes to Hindsite built-in templates and documentation website.
 - Refactor project directories layout.
 
 
