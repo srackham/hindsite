@@ -380,6 +380,7 @@ func TestExecuteArgs(t *testing.T) {
 .layout=layout.html
 .longdate=May 21, 2015
 .mediumdate=21-May-2015
+.date=Wednesday, 20-May-15 12:15:23 +0000
 .permalink=
 .slug=
 .shortdate=2015-05-21

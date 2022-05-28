@@ -1,7 +1,7 @@
 0638e7750213dfafe555bc81dd9278e57024acdf582ab97afbf92d2ce3f4b982  build/newsletters/slug with spaces.html
 411b3088fae5750e941241efe9009f36cf7e057cd8333f1ed70707cc3f295cf8  build/newsletters/sed-ac-nisi-porttitor.html
 42ae1461f9f13fca51ccaea45c10ba6998c56d9c34bff264394bc56001fd52b0  build/newsletters/natoque-pulvinar-vel-porttitor-cras.html
-fade47a7e9048fd85ea4ec73f9a979a821ed3538f77580fd96c3b0ad505b3039  build/index.html
+bb6cd1b408f319a7a703c4c68c79176cebd1e434d80c80b5e59a0e426eb47821  build/index.html
 67d0dda2885f48ed7f9a14831dda81a2a57159fe9b44e56a47431c0c923d78b3  build/indexes/newsletters/docs-1.html
 3c5e51daa4ef634f1b85474e3fe157723007fc8a324b4bac1ad51d087b6ea89d  build/indexes/posts/tags.html
 c03611dda5969c071bb0b22670198d12665cfda5b3ab0f6a74703b027c5549d1  build/indexes/posts/docs-2.html
@@ -34,4 +34,4 @@ de15200b712b8e35c7d5828db34dca2fb54e23bab1c1a63ef93e1c97d871b039  build/posts/20
 34c63506b3494aabed729033b082e415e6d413b101f23d7afa4b86547ed48012  build/posts/2015-05-20/document-1/index.html
 ddff73abe49ed07a82088a6df3984c7e1f1983d7eab0e106e5053dde3e40efad  build/posts/2016-09-21/document-4/index.html
 0bd6191b45d0cfb0a3a57a01c2c3eea28067101ddd9d1ddf70f91839332c4faa  build/posts/2017-06-07/2017-06-07-document-with-no-front-matter/index.html
-fade47a7e9048fd85ea4ec73f9a979a821ed3538f77580fd96c3b0ad505b3039  build/about.html
+bb6cd1b408f319a7a703c4c68c79176cebd1e434d80c80b5e59a0e426eb47821  build/about.html
