@@ -4,7 +4,7 @@ user:
 ---
 # Hindsite FAQ
 
-## Does hindsite support themes and skeletons?
+## Does Hindsite support themes and skeletons?
 Use the Hindsite [init command]({reference}#init-command) to install website
 styling, content and structure from existing [site templates]({reference}#sites)
 or from [built-in templates]({reference}#built-in-templates).
@@ -30,7 +30,7 @@ TOML example:
 ## How can I add site search to my website?
 An easy way to add a site search feature is to use the Google [Programmable
 Search Engine](https://programmablesearchengine.google.com/about/). For example,
-the hindsite built-in [`blog` template]({reference}#blog-built-in-template)
+the Hindsite built-in [`blog` template]({reference}#blog-built-in-template)
 includes a Google PSE search page.
 
 .note
@@ -41,7 +41,7 @@ Google](https://support.google.com/webmasters/answer/34397).
 
 .#disqus-howto
 ## How do I include Disqus comments in my website?
-The recipe described below is taken from the hindsite built-in
+The recipe described below is taken from the Hindsite built-in
 [`blog` template]({reference}#blog-built-in-template).
 If you [initialized your site]({reference}#init-command) with the built-in
 `blog` template then you already have the Disqus template and steps 3 and 4
@@ -106,14 +106,6 @@ That's it, all published documents with a non-blank
   matter value to a blank string.
 
 
-## Should I enable document and static file text template expansion?
-TODO rename: Performance considerations:
-
-As a performance consideration you should only enable [text
-template]({reference}#text-templates) expansion if you need it. If performance
-is an issue, only enable it for those documents or directories that need it.
-
-
 ## How can I customize `.date` and `.modtime` template variable formats?
 Use the Go [Format function](https://golang.org/pkg/time/#Time.Format). For
 example:
@@ -128,11 +120,11 @@ to using `.date` directly.
 
 ## How do you configure source code highlighting?
 By including [highlight.js](https://github.com/isagalaev/highlight.js) CSS and
-scripts in your web pages. For example, see the hindsite built-in
+scripts in your web pages. For example, see the Hindsite built-in
 [`docs`]({reference}#docs-built-in-template).
 
 
-## How can I partition documents into separate categories
+## How can I partition documents into separate categories?
 Put them in separate indexes. [Indexes]({reference}#indexes) are similar to [Wordpress
 categories](https://en.support.wordpress.com/posts/categories-vs-tags/) but they
 are folder based so you do not have to assign them explicitly.
@@ -170,7 +162,7 @@ extended to create multiple additional indexes over a the same indexed document
 set.
 
 
-## How can I skip a lint link check
+## How can I skip a lint link check?
 Quote the link's `href` or `src` attribute with single quotes instead of double
 quotes, for example:
 
@@ -193,88 +185,140 @@ Hindsite follows the Go command single-hyphen convention:
 
 
 ## How fast is hindsite?
-hindsite compares more than favorably with [Hugo](https://gohugo.io/) (which
+Hindsite compares more than favorably with [Hugo](https://gohugo.io/) (which
 bills itself as "The world’s fastest framework for building websites").
 
-Informal measurements on a blog site with 5000 Markdown posts (20MB of Markdown
-source) revealed that hindsite is an order of magnitude faster and uses and
-order of magnitude less memory than hugo:
+Fully rebuilding a blog site containing 5000 Markdown posts (20MB of Markdown
+source) revealed that **Hindsite is over twice as fast as Hugo** (3.14s vs 7.98s).
+Hindsite's executable is much smaller than Hugo's (8MB vs 53MB) and it consumed
+less working memory (46KB vs 432KB). Both sites are of comparable complexity.
 
-- hindsite was around fifteen times faster than Hugo for full rebuilds (hindsite
-  5.2s vs hugo 77.8s).
-
-- On subsequent [partial rebuilds](index.html#partial-rebuilds) rebuilds
-  hindsite was around ten times faster to four times slower than hugo depending
-  on wether hindsite has to rebuild index pages or not. hindsite took 0.06s (2.15s if
-  indexes rebuilt) vs hugo's 0.505s.
-
-- The `hindsite build` command uses approximately ten times less memory than the
-  `hugo` build command (hindsite 46KB vs hugo 524KB). The `hugo server` command
-  consumed a whopping 13GB.
-
-The tests were run under Ubuntu 20.04. The differences were not as marked under
-Windows 10 (hindsite builds were around eight times faster).
-
-.important
-This is not an "apples with apples" comparison, Hugo is more complex
-and has more features than hindsite. Differences between the respective themes
-is also a factor -- the Hugo theme is heavier than the hindsite theme. As
-always, benchmarks are irrelevant if they do not address your specific use
-cases.
-
-.note
-Exclude the site folders from Windows Defender anti-virus real-time
-protection (not doing this imposed a performance hit for both hindsite and
-Hugo).
-
-The benchmarked hindsite and Hugo projects are available in the downloadable
-[hindsite-benchmark.zip](https://drive.google.com/uc?export=download&id=1vm1542RE3W7s9qIYfyYsiTvuwXFZaMP_)
+#### The benchmark
+The benchmarked Hindsite and Hugo sites are available in the downloadable
+[hindsite2-benchmark.zip](https://drive.google.com/file/d/13JsaN48Dy3U2fR3Cku57WiwGg3gVuTjY/view?usp=sharing)
 file (7.4MB):
 
 ```
 ├── hindsite
-│   ├── build
-│   ├── content
-│   └── template
+│   ├── build/
+│   ├── content/
+│   └── template/
 └── hugo
-    ├── archetypes
-    ├── content
-    ├── data
-    ├── layouts
-    ├── public
-    ├── static
-    └── themes
+    ├── archetypes/
+    ├── content/
+    ├── data/
+    ├── layouts/
+    ├── public/
+    ├── resources/
+    ├── static/
+    ├── themes/
+    └── config.toml
 ```
 
-To compare performance run `hindsite` and `hugo` commands from their respective
-site directories:
+- The Hindsite site was created using the Hindsite [built-in _blog_ template]({reference}#blog-built-in-template).
+- The Hugo site was created using the minimal _anubis_ theme following the instructions
+  in [this blog
+  post](https://theibbster.medium.com/how-to-build-a-blog-a-complete-beginners-guide-to-hugo-9f831b50aad).
 
-```
-cd hindsite
-hindsite build    # Build.
-hindsite serve    # Build and serve.
+To compare performance, run `hindsite` and `hugo` commands from their respective
+site directories. Here are the build performance statistics measured using the
+GNU/Linux `time` command running on Ubuntu Linux 20.04:
 
-cd hugo
-hugo              # Build.
-hugo server       # Build and serve.
+#### Hindsite build
 ```
+$ /usr/bin/time -v hindsite build
+documents: 5005
+static: 6
+time: 3.14s
+        Command being timed: "hindsite build"
+        User time (seconds): 3.21
+        System time (seconds): 0.85
+        Percent of CPU this job got: 129%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:03.14
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 46288
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 13615
+        Voluntary context switches: 4956
+        Involuntary context switches: 2296
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 134000
+        Socket messages sent: 0
+        Socket messages received: 0
+        Signals delivered: 0
+        Page size (bytes): 4096
+        Exit status: 0
+```
+
+#### Hugo build
+```
+$ /usr/bin/time -v hugo
+Start building sites … 
+hugo v0.99.1-d524067382e60ce2a2248c3133a1b3af206b6ef1 linux/amd64 BuildDate=2022-05-18T11:18:14Z VendorInfo=gohugoio
+
+                   |  EN   
+-------------------+-------
+  Pages            | 5071  
+  Paginator pages  | 2932  
+  Non-page files   |    0  
+  Static files     |    0  
+  Processed images |    0  
+  Aliases          |   32  
+  Sitemaps         |    1  
+  Cleaned          |    0  
+
+Total in 7837 ms
+        Command being timed: "hugo"
+        User time (seconds): 19.70
+        System time (seconds): 1.18
+        Percent of CPU this job got: 264%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.89
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 432840
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 107285
+        Voluntary context switches: 4204
+        Involuntary context switches: 9082
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 332888
+        Socket messages sent: 0
+        Socket messages received: 0
+        Signals delivered: 0
+        Page size (bytes): 4096
+        Exit status: 0
+```
+
+.note
+Performances of both Hindsite and Hugo suffer if the site folders are not
+excluded from anti-virus real-time protection.
+
 
 ## Why did you create hindsite?
 The short answer is programmer's hubris; the longer answer has it's genesis in
 Hugo's complexity.
 
-Prior to writing hindsite I was using [Hugo](https://gohugo.io/) for blogging.
+Prior to writing Hindsite I was using [Hugo](https://gohugo.io/) for blogging.
 Hugo is an outstanding program, it's chock full of features and has the
 flexibility needed to build complex static web sites. But features and
 flexibility come at the price of complexity and a steeper learning curve.
 
-My frustration was not with hugo but with my brain's ability to retain hard-won
-working knowledge of hugo across six months or more between casual use. The amount
+My frustration was not with Hugo but with my brain's ability to retain hard-won
+working knowledge of Hugo across six months or more between casual use. The amount
 of time spent relearning (necessitated by my occasional reconfiguration and
-theme tweak) motivated me to write hindsite.
+theme tweak) motivated me to write Hindsite.
 
 Hindsite was designed to be easy to learn and use, it was not designed to
-compete with hugo's massive feature set.
+compete with Hugo's massive feature set.
 
 The casual-use argument is the same reason my go-to drawing program is Microsoft
 Paint or KolorPaint and not Adobe Photoshop or The Gimp.
