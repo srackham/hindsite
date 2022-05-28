@@ -1,6 +1,6 @@
 module github.com/srackham/hindsite
 
-go 1.18 // Embed package introduced in Go 1.18
+go 1.18
 
 require (
 	github.com/BurntSushi/toml v1.1.0
