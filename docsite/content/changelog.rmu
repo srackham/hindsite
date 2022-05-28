@@ -8,10 +8,10 @@ See the [Github commit logs]({hindsite-github}/commits/master) for a full list o
 - A built-in lint checker for validating generated webpages.
 - New command-line options: `-site`, `-config`, `-var`, `-keep`, `-lint`, `-from`
 - Command-line configuration files and configuration variables.
-- Added the `docs` built-in site template for building documentation sites. This
-  documentation is based on the `docs` template.
-- Enhanced `help` command.
+- Added the `docs` built-in site template for building documentation sites. The
+  Hindsite documentation is based on the `docs` template.
 - Expanded documentation
+- Enhanced `help` command.
 
 #### Upgrading from version 1 to version 2
 See the _BREAKING CHANGE_ items in the details below.
