@@ -12,7 +12,7 @@ SHELL := bash
 
 GOFLAGS ?=
 PACKAGES = ./...
-XFLAG_PATH = github.com/srackham/hindsite/site
+XFLAG_PATH = github.com/srackham/hindsite/v2/site
 
 .PHONY: install
 install:
