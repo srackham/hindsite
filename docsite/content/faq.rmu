@@ -196,7 +196,7 @@ less working memory (46KB vs 432KB). Both sites are of comparable complexity.
 #### The benchmark
 The benchmarked Hindsite and Hugo sites are available in the downloadable
 [hindsite2-benchmark.zip](https://drive.google.com/file/d/13JsaN48Dy3U2fR3Cku57WiwGg3gVuTjY/view?usp=sharing)
-file (7.4MB):
+file (7.0MB):
 
 ```
 ├── hindsite
