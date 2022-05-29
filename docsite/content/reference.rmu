@@ -37,9 +37,12 @@ Pre-compiled binaries are also available on the
 <a href="{hindsite-github}/releases" target="_blank">Hindsite releases page</a>.
 Download the relevant release and extract the `hindsite` executable.
 
-The source code is available on Github and can be downloaded using Git:
+The latest source code is available on Github and can be downloaded and
+installed with these commands:
 
   git clone https://github.com/srackham/hindsite.git
+  cd hindsite
+  go install
 
 
 ## Quick Start
