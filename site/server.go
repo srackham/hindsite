@@ -187,12 +187,11 @@ func (svr *server) watcherFilter(watcher *fsnotify.Watcher, out chan<- fsnotify.
 			if !ok {
 				return // Watcher has closed.
 			}
+			evt.Op = evt.Op & (fsnotify.Create | fsnotify.Write | fsnotify.Remove | fsnotify.Rename) // Ignore fsnotify.Chmod events.
 			svr.logVerbose("fsnotify: %s: %s: \"%s\"", time.Now().Format("15:04:05.000"), evt.Op.String(), evt.Name)
 			accepted := false
 			var msg string
 			switch {
-			case evt.Op == fsnotify.Chmod:
-				msg = "ignored"
 			case fsx.PathIsInDir(evt.Name, svr.contentDir) && svr.exclude(evt.Name):
 				msg = "excluded"
 			case fsx.DirExists(evt.Name):
