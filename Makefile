@@ -48,7 +48,7 @@ tag:
 	git tag -a -m "$$VERS" $$VERS
 
 .PHONY: push
-push: test validate-docs
+push: test
 	git push -u --tags origin master
 	make --silent submit-sitemap
 
@@ -117,38 +117,23 @@ build-dist:
 .PHONY: release
 # Upload release binary distributions for the version assigned to the VERS environment variable e.g. make release VERS=v1.0.0
 release:
-	REPO=hindsite
-	USER=srackham
+	REPO=srackham/hindsite
 	[[ ! $$VERS =~ ^v[0-9]+\.[0-9]+\.[0-9]+$$ ]] && echo "error: illegal VERS=$$VERS " && exit 1
 	upload () {
 		export GOOS=$$1
 		export GOARCH=$$2
 		FILE=hindsite-$$VERS-$$GOOS-$$GOARCH.zip
-		github-release upload \
-			--user $$USER \
-			--repo $$REPO \
-			--tag $$VERS \
-			--name $$FILE \
-			--file $$FILE
+		gh release upload $$VERS --repo $$REPO $$FILE
 	}
-	github-release release \
-		--user $$USER \
-		--repo $$REPO \
-		--tag $$VERS \
-		--name "hindsite $$VERS" \
-		--description "hindsite is a fast, lightweight static website generator."
+	gh release create $$VERS --repo $$REPO --draft --title "Hindsite $$VERS" --notes "Hindsite is a fast, lightweight static website generator."
+	sleep 5	# Wait to avoid "release not found" error.
 	cd $(DIST_DIR)
 	upload linux amd64
 	upload darwin amd64
 	upload windows amd64
 	upload windows 386
 	SUMS=hindsite-$$VERS-checksums-sha1.txt
-	github-release upload \
-		--user $$USER \
-		--repo $$REPO \
-		--tag $$VERS \
-		--name $$SUMS \
-		--file $$SUMS
+	gh release upload $$VERS --repo $$REPO $$SUMS
 
 # Generate build, serve and validate rules for builtin templates:
 #
