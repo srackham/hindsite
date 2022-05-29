@@ -17,7 +17,7 @@ user:
 .layout={{.layout}}
 .longdate={{.longdate}}
 .mediumdate={{.mediumdate}}
-.date={{.date.Format "Monday, 02-Jan-06 15:04:05 MST"}}
+.date={{.date.Format "Monday, 02-Jan-06 15:04:05"}}
 .permalink={{.permalink}}
 .slug={{.slug}}
 .shortdate={{.shortdate}}
