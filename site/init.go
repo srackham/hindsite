@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/srackham/hindsite/fsx"
-	"github.com/srackham/hindsite/slice"
+	"github.com/srackham/hindsite/v2/fsx"
+	"github.com/srackham/hindsite/v2/slice"
 )
 
 // init implements the init command.

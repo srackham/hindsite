@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/srackham/hindsite/fsx"
+	"github.com/srackham/hindsite/v2/fsx"
 )
 
 type textTemplates struct {

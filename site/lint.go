@@ -7,9 +7,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/srackham/hindsite/fsx"
-	"github.com/srackham/hindsite/set"
-	"github.com/srackham/hindsite/slice"
+	"github.com/srackham/hindsite/v2/fsx"
+	"github.com/srackham/hindsite/v2/set"
+	"github.com/srackham/hindsite/v2/slice"
 )
 
 // linkTarget computes the URL's target build file path.

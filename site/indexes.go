@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/srackham/hindsite/fsx"
+	"github.com/srackham/hindsite/v2/fsx"
 )
 
 type index struct {

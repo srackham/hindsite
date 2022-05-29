@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/srackham/hindsite/fsx"
+	"github.com/srackham/hindsite/v2/fsx"
 	"github.com/stretchr/testify/assert"
 )
 

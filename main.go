@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/srackham/hindsite/site"
+	"github.com/srackham/hindsite/v2/site"
 )
 
 func main() {

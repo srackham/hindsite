@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/srackham/hindsite/fsx"
-	"github.com/srackham/hindsite/slice"
+	"github.com/srackham/hindsite/v2/fsx"
+	"github.com/srackham/hindsite/v2/slice"
 )
 
 // Build ldflags.

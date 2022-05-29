@@ -14,7 +14,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/jaschaephraim/lrserver"
-	"github.com/srackham/hindsite/fsx"
+	"github.com/srackham/hindsite/v2/fsx"
 )
 
 const (

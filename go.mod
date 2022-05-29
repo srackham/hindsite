@@ -1,4 +1,4 @@
-module github.com/srackham/hindsite
+module github.com/srackham/hindsite/v2
 
 go 1.18
 

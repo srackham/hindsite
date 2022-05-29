@@ -7,7 +7,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/srackham/hindsite/fsx"
+	"github.com/srackham/hindsite/v2/fsx"
 )
 
 const (

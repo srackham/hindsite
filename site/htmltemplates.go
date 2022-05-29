@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"path/filepath"
 
-	"github.com/srackham/hindsite/fsx"
+	"github.com/srackham/hindsite/v2/fsx"
 )
 
 type templateData map[string]interface{}
