@@ -11,16 +11,15 @@ user:
 
 ```
 .author={{.author}}
-.date={{.date}}
 .description={{.description}}
 .id={{.id}}
 .layout={{.layout}}
 .longdate={{.longdate}}
 .mediumdate={{.mediumdate}}
-.date={{.date.Format "Monday, 02-Jan-06 15:04:05"}}
+.shortdate={{.shortdate}}
+.date.Format "Monday, 02-Jan-06 15:04:05"={{.date.Format "Monday, 02-Jan-06 15:04:05"}}
 .permalink={{.permalink}}
 .slug={{.slug}}
-.shortdate={{.shortdate}}
 .templates={{.templates}}
 .tags={{.tags}}
 .title={{.title}}

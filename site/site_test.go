@@ -373,17 +373,16 @@ func TestExecuteArgs(t *testing.T) {
 	text, err = fsx.ReadFile(f)
 	assert.NoError(err)
 	assert.Contains(text, `.author=Joe Bloggs
-.date=2015-05-20 12:15:23 +0000 +0000
 .description=&lt;p&gt;The about document.&lt;/p&gt;
 
 .id=/about.html
 .layout=layout.html
 .longdate=May 21, 2015
 .mediumdate=21-May-2015
-.date=Wednesday, 20-May-15 12:15:23
+.shortdate=2015-05-21
+.date.Format &quot;Monday, 02-Jan-06 15:04:05&quot;=Wednesday, 20-May-15 12:15:23
 .permalink=
 .slug=
-.shortdate=2015-05-21
 .templates=*
 .tags=[]
 .title=About Test
