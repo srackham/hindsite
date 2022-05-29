@@ -1,0 +1,82 @@
+
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<title>Changelog</title>
+<link type="text/css" rel="stylesheet" href="/hindsite/builtin/docs/main.css">
+<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/default.min.css">
+</head>
+<body>
+<div id="nav" class="no-print">
+    <span id="toc-button">&#8801;</span>
+</div>
+<div id="sidebar" class="no-print">
+<div id="toc" class="no-print">
+  <h2>Documents</h2>
+  <div class="h2"><a href="/hindsite/builtin/docs/index.html">Hindsite docs template</a></div>
+  <div class="h2"><a href="/hindsite/builtin/docs/faq.html">FAQ</a></div>
+  <div class="h2"><a href="/hindsite/builtin/docs/changelog.html">Change Log</a></div>
+  <div class="h2"><a href="https://github.com/srackham/hindsite">Github</a></div>
+<h2>Table of Contents</h2>
+  <div id="auto-toc"></div>
+</div>
+</div>
+<div id="main">
+<div id="article">
+
+<h1 id="change-log">Change Log</h1>
+
+<h2 id="version-0-0-3-2022-03-26">Version 0.0.3 (2022-03-26)</h2>
+
+<p>Hac scelerisque parturient a sed natoque pulvinar tincidunt integer
+parturient ac porttitor pulvinar.</p>
+
+<pre><code class="language-go">func getTrue() bool {
+    return true
+}
+</code></pre>
+
+<h2 id="version-0-0-2-2022-03-16">Version 0.0.2 (2022-03-16)</h2>
+
+<ul>
+<li>Nisi pulvinar mattis a ac montes placerat dolor tincidunt.</li>
+<li>Integer et montes:
+
+<ul>
+<li>Sagittis sagittis cursus sed in pulvinar.</li>
+<li>Sed cursus integer nisi a sagittis arcu natoque nisi.</li>
+</ul></li>
+</ul>
+
+<h2 id="version-0-0-1-2022-02-10">Version 0.0.1 (2022-02-10)</h2>
+
+<ul>
+<li>Et turpis magna mus nascetur arcu ultrices enim arcu aliquam sociis.</li>
+<li>Integer nisi? Rhoncus a, scelerisque etiam magna natoque!</li>
+<li>Turpis in vel. Hac nec adipiscing, aenean ut.</li>
+</ul>
+
+
+</div>
+</div>
+<script src="/hindsite/builtin/docs/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.highlightAll();
+window.onload = function() {
+  var headings = [].slice.call(document.body.querySelectorAll('#article > h1, #article > h2, #article > h3'));
+  headings.forEach(function(heading) {
+    setHeaderLink(heading);
+    appendTocEntry(heading);
+  });
+  if (isSmallScreen()) {
+    toggleToc();  
+  }
+}
+</script>
+</body>
+</html>

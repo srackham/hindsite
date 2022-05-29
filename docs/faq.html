@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <title>Faq</title>
 <link type="text/css" rel="stylesheet" href="/hindsite/main.css">
-
+<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/default.min.css">
 </head>
 <body>
 <div id="nav" class="no-print">
@@ -28,10 +28,10 @@
 <div id="article">
 
 <h1 id="hindsite-faq">Hindsite FAQ</h1>
-<h2 id="does-hindsite-support-themes">Does hindsite support themes?</h2>
-<p>Themes are baked in. Every <a href="/hindsite/index.html#sites">site template directory</a>, along
-with the built-in templates, is a theme. The Hindsite <a href="/hindsite/index.html#init-command">init
-command</a> is the &ldquo;theme&rdquo; installer.</p>
+<h2 id="does-hindsite-support-themes-and-skeletons">Does Hindsite support themes and skeletons?</h2>
+<p>Use the Hindsite <a href="/hindsite/index.html#init-command">init command</a> to install website
+styling, content and structure from existing <a href="/hindsite/index.html#sites">site templates</a>
+or from <a href="/hindsite/index.html#built-in-templates">built-in templates</a>.</p>
 <h2 id="why-does-the-serve-command-sometimes-fail-a-live-reload">Why does the <code>serve</code> command sometimes fail a live reload?</h2>
 <p>Some text editors create temporary and backup files when documents are saved and
 created, you need to exclude these files from document processing. Failure to do
@@ -39,20 +39,21 @@ so can result in rebuild false positives and premature watcher reloads.</p>
 <p>For example, the Vim editor creates tilda suffixed backup files and temporary
 <a href="https://github.com/neovim/neovim/issues/3460"><code>4913</code> files</a> so you need to add
 them to the <a href="/hindsite/index.html#configuration-variables"><code>exclude</code></a> configuration
-parameter in the templates directory root <a href="/hindsite/index.html#configuration-files">configuration
+variable in the templates directory root <a href="/hindsite/index.html#configuration-files">configuration
 file</a>.</p>
 <p>TOML example:</p>
 <pre><code>exclude = "*~|4913"</code></pre>
 <h2 id="search-howto">How can I add site search to my website?</h2>
 <p>An easy way to add a site search feature is to use the Google <a href="https://programmablesearchengine.google.com/about/">Programmable
 Search Engine</a>. For example,
-the hindsite built-in <code>blog</code> site template includes a Google PSE search page.</p>
+the Hindsite built-in <a href="/hindsite/index.html#blog-built-in-template"><code>blog</code> template</a>
+includes a Google PSE search page.</p>
 <p class="note">Google can take many days to index new and updated Web pages and even
 then there's no guarantee that they will be indexed. See <a href="https://support.google.com/webmasters/answer/34397">Get your website on
 Google</a>.</p>
 <h2 id="disqus-howto">How do I include Disqus comments in my website?</h2>
-<p>The recipe described below is taken from the hindsite <a href="https://github.com/srackham/hindsite/tree/master/cmd/hindsite/builtin/blog/template">built-in <code>blog</code>
-site</a>.
+<p>The recipe described below is taken from the Hindsite built-in
+<a href="/hindsite/index.html#blog-built-in-template"><code>blog</code> template</a>.
 If you <a href="/hindsite/index.html#init-command">initialized your site</a> with the built-in
 <code>blog</code> template then you already have the Disqus template and steps 3 and 4
 below are redundant.</p>
@@ -83,47 +84,41 @@ below are redundant.</p>
 &lt;noscript&gt;Please enable JavaScript to view the &lt;a href="https://disqus.com/?ref_noscript"&gt;comments powered by Disqus.&lt;/a&gt;&lt;/noscript&gt;
 {{end}}
 {{end}}</code></pre>
-</li><li>Include the Disqus template in your web pages by adding this line to the end
+</li><li>Include the Disqus template in your web pages by adding this line at the end
    of the HTML body in your document footer template:<pre><code>{{template "disqus" .}}</code></pre>
 </li><li>Add a <code>user</code> <code>shortname</code> entry to the site <a href="/hindsite/index.html#configuration"><code>config</code>
    file</a> and set it to your site's Disqus
    <a href="https://help.disqus.com/installation/whats-a-shortname"><code>shortname</code></a>. TOML
    example:<pre><code>[user]
 shortname = "disqus-shortname-goes-here"</code></pre>
-</li></ol><p>That's it, all published documents with a non-blank <a href="/hindsite/index.html#document-id">document
-<code>id</code></a> will now include Disqus comments.</p>
+</li></ol><p>That's it, all published documents with a non-blank
+<a href="/hindsite/index.html#document-id">document <code>id</code></a> will now include Disqus comments.</p>
 <ul><li>You can automatically assign document <code>id</code>s to all documents by setting the
-  <a href="/hindsite/index.html#id-configuration-variable"><code>id</code> configuration parameter</a> to
-  <code>urlpath</code>. To confine auto <code>id</code> assignment to a specific folder put the <code>id</code>
-  parameter in that folder's configuration file.</li><li>To disable comments on specific pages explicitly set the document <code>id</code> front
-  matter value to a blank string.</li></ul><h2 id="should-i-enable-document-and-static-file-text-template-expansion">Should I enable document and static file text template expansion?</h2>
-<p>As a performance consideration you should only enable <a href="/hindsite/index.html#text-templates">text
-template</a> expansion if you need it. If performance
-is an issue, only enable it for those documents or directories that need it.</p>
-<h2 id="how-can-i-customize-date-and-modtime-template-variable-formats">How can I customize <code>.date</code> and <code>.modtime</code> template variable formats?</h2>
+  <a href="/hindsite/index.html#id-configuration-variable"><code>id</code> configuration variable</a> to
+  <code>urlpath</code>. To confine auto <code>id</code> assignment to a specific folder set the <code>id</code>
+  variable in that folder's configuration file.</li><li>To disable Disqus comments on specific pages explicitly set the document <code>id</code> front
+  matter value to a blank string.</li></ul><h2 id="how-can-i-customize-date-and-modtime-template-variable-formats">How can I customize <code>.date</code> and <code>.modtime</code> template variable formats?</h2>
 <p>Use the Go <a href="https://golang.org/pkg/time/#Time.Format">Format function</a>. For
 example:</p>
 <pre><code>{{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}</code></pre>
-<p class="note">The <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="/hindsite/index.html#document-template-variable">document template
+<p class="note">The <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="/hindsite/index.html#document-variables">document template
 variables</a> are simpler and preferable
 to using <code>.date</code> directly.</p>
 <h2 id="how-do-you-configure-source-code-highlighting">How do you configure source code highlighting?</h2>
-<p>TODO
-By including <a href="https://github.com/isagalaev/highlight.js">highlight.js</a> CSS and
-scripts in your web pages. The hindsite documentation and the built-in <code>blog</code>
-and <code>docs</code> site templates include <code>highlight.js</code>. As an example, take a look at
-the <a href="https://github.com/srackham/hindsite/blob/master/cmd/hindsite/builtin/blog/template/partials.html"><code>blog</code> HTML templates</a>.</p>
-<h2 id="how-can-i-partition-documents-into-separate-categories">How can I partition documents into separate categories</h2>
+<p>By including <a href="https://github.com/isagalaev/highlight.js">highlight.js</a> CSS and
+scripts in your web pages. For example, see the Hindsite built-in
+<a href="/hindsite/index.html#docs-built-in-template"><code>docs</code></a>.</p>
+<h2 id="how-can-i-partition-documents-into-separate-categories">How can I partition documents into separate categories?</h2>
 <p>Put them in separate indexes. <a href="/hindsite/index.html#indexes">Indexes</a> are similar to <a href="https://en.support.wordpress.com/posts/categories-vs-tags/">Wordpress
 categories</a> but they
 are folder based so you do not have to assign them explicitly.</p>
 <h2 id="i-want-a-single-page-document-index">I want a single page document index</h2>
 <p>Set the <a href="/hindsite/index.html#configuration-variables"><code>paginate</code> configuration
-parameter</a> to <code>-1</code> and all indexed
+variable</a> to <code>-1</code> and all indexed
 documents will appear on the first page.</p>
 <h2 id="i-want-both-paginated-and-single-page-document-indexes">I want both paginated and single page document indexes</h2>
 <p>This technique creates a second nested index:</p>
-<ol><li>Create a child index with the <code>paginate</code> configuration parameter set to <code>-1</code>.
+<ol><li>Create a child index with the <code>paginate</code> configuration variable set to <code>-1</code>.
    For example:<pre><code>template/
     posts/
         docs.html           # Paginated document index template.
@@ -133,77 +128,133 @@ documents will appear on the first page.</p>
 </li><li>Create a corresponding content child directory and move the content documents into it:<pre><code>content/
     posts/
         all/    # Move documents here from posts.</code></pre>
-</li></ol><p>Each index has it's own page <code>docs.html</code> template. This technique can be
+</li></ol><p>Each index has it's own <code>docs.html</code> HTML template. This technique can be
 extended to create multiple additional indexes over a the same indexed document
 set.</p>
-<h2 id="relative-or-root-relative-intra-site-links">Relative or root-relative intra-site links?</h2>
-<p>A relative link is a URL equivalent to a relative directory path e.g.
-<code>./images/beach.jpg</code>. A root-relative link is relative to the website root and
-begins with a slash e.g. <code>/images/beach.jpg</code>.</p>
-<ul><li>Relative links are not affected by the <code>urlprefix</code> whereas root-relative links
-  are.</li><li>Relative links are broken by changes to the content document location and the
-  <code>permalink</code> configuration parameter, root-relative links are not.</li></ul><p>The <code>urlprefix</code> and <code>permalink</code> parameters do not tend to change much so this
-is probably just something to be aware of. Although you could enable document template
-expansion and prefix root-relative URLs with <code>{{.urlprefix}}</code>.</p>
-<h2 id="how-fast-is-hindsite">How fast is hindsite?</h2>
-<p>hindsite compares more than favorably with <a href="https://gohugo.io/">Hugo</a> (which
+<h2 id="how-can-i-skip-a-lint-link-check">How can I skip a lint link check?</h2>
+<p>Quote the link's <code>href</code> or <code>src</code> attribute with single quotes instead of double
+quotes, for example:</p>
+<pre class="html"><code>&lt;a href='foobar.html'&gt;single-quotes skip lint checks&lt;/a&gt;</code></pre>
+<h2 id="aren-t-single-hyphen-command-options-non-standard">Aren't single-hyphen command options non-standard?</h2>
+<p>Hindsite follows the Go command single-hyphen convention:</p>
+<ul><li>&ldquo;I wanted a single, straightforward syntax for flags, nothing
+  more, nothing less.&rdquo;
+  &mdash; Rob Pike (<a href="https://groups.google.com/g/golang-nuts/c/3myLL-6mA94">https://groups.google.com/g/golang-nuts/c/3myLL-6mA94</a>)</li><li>&ldquo;Traditionally, UNIX command-line options consist of a dash, followed by one
+  or more lowercase letters. The GNU utilities added a double-dash, followed by
+  a complete word or compound word.&rdquo;
+  &mdash;<a href="https://tldp.org/LDP/abs/html/standard-options.html">https://tldp.org/LDP/abs/html/standard-options.html</a></li></ul><h2 id="how-fast-is-hindsite">How fast is hindsite?</h2>
+<p>Hindsite compares more than favorably with <a href="https://gohugo.io/">Hugo</a> (which
 bills itself as &ldquo;The world’s fastest framework for building websites&rdquo;).</p>
-<p>Informal measurements on a blog site with 5000 Markdown posts (20MB of Markdown
-source) revealed that hindsite is an order of magnitude faster and uses and
-order of magnitude less memory than hugo:</p>
-<ul><li>hindsite was around fifteen times faster than Hugo for full rebuilds (hindsite
-  5.2s vs hugo 77.8s).</li><li>On subsequent <a href="index.html#partial-rebuilds">partial rebuilds</a> rebuilds
-  hindsite was around ten times faster to four times slower than hugo depending
-  on wether hindsite has to rebuild index pages or not. hindsite took 0.06s (2.15s if
-  indexes rebuilt) vs hugo's 0.505s.</li><li>The <code>hindsite build</code> command uses approximately ten times less memory than the
-  <code>hugo</code> build command (hindsite 46KB vs hugo 524KB). The <code>hugo server</code> command
-  consumed a whopping 13GB.</li></ul><p>The tests were run under Ubuntu 20.04. The differences were not as marked under
-Windows 10 (hindsite builds were around eight times faster).</p>
-<p class="important">This is not an &ldquo;apples with apples&rdquo; comparison, Hugo is more complex
-and has more features than hindsite. Differences between the respective themes
-is also a factor &mdash; the Hugo theme is heavier than the hindsite theme. As
-always, benchmarks are irrelevant if they do not address your specific use
-cases.</p>
-<p class="note">Exclude the site folders from Windows Defender anti-virus real-time
-protection (not doing this imposed a performance hit for both hindsite and
-Hugo).</p>
-<p>The benchmarked hindsite and Hugo projects are available in the downloadable
-<a href="https://drive.google.com/uc?export=download&amp;id=1vm1542RE3W7s9qIYfyYsiTvuwXFZaMP_">hindsite-benchmark.zip</a>
-file (7.4MB):</p>
+<p>Fully rebuilding a blog site containing 5000 Markdown posts (20MB of Markdown
+source) revealed that <strong>Hindsite is over twice as fast as Hugo</strong> (3.14s vs 7.98s).
+Hindsite's executable is much smaller than Hugo's (8MB vs 53MB) and it consumed
+less working memory (46KB vs 432KB). Both sites are of comparable complexity.</p>
+<h4 id="the-benchmark">The benchmark</h4>
+<p>The benchmarked Hindsite and Hugo sites are available in the downloadable
+<a href="https://drive.google.com/file/d/13JsaN48Dy3U2fR3Cku57WiwGg3gVuTjY/view?usp=sharing">hindsite2-benchmark.zip</a>
+file (7.0MB):</p>
 <pre><code>├── hindsite
-│   ├── build
-│   ├── content
-│   └── template
+│   ├── build/
+│   ├── content/
+│   └── template/
 └── hugo
-    ├── archetypes
-    ├── content
-    ├── data
-    ├── layouts
-    ├── public
-    ├── static
-    └── themes</code></pre>
-<p>To compare performance run <code>hindsite</code> and <code>hugo</code> commands from their respective
-site directories:</p>
-<pre><code>cd hindsite
-hindsite build    # Build.
-hindsite serve    # Build and serve.
+    ├── archetypes/
+    ├── content/
+    ├── data/
+    ├── layouts/
+    ├── public/
+    ├── resources/
+    ├── static/
+    ├── themes/
+    └── config.toml</code></pre>
+<ul><li>The Hindsite site was created using the Hindsite <a href="/hindsite/index.html#blog-built-in-template">built-in <em>blog</em> template</a>.</li><li>The Hugo site was created using the minimal <em>anubis</em> theme following the instructions
+  in <a href="https://theibbster.medium.com/how-to-build-a-blog-a-complete-beginners-guide-to-hugo-9f831b50aad">this blog
+  post</a>.</li></ul><p>To compare performance, run <code>hindsite</code> and <code>hugo</code> commands from their respective
+site directories. Here are the build performance statistics measured using the
+GNU/Linux <code>time</code> command running on Ubuntu Linux 20.04:</p>
+<h4 id="hindsite-build">Hindsite build</h4>
+<pre><code>$ /usr/bin/time -v hindsite build
+documents: 5005
+static: 6
+time: 3.14s
+        Command being timed: "hindsite build"
+        User time (seconds): 3.21
+        System time (seconds): 0.85
+        Percent of CPU this job got: 129%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:03.14
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 46288
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 13615
+        Voluntary context switches: 4956
+        Involuntary context switches: 2296
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 134000
+        Socket messages sent: 0
+        Socket messages received: 0
+        Signals delivered: 0
+        Page size (bytes): 4096
+        Exit status: 0</code></pre>
+<h4 id="hugo-build">Hugo build</h4>
+<pre><code>$ /usr/bin/time -v hugo
+Start building sites … 
+hugo v0.99.1-d524067382e60ce2a2248c3133a1b3af206b6ef1 linux/amd64 BuildDate=2022-05-18T11:18:14Z VendorInfo=gohugoio
 
-cd hugo
-hugo              # Build.
-hugo server       # Build and serve.</code></pre>
+                   |  EN   
+-------------------+-------
+  Pages            | 5071  
+  Paginator pages  | 2932  
+  Non-page files   |    0  
+  Static files     |    0  
+  Processed images |    0  
+  Aliases          |   32  
+  Sitemaps         |    1  
+  Cleaned          |    0  
+
+Total in 7837 ms
+        Command being timed: "hugo"
+        User time (seconds): 19.70
+        System time (seconds): 1.18
+        Percent of CPU this job got: 264%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:07.89
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 432840
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 107285
+        Voluntary context switches: 4204
+        Involuntary context switches: 9082
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 332888
+        Socket messages sent: 0
+        Socket messages received: 0
+        Signals delivered: 0
+        Page size (bytes): 4096
+        Exit status: 0</code></pre>
+<p class="note">Performances of both Hindsite and Hugo suffer if the site folders are not
+excluded from anti-virus real-time protection.</p>
 <h2 id="why-did-you-create-hindsite">Why did you create hindsite?</h2>
 <p>The short answer is programmer's hubris; the longer answer has it's genesis in
 Hugo's complexity.</p>
-<p>Prior to writing hindsite I was using <a href="https://gohugo.io/">Hugo</a> for blogging.
+<p>Prior to writing Hindsite I was using <a href="https://gohugo.io/">Hugo</a> for blogging.
 Hugo is an outstanding program, it's chock full of features and has the
 flexibility needed to build complex static web sites. But features and
 flexibility come at the price of complexity and a steeper learning curve.</p>
-<p>My frustration was not with hugo but with my brain's ability to retain hard-won
-working knowledge of hugo across six months or more between casual use. The amount
+<p>My frustration was not with Hugo but with my brain's ability to retain hard-won
+working knowledge of Hugo across six months or more between casual use. The amount
 of time spent relearning (necessitated by my occasional reconfiguration and
-theme tweak) motivated me to write hindsite.</p>
+theme tweak) motivated me to write Hindsite.</p>
 <p>Hindsite was designed to be easy to learn and use, it was not designed to
-compete with hugo's massive feature set.</p>
+compete with Hugo's massive feature set.</p>
 <p>The casual-use argument is the same reason my go-to drawing program is Microsoft
 Paint or KolorPaint and not Adobe Photoshop or The Gimp.</p>
 
@@ -211,9 +262,10 @@ Paint or KolorPaint and not Adobe Photoshop or The Gimp.</p>
 </div>
 </div>
 <script src="/hindsite/main.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
 <script>
-
+hljs.configure({languages: []});
+hljs.highlightAll();
 window.onload = function() {
   var headings = [].slice.call(document.body.querySelectorAll('#article > h1, #article > h2, #article > h3'));
   headings.forEach(function(heading) {

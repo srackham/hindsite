@@ -1,0 +1,80 @@
+
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<title>Faq</title>
+<link type="text/css" rel="stylesheet" href="/hindsite/builtin/docs/main.css">
+<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/default.min.css">
+</head>
+<body>
+<div id="nav" class="no-print">
+    <span id="toc-button">&#8801;</span>
+</div>
+<div id="sidebar" class="no-print">
+<div id="toc" class="no-print">
+  <h2>Documents</h2>
+  <div class="h2"><a href="/hindsite/builtin/docs/index.html">Hindsite docs template</a></div>
+  <div class="h2"><a href="/hindsite/builtin/docs/faq.html">FAQ</a></div>
+  <div class="h2"><a href="/hindsite/builtin/docs/changelog.html">Change Log</a></div>
+  <div class="h2"><a href="https://github.com/srackham/hindsite">Github</a></div>
+<h2>Table of Contents</h2>
+  <div id="auto-toc"></div>
+</div>
+</div>
+<div id="main">
+<div id="article">
+
+<h1 id="faq">FAQ</h1>
+<h2 id="lorem-ipsum">Lorem Ipsum?</h2>
+<p>Cursus pulvinar lectus placerat tincidunt sagittis cursus vel lectus sed lectus
+arcu et a lectus diam et a integer a parturient natoque integer a lorem a
+scelerisque ac dis dis integer cursus natoque nisi a tincidunt sed.</p>
+<pre class="javascript"><code>(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i &lt; links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+      links[i].rel = 'noopener noreferrer';
+    }
+  }
+})();</code></pre>
+<p>Integer Amet montes porttitor montes cursus a sagittis Amet ac porttitor a
+penatibus purus sed et integer a lectus lectus montes a montes.</p>
+<p class="sidebar">Lectus cursus porttitor sed lectus nisi est ac vel scelerisque natoque
+scelerisque lorem porttitor est scelerisque natoque vel.</p>
+<p class="note">Penatibus placerat integer scelerisque lorem dolor porttitor mattis dis cursus
+sed.</p>
+<p>Scelerisque ac dis dis integer cursus natoque nisi a tincidunt sed.
+Integer Amet montes porttitor montes cursus a sagittis Amet ac porttitor a
+penatibus purus sed et integer a lectus lectus montes a montes.</p>
+<h2 id="lectus-vel-est">Lectus vel est?</h2>
+<p>Hac scelerisque parturient a sed natoque pulvinar tincidunt integer
+parturient ac porttitor pulvinar.</p>
+<h2 id="nisi-pulvinar">Nisi pulvinar?</h2>
+<p>Nisi pulvinar mattis a ac montes placerat dolor tincidunt a integer et montes
+sagittis sagittis cursus sed in pulvinar sed cursus integer nisi a sagittis arcu
+natoque nisi.</p>
+
+</div>
+</div>
+<script src="/hindsite/builtin/docs/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
+<script>
+hljs.configure({languages: []});
+hljs.highlightAll();
+window.onload = function() {
+  var headings = [].slice.call(document.body.querySelectorAll('#article > h1, #article > h2, #article > h3'));
+  headings.forEach(function(heading) {
+    setHeaderLink(heading);
+    appendTocEntry(heading);
+  });
+  if (isSmallScreen()) {
+    toggleToc();  
+  }
+}
+</script>
+</body>
+</html>

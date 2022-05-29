@@ -29,9 +29,22 @@
 
 <h1 id="hindsite-change-log">Hindsite Change Log</h1>
 <p>See the <a href="https://github.com/srackham/hindsite/commits/master">Github commit logs</a> for a full list of changes.</p>
-<h2 id="version-2-0-0-2022">Version 2.0.0 (2022-??-??)</h2>
-<ul><li>Added <code>-lint</code> option to <em>build</em> and <em>serve</em> commands for intra-site link
-  validation.</li><li>BREAKING CHANGE: The <code>templates</code> configuration variable has been extended to
+<h2 id="version-2-0-0-2022-05-29">Version 2.0.0 (2022-05-29)</h2>
+<h4 id="major-new-features">Major new features</h4>
+<ul><li>A built-in lint checker for validating generated webpages.</li><li>New command-line options: <code>-site</code>, <code>-config</code>, <code>-var</code>, <code>-keep</code>, <code>-lint</code>, <code>-from</code></li><li>Command-line configuration files and configuration variables.</li><li>Added the <code>docs</code> built-in site template for building documentation sites. The
+  Hindsite documentation is based on the <code>docs</code> template.</li><li>Expanded documentation</li><li>Enhanced <code>help</code> command.</li></ul><h4 id="upgrading-from-version-1-to-version-2">Upgrading from version 1 to version 2</h4>
+<p>See the <em>BREAKING CHANGE</em> items in the details below.</p>
+<h4 id="details">Details</h4>
+<ul><li>Added server <em>I</em> (Info) keyboard command.</li><li>BREAKING CHANGE: Automated <code>urlprefix</code> injection so that it's no longer
+  necessary to explicitly prefix document and template root-relative URLs.</li><li>Added the <code>-keep</code> command-line option to <code>build</code> and <code>serve</code> commands.</li><li>Added the <code>-config CONFIG_FILE</code> <a href="/hindsite/index.html#common-command-options">command-line option</a>
+  which augments the site <a href="/hindsite/index.html#configuration-files">root configuration</a>.</li><li>Added the <code>-from SOURCE</code> command-line option to the <a href="/hindsite/index.html#new-command">new command</a>
+  which sets the name of the document initialisation template file.</li><li>Added common <code>-var NAME=VALUE</code> command-line option to set <a href="/hindsite/index.html#configuration-files">root configuration
+  variables</a>.</li><li>Added optional <code>COMMAND</code> parameter to the help command.
+  If <code>COMMAND</code> is specified the command topic on the Hindsite documentation
+  website is opened in the default web browser.</li><li>BREAKING CHANGE: Added <code>-site SITE_DIR</code> option (the previous optional leading
+  <code>SITE_DIR</code> argument syntax is deprecated). Use of the version 1 syntax will
+  usually generate a <code>to many command arguments</code> error.</li><li>Added <code>-lint</code> option to <em>build</em> and <em>serve</em> commands to perform validity
+  checks on the generated HTML document files.</li><li>BREAKING CHANGE: The <code>templates</code> configuration variable has been extended to
   include file pattern (previously it only accepted file name extensions). For
   example the Hindsite version 1 templates configuration value
   <code>.css|.html|.js|.md</code> would become <code>*.css|*.html|*.js|*.md</code> in Hindsite version 2.</li><li>BREAKING CHANGE: The <code>exclude/include</code> configuration variables only apply to
@@ -40,7 +53,7 @@
   <code>-from</code> option. The semantics differ in that <code>-from</code> can specify the location
   of a non-builtin template &mdash; previously the <code>-template</code> option was used which
   was confusing and less flexible).</li><li>Add built-in <em>docs</em> site template.</li><li>Rename built-in <em>minimal</em> site template to <em>hello</em>.</li><li>Add help to hindsite <code>serve</code> command: prints help if any key other than the <em>R</em>,
-  <em>D</em>, <em>N</em> keys are entered while the serve command is running.</li><li>Add Rimu CSS admonition classes to Hindsite documentation website.</li></ul><h2 id="version-1-4-1-2021-08-22">Version 1.4.1 (2021-08-22)</h2>
+  <em>D</em>, <em>N</em> keys are entered while the serve command is running.</li><li>Add Rimu CSS admonition classes to Hindsite built-in templates and documentation website.</li><li>Refactor project directories layout.</li></ul><h2 id="version-1-4-1-2021-08-22">Version 1.4.1 (2021-08-22)</h2>
 <ul><li>Refactor project directories layout.</li><li>Upgrade dependencies.</li><li>Migrate from the <code>go-bindata</code> tool to the Go <code>embed</code> package for embedded data.</li></ul><h2 id="version-1-4-0-2018-12-10">Version 1.4.0 (2018-12-10)</h2>
 <ul><li>Hindsite projects are now called <em>sites</em>. The word <em>site</em> is more descriptive
   and less generic than <em>project</em>.</li><li>Added the <a href="/hindsite/index.html#new-command"><code>new</code> command</a> which is used to create new
