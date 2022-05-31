@@ -18,15 +18,14 @@ The Hindsite stand-alone executable includes:
 - A linter for validating generated webpages.
 
 ## Quick Start
-Create a fully functional blog and newsletter website with just two hindsite
-commands:
+1. [Install Hindsite](https://srackham.github.io/hindsite/index.html#installation).
 
-    mkdir myblog
-    cd myblog
-    hindsite init -from blog
-    hindsite serve -launch
+2. Create a fully functional blog and newsletter website with just two hindsite
+   commands:
 
-## Learn more
-- [Documentation](https://srackham.github.io/hindsite)
-- [Change log](https://srackham.github.io/hindsite/changelog.html)
-- [Github repository](https://github.com/srackham/hindsite)
+        mkdir myblog
+        cd myblog
+        hindsite init -from blog
+        hindsite serve -launch
+
+3. Read the [Hindsite documentation](https://srackham.github.io/hindsite/) to learn more.
