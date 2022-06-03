@@ -6,8 +6,8 @@ permalink: /index.html
 Hindsite is a
 [fast]({faq}#how-fast-is-hindsite),
 lightweight static website generator. It builds static websites with optional
-document and tag indexes from [Markdown](https://en.wikipedia.org/wiki/Markdown)
-and [Rimu]({rimu-github}) source documents.
+document and tag indexes from ^[Markdown](https://en.wikipedia.org/wiki/Markdown)
+and ^[Rimu]({rimu-github}) source documents.
 
 The Hindsite stand-alone executable includes:
 
@@ -25,7 +25,7 @@ This documentation is written in Rimu.
 
 
 ## Installation
-If you have <a href="https://go.dev/" target="_blank">Go</a> installed on your
+If you have ^[Go](https://go.dev/) installed on your
 system then you can download and compile the latest version with this command:
 
   go install github.com/srackham/hindsite/v2@latest
@@ -34,7 +34,7 @@ system then you can download and compile the latest version with this command:
 Requires at least Go 1.18.
 
 Pre-compiled binaries are also available on the
-<a href="{hindsite-github}/releases" target="_blank">Hindsite releases page</a>.
+^[Hindsite releases page]({hindsite-github}/releases).
 Download the relevant release and extract the `hindsite` executable.
 
 The latest source code is available on Github and can be downloaded and
@@ -313,7 +313,7 @@ generated HTML webpages.
 
 The existence of external (off-site) URL resources is not checked -- for full
 site validation use a cross-site validator such as the
-[W3C Markup Validation Service](https://validator.w3.org/).
+^[W3C Markup Validation Service](https://validator.w3.org/).
 
 Validity checks increase site build times.
 
@@ -387,7 +387,7 @@ webpages. The server also handles browser live reloading.
   sending them to the browser. This allows the site to be tested locally
   irrespective of the `urlprefix` value.
 - To enable browser live reloads the server injects the
-  [LiveReload](http://livereload.com/) script into HTML files prior to sending
+  ^[LiveReload](http://livereload.com/) script into HTML files prior to sending
   them to the browser.
 
 ### Partial rebuilds
@@ -482,14 +482,14 @@ hindsite serve -launch
 
 ### blog built-in template
 A template to create a websites for blog posts and newsletters
-(view the built site <a href="/builtin/blog" target="_blank">here</a>).
+(view the built site ^[here](/builtin/blog)).
 
 Customisation notes:
 
 - Edit `content/main.css` to customise CSS styling.
 
 - The `template/partials.html` header template will include the
-  [highlight.js](https://highlightjs.org/) source code highlighter if the
+  ^[highlight.js](https://highlightjs.org/) source code highlighter if the
   `.user.highlightjs` [document variable](#document-variables) is set to `"yes"`.
 
 - [_user_](#user) template variable values can be set per document (in document
@@ -499,21 +499,21 @@ Customisation notes:
   leverages Google Programable Searches. To use this functionality in your own
   website you need register it with Google and then configure and test it. See:
   
-  * [Programmable Search Engine](https://developers.google.com/custom-search)
-  * [Google Search Console](https://search.google.com/search-console/about)
+  * ^[Programmable Search Engine](https://developers.google.com/custom-search)
+  * ^[Google Search Console](https://search.google.com/search-console/about)
 
 - The site [configuration file]({reference}#configuration) is `template/config.toml`.
 
 - The directory layout is documented in the [_Sites_ section]({reference}#sites).
 
 - The example content pages are written in Markdown but you could also use
-  <a href="{rimu-github}" target="_blank">Rimu markup</a>).
+  ^[Rimu markup]({rimu-github}).
 
 
 ### docs built-in template
 A template to create sites that have a fixed, relatively small number of pages.
 Ideal for building documentation sites or user guides, FAQs and reference manuals
-(view the built site <a href="/builtin/docs" target="_blank">here</a>).
+(view the built site ^[here](/builtin/docs)).
 
 This documentation is based on the `docs` template.
 
@@ -525,7 +525,7 @@ Customisation notes:
   (either in document front matter or site configuration files) to any value
   other than `"yes"`.
 
-- The home page and FAQ documents are written in [Rimu markup]({rimu-github}),
+- The home page and FAQ documents are written in ^[Rimu markup]({rimu-github}),
   the changelog is written in Markdown. Rimu and Markdown processors are
   configured to auto-generate HTML header element ID attributes which are
   used to dynamically build the table of contents.
@@ -536,7 +536,7 @@ Customisation notes:
   the TOC will not be displayed.
 
 - The nested `header` template in `template/partials.html` includes the
-  [highlight.js](https://highlightjs.org/) source code highlighter if the
+  ^[highlight.js](https://highlightjs.org/) source code highlighter if the
   `.user.highlightjs` document variable is set to `"yes"`. _Highlight.js_
   language auto-detection is not enabled and code blocks must specify the
   language explicitly. For example:
@@ -553,7 +553,7 @@ if x == 1:
 ### hello built-in template
 A minimal single-page built-in template consisting of a single
 `content/index.md` document and a single `template/layout.html` HTML template
-(view the built site <a href="/builtin/hello" target="_blank">here</a>).
+(view the built site ^[here](/builtin/hello)).
 
 ### Built-in template styling
 The `blog` and `docs` templates include the following block element CSS classes
@@ -596,8 +596,8 @@ Configuration files are optional, though most sites will have at least one
 at the root of the _template directory_. Additional configuration files can be put
 in template subdirectories.
 
-- <a href="https://toml.io" target="_blank">TOML</a> and
-  <a href="https://en.wikipedia.org/wiki/YAML" target="_blank">YAML</a>
+- ^[TOML](https://toml.io) and
+  ^[YAML](https://en.wikipedia.org/wiki/YAML)
   configuration files named `config.toml` and `config.yaml` respectively are
   loaded automatically.
   
@@ -646,7 +646,7 @@ from the content directory that are excluded from processing. TOML example:
 - The paths are relative to the content directory.
 - The path separator is a slash (`/`) character.
 - The file paths can contain wildcard patterns conforming to patterns matched by
-  the Go [path.Match() function](https://golang.org/pkg/path/#Match).
+  the Go ^[path.Match() function](https://golang.org/pkg/path/#Match).
 - If the path contains no path separators then it is matched against all file
   names e.g. `*.swp` will match all files in the content directory and subdirectories
   with the `.swp` file name extension.
@@ -753,7 +753,7 @@ The `templates` configuration variable has the same syntax as the
 
 .#timezone
 `timezone`:: Set to a timezone name from the
-[IANA Timezone Database](https://www.iana.org/time-zones).
+^[IANA Timezone Database](https://www.iana.org/time-zones).
 
 - It is assigned to document [publication dates](#publication-date)
   that specified without a timezone.
@@ -775,7 +775,7 @@ The `urlprefix` defaults to a blank string. TOML examples:
 .#user
 `user`:: This is a user defined key/value map and provides a mechanism for
 defining custom template variables. Both keys and values are strings and the
-keys must be legal [Go identifiers](https://golang.org/ref/spec#Identifiers). For
+keys must be legal ^[Go identifiers](https://golang.org/ref/spec#Identifiers). For
 example:
 ..
 
@@ -809,8 +809,8 @@ Content files are the source files that are used to build the static website.
 - There are two types of content file: [documents](#documents) and [static files](#static-files).
 
 ### Documents
-Documents are are [Markdown](https://en.wikipedia.org/wiki/Markdown) (`.md`) or
-[Rimu]({rimu-github}) (`.rmu`) files. Each document
+Documents are are ^[Markdown](https://en.wikipedia.org/wiki/Markdown) (`.md`) or
+^[Rimu]({rimu-github}) (`.rmu`) files. Each document
 generates a webpage. Website authoring consists mostly of creating and editing
 document files. Examples include blog posts, newsletters and articles.
 
@@ -856,8 +856,8 @@ and [static files](#static-files)).
 The front matter header begins with a start delimiter (which must be the first
 line of the file), followed by variable declarations, and ending with the
 an end delimiter line. The delimiter determines the front matter
-format ([TOML](https://github.com/toml-lang/toml) or
-[YAML](https://learn.getgrav.org/advanced/yaml)).
+format (^[TOML](https://github.com/toml-lang/toml) or
+^[YAML](https://learn.getgrav.org/advanced/yaml)).
 
 _Start delimiters_::
     TOML: `+++` \
@@ -1003,13 +1003,13 @@ strings, formatted using the `shortdate`, `mediumdate` and `longdate`
 [configuration variables](#configuration-variables) respectively and rendered
 in the configuration [timezone](#timezone).
 
-`.date`:: [`date`](#front-matter-variables) front matter value ([time.Time](https://pkg.go.dev/time#Time) type).
+`.date`:: ^[`date`](#front-matter-variables) front matter value ([time.Time](https://pkg.go.dev/time#Time) type).
 
 `.id`:: [`id`](#front-matter-variables) front matter value.
 
 `.layout`:: [`layout`](#front-matter-variables) front matter value.
 
-`.modtime`:: Source document content file modification date and time ([time.Time](https://pkg.go.dev/time#Time) type).
+`.modtime`:: Source document content file modification date and time (^[time.Time](https://pkg.go.dev/time#Time) type).
 
 `.next`, `.prev`:: The next and previous document [URLs](#urls) in primary index order.
 `.prev` is `nil` in the first document, `.next` is `nil` in the last document.
@@ -1045,7 +1045,7 @@ A document can have multiple tags.
 
 
 ## Templates
-_Hindsite_ uses [Go templates](https://pkg.go.dev/text/template) to build HTML
+_Hindsite_ uses ^[Go templates](https://pkg.go.dev/text/template) to build HTML
 build webpages and to inject dynamic content into [content files](#content-files). A template
  contains `{{` and `}}` delimited data evaluations
 and control structures which are expanded with [document
@@ -1067,7 +1067,7 @@ Template name:        posts/layout.html
 
 
 ## Text templates
-Text templates are [Go text templates](https://pkg.go.dev/text/template). They
+Text templates are ^[Go text templates](https://pkg.go.dev/text/template). They
 are optional and are used to [preprocess content files](#text-file-preprocessing).
 
 All `.txt` files in the _template directory_ contribute to the set of named text
@@ -1075,7 +1075,7 @@ templates.
 
 
 ## HTML templates
-[Go HTML templates](https://pkg.go.dev/html/template) are used to transform
+^[Go HTML templates](https://pkg.go.dev/html/template) are used to transform
 [documents](#documents) into HTML webpages and to create [index](#indexes) HTML
 webpages.
 

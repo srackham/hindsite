@@ -16,7 +16,7 @@ created, you need to exclude these files from document processing. Failure to do
 so can result in rebuild false positives and premature watcher reloads.
 
 For example, the Vim editor creates tilda suffixed backup files and temporary
-[`4913` files](https://github.com/neovim/neovim/issues/3460) so you need to add
+^[`4913` files](https://github.com/neovim/neovim/issues/3460) so you need to add
 them to the [`exclude`]({reference}#configuration-variables) configuration
 variable in the templates directory root [configuration
 file]({reference}#configuration-files).
@@ -47,12 +47,12 @@ If you [initialized your site]({reference}#init-command) with the built-in
 `blog` template then you already have the Disqus template and steps 3 and 4
 below are redundant.
 
-1. If you don't already have one you need a [Disqus](https://disqus.com/)
+1. If you don't already have one you need a ^[Disqus](https://disqus.com/)
    account.
 
 2. Now log into to your Disqus account and register your site. Make a note of
    your site's Disqus
-   [`shortname`](https://help.disqus.com/installation/whats-a-shortname), you
+   ^[`shortname`](https://help.disqus.com/installation/whats-a-shortname), you
    need to include it along with some Disqus JavaScript code to your site's
    generated webpages.
 
@@ -89,7 +89,7 @@ below are redundant.
 
 5. Add a `user` `shortname` entry to the site [`config`
    file]({reference}#configuration) and set it to your site's Disqus
-   [`shortname`](https://help.disqus.com/installation/whats-a-shortname). TOML
+   ^[`shortname`](https://help.disqus.com/installation/whats-a-shortname). TOML
    example:
 
     [user]
@@ -107,7 +107,7 @@ That's it, all published documents with a non-blank
 
 
 ## How can I customize `.date` and `.modtime` template variable formats?
-Use the Go [Format function](https://golang.org/pkg/time/#Time.Format). For
+Use the Go ^[Format function](https://golang.org/pkg/time/#Time.Format). For
 example:
 
     {{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}
@@ -119,7 +119,7 @@ to using `.date` directly.
 
 
 ## How do you configure source code highlighting?
-By including [highlight.js](https://github.com/isagalaev/highlight.js) CSS and
+By including ^[highlight.js](https://github.com/isagalaev/highlight.js) CSS and
 scripts in your web pages. For example, see the Hindsite built-in
 [`docs`]({reference}#docs-built-in-template).
 
@@ -185,7 +185,7 @@ Hindsite follows the Go command single-hyphen convention:
 
 
 ## How fast is hindsite?
-Hindsite compares more than favorably with [Hugo](https://gohugo.io/) (which
+Hindsite compares more than favorably with ^[Hugo](https://gohugo.io/) (which
 bills itself as "The world’s fastest framework for building websites").
 
 Fully rebuilding a blog site containing 5000 Markdown posts (20MB of Markdown
@@ -195,7 +195,7 @@ less working memory (46KB vs 432KB). Both sites are of comparable complexity.
 
 #### The benchmark
 The benchmarked Hindsite and Hugo sites are available in the downloadable
-[hindsite2-benchmark.zip](https://drive.google.com/file/d/13JsaN48Dy3U2fR3Cku57WiwGg3gVuTjY/view?usp=sharing)
+^[hindsite2-benchmark.zip](https://drive.google.com/file/d/13JsaN48Dy3U2fR3Cku57WiwGg3gVuTjY/view?usp=sharing)
 file (7.0MB):
 
 ```
@@ -307,7 +307,7 @@ excluded from anti-virus real-time protection.
 The short answer is programmer's hubris; the longer answer has it's genesis in
 Hugo's complexity.
 
-Prior to writing Hindsite I was using [Hugo](https://gohugo.io/) for blogging.
+Prior to writing Hindsite I was using ^[Hugo](https://gohugo.io/) for blogging.
 Hugo is an outstanding program, it's chock full of features and has the
 flexibility needed to build complex static web sites. But features and
 flexibility come at the price of complexity and a steeper learning curve.
