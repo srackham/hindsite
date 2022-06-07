@@ -17,7 +17,7 @@ import (
 // Build ldflags.
 var (
 	// VERS is the latest hindsite version tag. Set by linker -ldflags "-X main.VERS=..."
-	VERS = "v2.0.1"
+	VERS = "v2.0.2"
 	// OS is the target operating system and architecture. Set by linker -ldflags "-X main.OS=..."
 	OS = "-"
 	// BUILD is the date the executable was built.
