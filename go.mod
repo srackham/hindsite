@@ -8,7 +8,7 @@ require (
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/jaschaephraim/lrserver v0.0.0-20171129202958-50d19f603f71
 	github.com/russross/blackfriday/v2 v2.1.0
-	github.com/srackham/go-rimu/v11 v11.1.5
+	github.com/srackham/go-rimu/v11 v11.3.0
 	github.com/stretchr/testify v1.7.1
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -26,5 +26,3 @@ require (
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 )
-
-replace github.com/srackham/go-rimu/v11 => ../go-rimu
