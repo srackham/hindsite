@@ -37,7 +37,7 @@ or from <a href="/hindsite/index.html#built-in-templates">built-in templates</a>
 created, you need to exclude these files from document processing. Failure to do
 so can result in rebuild false positives and premature watcher reloads.</p>
 <p>For example, the Vim editor creates tilda suffixed backup files and temporary
-<a href="https://github.com/neovim/neovim/issues/3460"><code>4913</code> files</a> so you need to add
+<a href="https://github.com/neovim/neovim/issues/3460" target="_blank"><code>4913</code> files</a> so you need to add
 them to the <a href="/hindsite/index.html#configuration-variables"><code>exclude</code></a> configuration
 variable in the templates directory root <a href="/hindsite/index.html#configuration-files">configuration
 file</a>.</p>
@@ -57,10 +57,10 @@ Google</a>.</p>
 If you <a href="/hindsite/index.html#init-command">initialized your site</a> with the built-in
 <code>blog</code> template then you already have the Disqus template and steps 3 and 4
 below are redundant.</p>
-<ol><li>If you don't already have one you need a <a href="https://disqus.com/">Disqus</a>
+<ol><li>If you don't already have one you need a <a href="https://disqus.com/" target="_blank">Disqus</a>
    account.</li><li>Now log into to your Disqus account and register your site. Make a note of
    your site's Disqus
-   <a href="https://help.disqus.com/installation/whats-a-shortname"><code>shortname</code></a>, you
+   <a href="https://help.disqus.com/installation/whats-a-shortname" target="_blank"><code>shortname</code></a>, you
    need to include it along with some Disqus JavaScript code to your site's
    generated webpages.</li><li>Copy this <code>disqus</code> template definition to a site template file:<pre class="html"><code>{{define "disqus"}}
 {{/*
@@ -88,7 +88,7 @@ below are redundant.</p>
    of the HTML body in your document footer template:<pre><code>{{template "disqus" .}}</code></pre>
 </li><li>Add a <code>user</code> <code>shortname</code> entry to the site <a href="/hindsite/index.html#configuration"><code>config</code>
    file</a> and set it to your site's Disqus
-   <a href="https://help.disqus.com/installation/whats-a-shortname"><code>shortname</code></a>. TOML
+   <a href="https://help.disqus.com/installation/whats-a-shortname" target="_blank"><code>shortname</code></a>. TOML
    example:<pre><code>[user]
 shortname = "disqus-shortname-goes-here"</code></pre>
 </li></ol><p>That's it, all published documents with a non-blank
@@ -98,14 +98,14 @@ shortname = "disqus-shortname-goes-here"</code></pre>
   <code>urlpath</code>. To confine auto <code>id</code> assignment to a specific folder set the <code>id</code>
   variable in that folder's configuration file.</li><li>To disable Disqus comments on specific pages explicitly set the document <code>id</code> front
   matter value to a blank string.</li></ul><h2 id="how-can-i-customize-date-and-modtime-template-variable-formats">How can I customize <code>.date</code> and <code>.modtime</code> template variable formats?</h2>
-<p>Use the Go <a href="https://golang.org/pkg/time/#Time.Format">Format function</a>. For
+<p>Use the Go <a href="https://golang.org/pkg/time/#Time.Format" target="_blank">Format function</a>. For
 example:</p>
 <pre><code>{{.modtime.Format "Monday, 02-Jan-06 15:04:05 MST"}}</code></pre>
 <p class="note">The <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code> <a href="/hindsite/index.html#document-variables">document template
 variables</a> are simpler and preferable
 to using <code>.date</code> directly.</p>
 <h2 id="how-do-you-configure-source-code-highlighting">How do you configure source code highlighting?</h2>
-<p>By including <a href="https://github.com/isagalaev/highlight.js">highlight.js</a> CSS and
+<p>By including <a href="https://github.com/isagalaev/highlight.js" target="_blank">highlight.js</a> CSS and
 scripts in your web pages. For example, see the Hindsite built-in
 <a href="/hindsite/index.html#docs-built-in-template"><code>docs</code></a>.</p>
 <h2 id="how-can-i-partition-documents-into-separate-categories">How can I partition documents into separate categories?</h2>
@@ -143,7 +143,7 @@ quotes, for example:</p>
   or more lowercase letters. The GNU utilities added a double-dash, followed by
   a complete word or compound word.&rdquo;
   &mdash;<a href="https://tldp.org/LDP/abs/html/standard-options.html">https://tldp.org/LDP/abs/html/standard-options.html</a></li></ul><h2 id="how-fast-is-hindsite">How fast is hindsite?</h2>
-<p>Hindsite compares more than favorably with <a href="https://gohugo.io/">Hugo</a> (which
+<p>Hindsite compares more than favorably with <a href="https://gohugo.io/" target="_blank">Hugo</a> (which
 bills itself as &ldquo;The world’s fastest framework for building websites&rdquo;).</p>
 <p>Fully rebuilding a blog site containing 5000 Markdown posts (20MB of Markdown
 source) revealed that <strong>Hindsite is over twice as fast as Hugo</strong> (3.14s vs 7.98s).
@@ -151,7 +151,7 @@ Hindsite's executable is much smaller than Hugo's (8MB vs 53MB) and it consumed
 less working memory (46KB vs 432KB). Both sites are of comparable complexity.</p>
 <h4 id="the-benchmark">The benchmark</h4>
 <p>The benchmarked Hindsite and Hugo sites are available in the downloadable
-<a href="https://drive.google.com/file/d/13JsaN48Dy3U2fR3Cku57WiwGg3gVuTjY/view?usp=sharing">hindsite2-benchmark.zip</a>
+<a href="https://drive.google.com/file/d/13JsaN48Dy3U2fR3Cku57WiwGg3gVuTjY/view?usp=sharing" target="_blank">hindsite2-benchmark.zip</a>
 file (7.0MB):</p>
 <pre><code>├── hindsite
 │   ├── build/
@@ -245,7 +245,7 @@ excluded from anti-virus real-time protection.</p>
 <h2 id="why-did-you-create-hindsite">Why did you create hindsite?</h2>
 <p>The short answer is programmer's hubris; the longer answer has it's genesis in
 Hugo's complexity.</p>
-<p>Prior to writing Hindsite I was using <a href="https://gohugo.io/">Hugo</a> for blogging.
+<p>Prior to writing Hindsite I was using <a href="https://gohugo.io/" target="_blank">Hugo</a> for blogging.
 Hugo is an outstanding program, it's chock full of features and has the
 flexibility needed to build complex static web sites. But features and
 flexibility come at the price of complexity and a steeper learning curve.</p>

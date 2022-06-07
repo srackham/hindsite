@@ -31,8 +31,8 @@
 <p>Hindsite is a
 <a href="/hindsite/faq.html#how-fast-is-hindsite">fast</a>,
 lightweight static website generator. It builds static websites with optional
-document and tag indexes from <a href="https://en.wikipedia.org/wiki/Markdown">Markdown</a>
-and <a href="https://github.com/srackham/rimu">Rimu</a> source documents.</p>
+document and tag indexes from <a href="https://en.wikipedia.org/wiki/Markdown" target="_blank">Markdown</a>
+and <a href="https://github.com/srackham/rimu" target="_blank">Rimu</a> source documents.</p>
 <p>The Hindsite stand-alone executable includes:</p>
 <ul><li>Built-in site templates to get you up and running quickly.</li><li>A development web server with live reload and incremental rebuilds.</li><li>A linter for validating generated webpages.</li></ul><div class="note"><p>References to <em>Markdown</em> throughout this documentation apply to both <em>Markdown</em>
 and <em>Rimu</em>.</p>
@@ -177,7 +177,7 @@ generated HTML webpages.</p>
 <ul><li>HTML <code>href</code> and <code>src</code> attribute URL values are checked to ensure:<ol><li>URL syntax is valid.</li><li>URL target resource files exist.</li><li>URL fragment identifiers have a matching HTML <code>id</code> attribute in the target file.</li></ol></li><li>HTML <code>id</code> attributes are checked to ensure:<ol><li>ID syntax is valid.</li><li>Webpages do not contain duplicate IDs.</li></ol></li><li>A warning is issued if a document <a href="#url-synthesis">URL path name</a> is not
   confined to lowercase alphanumeric, hyphen, period and slash characters.</li></ul><p>The existence of external (off-site) URL resources is not checked &mdash; for full
 site validation use a cross-site validator such as the
-<a href="https://validator.w3.org/">W3C Markup Validation Service</a>.</p>
+<a href="https://validator.w3.org/" target="_blank">W3C Markup Validation Service</a>.</p>
 <p>Validity checks increase site build times.</p>
 <h3 id="errors-and-warnings">Errors and warnings</h3>
 <p>Warnings are indicative of potential problems. Errors are problems that require
@@ -210,7 +210,7 @@ webpages. The server also handles browser live reloading.</p>
 </li><li>The server strips the <a href="#urlprefix"><code>urlprefix</code></a> from URLs in HTML files before
   sending them to the browser. This allows the site to be tested locally
   irrespective of the <code>urlprefix</code> value.</li><li>To enable browser live reloads the server injects the
-  <a href="http://livereload.com/">LiveReload</a> script into HTML files prior to sending
+  <a href="http://livereload.com/" target="_blank">LiveReload</a> script into HTML files prior to sending
   them to the browser.</li></ul><h3 id="partial-rebuilds">Partial rebuilds</h3>
 <p>To speed up live reloads and to make the content creation process easier and
 more responsive the <em>serve</em> command automatically performs partial builds when
@@ -267,12 +267,12 @@ hindsite serve -launch</code></pre>
 (view the built site <a href="/hindsite/builtin/blog" target="_blank">here</a>).</p>
 <p>Customisation notes:</p>
 <ul><li>Edit <code>content/main.css</code> to customise CSS styling.</li><li>The <code>template/partials.html</code> header template will include the
-  <a href="https://highlightjs.org/">highlight.js</a> source code highlighter if the
+  <a href="https://highlightjs.org/" target="_blank">highlight.js</a> source code highlighter if the
   <code>.user.highlightjs</code> <a href="#document-variables">document variable</a> is set to <code>"yes"</code>.</li><li><a href="#user"><em>user</em></a> template variable values can be set per document (in document
   <a href="#front-matter">front matter</a>) or per directory (in site configuration files).</li><li>The template includes an example <em>Search</em> page (<code>content/search.md</code>) that
   leverages Google Programable Searches. To use this functionality in your own
-  website you need register it with Google and then configure and test it. See:<ul><li><a href="https://developers.google.com/custom-search">Programmable Search Engine</a></li><li><a href="https://search.google.com/search-console/about">Google Search Console</a></li></ul></li><li>The site <a href="/hindsite/index.html#configuration">configuration file</a> is <code>template/config.toml</code>.</li><li>The directory layout is documented in the <a href="/hindsite/index.html#sites"><em>Sites</em> section</a>.</li><li>The example content pages are written in Markdown but you could also use
-  <a href="https://github.com/srackham/rimu" target="_blank">Rimu markup</a>).</li></ul><h3 id="docs-built-in-template">docs built-in template</h3>
+  website you need register it with Google and then configure and test it. See:<ul><li><a href="https://developers.google.com/custom-search" target="_blank">Programmable Search Engine</a></li><li><a href="https://search.google.com/search-console/about" target="_blank">Google Search Console</a></li></ul></li><li>The site <a href="/hindsite/index.html#configuration">configuration file</a> is <code>template/config.toml</code>.</li><li>The directory layout is documented in the <a href="/hindsite/index.html#sites"><em>Sites</em> section</a>.</li><li>The example content pages are written in Markdown but you could also use
+  <a href="https://github.com/srackham/rimu" target="_blank">Rimu markup</a>.</li></ul><h3 id="docs-built-in-template">docs built-in template</h3>
 <p>A template to create sites that have a fixed, relatively small number of pages.
 Ideal for building documentation sites or user guides, FAQs and reference manuals
 (view the built site <a href="/hindsite/builtin/docs" target="_blank">here</a>).</p>
@@ -281,12 +281,12 @@ Ideal for building documentation sites or user guides, FAQs and reference manual
 <ul><li>Edit <code>content/main.css</code> to customise CSS styling.</li><li>Dynamic table of contents (TOC) generation is performed by JavaScript code in
   <code>content/main.js</code>. To disable TOC generation set the <code>.user.toc</code> template variable
   (either in document front matter or site configuration files) to any value
-  other than <code>"yes"</code>.</li><li>The home page and FAQ documents are written in <a href="https://github.com/srackham/rimu">Rimu markup</a>,
+  other than <code>"yes"</code>.</li><li>The home page and FAQ documents are written in <a href="https://github.com/srackham/rimu" target="_blank">Rimu markup</a>,
   the changelog is written in Markdown. Rimu and Markdown processors are
   configured to auto-generate HTML header element ID attributes which are
   used to dynamically build the table of contents.</li><li>The site <a href="#configuration">configuration file</a> is <code>template/config.yaml</code>.</li><li>If you set the <code>.user.toc</code> document variable to any value other than <code>"yes"</code>
   the TOC will not be displayed.</li><li>The nested <code>header</code> template in <code>template/partials.html</code> includes the
-  <a href="https://highlightjs.org/">highlight.js</a> source code highlighter if the
+  <a href="https://highlightjs.org/" target="_blank">highlight.js</a> source code highlighter if the
   <code>.user.highlightjs</code> document variable is set to <code>"yes"</code>. <em>Highlight.js</em>
   language auto-detection is not enabled and code blocks must specify the
   language explicitly. For example:<pre><code>```python
@@ -357,7 +357,7 @@ document's <a href="#front-matter-variables"><code>author</code> front matter va
 from the content directory that are excluded from processing. TOML example:<pre><code>exclude = "config.rmu|*~|4913"</code></pre>
 <ul><li>Dotfiles (file names starting with a period) are excluded by default. To force
   inclusion of a dotfile add it to the <code>include</code> variable.</li><li>The paths are relative to the content directory.</li><li>The path separator is a slash (<code>/</code>) character.</li><li>The file paths can contain wildcard patterns conforming to patterns matched by
-  the Go <a href="https://golang.org/pkg/path/#Match">path.Match() function</a>.</li><li>If the path contains no path separators then it is matched against all file
+  the Go <a href="https://golang.org/pkg/path/#Match" target="_blank">path.Match() function</a>.</li><li>If the path contains no path separators then it is matched against all file
   names e.g. <code>*.swp</code> will match all files in the content directory and subdirectories
   with the <code>.swp</code> file name extension.</li><li>If the path contains path separators then it is matched against the file path
   e.g. <code>posts/*.md</code> will only match files with the <code>.md</code> extension from the
@@ -414,7 +414,7 @@ the names of <a href="#content-files">content files</a> that undergo <a href="#t
 The <code>templates</code> configuration variable has the same syntax as the
 <a href="#exclude"><code>exclude</code></a> configuration variable. TOML example:<pre><code>templates = "*.css|*.js"</code></pre>
 </dd><dt id="timezone"><code>timezone</code></dt><dd>Set to a timezone name from the
-<a href="https://www.iana.org/time-zones">IANA Timezone Database</a>.<ul><li>It is assigned to document <a href="#publication-date">publication dates</a>
+<a href="https://www.iana.org/time-zones" target="_blank">IANA Timezone Database</a>.<ul><li>It is assigned to document <a href="#publication-date">publication dates</a>
   that specified without a timezone.</li><li><code>timezone</code> defaults to <code>"Local"</code> (the system's local timezone).</li><li><code>timezone</code> is used to render <code>.shortdate</code>, <code>.mediumdate</code> and <code>.longdate</code>
   <a href="#document-variables">document template variables</a>.</li><li>TOML example:<pre><code>timezone = "Pacific/Auckland"</code></pre>
 </li></ul></dd><dt id="urlprefix"><code>urlprefix</code> †</dt><dd>This variable is automatically prepended to all root-relative <a href="#urls">URLs</a>.
@@ -423,7 +423,7 @@ The <code>urlprefix</code> defaults to a blank string. TOML examples:<pre><code>
 urlprefix = "https://www.example.com"   # Absolute URL prefix.</code></pre>
 </dd><dt id="user"><code>user</code></dt><dd>This is a user defined key/value map and provides a mechanism for
 defining custom template variables. Both keys and values are strings and the
-keys must be legal <a href="https://golang.org/ref/spec#Identifiers">Go identifiers</a>. For
+keys must be legal <a href="https://golang.org/ref/spec#Identifiers" target="_blank">Go identifiers</a>. For
 example:<pre><code># TOML
 [user]
 banner = "News &amp; Views"
@@ -440,8 +440,8 @@ user:
 <h2 id="content-files">Content files</h2>
 <p>Content files are the source files that are used to build the static website.</p>
 <ul><li>Content files reside in the site <a href="#sites">content directory</a>.</li><li>There are two types of content file: <a href="#documents">documents</a> and <a href="#static-files">static files</a>.</li></ul><h3 id="documents">Documents</h3>
-<p>Documents are are <a href="https://en.wikipedia.org/wiki/Markdown">Markdown</a> (<code>.md</code>) or
-<a href="https://github.com/srackham/rimu">Rimu</a> (<code>.rmu</code>) files. Each document
+<p>Documents are are <a href="https://en.wikipedia.org/wiki/Markdown" target="_blank">Markdown</a> (<code>.md</code>) or
+<a href="https://github.com/srackham/rimu" target="_blank">Rimu</a> (<code>.rmu</code>) files. Each document
 generates a webpage. Website authoring consists mostly of creating and editing
 document files. Examples include blog posts, newsletters and articles.</p>
 <p>The Hindsite <a href="#build-command">build command</a> converts document markup to HTML
@@ -469,8 +469,8 @@ and <a href="#static-files">static files</a>).</p>
 <p>The front matter header begins with a start delimiter (which must be the first
 line of the file), followed by variable declarations, and ending with the
 an end delimiter line. The delimiter determines the front matter
-format (<a href="https://github.com/toml-lang/toml">TOML</a> or
-<a href="https://learn.getgrav.org/advanced/yaml">YAML</a>).</p>
+format (<a href="https://github.com/toml-lang/toml" target="_blank">TOML</a> or
+<a href="https://learn.getgrav.org/advanced/yaml" target="_blank">YAML</a>).</p>
 <dl><dt><em>Start delimiters</em></dt><dd>TOML: <code>+++</code><br>
     YAML: <code>---</code>, <code>&lt;!--</code>, <code>/***</code></dd><dt><em>End delimiters</em></dt><dd>TOML: <code>+++</code><br>
     YAML: <code>---</code>, <code>--&gt;</code>, <code>***/</code></dd></dl><p>Example YAML front matter:</p>
@@ -545,7 +545,7 @@ configuration variables.</p>
 value rendered as HTML.</dd><dt><code>.shortdate</code>, <code>.mediumdate</code>, <code>.longdate</code></dt><dd>These are synthesised document publication date
 strings, formatted using the <code>shortdate</code>, <code>mediumdate</code> and <code>longdate</code>
 <a href="#configuration-variables">configuration variables</a> respectively and rendered
-in the configuration <a href="#timezone">timezone</a>.</dd><dt><code>.date</code></dt><dd><a href="#front-matter-variables"><code>date</code></a> front matter value (<a href="https://pkg.go.dev/time#Time">time.Time</a> type).</dd><dt><code>.id</code></dt><dd><a href="#front-matter-variables"><code>id</code></a> front matter value.</dd><dt><code>.layout</code></dt><dd><a href="#front-matter-variables"><code>layout</code></a> front matter value.</dd><dt><code>.modtime</code></dt><dd>Source document content file modification date and time (<a href="https://pkg.go.dev/time#Time">time.Time</a> type).</dd><dt><code>.next</code>, <code>.prev</code></dt><dd>The next and previous document <a href="#urls">URLs</a> in primary index order.
+in the configuration <a href="#timezone">timezone</a>.</dd><dt><code>.date</code></dt><dd><a href="#front-matter-variables" target="_blank"><code>date</code></a> front matter value (<a href="https://pkg.go.dev/time#Time">time.Time</a> type).</dd><dt><code>.id</code></dt><dd><a href="#front-matter-variables"><code>id</code></a> front matter value.</dd><dt><code>.layout</code></dt><dd><a href="#front-matter-variables"><code>layout</code></a> front matter value.</dd><dt><code>.modtime</code></dt><dd>Source document content file modification date and time (<a href="https://pkg.go.dev/time#Time" target="_blank">time.Time</a> type).</dd><dt><code>.next</code>, <code>.prev</code></dt><dd>The next and previous document <a href="#urls">URLs</a> in primary index order.
 <code>.prev</code> is <code>nil</code> in the first document, <code>.next</code> is <code>nil</code> in the last document.</dd><dt><code>.permalink</code></dt><dd><a href="#front-matter-variables"><code>permalink</code></a> front matter value.</dd><dt><code>.slug</code></dt><dd><a href="#front-matter-variables"><code>slug</code></a> front matter value.</dd><dt><code>.url</code></dt><dd>Synthesized document <a href="#urls">URL</a>.</dd><dt><code>.tags</code></dt><dd>An iterable list of document <a href="#document-tags">tags</a>. Each item
 contains the variable <code>.tag</code> (the tag) and <code>.url</code> (the tag index URL).</dd><dt><code>.templates</code></dt><dd><a href="#front-matter-variables"><code>templates</code></a> configuration variable.</dd><dt><code>.title</code></dt><dd><a href="#title"><code>title</code></a> front matter value.</dd><dt><code>.urlprefix</code></dt><dd><a href="#urlprefix"><code>urlprefix</code></a> configuration value.</dd><dt><code>.user</code></dt><dd>This key/value map is synthesized by merging the (higher precedence)
 document <a href="#front-matter-variables">front matter <code>user</code> value</a> with the document's
@@ -556,7 +556,7 @@ way.</p>
 <p>Document tags are assigned using the front matter <a href="#tags">tags variable</a>.
 A document can have multiple tags.</p>
 <h2 id="templates">Templates</h2>
-<p><em>Hindsite</em> uses <a href="https://pkg.go.dev/text/template">Go templates</a> to build HTML
+<p><em>Hindsite</em> uses <a href="https://pkg.go.dev/text/template" target="_blank">Go templates</a> to build HTML
 build webpages and to inject dynamic content into <a href="#content-files">content files</a>. A template
  contains <code>{{</code> and <code>}}</code> delimited data evaluations
 and control structures which are expanded with <a href="#document-variables">document
@@ -571,12 +571,12 @@ with the slash path separator. For example:</p>
 Template file:        C:\blog\template\posts\layout.html   
 Template name:        posts/layout.html</code></pre>
 <h2 id="text-templates">Text templates</h2>
-<p>Text templates are <a href="https://pkg.go.dev/text/template">Go text templates</a>. They
+<p>Text templates are <a href="https://pkg.go.dev/text/template" target="_blank">Go text templates</a>. They
 are optional and are used to <a href="#text-file-preprocessing">preprocess content files</a>.</p>
 <p>All <code>.txt</code> files in the <em>template directory</em> contribute to the set of named text
 templates.</p>
 <h2 id="html-templates">HTML templates</h2>
-<p><a href="https://pkg.go.dev/html/template">Go HTML templates</a> are used to transform
+<p><a href="https://pkg.go.dev/html/template" target="_blank">Go HTML templates</a> are used to transform
 <a href="#documents">documents</a> into HTML webpages and to create <a href="#indexes">index</a> HTML
 webpages.</p>
 <p>All <code>.html</code> files in the site <em>template directory</em> contribute to the set of
