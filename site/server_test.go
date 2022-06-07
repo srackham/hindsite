@@ -53,7 +53,7 @@ func TestServer(t *testing.T) {
 				if matched {
 					return
 				}
-			case <-time.After(500 * time.Millisecond):
+			case <-time.After(1000 * time.Millisecond):
 				t.Fatalf("%s: timed out waiting for: %v", cmd, pattern)
 				return
 			}
