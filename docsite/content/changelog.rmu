@@ -3,6 +3,10 @@
 See the [Github commit logs]({hindsite-github}/commits/master) for a full list of changes.
 
 
+## Version 2.0.2 (2022-07-30)
+- Upgrade [go-rimu](https://github.com/srackham/go-rimu) dependency.
+
+
 ## Version 2.0.1 (2022-05-30)
 - Upgrade dependencies.
 
