@@ -484,6 +484,10 @@ hindsite serve -launch
 A template to create a websites for blog posts and newsletters
 (view the built site ^[here](/builtin/blog)).
 
+{linked-image}='<a href="$2" target="_blank"><img src="$1" alt="An image" width="500"></a>'
+
+{linked-image|blog-template.png|/builtin/blog}
+
 Customisation notes:
 
 - Edit `content/main.css` to customise CSS styling.
@@ -514,6 +518,8 @@ Customisation notes:
 A template to create sites that have a fixed, relatively small number of pages.
 Ideal for building documentation sites or user guides, FAQs and reference manuals
 (view the built site ^[here](/builtin/docs)).
+
+{linked-image|docs-template.png|/builtin/docs}
 
 This documentation is based on the `docs` template.
 
@@ -554,6 +560,8 @@ if x == 1:
 A minimal single-page built-in template consisting of a single
 `content/index.md` document and a single `template/layout.html` HTML template
 (view the built site ^[here](/builtin/hello)).
+
+{linked-image|hello-template.png|/builtin/hello}
 
 ### Built-in template styling
 The `blog` and `docs` templates include the following block element CSS classes
