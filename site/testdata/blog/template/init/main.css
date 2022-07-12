@@ -71,7 +71,7 @@ h2 {
     border-bottom: var(--border);
 }
 
-p>img:only-child {
+p>img:only-child, p>a>img:only-child {
     max-width: 100%;
     margin-top: 1rem;
     margin-bottom: 1rem;
@@ -462,7 +462,7 @@ p.important::before {
         padding-left: 10px;
     }
 
-    p>img:only-child {
+    p>img:only-child, p>a>img:only-child {
         max-width: 100%;
     }
 }
