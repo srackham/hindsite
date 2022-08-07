@@ -5,7 +5,6 @@ Extra file system related functions.
 */
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -26,12 +25,12 @@ func FileExists(name string) bool {
 }
 
 func ReadFile(name string) (string, error) {
-	bytes, err := ioutil.ReadFile(name)
+	bytes, err := os.ReadFile(name)
 	return string(bytes), err
 }
 
 func WriteFile(name string, text string) error {
-	return ioutil.WriteFile(name, []byte(text), 0644)
+	return os.WriteFile(name, []byte(text), 0644)
 }
 
 // WritePath writes file and creates any missing path directories.
@@ -103,9 +102,9 @@ func DirCount(dir string) int {
 	if !DirExists(dir) {
 		return 0
 	}
-	files, err := ioutil.ReadDir(dir)
+	entries, err := os.ReadDir(dir)
 	if err != nil {
 		panic(err)
 	}
-	return len(files)
+	return len(entries)
 }

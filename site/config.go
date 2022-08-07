@@ -2,7 +2,7 @@ package site
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -108,7 +108,7 @@ func (raw *rawConfig) parseVar(arg string) error {
 
 func (raw *rawConfig) parseConfigFile(f string) (err error) {
 	var text []byte
-	if text, err = ioutil.ReadFile(f); err != nil {
+	if text, err = os.ReadFile(f); err != nil {
 		return err
 	}
 	switch filepath.Ext(f) {
