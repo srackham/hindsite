@@ -219,19 +219,23 @@ validate-all: validate-docs validate-builtin-hello validate-builtin-blog  valida
 # Create and validate build file checksums for the testdata site.
 #
 TEST_SITE = ./site/testdata/blog
-make-checksums:
+.PHONY: build-checksums
+build-checksums:
 	tmpdir=$$(mktemp -d /tmp/hindsite-XXXXXXXX)
 	hindsite init -site $$tmpdir -from $(TEST_SITE)/template
 	hindsite build -site $$tmpdir
 	(cd $$tmpdir && find build -name '*.html' -type f -exec sha256sum '{}' +) > $(TEST_SITE)/checksums.txt
 
+.PHONY: validate-checksums
 validate-checksums:
 	tmpdir=$$(mktemp -d /tmp/hindsite-XXXXXXXX)
+	echo '************* IGNORE THE FOLLOWING 6 TEST WARNINGS *************'
 	hindsite init -site $$tmpdir -from $(TEST_SITE)/template
 	hindsite build -site $$tmpdir
 	f=$$(readlink -f $(TEST_SITE)/checksums.txt)
 	(cd $$tmpdir && sha256sum --quiet --check $$f)
 
+.PHONY: serve-testdata
 serve-testdata:
 	tmpdir=$$(mktemp -d /tmp/hindsite-XXXXXXXX)
 	hindsite init -site $$tmpdir -from $(TEST_SITE)/template

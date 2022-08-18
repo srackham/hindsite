@@ -222,7 +222,7 @@ func TestExecuteArgs(t *testing.T) {
 
 	/*
 		Validate the checksums of the test site's built HTML files.
-		The checksums.txt file is built with the Makefile make-checksums task.
+		The checksums.txt file is built with the Makefile build-checksums task.
 	*/
 	text, err := fsx.ReadFile("./testdata/blog/checksums.txt")
 	assert.True(t, err == nil)
