@@ -30,7 +30,7 @@ TOML example:
 ## How can I add site search to my website?
 An easy way to add a site search feature is to use the Google [Programmable
 Search Engine](https://programmablesearchengine.google.com/about/). For example,
-the Hindsite built-in [`blog` template]({reference}#blog-built-in-template)
+the Hindsite built-in ^[`blog` template](/builtin/docs)
 includes a Google PSE search page.
 
 .note
